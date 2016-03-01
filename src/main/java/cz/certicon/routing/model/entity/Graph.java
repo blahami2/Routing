@@ -80,6 +80,17 @@ public interface Graph {
      * @return target {@link Node}
      */
     public Node getTargetNodeOf( Edge edge );
+    
+/**
+     * Getter for the other node connected to the edge than the given node
+     *
+     * @param edge an instance of {@link Edge} connected to the two nodes
+     * @param node an instance of {@link Node} connected to this edge
+     * @return the other node connected to the edge
+     * @throws IllegalArgumentException thrown when a node is not connected to
+     * this edge
+     */
+    public Node getOtherNodeOf(Edge edge, Node node);
 
     /**
      * Getter for all the edges of the given node

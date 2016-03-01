@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.input;
+package cz.certicon.routing.data.input.osm;
 
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
@@ -52,9 +52,9 @@ public class OsmPbfDataSource implements DataSource {
         BlockInputStream blockInputStream = new BlockInputStream( input, brad );
         blockInputStream.process();
     }
-    
-    private void onLoadFinish(GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener, Graph graph) throws IOException{
-        OsmBinaryProcessor brad = new OsmBinaryProcessor(graphEntityFactory, distanceFactory, graphLoadListener, graph );
+
+    private void onLoadFinish( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener, Graph graph ) throws IOException {
+        OsmBinaryProcessor brad = new OsmBinaryProcessor( graphEntityFactory, distanceFactory, graphLoadListener, graph );
         BlockInputStream blockInputStream = new BlockInputStream( input, brad );
         blockInputStream.process();
     }
@@ -116,8 +116,17 @@ public class OsmPbfDataSource implements DataSource {
 
         @Override
         protected void parseWays( List<Osmformat.Way> ways ) {
-            ways.stream().forEach( ( w ) -> {
-/*
+            ways.stream()
+                    .filter( ( w ) -> {
+                        for ( int i = 0; i < w.getKeysCount(); i++ ) {
+                            if ( TagKey.HIGHWAY.equals( TagKey.parse( getStringById( w.getKeys( i ) ) ) ) ) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    } )
+                    .forEach( ( w ) -> {
+                        
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
                     Node sourceNode = null;
@@ -141,48 +150,48 @@ public class OsmPbfDataSource implements DataSource {
                     }
                 }
 
-                */
-                long lastRef = 0;
-                List<Coordinates> edgeCoords = new LinkedList<>();
-                Node sourceNode = null;
-                Node targetNode = null;
-                Node tmpSource = null;
-                Node tmpTarget = null;
-                Distance edgeLength = distanceFactory.createZeroDistance();
-                for ( Long ref : w.getRefsList() ) {
-                    if ( lastRef != 0 ) {
-                        tmpSource = nodeMap.get( lastRef );
-                    }
-                    lastRef += ref;
-                    if ( sourceNode == null ) {
-                        sourceNode = nodeMap.get( lastRef );
-                    }
-                    tmpTarget = nodeMap.get( lastRef );
-                    if ( tmpSource != null ) {
-                        Distance distance = distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( tmpSource.getCoordinates(), tmpTarget.getCoordinates() ) );
-                        edgeLength = edgeLength.add( distance );
-                    }
-                    targetNode = tmpTarget;
-                    edgeCoords.add( targetNode.getCoordinates() );
-                }
-                Edge edge = graphEntityFactory.createEdge( sourceNode, targetNode, edgeLength );
-                StringBuilder sb = new StringBuilder();
-                for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                    sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
-                            .append( getStringById( w.getVals( i ) ) ).append( " " )
-                            .append( "\n" );
-                }
-                edge.setLabel( sb.toString() );
-                edge.setCoordinates( edgeCoords );
-                graph.addEdge( edge );
-                 
+                         /*
+                        long lastRef = 0;
+                        List<Coordinates> edgeCoords = new LinkedList<>();
+                        Node sourceNode = null;
+                        Node targetNode = null;
+                        Node tmpSource = null;
+                        Node tmpTarget = null;
+                        Distance edgeLength = distanceFactory.createZeroDistance();
+                        for ( Long ref : w.getRefsList() ) {
+                            if ( lastRef != 0 ) {
+                                tmpSource = nodeMap.get( lastRef );
+                            }
+                            lastRef += ref;
+                            if ( sourceNode == null ) {
+                                sourceNode = nodeMap.get( lastRef );
+                            }
+                            tmpTarget = nodeMap.get( lastRef );
+                            if ( tmpSource != null ) {
+                                Distance distance = distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( tmpSource.getCoordinates(), tmpTarget.getCoordinates() ) );
+                                edgeLength = edgeLength.add( distance );
+                            }
+                            targetNode = tmpTarget;
+                            edgeCoords.add( targetNode.getCoordinates() );
+                        }
+                        Edge edge = graphEntityFactory.createEdge( sourceNode, targetNode, edgeLength );
+                        StringBuilder sb = new StringBuilder();
+                        for ( int i = 0; i < w.getKeysCount(); i++ ) {
+                            sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
+                                    .append( getStringById( w.getVals( i ) ) ).append( " " )
+                                    .append( "\n" );
+                        }
+                        edge.setLabel( sb.toString() );
+                        edge.setCoordinates( edgeCoords );
+                        graph.addEdge( edge );
+*/
 //                sb.append( "\n  Key=value pairs: " );
 //                for ( int i = 0; i < w.getKeysCount(); i++ ) {
 //                    sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
 //                            .append( getStringById( w.getVals( i ) ) ).append( " " );
 //                }
 //                System.out.println( sb.toString() );
-            } );
+                    } );
         }
 
         @Override

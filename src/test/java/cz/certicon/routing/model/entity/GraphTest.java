@@ -5,14 +5,10 @@
  */
 package cz.certicon.routing.model.entity;
 
-import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtGraphEntityFactory;
-import cz.certicon.routing.model.entity.neighbourlist.NeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -368,83 +364,16 @@ public class GraphTest {
 
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
-        return Arrays.asList( new Object[]{
+        return Arrays.asList(new Object[]{
             new JgraphtGraphEntityFactory()
         },
                 new Object[]{
                     new JgraphtDirectedGraphEntityFactory()
                 },
                 new Object[]{
-                    new NeighbourListGraphEntityFactory()
+                    new DirectedNeighbourListGraphEntityFactory()
                 }
         );
-    }
-
-    public class GraphImpl implements Graph {
-
-        public Graph addNode( Node node ) {
-            return null;
-        }
-
-        public Graph removeNode( Node node ) {
-            return null;
-        }
-
-        public Graph addEdge( Edge edge ) {
-            return null;
-        }
-
-        public Graph addEdge( Node sourceNode, Node targetNode, Edge edge ) {
-            return null;
-        }
-
-        public Graph removeEdge( Edge edge ) {
-            return null;
-        }
-
-        public Graph removeEdge( Node sourceNode, Node targetNode ) {
-            return null;
-        }
-
-        public Node getSourceNodeOf( Edge edge ) {
-            return null;
-        }
-
-        public Node getTargetNodeOf( Edge edge ) {
-            return null;
-        }
-
-        public Set<Edge> getEdgesOf( Node node ) {
-            return null;
-        }
-
-        public Set<Edge> getIncomingEdgesOf( Node node ) {
-            return null;
-        }
-
-        public Set<Edge> getOutgoingEdgesOf( Node node ) {
-            return null;
-        }
-
-        public int getDegreeOf( Node node ) {
-            return 0;
-        }
-
-        public int getInDegreeOf( Node node ) {
-            return 0;
-        }
-
-        public int getOutDegreeOf( Node node ) {
-            return 0;
-        }
-
-        public Set<Node> getNodes() {
-            return null;
-        }
-
-        public Set<Edge> getEdges() {
-            return null;
-        }
     }
 
 }

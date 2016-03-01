@@ -9,6 +9,7 @@ import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFacto
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.utils.CoordinateUtils;
@@ -17,7 +18,7 @@ import java.util.Objects;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public abstract class SimpleEdge implements Edge {
 
@@ -28,19 +29,33 @@ public abstract class SimpleEdge implements Edge {
     private Distance distance;
     private String label;
     private List<Coordinates> coordinates;
+    private EdgeAttributes attributes;
 
     public SimpleEdge( Node sourceNode, Node targetNode ) {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.distance = new SimpleDistanceFactory().createFromDouble( 1 );
-        this.label = generateLabel(sourceNode, targetNode);
+        this.label = generateLabel( sourceNode, targetNode );
+        this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
     }
 
     public SimpleEdge( Node sourceNode, Node targetNode, Distance distance ) {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.distance = distance;
-        this.label = generateLabel(sourceNode, targetNode);
+        this.label = generateLabel( sourceNode, targetNode );
+        this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
+    }
+
+    @Override
+    public EdgeAttributes getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public Edge setAttributes( EdgeAttributes attributes ) {
+        this.attributes = attributes;
+        return this;
     }
 
     @Override
@@ -73,6 +88,14 @@ public abstract class SimpleEdge implements Edge {
     @Override
     public Node getTargetNode() {
         return targetNode;
+    }
+
+    @Override
+    public Node getOtherNode( Node node ) {
+        if ( node.equals( sourceNode ) ) {
+            return targetNode;
+        }
+        return sourceNode;
     }
 
     @Override
@@ -129,7 +152,7 @@ public abstract class SimpleEdge implements Edge {
 
     @Override
     public List<Coordinates> getCoordinates( Graph graph ) {
-        if(coordinates != null){
+        if ( coordinates != null ) {
             return coordinates;
         }
         int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
@@ -142,8 +165,8 @@ public abstract class SimpleEdge implements Edge {
         this.coordinates = coordinates;
         return this;
     }
-    
-    private String generateLabel(Node sourceNode, Node targetNode){
+
+    private String generateLabel( Node sourceNode, Node targetNode ) {
         return sourceNode.getLabel() + "-" + targetNode.getLabel();
     }
 

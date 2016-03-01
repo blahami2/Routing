@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.model.entity.neighbourlist;
 
-import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.common.SimpleNode;
 import cz.certicon.routing.model.entity.Edge;

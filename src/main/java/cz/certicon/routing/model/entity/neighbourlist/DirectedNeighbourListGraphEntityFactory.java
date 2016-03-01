@@ -14,9 +14,9 @@ import cz.certicon.routing.model.entity.Path;
 
 /**
  *
- * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */
-public class NeighbourListGraphEntityFactory implements GraphEntityFactory {
+public class DirectedNeighbourListGraphEntityFactory implements GraphEntityFactory {
 
     @Override
     public Node createNode( double latitude, double longitude ) {
@@ -35,7 +35,7 @@ public class NeighbourListGraphEntityFactory implements GraphEntityFactory {
 
     @Override
     public Graph createGraph() {
-        return new NeighbourListGraph();
+        return new DirectedNeighbourListGraph();
     }
 
 }

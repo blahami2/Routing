@@ -70,6 +70,15 @@ class JgraphtGraph implements Graph {
     }
 
     @Override
+    public Node getOtherNodeOf( Edge edge, Node node ) {
+        Node s = innerGraph.getEdgeSource( edge );
+        if ( s.equals( node ) ) {
+            return innerGraph.getEdgeTarget( edge );
+        }
+        return s;
+    }
+
+    @Override
     public Set<Edge> getEdgesOf( Node node ) {
         return innerGraph.edgesOf( node );
     }

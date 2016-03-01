@@ -13,14 +13,14 @@ import java.util.Set;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-class DirectedNeighbourListGraph implements Graph {
+public class NeighbourListGraph implements Graph {
 
     private final Set<Node> nodes;
     private final Set<Edge> edges;
 
-    public DirectedNeighbourListGraph() {
+    public NeighbourListGraph() {
         this.nodes = new HashSet<>();
         this.edges = new HashSet<>();
     }
@@ -54,19 +54,21 @@ class DirectedNeighbourListGraph implements Graph {
     public Graph addEdge( Edge edge ) {
         edges.add( edge );
         safeType( edge.getSourceNode() ).addEdge( edge );
+        safeType( edge.getTargetNode() ).addEdge( edge );
         return this;
     }
 
     @Override
     public Graph addEdge( Node sourceNode, Node targetNode, Edge edge ) {
         Edge e;
-        if(!edge.getSourceNode().equals( sourceNode) || !edge.getTargetNode().equals( targetNode)){
+        if ( !edge.getSourceNode().equals( sourceNode ) || !edge.getTargetNode().equals( targetNode ) ) {
             e = edge.newNodes( sourceNode, targetNode );
         } else {
             e = edge;
         }
         edges.add( e );
         safeType( sourceNode ).addEdge( e );
+        safeType( targetNode ).addEdge( e );
         return this;
     }
 
@@ -119,11 +121,7 @@ class DirectedNeighbourListGraph implements Graph {
 
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
-        Set<Edge> edgeSet = new HashSet<>();
-        edges.stream().filter( ( edge ) -> ( safeType( edge ).getTargetNode().equals( node ) ) ).forEach( ( edge ) -> {
-            edgeSet.add( edge );
-        } );
-        return edgeSet;
+        return safeType( node ).getEdges();
     }
 
     @Override
@@ -153,5 +151,4 @@ class DirectedNeighbourListGraph implements Graph {
     private EdgeImpl safeType( Edge edge ) {
         return (EdgeImpl) edge;
     }
-
 }

@@ -64,7 +64,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             }
             // foreach neighbour T of node S
             getGraph().getOutgoingEdgesOf( currentNode ).stream().forEach( ( edge ) -> {
-                Node endNode = getGraph().getTargetNodeOf( edge );
+                Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = routingConfiguration.getNodeEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual

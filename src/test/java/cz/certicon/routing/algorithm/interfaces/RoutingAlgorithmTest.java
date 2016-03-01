@@ -12,7 +12,7 @@ import cz.certicon.routing.application.algorithm.RoutingConfiguration;
 import cz.certicon.routing.application.algorithm.algorithms.dijkstra.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
-import cz.certicon.routing.model.entity.neighbourlist.NeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -38,14 +38,14 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 public class RoutingAlgorithmTest {
 
     private final RoutingAlgorithmFactory routingAlgorithmFactory;
-    private final NeighbourListGraphEntityFactory graphFactory;
+    private final DirectedNeighbourListGraphEntityFactory graphFactory;
     private final SimpleDistanceFactory distanceFactory;
     private final Graph graph;
 
     public RoutingAlgorithmTest( RoutingAlgorithmFactory routingAlgorithmFactory1 ) {
         this.routingAlgorithmFactory = routingAlgorithmFactory1;
         this.graph = routingAlgorithmFactory1.getGraph();
-        this.graphFactory = new NeighbourListGraphEntityFactory();
+        this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
         this.distanceFactory = new SimpleDistanceFactory();
     }
 
@@ -108,7 +108,7 @@ public class RoutingAlgorithmTest {
     }
 
     public static Graph createGraph() {
-        NeighbourListGraphEntityFactory entityFactory = new NeighbourListGraphEntityFactory();
+        DirectedNeighbourListGraphEntityFactory entityFactory = new DirectedNeighbourListGraphEntityFactory();
         SimpleDistanceFactory distanceFactory = new SimpleDistanceFactory();
         Graph graph = entityFactory.createGraph();
         Node a = entityFactory.createNode( 50.1001831, 14.3856114 );
@@ -146,7 +146,7 @@ public class RoutingAlgorithmTest {
         return graph;
     }
 
-    private static Edge createEdge( NeighbourListGraphEntityFactory entityFactory, SimpleDistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
+    private static Edge createEdge( DirectedNeighbourListGraphEntityFactory entityFactory, SimpleDistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
         return entityFactory.createEdge( sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
     }
 
@@ -160,7 +160,7 @@ public class RoutingAlgorithmTest {
                 public RoutingAlgorithm createRoutingAlgorithm() {
                     return new DijkstraRoutingAlgorithm(
                             graph,
-                            new NeighbourListGraphEntityFactory(),
+                            new DirectedNeighbourListGraphEntityFactory(),
                             new TrivialNodeDataStructure(),
                             new AlgorithmConfiguration() {/**/
                     }, new RoutingConfiguration() {
@@ -191,7 +191,7 @@ public class RoutingAlgorithmTest {
                 public RoutingAlgorithm createRoutingAlgorithm() {
                     return new DijkstraRoutingAlgorithm(
                             graph,
-                            new NeighbourListGraphEntityFactory(),
+                            new DirectedNeighbourListGraphEntityFactory(),
                             new TrivialNodeDataStructure(),
                             new AlgorithmConfiguration() {/**/
                     }, new RoutingConfiguration() {

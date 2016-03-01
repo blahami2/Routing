@@ -13,10 +13,10 @@ import org.jgrapht.DirectedGraph;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class DirectedJgraphtGraph implements Graph {
-    
+
     public final org.jgrapht.DirectedGraph<Node, Edge> innerGraph;
 
     public DirectedJgraphtGraph( DirectedGraph<Node, Edge> innerGraph ) {
@@ -37,7 +37,7 @@ class DirectedJgraphtGraph implements Graph {
 
     @Override
     public Graph addEdge( Edge edge ) {
-        innerGraph.addEdge( edge.getSourceNode(), edge.getTargetNode(), edge);
+        innerGraph.addEdge( edge.getSourceNode(), edge.getTargetNode(), edge );
         return this;
     }
 
@@ -55,7 +55,7 @@ class DirectedJgraphtGraph implements Graph {
 
     @Override
     public Graph removeEdge( Node sourceNode, Node targetNode ) {
-        innerGraph.removeEdge( sourceNode, targetNode);
+        innerGraph.removeEdge( sourceNode, targetNode );
         return this;
     }
 
@@ -67,6 +67,15 @@ class DirectedJgraphtGraph implements Graph {
     @Override
     public Node getTargetNodeOf( Edge edge ) {
         return innerGraph.getEdgeTarget( edge );
+    }
+
+    @Override
+    public Node getOtherNodeOf( Edge edge, Node node ) {
+        Node s = innerGraph.getEdgeSource( edge );
+        if ( s.equals( node ) ) {
+            return innerGraph.getEdgeTarget( edge );
+        }
+        return s;
     }
 
     @Override
@@ -108,5 +117,4 @@ class DirectedJgraphtGraph implements Graph {
     public Set<Edge> getEdges() {
         return innerGraph.edgeSet();
     }
-    
 }
