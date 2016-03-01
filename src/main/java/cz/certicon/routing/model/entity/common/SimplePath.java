@@ -1,0 +1,133 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.certicon.routing.model.entity.common;
+
+import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.Graph;
+import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.model.entity.Path;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Objects;
+
+/**
+ *
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ */
+public abstract class SimplePath implements Path {
+
+    private final LinkedList<Edge> edges;
+    private final Graph graph;
+
+    public SimplePath( Graph graph ) {
+        this.graph = graph;
+        this.edges = new LinkedList<>();
+    }
+
+    @Override
+    public Path addEdge( Edge e ) {
+        edges.add( e );
+        return this;
+    }
+
+    @Override
+    public Path addEdgeAsFirst( Edge e ) {
+        edges.addFirst( e );
+        return this;
+    }
+
+    @Override
+    public Path addEdgeAsLast( Edge e ) {
+        edges.addLast( e );
+        return this;
+    }
+
+    @Override
+    public Iterator<Edge> iterator() {
+        return edges.iterator();
+    }
+
+    @Override
+    public Node getSourceNode() {
+        return graph.getSourceNodeOf( edges.getFirst() );
+    }
+
+    @Override
+    public Node getTargetNode() {
+        return graph.getTargetNodeOf( edges.getLast() );
+    }
+
+    @Override
+    public Graph getGraph() {
+        return graph;
+    }
+
+    @Override
+    public Distance getLength() {
+        Distance result = null;
+        for ( Edge e : this ) {
+            if ( result == null ) {
+                result = e.getDistance();
+            } else {
+                result = result.add( e.getDistance() );
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Path connectWith( Path otherPath ) {
+        for ( Edge edge : otherPath ) {
+            addEdgeAsLast( edge );
+        }
+        return this;
+    }
+
+    @Override
+    public int size() {
+        return edges.size();
+    }
+
+    @Override
+    public String toStringLabelPath() {
+        StringBuilder sb = new StringBuilder();
+        for ( Edge e : this ) {
+            sb.append( e.getLabel() );
+            sb.append( ":" );
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final SimplePath other = (SimplePath) obj;
+        if ( !Objects.equals( this.edges, other.edges ) ) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SimplePath{" + "distance=" + getLength() + ", " + "edges=" + edges + '}';
+    }
+}
