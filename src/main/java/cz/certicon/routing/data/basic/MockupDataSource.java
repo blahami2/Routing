@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data;
+package cz.certicon.routing.data.basic;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.data.GraphLoadListener;
+import cz.certicon.routing.data.MapDataSource;
+import cz.certicon.routing.data.Restriction;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -58,5 +61,10 @@ public class MockupDataSource implements MapDataSource {
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
         return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+    }
+
+    @Override
+    public MapDataSource setRestrictions( Restriction restriction ) {
+        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
     }
 }

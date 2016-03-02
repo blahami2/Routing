@@ -16,8 +16,12 @@ import java.io.IOException;
  */
 public interface MapDataSource {
 
+    public MapDataSource setRestrictions( Restriction restriction );
+
     /**
-     * Loads a graph from the data source. The graph is created using factories. It is created asynchronously using the {@link GraphLoadListener} as callback.
+     * Loads a graph from the data source. The graph is created using factories.
+     * It is created asynchronously using the {@link GraphLoadListener} as
+     * callback.
      *
      * @param graphEntityFactory factory for creating graph-related objects
      * @param distanceFactory factory for creating distances

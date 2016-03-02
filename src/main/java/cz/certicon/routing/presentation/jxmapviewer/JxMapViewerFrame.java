@@ -64,8 +64,8 @@ public class JxMapViewerFrame implements PathPresenter {
 //            if ( someEdge != null ) {
 //                addWaypoint( path.getSourceNode(), someEdge.getLabel() );
 //            }
-//            addWaypoint( edge, edge.getLabel() );
-//            addWaypoint( currentNode, currentNode.getLabel() );
+            addWaypoint( edge, edge.getLabel() );
+            addWaypoint( currentNode, currentNode.getLabel() );
 
             List<Coordinate> coordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getSourceNode() ) ) {

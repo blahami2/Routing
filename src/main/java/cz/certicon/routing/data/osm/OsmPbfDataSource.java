@@ -32,6 +32,7 @@ import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 import cz.certicon.routing.data.MapDataSource;
+import cz.certicon.routing.data.Restriction;
 
 /**
  *
@@ -40,10 +41,11 @@ import cz.certicon.routing.data.MapDataSource;
 public class OsmPbfDataSource implements MapDataSource {
 
     private final InputStream input;
+    private Restriction restriction;
 
     public OsmPbfDataSource( File input ) throws FileNotFoundException {
         this.input = new BufferedInputStream( new FileInputStream( input ) );
-
+        this.restriction = Restriction.getDefault();
     }
 
     @Override
@@ -53,10 +55,10 @@ public class OsmPbfDataSource implements MapDataSource {
         blockInputStream.process();
     }
 
-    private void onLoadFinish( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener, Graph graph ) throws IOException {
-        OsmBinaryProcessor brad = new OsmBinaryProcessor( graphEntityFactory, distanceFactory, graphLoadListener, graph );
-        BlockInputStream blockInputStream = new BlockInputStream( input, brad );
-        blockInputStream.process();
+    @Override
+    public MapDataSource setRestrictions( Restriction restriction ) {
+        this.restriction = restriction;
+        return this;
     }
 
     private class OsmBinaryParser extends BinaryParser {
@@ -118,15 +120,16 @@ public class OsmPbfDataSource implements MapDataSource {
         protected void parseWays( List<Osmformat.Way> ways ) {
             ways.stream()
                     .filter( ( w ) -> {
+                        List<Restriction.Pair> pairs = new LinkedList<>();
                         for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                            if ( TagKey.HIGHWAY.equals( TagKey.parse( getStringById( w.getKeys( i ) ) ) ) ) {
-                                return true;
-                            }
+                            String key = getStringById( w.getKeys( i ) );
+                            String value = getStringById( w.getVals( i ) );
+                            pairs.add( new Restriction.Pair( key, value ) );
                         }
-                        return false;
+                        return restriction.isAllowed( pairs );
                     } )
-                    .forEach(( w ) -> {
-                       /* 
+                    .forEach( ( w ) -> {
+                        /* 
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
                     Node sourceNode = null;
@@ -303,7 +306,7 @@ public class OsmPbfDataSource implements MapDataSource {
 
         @Override
         protected void parseWays( List<Osmformat.Way> ways ) {
-            ways.stream().forEach(( w ) -> {
+            ways.stream().forEach( ( w ) -> {
                 List<Node> redundantNodes = new ArrayList<>();
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
@@ -333,7 +336,7 @@ public class OsmPbfDataSource implements MapDataSource {
                                 graph.removeNode( rn );
                             }
                             coords.add( t.getCoordinates() );
-                            Edge edge = graphEntityFactory.createEdge(Edge.Id.generateId(), s, t, length );
+                            Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), s, t, length );
                             edge.setCoordinates( coords );
                             edge.setLabel( label );
                             graph.addEdge( edge );
@@ -379,7 +382,7 @@ public class OsmPbfDataSource implements MapDataSource {
                         prev = tmp;
                         coords.add( tmp.getCoordinates() );
                     }
-                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(),first, prev, length );
+                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), first, prev, length );
                     edge.setCoordinates( coords );
                     graph.addEdge( edge );
                 }

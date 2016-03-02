@@ -25,9 +25,11 @@ import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 import cz.certicon.routing.data.MapDataSource;
+import cz.certicon.routing.data.Restriction;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.util.Arrays;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
+import java.util.LinkedList;
 
 /**
  *
@@ -36,9 +38,11 @@ import cz.certicon.routing.data.coordinates.CoordinateWriter;
 public class AlternativeOsmPbfDataSource implements MapDataSource {
 
     private final DataSource source;
+    private Restriction restriction;
 
     public AlternativeOsmPbfDataSource( DataSource source ) throws IOException {
         this.source = source;
+        this.restriction = Restriction.getDefault();
     }
 
     @Override
@@ -46,6 +50,12 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
         OsmBinaryParser brad = new OsmBinaryParser( graphEntityFactory, distanceFactory, graphLoadListener );
         BlockInputStream blockInputStream = new BlockInputStream( new BufferedInputStream( source.getInputStream() ), brad );
         blockInputStream.process();
+    }
+
+    @Override
+    public MapDataSource setRestrictions( Restriction restriction ) {
+        this.restriction = restriction;
+        return this;
     }
 
     private class OsmBinaryParser extends BinaryParser {
@@ -98,12 +108,13 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
         protected void parseWays( List<Osmformat.Way> ways ) {
             ways.stream()
                     .filter( ( w ) -> {
+                        List<Restriction.Pair> pairs = new LinkedList<>();
                         for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                            if ( TagKey.HIGHWAY.equals( TagKey.parse( getStringById( w.getKeys( i ) ) ) ) ) {
-                                return true;
-                            }
+                            String key = getStringById( w.getKeys( i ) );
+                            String value = getStringById( w.getVals( i ) );
+                            pairs.add( new Restriction.Pair( key, value ) );
                         }
-                        return false;
+                        return restriction.isAllowed( pairs );
                     } )
                     .forEach( ( w ) -> {
 
@@ -120,6 +131,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                                 Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                         distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
                                 edge.setCoordinates( Arrays.asList( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+//                                edge.setLabel( value );
                                 getFromMap( sourceNode ).add( edge );
                                 getFromMap( targetNode ).add( edge );
                             }
@@ -164,7 +176,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                     Node nodeA = a.getOtherNode( node );
                     Node nodeB = b.getOtherNode( node );
                     Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
-                    newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
+//                    newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
                     List<Coordinate> coords = new ArrayList<>();
                     // connect coordinates
                     List<Coordinate> aCoords = a.getCoordinates();
@@ -227,7 +239,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                 edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
 //                System.out.println( "old edge has " + edge.getCoordinates().size() + " coordinates" );
                 Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
-                newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
+//                newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
 //                System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
                 graph.addEdge( newEdge );
             }
