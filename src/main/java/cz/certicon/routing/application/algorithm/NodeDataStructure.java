@@ -59,4 +59,10 @@ public interface NodeDataStructure {
      * @return boolean value
      */
     public boolean isEmpty();
+    
+    /**
+     * Returns amount of nodes left in the structure.
+     * @return integer value
+     */
+    public int size();
 }

@@ -92,7 +92,7 @@ public class RoutingAlgorithmTest {
                 .addEdge( cd )
                 .addEdge( df );
 
-        expResult = graphFactory.createPath( g ).addEdgeAsLast( ac ).addEdgeAsLast( cd ).addEdgeAsLast( df );
+        expResult = graphFactory.createPathWithSource( g, a ).addEdgeAsLast( ac ).addEdgeAsLast( cd ).addEdgeAsLast( df );
         Path result = instance.route( a, f );
 //        System.out.println( "expected: " + expResult );
 //        System.out.println( "result: " + result );
@@ -147,7 +147,7 @@ public class RoutingAlgorithmTest {
     }
 
     private static Edge createEdge( DirectedNeighbourListGraphEntityFactory entityFactory, SimpleDistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        return entityFactory.createEdge( sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
     }
 
     @Parameterized.Parameters

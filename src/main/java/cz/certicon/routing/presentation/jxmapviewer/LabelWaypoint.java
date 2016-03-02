@@ -20,44 +20,46 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
  */
 public class LabelWaypoint extends DefaultWaypoint {
 
-        private final JLabel button;
-        private final String text;
+    private final JLabel button;
+    private final String text;
+    
+    private static final int MAX_LENGTH = 15;
 
-        public LabelWaypoint( String text, GeoPosition coord ) {
-            super( coord );
-            this.text = text;
-            button = new JLabel( "tags" );
-            button.setSize( 24, 24 );
-            button.setPreferredSize( new Dimension( 24, 24 ) );
-            button.addMouseListener( new SwingWaypointMouseListener() );
-            button.setVisible( true );
+    public LabelWaypoint( String text, GeoPosition coord ) {
+        super( coord );
+        this.text = text;
+        button = new JLabel( ( text.length() < MAX_LENGTH ) ? ( ( text.isEmpty() ) ? "empty" : text ) : text.substring( 0, MAX_LENGTH ) );
+//        button.setSize( 24, 24 );
+//        button.setPreferredSize( new Dimension( 24, 24 ) );
+        button.addMouseListener( new SwingWaypointMouseListener() );
+        button.setVisible( true );
+    }
+
+    public JComponent getComponent() {
+        return button;
+    }
+
+    private class SwingWaypointMouseListener implements MouseListener {
+
+        @Override
+        public void mouseClicked( MouseEvent e ) {
+            JOptionPane.showMessageDialog( button, text );
         }
 
-        public JComponent getComponent() {
-            return button;
+        @Override
+        public void mousePressed( MouseEvent e ) {
         }
 
-        private class SwingWaypointMouseListener implements MouseListener {
+        @Override
+        public void mouseReleased( MouseEvent e ) {
+        }
 
-            @Override
-            public void mouseClicked( MouseEvent e ) {
-                JOptionPane.showMessageDialog( button, text );
-            }
+        @Override
+        public void mouseEntered( MouseEvent e ) {
+        }
 
-            @Override
-            public void mousePressed( MouseEvent e ) {
-            }
-
-            @Override
-            public void mouseReleased( MouseEvent e ) {
-            }
-
-            @Override
-            public void mouseEntered( MouseEvent e ) {
-            }
-
-            @Override
-            public void mouseExited( MouseEvent e ) {
-            }
+        @Override
+        public void mouseExited( MouseEvent e ) {
         }
     }
+}

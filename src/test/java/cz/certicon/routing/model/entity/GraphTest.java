@@ -319,7 +319,7 @@ public class GraphTest {
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, SimpleDistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        return entityFactory.createEdge( sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+        return entityFactory.createEdge(  Edge.Id.generateId(),sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
     }
 
     private static boolean containsNode( Graph g, Node n ) {

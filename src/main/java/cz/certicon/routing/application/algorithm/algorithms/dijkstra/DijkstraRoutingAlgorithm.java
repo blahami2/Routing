@@ -38,6 +38,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     @Override
     public Path route( Node from, Node to ) throws NoPathException {
+        System.out.println( "routing from: " + from.getLabel() + " to " + to.getLabel() );
         // clear the data structure
         nodeDataStructure.clear();
         Node nodeEqToFrom = from;
@@ -59,12 +60,16 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+            System.out.println( "extracted node: " + currentNode.getLabel() );
+            System.out.println( "nodes left: " + nodeDataStructure.size() );
             if ( currentNode.equals( nodeEqToTo ) ) {
+                System.out.println( "found, breaking" );
                 break;
             }
             // foreach neighbour T of node S
             getGraph().getOutgoingEdgesOf( currentNode ).stream().forEach( ( edge ) -> {
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
+                System.out.println( "checking node: " + endNode.getLabel() );
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = routingConfiguration.getNodeEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
@@ -79,11 +84,12 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             throw new NoPathException( from, to );
         }
         // build path from predecessors
-        Path path = getEntityAbstractFactory().createPath( getGraph() );
+        Path path = getEntityAbstractFactory().createPathWithTarget( getGraph(), nodeEqToTo );
         Node currentNode = nodeEqToTo;
         while ( !currentNode.equals( nodeEqToFrom ) ) {
+            System.out.println( "backtracking: " + currentNode.getLabel() );
             path.addEdgeAsFirst( currentNode.getPredecessorEdge() );
-            currentNode = getGraph().getSourceNodeOf( currentNode.getPredecessorEdge() );
+            currentNode = getGraph().getOtherNodeOf( currentNode.getPredecessorEdge(), currentNode );
         }
         return path;
     }

@@ -7,15 +7,16 @@ package cz.certicon.routing.model.entity.jgrapht;
 
 import cz.certicon.routing.model.entity.common.SimplePath;
 import cz.certicon.routing.model.entity.Graph;
+import cz.certicon.routing.model.entity.Node;
 
 /**
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */
 class PathImpl extends SimplePath {
-    
-    public PathImpl( Graph graph ) {
-        super( graph );
+
+    public PathImpl( Graph graph, Node node, boolean isFirst ) {
+        super( graph, node, isFirst );
     }
     
 }

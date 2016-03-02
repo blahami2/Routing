@@ -65,4 +65,9 @@ public class TrivialNodeDataStructure implements NodeDataStructure {
         return nodes.isEmpty();
     }
 
+    @Override
+    public int size() {
+        return nodes.size();
+    }
+
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.input.osm;
+package cz.certicon.routing.data.osm;
 
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
@@ -126,7 +126,7 @@ public class OsmPbfDataSource implements DataSource {
                         return false;
                     } )
                     .forEach( ( w ) -> {
-                        
+                       /* 
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
                     Node sourceNode = null;
@@ -150,7 +150,7 @@ public class OsmPbfDataSource implements DataSource {
                     }
                 }
 
-                         /*
+                         */
                         long lastRef = 0;
                         List<Coordinates> edgeCoords = new LinkedList<>();
                         Node sourceNode = null;
@@ -174,7 +174,7 @@ public class OsmPbfDataSource implements DataSource {
                             targetNode = tmpTarget;
                             edgeCoords.add( targetNode.getCoordinates() );
                         }
-                        Edge edge = graphEntityFactory.createEdge( sourceNode, targetNode, edgeLength );
+                        Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, edgeLength );
                         StringBuilder sb = new StringBuilder();
                         for ( int i = 0; i < w.getKeysCount(); i++ ) {
                             sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
@@ -184,7 +184,7 @@ public class OsmPbfDataSource implements DataSource {
                         edge.setLabel( sb.toString() );
                         edge.setCoordinates( edgeCoords );
                         graph.addEdge( edge );
-*/
+
 //                sb.append( "\n  Key=value pairs: " );
 //                for ( int i = 0; i < w.getKeysCount(); i++ ) {
 //                    sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
@@ -236,7 +236,7 @@ public class OsmPbfDataSource implements DataSource {
                         prev = tmp;
                         coords.add( tmp.getCoordinates() );
                     }
-                    Edge edge = graphEntityFactory.createEdge( first, prev, length );
+                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), first, prev, length );
                     edge.setCoordinates( coords );
                     graph.addEdge( edge );
                 }
@@ -333,7 +333,7 @@ public class OsmPbfDataSource implements DataSource {
                                 graph.removeNode( rn );
                             }
                             coords.add( t.getCoordinates() );
-                            Edge edge = graphEntityFactory.createEdge( s, t, length );
+                            Edge edge = graphEntityFactory.createEdge(Edge.Id.generateId(), s, t, length );
                             edge.setCoordinates( coords );
                             edge.setLabel( label );
                             graph.addEdge( edge );
@@ -379,7 +379,7 @@ public class OsmPbfDataSource implements DataSource {
                         prev = tmp;
                         coords.add( tmp.getCoordinates() );
                     }
-                    Edge edge = graphEntityFactory.createEdge( first, prev, length );
+                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(),first, prev, length );
                     edge.setCoordinates( coords );
                     graph.addEdge( edge );
                 }

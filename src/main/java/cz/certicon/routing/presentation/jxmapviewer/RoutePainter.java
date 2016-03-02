@@ -36,7 +36,7 @@ public class RoutePainter implements Painter<JXMapViewer> {
     public RoutePainter( List<GeoPosition> track ) {
         // copy the list so that changes in the 
         // original list do not have an effect here
-        this.track = new ArrayList<GeoPosition>( track );
+        this.track = new ArrayList<>( track );
     }
 
     @Override

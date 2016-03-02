@@ -22,10 +22,13 @@ public abstract class SimplePath implements Path {
 
     private final LinkedList<Edge> edges;
     private final Graph graph;
+    private Node sourceNode = null;
+    private Node targetNode = null;
 
-    public SimplePath( Graph graph ) {
+    public SimplePath( Graph graph, Node node, boolean isFirst ) {
         this.graph = graph;
         this.edges = new LinkedList<>();
+        this.sourceNode = this.targetNode = node;
     }
 
     @Override
@@ -37,12 +40,14 @@ public abstract class SimplePath implements Path {
     @Override
     public Path addEdgeAsFirst( Edge e ) {
         edges.addFirst( e );
+        sourceNode = e.getOtherNode( sourceNode );
         return this;
     }
 
     @Override
     public Path addEdgeAsLast( Edge e ) {
         edges.addLast( e );
+        targetNode = e.getOtherNode( targetNode );
         return this;
     }
 
@@ -53,12 +58,12 @@ public abstract class SimplePath implements Path {
 
     @Override
     public Node getSourceNode() {
-        return graph.getSourceNodeOf( edges.getFirst() );
+        return sourceNode;
     }
 
     @Override
     public Node getTargetNode() {
-        return graph.getTargetNodeOf( edges.getLast() );
+        return targetNode;
     }
 
     @Override
