@@ -37,9 +37,9 @@ public interface Node {
     /**
      * Getter for the coordinates of this node
      *
-     * @return an instance of {@link Coordinates}
+     * @return an instance of {@link Coordinate}
      */
-    public Coordinates getCoordinates();
+    public Coordinate getCoordinates();
 
     /**
      * Getter for the label of this node
@@ -98,6 +98,14 @@ public interface Node {
 
         public static Id createId( int id ) {
             return new Id( id );
+        }
+
+        public static String toString( Id id ) {
+            return id.id + "";
+        }
+
+        public static Id fromString( String str ) {
+            return createId( Integer.parseInt( str ) );
         }
 
         private final int id;

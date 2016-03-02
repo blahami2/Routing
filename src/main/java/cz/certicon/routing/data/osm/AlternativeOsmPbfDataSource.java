@@ -5,50 +5,46 @@
  */
 package cz.certicon.routing.data.osm;
 
-import com.sun.javafx.scene.control.skin.VirtualFlow;
-import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.data.DataDestination;
 import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.GraphLoadListener;
-import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
+import cz.certicon.routing.data.MapDataSource;
+import cz.certicon.routing.model.entity.Coordinate;
+import java.util.Arrays;
+import cz.certicon.routing.data.coordinates.CoordinateWriter;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class AlternativeOsmPbfDataSource implements DataSource {
+public class AlternativeOsmPbfDataSource implements MapDataSource {
 
-    private final InputStream input;
+    private final DataSource source;
 
-    public AlternativeOsmPbfDataSource( File input ) throws FileNotFoundException {
-        this.input = new BufferedInputStream( new FileInputStream( input ) );
-
+    public AlternativeOsmPbfDataSource( DataSource source) throws IOException {
+        this.source = source;
     }
 
     @Override
     public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException {
         OsmBinaryParser brad = new OsmBinaryParser( graphEntityFactory, distanceFactory, graphLoadListener );
-        BlockInputStream blockInputStream = new BlockInputStream( input, brad );
+        BlockInputStream blockInputStream = new BlockInputStream( new BufferedInputStream( source.getInputStream() ), brad );
         blockInputStream.process();
     }
 
@@ -123,6 +119,7 @@ public class AlternativeOsmPbfDataSource implements DataSource {
                                 targetNode = nodeMap.get( lastRef );
                                 Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                         distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+                                edge.setCoordinates( Arrays.asList( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
                                 getFromMap( sourceNode ).add( edge );
                                 getFromMap( targetNode ).add( edge );
                             }
@@ -168,6 +165,29 @@ public class AlternativeOsmPbfDataSource implements DataSource {
                     Node nodeB = b.getOtherNode( node );
                     Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
                     newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
+                    List<Coordinate> coords = new ArrayList<>();
+                    // connect coordinates
+                    List<Coordinate> aCoords = a.getCoordinates( graph );
+                    List<Coordinate> bCoords = b.getCoordinates( graph );
+                    if ( node.equals( a.getSourceNode() ) ) {
+                        for ( int i = aCoords.size() - 1; i >= 0; i-- ) {
+                            coords.add( aCoords.get( i ) );
+                        }
+                    } else {
+                        for ( int i = 0; i < aCoords.size(); i++ ) {
+                            coords.add( aCoords.get( i ) );
+                        }
+                    }
+                    if(node.equals( b.getSourceNode())){
+                        for ( int i = 1; i < bCoords.size(); i++ ) {
+                            coords.add( bCoords.get( i ) );
+                        }
+                    } else {
+                        for ( int i = bCoords.size() - 2; i >= 0; i-- ) {
+                            coords.add( bCoords.get( i ) );
+                        }
+                    }
+                    newEdge.setCoordinates( coords );
 //                    System.out.println( "orig edge: " + nodeA.getLabel() + ":" + node.getLabel() + ":" + nodeB.getLabel() );
 //                    System.out.println( "new edge: " + newEdge.getLabel() );
                     List<Edge> aList = getFromMap( nodeA );
@@ -206,6 +226,8 @@ public class AlternativeOsmPbfDataSource implements DataSource {
                 newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
                 graph.addEdge( newEdge );
             }
+            System.out.println( "Processing done!" );
+
 
             graphLoadListener.onGraphLoaded( graph );
 //            try {

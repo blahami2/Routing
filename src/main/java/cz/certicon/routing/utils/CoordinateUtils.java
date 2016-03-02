@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.utils;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,9 +22,9 @@ public class CoordinateUtils {
      * @param coordinates list of coordinates to be accounted into the calculation
      * @return geographical midpoint
      */
-    public static Coordinates calculateGeographicMidpoint( List<Coordinates> coordinates ) {
+    public static Coordinate calculateGeographicMidpoint( List<Coordinate> coordinates ) {
         List<CartesianCoords> ccoords = new LinkedList<>();
-        for ( Coordinates coordinate : coordinates ) {
+        for ( Coordinate coordinate : coordinates ) {
             double lat = Math.toRadians( coordinate.getLatitude() );
             double lon = Math.toRadians( coordinate.getLongitude() );
             ccoords.add( new CartesianCoords(
@@ -41,17 +41,17 @@ public class CoordinateUtils {
         double lon = Math.atan2( mid.y, mid.x );
         double hyp = Math.sqrt( mid.x * mid.x + mid.y * mid.y );
         double lat = Math.atan2( mid.z, hyp );
-        return new Coordinates( Math.toDegrees( lat ), Math.toDegrees( lon ) );
+        return new Coordinate( Math.toDegrees( lat ), Math.toDegrees( lon ) );
     }
 
     /**
      * Calculates the geographical distance between two points
      *
-     * @param a first point in {@link Coordinates}
-     * @param b second point in {@link Coordinates}
+     * @param a first point in {@link Coordinate}
+     * @param b second point in {@link Coordinate}
      * @return calculated distance in double
      */
-    public static double calculateDistance( Coordinates a, Coordinates b ) {
+    public static double calculateDistance( Coordinate a, Coordinate b ) {
         double lat = a.getLatitude() - b.getLatitude();
         double lon = a.getLongitude() - b.getLongitude();
         return Math.sqrt( lat * lat + lon * lon );
@@ -60,13 +60,13 @@ public class CoordinateUtils {
     /**
      * Divides path between two points into list of coordinates.
      *
-     * @param start starting point in {@link Coordinates}
-     * @param end target point in {@link Coordinates}
+     * @param start starting point in {@link Coordinate}
+     * @param end target point in {@link Coordinate}
      * @param count amount of required points in the path
-     * @return list of {@link Coordinates} for the given path
+     * @return list of {@link Coordinate} for the given path
      */
-    public static List<Coordinates> divideCoordinates( Coordinates start, Coordinates end, int count ) {
-        List<Coordinates> coords = new LinkedList<>();
+    public static List<Coordinate> divideCoordinates( Coordinate start, Coordinate end, int count ) {
+        List<Coordinate> coords = new LinkedList<>();
         double aLat = start.getLatitude();
         double aLon = start.getLongitude();
         double bLat = end.getLatitude();
@@ -74,7 +74,7 @@ public class CoordinateUtils {
         for ( int i = 0; i < count; i++ ) {
             double avgLat = ( ( count - 1 - i ) * aLat + ( i ) * bLat ) / ( count - 1 );
             double avgLon = ( ( count - 1 - i ) * aLon + ( i ) * bLon ) / ( count - 1 );
-            coords.add( new Coordinates( avgLat, avgLon ) );
+            coords.add(new Coordinate( avgLat, avgLon ) );
         }
         return coords;
     }

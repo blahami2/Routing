@@ -69,7 +69,7 @@ public interface Edge {
      * @param graph graph to optionally load coordinates from
      * @return path coordinates
      */
-    public List<Coordinates> getCoordinates( Graph graph );
+    public List<Coordinate> getCoordinates( Graph graph );
 
     /**
      * Setter for coordinates of the path
@@ -77,7 +77,7 @@ public interface Edge {
      * @param coordinates list of coordinates representing the path
      * @return this instance
      */
-    public Edge setCoordinates( List<Coordinates> coordinates );
+    public Edge setCoordinates( List<Coordinate> coordinates );
 
     /**
      * Getter for the source point of this edge
@@ -134,8 +134,8 @@ public interface Edge {
      * source node and a target node
      */
     public Edge newNodes( Node sourceNode, Node targetNode );
-    
-    public Edge createCopyWithNewId(Edge.Id id);
+
+    public Edge createCopyWithNewId( Edge.Id id );
 
     public static class Id implements Serializable {
 
@@ -147,6 +147,14 @@ public interface Edge {
 
         public static Id createId( int id ) {
             return new Id( id );
+        }
+
+        public static String toString( Id id ) {
+            return id.id + "";
+        }
+
+        public static Id fromString( String str ) {
+            return createId( Integer.parseInt( str ) );
         }
 
         private final int id;
@@ -182,7 +190,7 @@ public interface Edge {
 
         @Override
         public String toString() {
-            return "Id{"  + id + '}';
+            return "Id{" + id + '}';
         }
 
     }

@@ -17,7 +17,7 @@ import java.io.IOException;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class MockupDataSource implements DataSource {
+public class MockupDataSource implements MapDataSource {
 
     @Override
     public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException {

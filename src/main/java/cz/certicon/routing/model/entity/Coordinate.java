@@ -14,7 +14,7 @@ import cz.certicon.routing.utils.DoubleComparator;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class Coordinates {
+public class Coordinate {
 
     private static final double EPS = 10E-15;
 
@@ -27,7 +27,7 @@ public class Coordinates {
      * @param latitude double representation of latitude
      * @param longitude double representation of longitude
      */
-    public Coordinates( double latitude, double longitude ) {
+    public Coordinate( double latitude, double longitude ) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -74,7 +74,7 @@ public class Coordinates {
         if ( getClass() != obj.getClass() ) {
             return false;
         }
-        final Coordinates other = (Coordinates) obj;
+        final Coordinate other = (Coordinate) obj;
         if ( !DoubleComparator.isEqualTo( this.latitude, other.latitude, EPS ) ) {
             return false;
         }

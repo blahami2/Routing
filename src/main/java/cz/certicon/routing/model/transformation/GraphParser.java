@@ -5,8 +5,8 @@
  */
 package cz.certicon.routing.model.transformation;
 
-import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.model.entity.Graph;
+import cz.certicon.routing.data.MapDataSource;
 
 /**
  *
@@ -14,5 +14,5 @@ import cz.certicon.routing.model.entity.Graph;
  */
 public interface GraphParser {
 
-    public Graph parse( DataSource dataSource );
+    public Graph parse( MapDataSource dataSource );
 }

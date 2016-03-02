@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class FileDestination implements DataDestination {
 
@@ -49,6 +49,11 @@ public class FileDestination implements DataDestination {
     public DataDestination flush() throws IOException {
         writer.flush();
         return this;
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        return new FileOutputStream( file );
     }
 
 }

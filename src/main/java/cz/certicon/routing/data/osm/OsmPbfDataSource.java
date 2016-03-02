@@ -7,9 +7,8 @@ package cz.certicon.routing.data.osm;
 
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.GraphLoadListener;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
@@ -32,12 +31,13 @@ import java.util.logging.Logger;
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
+import cz.certicon.routing.data.MapDataSource;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class OsmPbfDataSource implements DataSource {
+public class OsmPbfDataSource implements MapDataSource {
 
     private final InputStream input;
 
@@ -125,7 +125,7 @@ public class OsmPbfDataSource implements DataSource {
                         }
                         return false;
                     } )
-                    .forEach( ( w ) -> {
+                    .forEach(( w ) -> {
                        /* 
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
@@ -152,7 +152,7 @@ public class OsmPbfDataSource implements DataSource {
 
                          */
                         long lastRef = 0;
-                        List<Coordinates> edgeCoords = new LinkedList<>();
+                        List<Coordinate> edgeCoords = new LinkedList<>();
                         Node sourceNode = null;
                         Node targetNode = null;
                         Node tmpSource = null;
@@ -224,7 +224,7 @@ public class OsmPbfDataSource implements DataSource {
                     while ( ( tmp = getPrevious( graph, first ) ) != null ) {
                         first = tmp;
                     }
-                    List<Coordinates> coords = new LinkedList<>();
+                    List<Coordinate> coords = new LinkedList<>();
                     Distance length = distanceFactory.createZeroDistance();
                     coords.add( first.getCoordinates() );
                     Node prev = first;
@@ -303,7 +303,7 @@ public class OsmPbfDataSource implements DataSource {
 
         @Override
         protected void parseWays( List<Osmformat.Way> ways ) {
-            ways.stream().forEach( ( w ) -> {
+            ways.stream().forEach(( w ) -> {
                 List<Node> redundantNodes = new ArrayList<>();
                 long lastRef = 0;
                 for ( Long ref : w.getRefsList() ) {
@@ -323,7 +323,7 @@ public class OsmPbfDataSource implements DataSource {
                             Node s = graph.getIncomingEdgesOf( redundantNodes.get( 0 ) ).stream().findFirst().get().getSourceNode();
                             Node t = graph.getOutgoingEdgesOf( redundantNodes.get( redundantNodes.size() - 1 ) ).stream().findFirst().get().getTargetNode();
                             Distance length = distanceFactory.createZeroDistance();
-                            List<Coordinates> coords = new LinkedList<>();
+                            List<Coordinate> coords = new LinkedList<>();
                             coords.add( s.getCoordinates() );
                             Node prev = s;
                             for ( Node rn : redundantNodes ) {
@@ -367,7 +367,7 @@ public class OsmPbfDataSource implements DataSource {
                     while ( ( tmp = getPrevious( graph, first ) ) != null ) {
                         first = tmp;
                     }
-                    List<Coordinates> coords = new LinkedList<>();
+                    List<Coordinate> coords = new LinkedList<>();
                     Distance length = distanceFactory.createZeroDistance();
                     coords.add( first.getCoordinates() );
                     Node prev = first;

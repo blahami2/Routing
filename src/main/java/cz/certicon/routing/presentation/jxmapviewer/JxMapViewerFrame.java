@@ -5,7 +5,8 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.data.coordinates.CoordinateReader;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
@@ -18,8 +19,6 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
-import javax.swing.JToolTip;
-import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.OSMTileFactoryInfo;
@@ -68,16 +67,16 @@ public class JxMapViewerFrame implements PathPresenter {
             addWaypoint( edge, edge.getLabel() );
             addWaypoint( currentNode, currentNode.getLabel() );
 
-            List<Coordinates> coordinates = edge.getCoordinates( path.getGraph() );
+            List<Coordinate> coordinates = edge.getCoordinates( path.getGraph() );
             if ( currentNode.equals( edge.getSourceNode() ) ) {
                 for ( int i = 0; i < coordinates.size(); i++ ) {
-                    Coordinates coord = coordinates.get( i );
+                    Coordinate coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getTargetNode();
             } else {
                 for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
-                    Coordinates coord = coordinates.get( i );
+                    Coordinate coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getSourceNode();
@@ -101,27 +100,27 @@ public class JxMapViewerFrame implements PathPresenter {
     @Override
     public PathPresenter display() {
 //        SwingUtilities.invokeLater( () -> {
-            JFrame frame = new JFrame( "map" );
-            frame.getContentPane().add( mapViewer );
-            frame.setSize( 800, 600 );
-            frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-            frame.setVisible( true );
+        JFrame frame = new JFrame( "map" );
+        frame.getContentPane().add( mapViewer );
+        frame.setSize( 800, 600 );
+        frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
+        frame.setVisible( true );
 
-            TileFactoryInfo info = new OSMTileFactoryInfo();
-            DefaultTileFactory tileFactory = new DefaultTileFactory( info );
-            tileFactory.setThreadPoolSize( 8 );
-            mapKit.setTileFactory( tileFactory );
+        TileFactoryInfo info = new OSMTileFactoryInfo();
+        DefaultTileFactory tileFactory = new DefaultTileFactory( info );
+        tileFactory.setThreadPoolSize( 8 );
+        mapKit.setTileFactory( tileFactory );
 //            mapViewer.setTileFactory( tileFactory );
-            mapViewer.zoomToBestFit( fitGeoPosition, 0.8 );
-            waypoints.stream().forEach( ( waypoint ) -> {
-                mapViewer.add( waypoint.getComponent() );
-            } );
+        mapViewer.zoomToBestFit( fitGeoPosition, 0.8 );
+        waypoints.stream().forEach( ( waypoint ) -> {
+            mapViewer.add( waypoint.getComponent() );
+        } );
 //            mapKit.setCenterPosition( fitGeoPosition.stream().findAny().get() );
-            LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
-            p.setWaypoints( waypoints );
-            painters.add( p );
-            CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
-            mapViewer.setOverlayPainter( painter );
+        LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
+        p.setWaypoints( waypoints );
+        painters.add( p );
+        CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
+        mapViewer.setOverlayPainter( painter );
 //
 //            JToolTip tooltip = new JToolTip();
 //            mapViewer.add( tooltip );
@@ -139,7 +138,7 @@ public class JxMapViewerFrame implements PathPresenter {
 //        double avgLat = (sc.getLatitude() + tc.getLatitude() ) / 2;
 //        double avgLon = (sc.getLongitude()+ tc.getLongitude() ) / 2;
 //        waypoints.add( new LabelWaypoint( text, new GeoPosition( avgLat, avgLon ) ) );
-        Coordinates midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
+        Coordinate midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
         waypoints.add( new LabelWaypoint( text, new GeoPosition( midpoint.getLatitude(), midpoint.getLongitude() ) ) );
     }
 }

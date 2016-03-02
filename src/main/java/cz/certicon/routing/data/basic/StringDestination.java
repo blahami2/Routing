@@ -6,7 +6,9 @@
 package cz.certicon.routing.data.basic;
 
 import cz.certicon.routing.data.DataDestination;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  *
@@ -43,4 +45,32 @@ public class StringDestination implements DataDestination {
         return this;
     }
 
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        return new StringOutputStream();
+    }
+    
+    private class StringOutputStream extends OutputStream {
+        
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        @Override
+        public void write( int b ) throws IOException {
+            os.write( b );
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            sb.append( new String(os.toByteArray(), "UTF-8"));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            super.flush();
+            sb.append( new String(os.toByteArray(), "UTF-8"));
+        }
+        
+        
+    }
 }

@@ -7,7 +7,7 @@ package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Graph;
@@ -29,7 +29,7 @@ public abstract class SimpleEdge implements Edge {
     private final Edge.Id id;
     private Distance distance;
     private String label;
-    private List<Coordinates> coordinates;
+    private List<Coordinate> coordinates;
     private EdgeAttributes attributes;
 
     public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode ) {
@@ -109,6 +109,7 @@ public abstract class SimpleEdge implements Edge {
     @Override
     public Edge createCopyWithNewId( Id id ) {
         Edge edge = createNew( id, sourceNode, targetNode, distance);
+        edge.setCoordinates( coordinates );
         edge.setAttributes( attributes );
         edge.setLabel( label );
         return edge;
@@ -167,18 +168,18 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public List<Coordinates> getCoordinates( Graph graph ) {
+    public List<Coordinate> getCoordinates( Graph graph ) {
         if ( coordinates != null ) {
             return coordinates;
         }
-        List<Coordinates> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
+        List<Coordinate> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
 //        int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
 //        List<Coordinates> coords = CoordinateUtils.divideCoordinates( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates(), count );
         return coords;
     }
 
     @Override
-    public Edge setCoordinates( List<Coordinates> coordinates ) {
+    public Edge setCoordinates( List<Coordinate> coordinates ) {
         this.coordinates = coordinates;
         return this;
     }

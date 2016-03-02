@@ -6,14 +6,15 @@
 package cz.certicon.routing.data;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The root interface for data export destination.
- * 
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ *
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface DataDestination {
-    
+
     /**
      * Opens the channel for writing into the destination.
      *
@@ -21,16 +22,18 @@ public interface DataDestination {
      * @throws IOException thrown when an error appears while opening
      */
     public DataDestination open() throws IOException;
-    
+
     /**
      * Writes data into the destination.
-     * 
+     *
      * @param str data to be written
      * @return this instance
      * @throws IOException thrown when an error appears while writing
      */
-    public DataDestination write(String str) throws IOException;
-    
+    public DataDestination write( String str ) throws IOException;
+
+    public OutputStream getOutputStream() throws IOException;
+
     /**
      * Closing the channel.
      *
@@ -38,12 +41,12 @@ public interface DataDestination {
      * @throws IOException thrown when an error appears while closing
      */
     public DataDestination close() throws IOException;
-    
+
     /**
      * Flushes the data into the destination, clears the channel.
      *
      * @return this instance
-     * @throws IOException  thrown when an error appears while flushing
+     * @throws IOException thrown when an error appears while flushing
      */
     public DataDestination flush() throws IOException;
 }

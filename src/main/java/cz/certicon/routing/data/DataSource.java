@@ -5,24 +5,20 @@
  */
 package cz.certicon.routing.data;
 
-import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * The root interface for data import.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface DataSource {
 
-    /**
-     * Loads a graph from the data source. The graph is created using factories. It is created asynchronously using the {@link GraphLoadListener} as callback.
-     *
-     * @param graphEntityFactory factory for creating graph-related objects
-     * @param distanceFactory factory for creating distances
-     * @param graphLoadListener callback method for graph-creation completion
-     * @throws IOException thrown when an error occurs during the data retrieval
-     */
-    public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException;
+    public DataSource open() throws IOException;
+
+    public int read() throws IOException;
+
+    public InputStream getInputStream() throws IOException;
+
+    public DataSource close() throws IOException;
 }

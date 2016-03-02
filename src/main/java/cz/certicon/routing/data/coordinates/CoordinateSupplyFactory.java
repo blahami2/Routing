@@ -5,15 +5,16 @@
  */
 package cz.certicon.routing.data.coordinates;
 
-import java.net.URI;
+import cz.certicon.routing.data.DataDestination;
+import cz.certicon.routing.data.DataSource;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinatesSupplyFactory {
+public interface CoordinateSupplyFactory {
 
-    public CoordinatesReader createReader( URI sourceUri );
+    public CoordinateReader createReader( DataSource source );
 
-    public CoordinatesWriter createWriter( URI targetUri );
+    public CoordinateWriter createWriter( DataDestination destination );
 }
