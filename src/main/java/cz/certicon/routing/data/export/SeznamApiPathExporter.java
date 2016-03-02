@@ -6,8 +6,6 @@
 package cz.certicon.routing.data.export;
 
 import cz.certicon.routing.data.DataDestination;
-import cz.certicon.routing.data.DataDestination;
-import cz.certicon.routing.data.PathExporter;
 import cz.certicon.routing.data.PathExporter;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
@@ -19,7 +17,7 @@ import java.util.List;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class SeznamApiPathExporter implements PathExporter {
 
@@ -48,7 +46,7 @@ public class SeznamApiPathExporter implements PathExporter {
 
         destination.write( "                var coords = [];\n" );
         for ( Edge edge : path ) {
-            for ( Coordinate coord : edge.getCoordinates( path.getGraph() ) ) {
+            for ( Coordinate coord : edge.getCoordinates() ) {
                 destination.write(
                         "                coords.push(\n"
                         + "                    SMap.Coords.fromWGS84(" + coord.getLongitude() + ", " + coord.getLatitude() + ")\n"

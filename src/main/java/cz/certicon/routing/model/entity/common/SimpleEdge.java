@@ -108,7 +108,7 @@ public abstract class SimpleEdge implements Edge {
 
     @Override
     public Edge createCopyWithNewId( Id id ) {
-        Edge edge = createNew( id, sourceNode, targetNode, distance);
+        Edge edge = createNew( id, sourceNode, targetNode, distance );
         edge.setCoordinates( coordinates );
         edge.setAttributes( attributes );
         edge.setLabel( label );
@@ -117,17 +117,17 @@ public abstract class SimpleEdge implements Edge {
 
     @Override
     public Edge newSourceNode( Node sourceNode ) {
-        return createNew( getId(), sourceNode, getTargetNode(), getDistance() );
+        return fillCopy( createNew( getId(), sourceNode, getTargetNode(), getDistance() ) );
     }
 
     @Override
     public Edge newTargetNode( Node targetNode ) {
-        return createNew( getId(), getSourceNode(), targetNode, getDistance() );
+        return fillCopy( createNew( getId(), getSourceNode(), targetNode, getDistance() ) );
     }
 
     @Override
     public Edge newNodes( Node sourceNode, Node targetNode ) {
-        return createNew( getId(), sourceNode, targetNode, getDistance() );
+        return fillCopy( createNew( getId(), sourceNode, targetNode, getDistance() ) );
     }
 
     @Override
@@ -168,7 +168,7 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public List<Coordinate> getCoordinates( Graph graph ) {
+    public List<Coordinate> getCoordinates() {
         if ( coordinates != null ) {
             return coordinates;
         }
@@ -186,6 +186,13 @@ public abstract class SimpleEdge implements Edge {
 
     private String generateLabel( Node sourceNode, Node targetNode ) {
         return sourceNode.getLabel() + "-" + targetNode.getLabel();
+    }
+
+    private Edge fillCopy( Edge edge ) {
+        edge.setCoordinates( coordinates );
+        edge.setAttributes( attributes );
+        edge.setLabel( label );
+        return edge;
     }
 
     abstract protected Edge createNew( Edge.Id id, Node sourceNode, Node targetNode, Distance length );

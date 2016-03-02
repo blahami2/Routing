@@ -66,10 +66,9 @@ public interface Edge {
     /**
      * Getter for coordinates of the path
      *
-     * @param graph graph to optionally load coordinates from
      * @return path coordinates
      */
-    public List<Coordinate> getCoordinates( Graph graph );
+    public List<Coordinate> getCoordinates();
 
     /**
      * Setter for coordinates of the path

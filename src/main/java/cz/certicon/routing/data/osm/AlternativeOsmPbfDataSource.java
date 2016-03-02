@@ -37,7 +37,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
 
     private final DataSource source;
 
-    public AlternativeOsmPbfDataSource( DataSource source) throws IOException {
+    public AlternativeOsmPbfDataSource( DataSource source ) throws IOException {
         this.source = source;
     }
 
@@ -167,8 +167,8 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                     newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
                     List<Coordinate> coords = new ArrayList<>();
                     // connect coordinates
-                    List<Coordinate> aCoords = a.getCoordinates( graph );
-                    List<Coordinate> bCoords = b.getCoordinates( graph );
+                    List<Coordinate> aCoords = a.getCoordinates();
+                    List<Coordinate> bCoords = b.getCoordinates();
                     if ( node.equals( a.getSourceNode() ) ) {
                         for ( int i = aCoords.size() - 1; i >= 0; i-- ) {
                             coords.add( aCoords.get( i ) );
@@ -178,7 +178,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                             coords.add( aCoords.get( i ) );
                         }
                     }
-                    if(node.equals( b.getSourceNode())){
+                    if ( node.equals( b.getSourceNode() ) ) {
                         for ( int i = 1; i < bCoords.size(); i++ ) {
                             coords.add( bCoords.get( i ) );
                         }
@@ -188,6 +188,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                         }
                     }
                     newEdge.setCoordinates( coords );
+//                    System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
 //                    System.out.println( "orig edge: " + nodeA.getLabel() + ":" + node.getLabel() + ":" + nodeB.getLabel() );
 //                    System.out.println( "new edge: " + newEdge.getLabel() );
                     List<Edge> aList = getFromMap( nodeA );
@@ -202,6 +203,7 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
                 for ( Edge edge : getFromMap( node ) ) {
                     if ( node.equals( edge.getSourceNode() ) ) {
                         edge.setLabel( edge.getId() + "|" + edge.getSourceNode().getLabel() + ":" + edge.getTargetNode().getLabel() );
+//                        System.out.println( "added edge has " + edge.getCoordinates().size() + " coordinates" );
                         graph.addEdge( edge );
                     }
                 }
@@ -221,13 +223,15 @@ public class AlternativeOsmPbfDataSource implements MapDataSource {
             }
             int edgeCounter = 0;
             for ( Edge edge : g.getEdges() ) {
+//                System.out.println( "old old edge has " + edge.getCoordinates().size() + " coordinates" );
                 edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
+//                System.out.println( "old edge has " + edge.getCoordinates().size() + " coordinates" );
                 Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
                 newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
+//                System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
                 graph.addEdge( newEdge );
             }
             System.out.println( "Processing done!" );
-
 
             graphLoadListener.onGraphLoaded( graph );
 //            try {
