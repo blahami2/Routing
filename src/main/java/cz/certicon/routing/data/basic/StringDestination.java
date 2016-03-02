@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.output;
+package cz.certicon.routing.data.basic;
 
 import cz.certicon.routing.data.DataDestination;
 import java.io.IOException;

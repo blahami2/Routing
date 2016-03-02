@@ -3,11 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.input;
+package cz.certicon.routing.data;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.data.DataSource;
-import cz.certicon.routing.data.GraphLoadListener;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -59,6 +57,6 @@ public class MockupDataSource implements DataSource {
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        return entityFactory.createEdge( sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+        return entityFactory.createEdge(  Edge.Id.generateId(),sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
     }
 }
