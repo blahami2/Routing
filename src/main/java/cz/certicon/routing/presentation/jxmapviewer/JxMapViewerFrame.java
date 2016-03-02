@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
@@ -99,30 +100,32 @@ public class JxMapViewerFrame implements PathPresenter {
 
     @Override
     public PathPresenter display() {
-        SwingUtilities.invokeLater( () -> {
+//        SwingUtilities.invokeLater( () -> {
+            JFrame frame = new JFrame( "map" );
+            frame.getContentPane().add( mapViewer );
+            frame.setSize( 800, 600 );
+            frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
+            frame.setVisible( true );
+
             TileFactoryInfo info = new OSMTileFactoryInfo();
             DefaultTileFactory tileFactory = new DefaultTileFactory( info );
-            mapKit.setTileFactory( tileFactory );
             tileFactory.setThreadPoolSize( 8 );
-            mapViewer.setTileFactory( tileFactory );
+            mapKit.setTileFactory( tileFactory );
+//            mapViewer.setTileFactory( tileFactory );
+            mapViewer.zoomToBestFit( fitGeoPosition, 0.8 );
+            waypoints.stream().forEach( ( waypoint ) -> {
+                mapViewer.add( waypoint.getComponent() );
+            } );
+//            mapKit.setCenterPosition( fitGeoPosition.stream().findAny().get() );
             LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
             p.setWaypoints( waypoints );
             painters.add( p );
             CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
             mapViewer.setOverlayPainter( painter );
-            waypoints.stream().forEach( ( waypoint ) -> {
-                mapViewer.add( waypoint.getComponent() );
-            } );
-            mapKit.setCenterPosition( fitGeoPosition.stream().findAny().get() );
-            mapViewer.zoomToBestFit( fitGeoPosition, 0.8 );
-
-            JFrame frame = new JFrame( "map" );
-
-            frame.setContentPane( mapViewer );
-            frame.setSize( 1200, 800 );
-            frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-            frame.setVisible( true );
-        } );
+//
+//            JToolTip tooltip = new JToolTip();
+//            mapViewer.add( tooltip );
+//        } );
         return this;
     }
 
