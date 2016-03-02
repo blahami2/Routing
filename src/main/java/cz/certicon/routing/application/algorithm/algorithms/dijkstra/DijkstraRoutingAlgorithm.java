@@ -14,6 +14,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
+import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 
@@ -30,6 +31,14 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, NodeDataStructure nodeDataStructure, AlgorithmConfiguration algorithmConfiguration, RoutingConfiguration routingConfiguration, DistanceFactory distanceFactory ) {
         super( graph, entityAbstractFactory );
+//        System.out.println( "============ DIJKSTRA =============" );
+//        for ( Node node : graph.getNodes() ) {
+//            System.out.println( "node: " + node.getLabel() );
+//        }
+//        for ( Edge edge : graph.getEdges() ) {
+//            System.out.println( "edge: " + edge.getLabel() );
+//        }
+
         this.nodeDataStructure = nodeDataStructure;
         this.algorithmConfiguration = algorithmConfiguration;
         this.routingConfiguration = routingConfiguration;
@@ -38,7 +47,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     @Override
     public Path route( Node from, Node to ) throws NoPathException {
-        System.out.println( "routing from: " + from.getLabel() + " to " + to.getLabel() );
+//        System.out.println( "routing from: " + from.getLabel() + " to " + to.getLabel() );
         // clear the data structure
         nodeDataStructure.clear();
         Node nodeEqToFrom = from;
@@ -46,30 +55,32 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
             if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
-                nodeEqToFrom = node;
+                nodeDataStructure.add( node.setDistance( distanceFactory.createZeroDistance() ).setPredecessorEdge( null ) );
             } else { // set distance to infinity
                 nodeDataStructure.add( node.setDistance( distanceFactory.createInfiniteDistance() ).setPredecessorEdge( null ) );
                 if ( node.getCoordinates().equals( to.getCoordinates() ) ) {
                     nodeEqToTo = node;
                 }
             }
+//            System.out.println( "node (" + node.getLabel() + ") distance = " + node.getDistance() );
         }
         // set source node distance to zero
-        nodeDataStructure.add( nodeEqToFrom.setDistance( distanceFactory.createZeroDistance() ).setPredecessorEdge( null ) );
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
-            System.out.println( "extracted node: " + currentNode.getLabel() );
-            System.out.println( "nodes left: " + nodeDataStructure.size() );
-            if ( currentNode.equals( nodeEqToTo ) ) {
-                System.out.println( "found, breaking" );
+//            System.out.println( "extracted node: " + currentNode.getLabel() );
+//            System.out.println( "nodes left: " + nodeDataStructure.size() );
+            if ( currentNode.equals( to ) ) {
+//                System.out.println( "found, breaking" );
                 break;
             }
             // foreach neighbour T of node S
             getGraph().getOutgoingEdgesOf( currentNode ).stream().forEach( ( edge ) -> {
+//                System.out.println( "edge = " + edge.getLabel() );
+//                System.out.println( "nodes: s = " + edge.getSourceNode().getLabel() + ", t = " + edge.getTargetNode().getLabel() );
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
-                System.out.println( "checking node: " + endNode.getLabel() );
+//                System.out.println( "checking node: " + endNode.getLabel() + " with distance = " + endNode.getDistance() );
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = routingConfiguration.getNodeEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
@@ -86,8 +97,8 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // build path from predecessors
         Path path = getEntityAbstractFactory().createPathWithTarget( getGraph(), nodeEqToTo );
         Node currentNode = nodeEqToTo;
-        while ( !currentNode.equals( nodeEqToFrom ) ) {
-            System.out.println( "backtracking: " + currentNode.getLabel() );
+        while ( !currentNode.equals( from ) ) {
+//            System.out.println( "backtracking: " + currentNode.getLabel() );
             path.addEdgeAsFirst( currentNode.getPredecessorEdge() );
             currentNode = getGraph().getOtherNodeOf( currentNode.getPredecessorEdge(), currentNode );
         }

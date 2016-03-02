@@ -58,10 +58,10 @@ public class AlternativeOsmPbfDataSource implements DataSource {
         private final DistanceFactory distanceFactory;
         private final GraphLoadListener graphLoadListener;
 
-        private final Map<Long, Node> nodeMap = new HashMap<>();
+        private Map<Long, Node> nodeMap = new HashMap<>();
         private Graph graph;
 
-        private final Map<Node, List<Edge>> nodeEdgeMap;
+        private Map<Node, List<Edge>> nodeEdgeMap;
 
         public OsmBinaryParser( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) {
             this.graphEntityFactory = graphEntityFactory;
@@ -147,6 +147,7 @@ public class AlternativeOsmPbfDataSource implements DataSource {
         @Override
         public void complete() {
             System.out.println( "Complete loading! Starting processing." );
+            nodeMap = null;
             for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
@@ -189,11 +190,22 @@ public class AlternativeOsmPbfDataSource implements DataSource {
             // map ids to sequence
             Graph g = graph;
             graph = graphEntityFactory.createGraph();
+
+            Map<Node, Node> oldToNewMap = new HashMap<>();
             int nodeCounter = 0;
             for ( Node node : g.getNodes() ) {
-                graph.addNode( node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) ) );
+                Node newNode = node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) );
+                newNode.setLabel( newNode.getId() + "[" + getFromMap( node ).size() + "]" );
+                oldToNewMap.put( node, newNode ); // old node edge set is copied to the new node
+                graph.addNode( newNode );
             }
             int edgeCounter = 0;
+            for ( Edge edge : g.getEdges() ) {
+                edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
+                Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
+                newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
+                graph.addEdge( newEdge );
+            }
 
             graphLoadListener.onGraphLoaded( graph );
 //            try {

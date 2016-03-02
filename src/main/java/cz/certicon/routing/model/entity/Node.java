@@ -11,13 +11,28 @@ import java.io.Serializable;
 /**
  * The root interface for graph node
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface Node {
-    
+
+    /**
+     * Getter for id
+     *
+     * @return an instance of {@link Id}
+     */
     public Id getId();
-    
-    public Node createCopyWithNewId(Id id);
+
+    /**
+     * Creates a copy of this node. Should the node be directly associated with
+     * other nodes via edges, those edges are NOT a part of the new copy (it is
+     * assumed that other nodes will be changed as well and therefore the
+     * current edge set becomes invalid). Should such copying be required, it
+     * had to be done manually.
+     *
+     * @param id an instance of {@link Id} representing id of this node
+     * @return a new copy
+     */
+    public Node createCopyWithNewId( Id id );
 
     /**
      * Getter for the coordinates of this node
@@ -25,21 +40,21 @@ public interface Node {
      * @return an instance of {@link Coordinates}
      */
     public Coordinates getCoordinates();
-    
+
     /**
      * Getter for the label of this node
      *
      * @return an instance of {@link String}
      */
     public String getLabel();
-    
+
     /**
      * Setter for the label of this node
      *
      * @param label {@link String} representing the node label
      * @return this instance
      */
-    public Node setLabel(String label);
+    public Node setLabel( String label );
 
     /**
      * Getter for the distance of this node
@@ -57,14 +72,16 @@ public interface Node {
     public Node setDistance( Distance distance );
 
     /**
-     * Getter for the predecessor edge of this node (incoming edge as a part of the route)
+     * Getter for the predecessor edge of this node (incoming edge as a part of
+     * the route)
      *
      * @return an instance of {@link Edge}
      */
     public Edge getPredecessorEdge();
 
     /**
-     * Setter for the predecessor edge of this node (incoming edge as a part of the route)
+     * Setter for the predecessor edge of this node (incoming edge as a part of
+     * the route)
      *
      * @param predecessorEdge an instance of {@link Edge}
      * @return this instance
@@ -116,7 +133,7 @@ public interface Node {
 
         @Override
         public String toString() {
-            return "Id{"  + id + '}';
+            return "Id{" + id + '}';
         }
 
     }

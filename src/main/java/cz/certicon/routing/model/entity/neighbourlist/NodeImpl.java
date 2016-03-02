@@ -45,7 +45,7 @@ class NodeImpl extends SimpleNode {
     @Override
     public Node createCopyWithNewId( Id id ) {
         NodeImpl node = (NodeImpl) super.createCopyWithNewId( id );
-        node.edges.addAll( edges );
+//        node.edges.addAll( edges );
         return node;
     }
     
