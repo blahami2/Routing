@@ -22,7 +22,7 @@ public class NoPathException extends Exception {
      * @param target an instance of {@link Node} representing a target
      */
     public NoPathException( Node source, Node target ) {
-        super( "No path found between the two nodes." );
+        super( "No path found between the two nodes: from " + source.getLabel() + " to " + target.getLabel() );
         this.source = source;
         this.target = target;
     }

@@ -93,7 +93,7 @@ public class OsmPbfDataSource implements DataSource {
                 lastLon += nodes.getLon( i );
 //                System.out.printf( "Dense node, ID %d @ %.6f,%.6f\n",
 //                        lastId, parseLat( lastLat ), parseLon( lastLon ) );
-                Node n = graphEntityFactory.createNode( parseLat( lastLat ), parseLon( lastLon ) );
+                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( lastLat ), parseLon( lastLon ) );
                 nodeMap.put( lastId, n );
                 graph.addNode( n );
 
@@ -106,7 +106,7 @@ public class OsmPbfDataSource implements DataSource {
             nodes.stream().map( ( node ) -> {
                 //                System.out.printf( "Regular node, ID %d @ %.6f,%.6f\n",
 //                        node.getId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
-                Node n = graphEntityFactory.createNode( parseLat( node.getLat() ), parseLon( node.getLon() ) );
+                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 nodeMap.put( node.getId(), n );
                 return n;
             } ).forEach( ( n ) -> {
@@ -293,7 +293,7 @@ public class OsmPbfDataSource implements DataSource {
             nodes.stream().map( ( node ) -> {
                 //                System.out.printf( "Regular node, ID %d @ %.6f,%.6f\n",
 //                        node.getId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
-                Node n = graphEntityFactory.createNode( parseLat( node.getLat() ), parseLon( node.getLon() ) );
+                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 nodeMap.put( node.getId(), n );
                 return n;
             } ).forEach( ( n ) -> {

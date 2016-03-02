@@ -17,13 +17,14 @@ public interface GraphEntityFactory {
     /**
      * Creates a node for the given coordinates
      *
+     * @param id an instance of {@link Node.Id} as an identifier of this node
      * @param latitude double representation of latitude as a part of node's
      * coordinates
      * @param longitude double representation of longitude as a part of node's
      * coordinates
      * @return an instance of {@link Node}
      */
-    public Node createNode( double latitude, double longitude );
+    public Node createNode( Node.Id id, double latitude, double longitude );
 
     /**
      * Creates an edge between the given source and target nodes

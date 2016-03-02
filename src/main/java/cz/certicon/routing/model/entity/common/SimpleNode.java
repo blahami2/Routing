@@ -18,26 +18,43 @@ import java.util.Objects;
 public abstract class SimpleNode implements Node {
 
     private final Coordinates coordinates;
+    private final Id id;
     private Distance distance;
     private Edge predecessorEdge;
     private String label;
 
     private static int charCounter = 0;
 
-    public SimpleNode( Coordinates coordinates ) {
+    public SimpleNode(Id id, Coordinates coordinates ) {
         this.coordinates = coordinates;
+        this.id = id;
         this.distance = null;
         this.predecessorEdge = null;
         this.label = generateLabel( charCounter++ );
     }
 
-    public SimpleNode( double latitude, double longitude ) {
+    public SimpleNode( Id id, double latitude, double longitude ) {
         this.coordinates = new Coordinates( latitude, longitude );
+        this.id = id;
         this.distance = null;
         this.predecessorEdge = null;
         this.label = generateLabel( charCounter++ );
     }
 
+    @Override
+    public Id getId() {
+        return id;
+    }
+
+    @Override
+    public Node createCopyWithNewId( Id id ) {
+        Node node = createNew( id, coordinates );
+        node.setDistance( distance );
+        node.setPredecessorEdge( predecessorEdge );
+        node.setLabel( label );
+        return node;
+    }
+    
     @Override
     public String getLabel() {
         return label;
@@ -118,5 +135,7 @@ public abstract class SimpleNode implements Node {
 //        System.out.println( "generating label: " + sb.toString() );
         return sb.toString();
     }
+    
+    abstract protected Node createNew(Id id, Coordinates coordinates);
 
 }

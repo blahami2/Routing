@@ -59,7 +59,7 @@ public class AlternativeOsmPbfDataSource implements DataSource {
         private final GraphLoadListener graphLoadListener;
 
         private final Map<Long, Node> nodeMap = new HashMap<>();
-        private final Graph graph;
+        private Graph graph;
 
         private final Map<Node, List<Edge>> nodeEdgeMap;
 
@@ -85,7 +85,7 @@ public class AlternativeOsmPbfDataSource implements DataSource {
                 lastId += nodes.getId( i );
                 lastLat += nodes.getLat( i );
                 lastLon += nodes.getLon( i );
-                Node n = graphEntityFactory.createNode( parseLat( lastLat ), parseLon( lastLon ) );
+                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( lastLat ), parseLon( lastLon ) );
                 nodeMap.put( lastId, n );
             }
         }
@@ -93,7 +93,7 @@ public class AlternativeOsmPbfDataSource implements DataSource {
         @Override
         protected void parseNodes( List<Osmformat.Node> nodes ) {
             nodes.stream().forEach( ( node ) -> {
-                Node n = graphEntityFactory.createNode( parseLat( node.getLat() ), parseLon( node.getLon() ) );
+                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 nodeMap.put( node.getId(), n );
             } );
         }
@@ -147,13 +147,11 @@ public class AlternativeOsmPbfDataSource implements DataSource {
         @Override
         public void complete() {
             System.out.println( "Complete loading! Starting processing." );
-            int nodeCounter = 0;
             for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
                 if ( list.size() != 2 ) {
-                    node.setLabel( ( nodeCounter++ ) + "[" + list.size() + "]" );
-//                    System.out.println( "added node: " + node.getLabel() );
+                    node.setLabel( node.getId() + "[" + list.size() + "]" );
                     graph.addNode( node );
                 } else {
                 }
@@ -179,16 +177,23 @@ public class AlternativeOsmPbfDataSource implements DataSource {
                     bList.add( newEdge );
                 }
             }
-            int edgeCounter = 0;
             for ( Node node : graph.getNodes() ) {
                 for ( Edge edge : getFromMap( node ) ) {
                     if ( node.equals( edge.getSourceNode() ) ) {
-                        Edge e = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
-                        e.setLabel( e.getId() + "|" + edge.getSourceNode().getLabel() + ":" + edge.getTargetNode().getLabel() );
-                        graph.addEdge( e );
+                        edge.setLabel( edge.getId() + "|" + edge.getSourceNode().getLabel() + ":" + edge.getTargetNode().getLabel() );
+                        graph.addEdge( edge );
                     }
                 }
             }
+
+            // map ids to sequence
+            Graph g = graph;
+            graph = graphEntityFactory.createGraph();
+            int nodeCounter = 0;
+            for ( Node node : g.getNodes() ) {
+                graph.addNode( node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) ) );
+            }
+            int edgeCounter = 0;
 
             graphLoadListener.onGraphLoaded( graph );
 //            try {

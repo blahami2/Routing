@@ -19,8 +19,8 @@ import cz.certicon.routing.model.entity.Path;
 public class DirectedNeighbourListGraphEntityFactory implements GraphEntityFactory {
 
     @Override
-    public Node createNode( double latitude, double longitude ) {
-        return new NodeImpl( latitude, longitude );
+    public Node createNode( Node.Id id,double latitude, double longitude ) {
+        return new NodeImpl( id,  latitude, longitude );
     }
 
     @Override

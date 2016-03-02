@@ -5,24 +5,27 @@
  */
 package cz.certicon.routing.model.entity.jgrapht;
 
-import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.common.SimpleNode;
-import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class NodeImpl extends SimpleNode {
 
-    public NodeImpl( Coordinates coordinates ) {
-        super( coordinates );
+    public NodeImpl( Id id, Coordinates coordinates ) {
+        super( id, coordinates );
     }
 
-    public NodeImpl( double latitude, double longitude ) {
-        super( latitude, longitude );
+    public NodeImpl( Id id, double latitude, double longitude ) {
+        super( id, latitude, longitude );
     }
-    
+
+    @Override
+    protected Node createNew( Id id, Coordinates coordinates ) {
+        return new NodeImpl( id, coordinates );
+    }
+
 }

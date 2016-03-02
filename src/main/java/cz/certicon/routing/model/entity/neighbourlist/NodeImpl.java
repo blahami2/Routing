@@ -18,16 +18,14 @@ import java.util.Set;
  */
 class NodeImpl extends SimpleNode {
 
-    private final Set<Edge> edges;
+    private final Set<Edge> edges = new HashSet<>();
 
-    public NodeImpl( Coordinates coordinates ) {
-        super(coordinates );
-        this.edges = new HashSet<>();
+    public NodeImpl( Id id, Coordinates coordinates ) {
+        super( id, coordinates );
     }
 
-    public NodeImpl( double latitude, double longitude ) {
-        super(latitude, longitude );
-        this.edges = new HashSet<>();
+    public NodeImpl( Id id, double latitude, double longitude ) {
+        super( id, latitude, longitude );
     }
 
     public Node addEdge( Edge edge ) {
@@ -43,5 +41,21 @@ class NodeImpl extends SimpleNode {
     public Set<Edge> getEdges() {
         return edges;
     }
+
+    @Override
+    public Node createCopyWithNewId( Id id ) {
+        NodeImpl node = (NodeImpl) super.createCopyWithNewId( id );
+        node.edges.addAll( edges );
+        return node;
+    }
+    
+    
+
+    @Override
+    protected Node createNew( Id id, Coordinates coordinates ) {
+        return new NodeImpl(id, coordinates );
+    }
+    
+    
 
 }

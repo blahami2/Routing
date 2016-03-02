@@ -22,12 +22,12 @@ public class MockupDataSource implements DataSource {
     @Override
     public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException {
         Graph graph = graphEntityFactory.createGraph();
-        Node a = graphEntityFactory.createNode( 50.1001831, 14.3856114 );
-        Node b = graphEntityFactory.createNode( 50.1002725, 14.3872906 );
-        Node c = graphEntityFactory.createNode( 50.1018347, 14.3857995 );
-        Node d = graphEntityFactory.createNode( 50.1017039, 14.3871028 );
-        Node e = graphEntityFactory.createNode( 50.1002828, 14.3878056 );
-        Node f = graphEntityFactory.createNode( 50.1016489, 14.3876339 );
+        Node a = graphEntityFactory.createNode( Node.Id.generateId(), 50.1001831, 14.3856114 );
+        Node b = graphEntityFactory.createNode( Node.Id.generateId(), 50.1002725, 14.3872906 );
+        Node c = graphEntityFactory.createNode( Node.Id.generateId(), 50.1018347, 14.3857995 );
+        Node d = graphEntityFactory.createNode( Node.Id.generateId(), 50.1017039, 14.3871028 );
+        Node e = graphEntityFactory.createNode( Node.Id.generateId(), 50.1002828, 14.3878056 );
+        Node f = graphEntityFactory.createNode( Node.Id.generateId(), 50.1016489, 14.3876339 );
         Edge ab = createEdge( graphEntityFactory, distanceFactory, a, b );
         Edge ba = createEdge( graphEntityFactory, distanceFactory, b, a );
         Edge ac = createEdge( graphEntityFactory, distanceFactory, a, c );
@@ -57,6 +57,6 @@ public class MockupDataSource implements DataSource {
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        return entityFactory.createEdge(  Edge.Id.generateId(),sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
     }
 }
