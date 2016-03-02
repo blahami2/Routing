@@ -12,7 +12,7 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
-import cz.certicon.routing.utils.CoordinateUtils;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,25 +26,33 @@ public abstract class SimpleEdge implements Edge {
 
     private final Node sourceNode;
     private final Node targetNode;
+    private final Edge.Id id;
     private Distance distance;
     private String label;
     private List<Coordinates> coordinates;
     private EdgeAttributes attributes;
 
-    public SimpleEdge( Node sourceNode, Node targetNode ) {
+    public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode ) {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
+        this.id = id;
         this.distance = new SimpleDistanceFactory().createFromDouble( 1 );
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
     }
 
-    public SimpleEdge( Node sourceNode, Node targetNode, Distance distance ) {
+    public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance distance ) {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
+        this.id = id;
         this.distance = distance;
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
+    }
+
+    @Override
+    public Id getId() {
+        return id;
     }
 
     @Override
@@ -99,18 +107,26 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
+    public Edge createCopyWithNewId( Id id ) {
+        Edge edge = createNew( id, sourceNode, targetNode, distance);
+        edge.setAttributes( attributes );
+        edge.setLabel( label );
+        return edge;
+    }
+
+    @Override
     public Edge newSourceNode( Node sourceNode ) {
-        return createNew( sourceNode, getTargetNode(), getDistance() );
+        return createNew( getId(), sourceNode, getTargetNode(), getDistance() );
     }
 
     @Override
     public Edge newTargetNode( Node targetNode ) {
-        return createNew( getSourceNode(), targetNode, getDistance() );
+        return createNew( getId(), getSourceNode(), targetNode, getDistance() );
     }
 
     @Override
     public Edge newNodes( Node sourceNode, Node targetNode ) {
-        return createNew( sourceNode, targetNode, getDistance() );
+        return createNew( getId(), sourceNode, targetNode, getDistance() );
     }
 
     @Override
@@ -155,8 +171,9 @@ public abstract class SimpleEdge implements Edge {
         if ( coordinates != null ) {
             return coordinates;
         }
-        int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
-        List<Coordinates> coords = CoordinateUtils.divideCoordinates( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates(), count );
+        List<Coordinates> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
+//        int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
+//        List<Coordinates> coords = CoordinateUtils.divideCoordinates( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates(), count );
         return coords;
     }
 
@@ -170,6 +187,6 @@ public abstract class SimpleEdge implements Edge {
         return sourceNode.getLabel() + "-" + targetNode.getLabel();
     }
 
-    abstract protected Edge createNew( Node sourceNode, Node targetNode, Distance length );
+    abstract protected Edge createNew( Edge.Id id, Node sourceNode, Node targetNode, Distance length );
 
 }

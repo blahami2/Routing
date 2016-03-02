@@ -24,13 +24,18 @@ public class DirectedNeighbourListGraphEntityFactory implements GraphEntityFacto
     }
 
     @Override
-    public Edge createEdge( Node sourceNode, Node targetNode, Distance length ) {
-        return new EdgeImpl( sourceNode, targetNode, length );
+    public Edge createEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance length ) {
+        return new EdgeImpl( id, sourceNode, targetNode, length );
     }
 
     @Override
-    public Path createPath( Graph graph ) {
-        return new PathImpl( graph );
+    public Path createPathWithSource( Graph graph, Node sourceNode ) {
+        return new PathImpl( graph, sourceNode, true );
+    }
+
+    @Override
+    public Path createPathWithTarget( Graph graph, Node targetNode ) {
+        return new PathImpl( graph, targetNode, false );
     }
 
     @Override

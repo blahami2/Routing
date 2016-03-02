@@ -16,7 +16,7 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class JgraphtDirectedGraphEntityFactory implements GraphEntityFactory {
 
@@ -26,23 +26,28 @@ public class JgraphtDirectedGraphEntityFactory implements GraphEntityFactory {
     }
 
     @Override
-    public Edge createEdge( Node sourceNode, Node targetNode, Distance length ) {
-        return new EdgeImpl(sourceNode, targetNode, length );
+    public Edge createEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance length ) {
+        return new EdgeImpl( id, sourceNode, targetNode, length );
     }
 
     @Override
-    public Path createPath( Graph graph ) {
-        return new PathImpl( graph );
+    public Path createPathWithSource( Graph graph, Node sourceNode ) {
+        return new PathImpl( graph, sourceNode, true );
+    }
+
+    @Override
+    public Path createPathWithTarget( Graph graph, Node targetNode ) {
+        return new PathImpl( graph, targetNode, false );
     }
 
     @Override
     public Graph createGraph() {
-        return new DirectedJgraphtGraph(new SimpleDirectedGraph<>(new EdgeFactory<Node, Edge>() {
+        return new DirectedJgraphtGraph( new SimpleDirectedGraph<>( new EdgeFactory<Node, Edge>() {
             @Override
             public Edge createEdge( Node sourceNode, Node targetNode ) {
-                return new EdgeImpl(sourceNode, targetNode );
+                return new EdgeImpl( Edge.Id.generateId(), sourceNode, targetNode );
             }
-        }));
+        } ) );
     }
-    
+
 }

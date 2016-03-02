@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ import java.util.List;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface Edge {
+
+    public Id getId();
 
     /**
      * Getter for length represented by an instance of {@link Distance}
@@ -131,4 +134,56 @@ public interface Edge {
      * source node and a target node
      */
     public Edge newNodes( Node sourceNode, Node targetNode );
+    
+    public Edge createCopyWithNewId(Edge.Id id);
+
+    public static class Id implements Serializable {
+
+        private static int counter = 0;
+
+        public static Id generateId() {
+            return new Id( counter++ );
+        }
+
+        public static Id createId( int id ) {
+            return new Id( id );
+        }
+
+        private final int id;
+
+        private Id( int id ) {
+            this.id = id;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 59 * hash + this.id;
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( this == obj ) {
+                return true;
+            }
+            if ( obj == null ) {
+                return false;
+            }
+            if ( getClass() != obj.getClass() ) {
+                return false;
+            }
+            final Id other = (Id) obj;
+            if ( this.id != other.id ) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Id{"  + id + '}';
+        }
+
+    }
 }

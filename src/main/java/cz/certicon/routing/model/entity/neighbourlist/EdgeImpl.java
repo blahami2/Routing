@@ -16,13 +16,18 @@ import cz.certicon.routing.model.entity.Node;
  */
 class EdgeImpl extends SimpleEdge {
 
-    public EdgeImpl( Node sourceNode, Node targetNode, Distance distance ) {
-        super( sourceNode, targetNode, distance );
+    public EdgeImpl( Id id, Node sourceNode, Node targetNode ) {
+        super( id, sourceNode, targetNode );
     }
 
+    public EdgeImpl( Id id, Node sourceNode, Node targetNode, Distance distance ) {
+        super( id, sourceNode, targetNode, distance );
+    }
+
+    
     @Override
-    protected Edge createNew( Node sourceNode, Node targetNode, Distance length ) {
-        return new EdgeImpl( sourceNode, targetNode, length );
+    protected Edge createNew( Edge.Id id, Node sourceNode, Node targetNode, Distance length ) {
+        return new EdgeImpl( id, sourceNode, targetNode, length );
     }
 
 }

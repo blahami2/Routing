@@ -74,6 +74,8 @@ public class NeighbourListGraph implements Graph {
 
     @Override
     public Graph removeEdge( Edge edge ) {
+        safeType( edge.getSourceNode() ).removeEdge( edge );
+        safeType( edge.getTargetNode() ).removeEdge( edge );
         edges.remove( edge );
         return this;
     }
@@ -88,6 +90,8 @@ public class NeighbourListGraph implements Graph {
             }
         }
         if ( removeEdge != null ) {
+            safeType( removeEdge.getSourceNode() ).removeEdge( removeEdge );
+            safeType( removeEdge.getTargetNode() ).removeEdge( removeEdge );
             edges.remove( removeEdge );
         }
         return this;
