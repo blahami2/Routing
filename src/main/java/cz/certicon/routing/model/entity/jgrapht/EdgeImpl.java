@@ -6,15 +6,21 @@
 package cz.certicon.routing.model.entity.jgrapht;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.common.SimpleEdge;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class EdgeImpl extends SimpleEdge {
+
+    boolean isReversed = false;
 
     public EdgeImpl( Id id, Node sourceNode, Node targetNode ) {
         super( id, sourceNode, targetNode );
@@ -24,10 +30,21 @@ class EdgeImpl extends SimpleEdge {
         super( id, sourceNode, targetNode, distance );
     }
 
-    
     @Override
     protected Edge createNew( Id id, Node sourceNode, Node targetNode, Distance length ) {
-        return new EdgeImpl(id, sourceNode, targetNode, length );
+        return new EdgeImpl( id, sourceNode, targetNode, length );
     }
 
+    public void setReversed( boolean isReversed ) {
+        this.isReversed = isReversed;
+    }
+
+    @Override
+    public List<Coordinate> getCoordinates() {
+        List<Coordinate> coords = new ArrayList<>( super.getCoordinates() );
+        if ( isReversed ) {
+            Collections.reverse( coords );
+        }
+        return coords;
+    }
 }

@@ -136,7 +136,7 @@ public interface Edge {
 
     public Edge createCopyWithNewId( Edge.Id id );
 
-    public static class Id implements Serializable {
+    public static class Id implements Serializable, Comparable<Id> {
 
         private static int counter = 0;
 
@@ -161,6 +161,11 @@ public interface Edge {
         private Id( int id ) {
             this.id = id;
         }
+        
+        public int getValue(){
+            return id;
+        }
+
 
         @Override
         public int hashCode() {
@@ -190,6 +195,11 @@ public interface Edge {
         @Override
         public String toString() {
             return "Id{" + id + '}';
+        }
+
+        @Override
+        public int compareTo( Id o ) {
+            return Integer.compare( this.id, o.id );
         }
 
     }

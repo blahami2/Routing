@@ -74,7 +74,7 @@ public class XmlCoordinateWriter implements CoordinateWriter {
         } catch ( XMLStreamException ex ) {
             throw new IOException( ex );
         }
-//        output.close();
+        output.close();
         return this;
     }
 

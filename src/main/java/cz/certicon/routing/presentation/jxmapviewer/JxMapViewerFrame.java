@@ -55,11 +55,14 @@ public class JxMapViewerFrame implements PathPresenter {
 
     @Override
     public PathPresenter addPath( Path path ) {
+//        System.out.println( "Source = " + path.getSourceNode() );
+//        System.out.println( "Destination = " + path.getTargetNode() );
         List<GeoPosition> track = new ArrayList<>();
 //        Edge someEdge;
         Node source = path.getSourceNode();
         Node currentNode = source;
         for ( Edge edge : path ) {
+//            System.out.println( "drawing edge: " + edge );
 //            someEdge = edge;
 //            if ( someEdge != null ) {
 //                addWaypoint( path.getSourceNode(), someEdge.getLabel() );
@@ -69,12 +72,14 @@ public class JxMapViewerFrame implements PathPresenter {
 
             List<Coordinate> coordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getSourceNode() ) ) {
+//                System.out.println( "from " + currentNode );
                 for ( int i = 0; i < coordinates.size(); i++ ) {
                     Coordinate coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getTargetNode();
             } else {
+//                System.out.println( "from " + edge.getTargetNode() );
                 for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
                     Coordinate coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );

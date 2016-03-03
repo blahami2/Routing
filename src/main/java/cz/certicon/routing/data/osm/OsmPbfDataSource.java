@@ -77,9 +77,9 @@ public class OsmPbfDataSource implements MapDataSource {
 
         @Override
         protected void parseRelations( List<Osmformat.Relation> list ) {
-            for ( Osmformat.Relation relation : list ) {
-                printRelation( relation );
-            }
+//            for ( Osmformat.Relation relation : list ) {
+//                printRelation( relation );
+//            }
 //            System.out.println( "relations: " + list.size() );
         }
 

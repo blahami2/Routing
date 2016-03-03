@@ -88,7 +88,7 @@ public interface Node {
      */
     public Node setPredecessorEdge( Edge predecessorEdge );
 
-    public static class Id implements Serializable {
+    public static class Id implements Serializable, Comparable<Id> {
 
         private static int counter = 0;
 
@@ -112,6 +112,10 @@ public interface Node {
 
         private Id( int id ) {
             this.id = id;
+        }
+        
+        public int getValue(){
+            return id;
         }
 
         @Override
@@ -142,6 +146,11 @@ public interface Node {
         @Override
         public String toString() {
             return "Id{" + id + '}';
+        }
+
+        @Override
+        public int compareTo( Id o ) {
+            return Integer.compare( this.id, o.id );
         }
 
     }

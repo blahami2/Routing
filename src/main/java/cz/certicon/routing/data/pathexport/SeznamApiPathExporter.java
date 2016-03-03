@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.export;
+package cz.certicon.routing.data.pathexport;
 
 import cz.certicon.routing.data.DataDestination;
 import cz.certicon.routing.data.PathExporter;

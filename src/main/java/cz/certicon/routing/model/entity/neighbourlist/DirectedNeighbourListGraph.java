@@ -57,6 +57,7 @@ class DirectedNeighbourListGraph implements DirectedGraph {
         if ( !edge.getAttributes().isOneWay() ) {
             Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
             safeType( opposite.getSourceNode() ).addEdge( opposite );
+            safeType( opposite ).setReversed( true );
             edges.add( opposite );
         }
         safeType( edge.getSourceNode() ).addEdge( edge );
@@ -75,6 +76,7 @@ class DirectedNeighbourListGraph implements DirectedGraph {
         if ( !edge.getAttributes().isOneWay() ) {
             Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
             safeType( opposite.getSourceNode() ).addEdge( opposite );
+            safeType( opposite ).setReversed( true );
             edges.add( opposite );
         }
         safeType( sourceNode ).addEdge( e );
@@ -85,7 +87,6 @@ class DirectedNeighbourListGraph implements DirectedGraph {
     public Graph removeEdge( Edge edge ) {
         edges.remove( edge );
         safeType( edge.getSourceNode() ).removeEdge( edge );
-        safeType( edge.getTargetNode() ).removeEdge( edge );
         return this;
     }
 
@@ -100,7 +101,6 @@ class DirectedNeighbourListGraph implements DirectedGraph {
         }
         if ( removeEdge != null ) {
             safeType( removeEdge.getSourceNode() ).removeEdge( removeEdge );
-            safeType( removeEdge.getTargetNode() ).removeEdge( removeEdge );
             edges.remove( removeEdge );
         }
         return this;
