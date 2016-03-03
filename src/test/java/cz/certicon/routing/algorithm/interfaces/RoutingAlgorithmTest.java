@@ -92,7 +92,7 @@ public class RoutingAlgorithmTest {
                 .addEdge( cd )
                 .addEdge( df );
 
-        expResult = graphFactory.createPathWithSource( g, a ).addEdgeAsLast( ac ).addEdgeAsLast( cd ).addEdgeAsLast( df );
+        expResult = graphFactory.createPathWithSource( g, a ).addEdgeAsLast( ab ).addEdgeAsLast( be ).addEdgeAsLast( ef );
         Path result = instance.route( a, f );
 //        System.out.println( "expected: " + expResult );
 //        System.out.println( "result: " + result );

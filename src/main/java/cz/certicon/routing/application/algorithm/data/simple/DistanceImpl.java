@@ -14,7 +14,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 class DistanceImpl implements Distance {
 
     private final double dist;
-    private static final double EPS = 10E-20;
+    private static final double EPS = 10E-14;
 
     public DistanceImpl() {
         this.dist = Double.POSITIVE_INFINITY;

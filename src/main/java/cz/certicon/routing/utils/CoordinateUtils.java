@@ -8,29 +8,33 @@ package cz.certicon.routing.utils;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.util.LinkedList;
 import java.util.List;
+import static java.lang.Math.*;
 
 /**
  * Utilities for coordinates
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class CoordinateUtils {
+
+    private static final double EARTH_RADIUS = 6371000;
 
     /**
      * Calculates the geographical midpoint of the given coordinates.
      *
-     * @param coordinates list of coordinates to be accounted into the calculation
+     * @param coordinates list of coordinates to be accounted into the
+     * calculation
      * @return geographical midpoint
      */
     public static Coordinate calculateGeographicMidpoint( List<Coordinate> coordinates ) {
         List<CartesianCoords> ccoords = new LinkedList<>();
         for ( Coordinate coordinate : coordinates ) {
-            double lat = Math.toRadians( coordinate.getLatitude() );
-            double lon = Math.toRadians( coordinate.getLongitude() );
+            double lat = toRadians( coordinate.getLatitude() );
+            double lon = toRadians( coordinate.getLongitude() );
             ccoords.add( new CartesianCoords(
-                    Math.cos( lat ) * Math.cos( lon ),
-                    Math.cos( lat ) * Math.sin( lon ),
-                    Math.sin( lat )
+                    cos( lat ) * cos( lon ),
+                    cos( lat ) * sin( lon ),
+                    sin( lat )
             ) );
         }
         CartesianCoords mid = new CartesianCoords(
@@ -38,10 +42,10 @@ public class CoordinateUtils {
                 ccoords.stream().mapToDouble( c -> c.y ).sum() / ccoords.size(),
                 ccoords.stream().mapToDouble( c -> c.z ).sum() / ccoords.size()
         );
-        double lon = Math.atan2( mid.y, mid.x );
-        double hyp = Math.sqrt( mid.x * mid.x + mid.y * mid.y );
-        double lat = Math.atan2( mid.z, hyp );
-        return new Coordinate( Math.toDegrees( lat ), Math.toDegrees( lon ) );
+        double lon = atan2( mid.y, mid.x );
+        double hyp = sqrt( mid.x * mid.x + mid.y * mid.y );
+        double lat = atan2( mid.z, hyp );
+        return new Coordinate( toDegrees( lat ), toDegrees( lon ) );
     }
 
     /**
@@ -52,9 +56,28 @@ public class CoordinateUtils {
      * @return calculated distance in double
      */
     public static double calculateDistance( Coordinate a, Coordinate b ) {
-        double lat = a.getLatitude() - b.getLatitude();
-        double lon = a.getLongitude() - b.getLongitude();
-        return Math.sqrt( lat * lat + lon * lon );
+//        System.out.println( "calcualting distance:" );
+//        System.out.println( a );
+//        System.out.println( b );
+        double aLatRad = toRadians( a.getLatitude() );
+        double aLonRad = toRadians( a.getLongitude() );
+        double bLatRad = toRadians( b.getLatitude() );
+        double bLonRad = toRadians( b.getLongitude() );
+        double result;
+        // Pythagoras distance
+//        double varX = ( aLatRad - bLatRad ) * cos( ( aLonRad + bLonRad ) / 2 );
+//        double varY = ( aLonRad - bLonRad );
+//        result = sqrt( varX * varX + varY * varY ) * EARTH_RADIUS;
+//        System.out.println( "Pythagoras: " + result );
+        // Haversine formula
+        double deltaLatRad = toRadians( a.getLatitude() - b.getLatitude() );
+        double deltaLonRad = toRadians( a.getLongitude() - b.getLongitude() );
+        double varA = sin( deltaLatRad / 2 ) * sin( deltaLatRad / 2 ) + cos( aLatRad ) * cos( bLatRad ) * sin( deltaLonRad / 2 ) * sin( deltaLonRad / 2 );
+        double varC = 2 * atan2( sqrt( varA ), sqrt( 1 - varA ) );
+        result = EARTH_RADIUS * varC;
+//        System.out.println( "Haversine: " + result );
+
+        return result;
     }
 
     /**
@@ -74,7 +97,7 @@ public class CoordinateUtils {
         for ( int i = 0; i < count; i++ ) {
             double avgLat = ( ( count - 1 - i ) * aLat + ( i ) * bLat ) / ( count - 1 );
             double avgLon = ( ( count - 1 - i ) * aLon + ( i ) * bLon ) / ( count - 1 );
-            coords.add(new Coordinate( avgLat, avgLon ) );
+            coords.add( new Coordinate( avgLat, avgLon ) );
         }
         return coords;
     }
