@@ -72,7 +72,7 @@ public abstract class SimplePath implements Path {
     }
 
     @Override
-    public Distance getLength() {
+    public Distance getDistance() {
         Distance result = null;
         for ( Edge e : this ) {
             if ( result == null ) {
@@ -82,6 +82,11 @@ public abstract class SimplePath implements Path {
             }
         }
         return result;
+    }
+
+    @Override
+    public double getLength() {
+        return edges.stream().mapToDouble( edge -> edge.getAttributes().getLength()).sum();
     }
 
     @Override
@@ -126,6 +131,16 @@ public abstract class SimplePath implements Path {
         }
         final SimplePath other = (SimplePath) obj;
         if ( !Objects.equals( this.edges, other.edges ) ) {
+            Iterator<Edge> thisIt = this.edges.iterator();
+            Iterator<Edge> otherIt = other.edges.iterator();
+            while ( thisIt.hasNext() ) {
+                Edge a = thisIt.next();
+                Edge b = otherIt.next();
+                System.out.println( a );
+                System.out.println( b );
+                System.out.println( a.equals( b ) );
+            }
+            System.out.println( "edges not equal" );
             return false;
         }
         return true;
@@ -133,6 +148,6 @@ public abstract class SimplePath implements Path {
 
     @Override
     public String toString() {
-        return "SimplePath{" + "distance=" + getLength() + ", " + "edges=" + edges + '}';
+        return "SimplePath{" + "distance=" + getDistance() + ", " + "edges=" + edges + '}';
     }
 }

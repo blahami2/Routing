@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity.neighbourlist;
 
 import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.DirectedGraph;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import java.util.HashSet;
@@ -13,9 +14,9 @@ import java.util.Set;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-class DirectedNeighbourListGraph implements Graph {
+class DirectedNeighbourListGraph implements DirectedGraph {
 
     private final Set<Node> nodes;
     private final Set<Edge> edges;
@@ -53,6 +54,11 @@ class DirectedNeighbourListGraph implements Graph {
     @Override
     public Graph addEdge( Edge edge ) {
         edges.add( edge );
+        if ( !edge.getAttributes().isOneWay() ) {
+            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
+            safeType( opposite.getSourceNode() ).addEdge( opposite );
+            edges.add( opposite );
+        }
         safeType( edge.getSourceNode() ).addEdge( edge );
         return this;
     }
@@ -60,12 +66,17 @@ class DirectedNeighbourListGraph implements Graph {
     @Override
     public Graph addEdge( Node sourceNode, Node targetNode, Edge edge ) {
         Edge e;
-        if(!edge.getSourceNode().equals( sourceNode) || !edge.getTargetNode().equals( targetNode)){
+        if ( !edge.getSourceNode().equals( sourceNode ) || !edge.getTargetNode().equals( targetNode ) ) {
             e = edge.newNodes( sourceNode, targetNode );
         } else {
             e = edge;
         }
         edges.add( e );
+        if ( !edge.getAttributes().isOneWay() ) {
+            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
+            safeType( opposite.getSourceNode() ).addEdge( opposite );
+            edges.add( opposite );
+        }
         safeType( sourceNode ).addEdge( e );
         return this;
     }
@@ -73,6 +84,8 @@ class DirectedNeighbourListGraph implements Graph {
     @Override
     public Graph removeEdge( Edge edge ) {
         edges.remove( edge );
+        safeType( edge.getSourceNode() ).removeEdge( edge );
+        safeType( edge.getTargetNode() ).removeEdge( edge );
         return this;
     }
 
@@ -86,6 +99,8 @@ class DirectedNeighbourListGraph implements Graph {
             }
         }
         if ( removeEdge != null ) {
+            safeType( removeEdge.getSourceNode() ).removeEdge( removeEdge );
+            safeType( removeEdge.getTargetNode() ).removeEdge( removeEdge );
             edges.remove( removeEdge );
         }
         return this;

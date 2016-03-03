@@ -13,12 +13,12 @@ import cz.certicon.routing.model.entity.EdgeAttributes;
  */
 public class SimpleEdgeAttributes implements EdgeAttributes {
 
-    private final int speed;
-    private final double length;
-    private final boolean isOneWay;
-    private final boolean isPaid;
+    private double speed;
+    private double length;
+    private boolean isOneWay;
+    private boolean isPaid;
 
-    private SimpleEdgeAttributes( int speed, double length, boolean isOneWay, boolean isPaid ) {
+    private SimpleEdgeAttributes( double speed, double length, boolean isOneWay, boolean isPaid ) {
         this.speed = speed;
         this.length = length;
         this.isOneWay = isOneWay;
@@ -26,7 +26,7 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
     }
 
     @Override
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
@@ -45,18 +45,28 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
         return length;
     }
 
-    public static Builder builder( int speed ) {
+    @Override
+    public EdgeAttributes copyWithNewLength( double length ) {
+        return builder( speed ).setLength( length ).setOneWay( isOneWay ).setPaid( isPaid ).build();
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleEdgeAttributes{" + "speed=" + speed + ", length=" + length + ", isOneWay=" + isOneWay + ", isPaid=" + isPaid + '}';
+    }
+
+    public static Builder builder( double speed ) {
         return new Builder( speed );
     }
 
     public static class Builder {
 
-        private final int speed;
+        private final double speed;
         private double length = 1;
         private boolean isOneWay = false;
         private boolean isPaid = false;
 
-        public Builder( int speed ) {
+        public Builder( double speed ) {
             this.speed = speed;
         }
 

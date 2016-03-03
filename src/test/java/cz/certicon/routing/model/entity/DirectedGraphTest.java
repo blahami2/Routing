@@ -16,7 +16,6 @@ import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.text.SimpleAttributeSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -31,14 +30,14 @@ import org.junit.runners.Parameterized;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 @RunWith( Parameterized.class )
-public class GraphTest {
+public class DirectedGraphTest {
 
     private final int LOOPS = 10;
 
     static final DoubleDistanceFactory distanceFactory = new DoubleDistanceFactory();
     private final GraphEntityFactory graphFactory;
 
-    public GraphTest( GraphEntityFactory graphFactory ) {
+    public DirectedGraphTest( GraphEntityFactory graphFactory ) {
         this.graphFactory = graphFactory;
     }
 
@@ -97,7 +96,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
@@ -112,7 +111,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addNode( a ).addNode( b );
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( edge );
@@ -128,7 +127,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
@@ -143,7 +142,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
         instance.removeEdge( edge );
@@ -159,7 +158,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
         instance.removeEdge( a, b );
@@ -175,7 +174,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( a, instance.getSourceNodeOf( edge ) );
     }
@@ -189,7 +188,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( b, instance.getTargetNodeOf( edge ) );
     }
@@ -203,7 +202,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getEdgesOf( a ) );
@@ -220,9 +219,9 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
-        assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
+        assertEquals( new HashSet<Edge>( Arrays.asList() ),
                 instance.getIncomingEdgesOf( a ) );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getIncomingEdgesOf( b ) );
@@ -237,11 +236,11 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getOutgoingEdgesOf( a ) );
-        assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
+        assertEquals( new HashSet<Edge>( Arrays.asList() ),
                 instance.getOutgoingEdgesOf( b ) );
     }
 
@@ -254,7 +253,7 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( 1, instance.getDegreeOf( a ) );
         assertEquals( 1, instance.getDegreeOf( b ) );
@@ -269,9 +268,9 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
-        assertEquals( 1, instance.getInDegreeOf( a ) );
+        assertEquals( 0, instance.getInDegreeOf( a ) );
         assertEquals( 1, instance.getInDegreeOf( b ) );
     }
 
@@ -284,10 +283,10 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( 1, instance.getOutDegreeOf( a ) );
-        assertEquals( 1, instance.getOutDegreeOf( b ) );
+        assertEquals( 0, instance.getOutDegreeOf( b ) );
     }
 
     /**
@@ -316,14 +315,18 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getEdges() );
     }
 
-    private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( false ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();
+
+
+
+
+    private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode, boolean oneWay ) {
+        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( oneWay ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();
         return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) )
                 .setAttributes( edgeAttributes );
     }
@@ -361,7 +364,7 @@ public class GraphTest {
         for ( Node a : instance.getNodes() ) {
             for ( Node b : instance.getNodes() ) {
                 if ( !a.equals( b ) ) {
-                    instance.addEdge( createEdge( factory, distanceFactory, a, b ) );
+                    instance.addEdge( createEdge( factory, distanceFactory, a, b, true ) );
                 }
             }
         }
@@ -372,10 +375,10 @@ public class GraphTest {
     public static Iterable<Object[]> instancesToTest() {
         return Arrays.asList(
                 new Object[]{
-                    new JgraphtGraphEntityFactory()
+                    new JgraphtDirectedGraphEntityFactory()
                 },
                 new Object[]{
-                    new NeighbourListGraphEntityFactory()
+                    new DirectedNeighbourListGraphEntityFactory()
                 }
         );
     }

@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.model.entity.common;
 
-import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
+import cz.certicon.routing.application.algorithm.data.number.DoubleDistanceFactory;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
@@ -36,9 +36,9 @@ public abstract class SimpleEdge implements Edge {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.id = id;
-        this.distance = new SimpleDistanceFactory().createFromDouble( 1 );
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
+        this.distance = new DoubleDistanceFactory().createFromEdgeAttributes( attributes );
     }
 
     public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance distance ) {

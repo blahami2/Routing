@@ -5,34 +5,29 @@
  */
 package cz.certicon.routing.data.osm;
 
-import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.GraphLoadListener;
-import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openstreetmap.osmosis.osmbinary.BinaryParser;
 import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 import cz.certicon.routing.data.MapDataSource;
 import cz.certicon.routing.data.Restriction;
+import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.EdgeAttributes;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  *
@@ -40,18 +35,18 @@ import cz.certicon.routing.data.Restriction;
  */
 public class OsmPbfDataSource implements MapDataSource {
 
-    private final InputStream input;
+    private final DataSource source;
     private Restriction restriction;
 
-    public OsmPbfDataSource( File input ) throws FileNotFoundException {
-        this.input = new BufferedInputStream( new FileInputStream( input ) );
+    public OsmPbfDataSource( DataSource source ) throws IOException {
+        this.source = source;
         this.restriction = Restriction.getDefault();
     }
 
     @Override
     public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException {
         OsmBinaryParser brad = new OsmBinaryParser( graphEntityFactory, distanceFactory, graphLoadListener );
-        BlockInputStream blockInputStream = new BlockInputStream( input, brad );
+        BlockInputStream blockInputStream = new BlockInputStream( new BufferedInputStream( source.getInputStream() ), brad );
         blockInputStream.process();
     }
 
@@ -67,14 +62,17 @@ public class OsmPbfDataSource implements MapDataSource {
         private final DistanceFactory distanceFactory;
         private final GraphLoadListener graphLoadListener;
 
-        private final Map<Long, Node> nodeMap = new HashMap<>();
-        private final Graph graph;
+        private Map<Long, Node> nodeMap = new HashMap<>();
+        private Graph graph;
+
+        private Map<Node, List<Edge>> nodeEdgeMap;
 
         public OsmBinaryParser( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) {
             this.graphEntityFactory = graphEntityFactory;
             this.distanceFactory = distanceFactory;
             this.graphLoadListener = graphLoadListener;
             this.graph = graphEntityFactory.createGraph();
+            this.nodeEdgeMap = new HashMap<>();
         }
 
         @Override
@@ -84,40 +82,29 @@ public class OsmPbfDataSource implements MapDataSource {
 
         @Override
         protected void parseDense( Osmformat.DenseNodes nodes ) {
-//            System.out.println( "dense nodes: " + nodes.getIdCount() );
             long lastId = 0;
             long lastLat = 0;
             long lastLon = 0;
-
             for ( int i = 0; i < nodes.getIdCount(); i++ ) {
                 lastId += nodes.getId( i );
                 lastLat += nodes.getLat( i );
                 lastLon += nodes.getLon( i );
-//                System.out.printf( "Dense node, ID %d @ %.6f,%.6f\n",
-//                        lastId, parseLat( lastLat ), parseLon( lastLon ) );
                 Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( lastLat ), parseLon( lastLon ) );
                 nodeMap.put( lastId, n );
-                graph.addNode( n );
-
             }
         }
 
         @Override
         protected void parseNodes( List<Osmformat.Node> nodes ) {
-//            System.out.println( "nodes: " + nodes.size() );
-            nodes.stream().map( ( node ) -> {
-                //                System.out.printf( "Regular node, ID %d @ %.6f,%.6f\n",
-//                        node.getId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
+            nodes.stream().forEach( ( node ) -> {
                 Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 nodeMap.put( node.getId(), n );
-                return n;
-            } ).forEach( ( n ) -> {
-                graph.addNode( n );
             } );
         }
 
         @Override
         protected void parseWays( List<Osmformat.Way> ways ) {
+            WayAttributeParser wayAttributeParser = new WayAttributeParser();
             ways.stream()
                     .filter( ( w ) -> {
                         List<Restriction.Pair> pairs = new LinkedList<>();
@@ -129,72 +116,52 @@ public class OsmPbfDataSource implements MapDataSource {
                         return restriction.isAllowed( pairs );
                     } )
                     .forEach( ( w ) -> {
-                        /* 
-                long lastRef = 0;
-                for ( Long ref : w.getRefsList() ) {
-                    Node sourceNode = null;
-                    Node targetNode = null;
-                    if ( lastRef != 0 ) {
-                        sourceNode = nodeMap.get( lastRef );
-                    }
-                    lastRef += ref;
-                    if ( sourceNode != null ) {
-                        targetNode = nodeMap.get( lastRef );
-                        Distance distance = distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
-                        Edge edge = graphEntityFactory.createEdge( sourceNode, targetNode, distance );
-                        StringBuilder sb = new StringBuilder();
-                        for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                            sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
-                                    .append( getStringById( w.getVals( i ) ) ).append( " " )
-                                    .append( "\n" );
-                        }
-                        edge.setLabel( sb.toString() );
-                        graph.addEdge( edge );
-                    }
-                }
-
-                         */
+                        // oneway = -1 => reverse the way!!!
                         long lastRef = 0;
-                        List<Coordinate> edgeCoords = new LinkedList<>();
-                        Node sourceNode = null;
-                        Node targetNode = null;
-                        Node tmpSource = null;
-                        Node tmpTarget = null;
-                        Distance edgeLength = distanceFactory.createZeroDistance();
                         for ( Long ref : w.getRefsList() ) {
+                            Node sourceNode = null;
+                            Node targetNode = null;
                             if ( lastRef != 0 ) {
-                                tmpSource = nodeMap.get( lastRef );
-                            }
-                            lastRef += ref;
-                            if ( sourceNode == null ) {
                                 sourceNode = nodeMap.get( lastRef );
                             }
-                            tmpTarget = nodeMap.get( lastRef );
-                            if ( tmpSource != null ) {
-                                Distance distance = distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( tmpSource.getCoordinates(), tmpTarget.getCoordinates() ) );
-                                edgeLength = edgeLength.add( distance );
-                            }
-                            targetNode = tmpTarget;
-                            edgeCoords.add( targetNode.getCoordinates() );
-                        }
-                        Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, edgeLength );
-                        StringBuilder sb = new StringBuilder();
-                        for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                            sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
-                                    .append( getStringById( w.getVals( i ) ) ).append( " " )
-                                    .append( "\n" );
-                        }
-                        edge.setLabel( sb.toString() );
-                        edge.setCoordinates( edgeCoords );
-                        graph.addEdge( edge );
+                            lastRef += ref;
+                            if ( sourceNode != null ) {
+                                targetNode = nodeMap.get( lastRef );
 
-//                sb.append( "\n  Key=value pairs: " );
-//                for ( int i = 0; i < w.getKeysCount(); i++ ) {
-//                    sb.append( getStringById( w.getKeys( i ) ) ).append( "=" )
-//                            .append( getStringById( w.getVals( i ) ) ).append( " " );
-//                }
-//                System.out.println( sb.toString() );
+                                List<WayAttributeParser.Pair> pairs = new LinkedList<>();
+                                for ( int i = 0; i < w.getKeysCount(); i++ ) {
+                                    String key = getStringById( w.getKeys( i ) );
+                                    String value = getStringById( w.getVals( i ) );
+                                    pairs.add( new WayAttributeParser.Pair( key, value ) );
+                                }
+                                // country code and inside city, solve it!
+                                EdgeAttributes edgeAttributes = wayAttributeParser.parse( "CZ", true, pairs, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+
+                                Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
+                                        distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
+                                edge.setAttributes( edgeAttributes );
+
+//                                StringBuilder sb = new StringBuilder();
+//                                pairs.forEach( ( pair ) -> {
+//                                    sb.append( pair.key ).append( "=" ).append( pair.value ).append( "\n" );
+//                                } );
+//                                edge.setLabel( edge.getAttributes().toString() + "\n" + sb.toString() );
+                                edge.setCoordinates( Arrays.asList( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+//                                edge.setLabel( value );
+                                getFromMap( sourceNode ).add( edge );
+                                getFromMap( targetNode ).add( edge );
+                            }
+                        }
                     } );
+        }
+
+        private List<Edge> getFromMap( Node node ) {
+            List<Edge> list = nodeEdgeMap.get( node );
+            if ( list == null ) {
+                list = new ArrayList<>();
+                nodeEdgeMap.put( node, list );
+            }
+            return list;
         }
 
         @Override
@@ -205,6 +172,101 @@ public class OsmPbfDataSource implements MapDataSource {
         @Override
         public void complete() {
             System.out.println( "Complete loading! Starting processing." );
+            nodeMap = null;
+            for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
+                Node node = entry.getKey();
+                List<Edge> list = entry.getValue();
+                if ( list.size() != 2 ) {
+                    node.setLabel( node.getId() + "[" + list.size() + "]" );
+                    graph.addNode( node );
+                } else {
+                }
+            }
+            for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
+                Node node = entry.getKey();
+                List<Edge> list = entry.getValue();
+                if ( list.size() != 2 ) {
+                } else {
+                    Edge a = list.get( 0 );
+                    Edge b = list.get( 1 );
+                    Node nodeA = a.getOtherNode( node );
+                    Node nodeB = b.getOtherNode( node );
+                    Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
+                    newEdge.setAttributes( a.getAttributes().copyWithNewLength( a.getAttributes().getLength() + b.getAttributes().getLength() ) );
+//                    System.out.println( "distance a = " + a.getDistance() );
+//                    System.out.println( "distance b = " + b.getDistance() );
+//                    System.out.println( "distance new = " + newEdge.getDistance() );
+//                    newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
+                    List<Coordinate> coords = new ArrayList<>();
+                    // connect coordinates
+                    List<Coordinate> aCoords = a.getCoordinates();
+                    List<Coordinate> bCoords = b.getCoordinates();
+                    if ( node.equals( a.getSourceNode() ) ) {
+                        for ( int i = aCoords.size() - 1; i >= 0; i-- ) {
+                            coords.add( aCoords.get( i ) );
+                        }
+                    } else {
+                        for ( int i = 0; i < aCoords.size(); i++ ) {
+                            coords.add( aCoords.get( i ) );
+                        }
+                    }
+                    if ( node.equals( b.getSourceNode() ) ) {
+                        for ( int i = 1; i < bCoords.size(); i++ ) {
+                            coords.add( bCoords.get( i ) );
+                        }
+                    } else {
+                        for ( int i = bCoords.size() - 2; i >= 0; i-- ) {
+                            coords.add( bCoords.get( i ) );
+                        }
+                    }
+                    newEdge.setCoordinates( coords );
+                    newEdge.setLabel( a.getLabel() );
+//                    System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
+//                    System.out.println( "orig edge: " + nodeA.getLabel() + ":" + node.getLabel() + ":" + nodeB.getLabel() );
+//                    System.out.println( "new edge: " + newEdge.getLabel() );
+                    List<Edge> aList = getFromMap( nodeA );
+                    aList.remove( a );
+                    aList.add( newEdge );
+                    List<Edge> bList = getFromMap( nodeB );
+                    bList.remove( b );
+                    bList.add( newEdge );
+                }
+            }
+            for ( Node node : graph.getNodes() ) {
+                for ( Edge edge : getFromMap( node ) ) {
+                    if ( node.equals( edge.getSourceNode() ) ) {
+//                        edge.setLabel( edge.getId() + "|" + edge.getSourceNode().getLabel() + ":" + edge.getTargetNode().getLabel() );
+//                        System.out.println( "added edge has " + edge.getCoordinates().size() + " coordinates" );
+                        graph.addEdge( edge );
+                    }
+                }
+            }
+
+            // map ids to sequence
+            Graph g = graph;
+            graph = graphEntityFactory.createGraph();
+
+            Map<Node, Node> oldToNewMap = new HashMap<>();
+            int nodeCounter = 0;
+            for ( Node node : g.getNodes() ) {
+                Node newNode = node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) );
+                newNode.setLabel( newNode.getId() + "[" + getFromMap( node ).size() + "]" );
+                oldToNewMap.put( node, newNode ); // old node edge set is copied to the new node
+                graph.addNode( newNode );
+            }
+            int edgeCounter = 0;
+            for ( Edge edge : g.getEdges() ) {
+//                System.out.println( "old old edge has " + edge.getCoordinates().size() + " coordinates" );
+                edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
+//                System.out.println( "old edge has " + edge.getCoordinates().size() + " coordinates" );
+                Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
+//                newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
+//                System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
+                newEdge.setLabel( newEdge.getAttributes().toString() );
+                graph.addEdge( newEdge );
+            }
+            System.out.println( "Processing done!" );
+
             graphLoadListener.onGraphLoaded( graph );
 //            try {
 //                onLoadFinish( graphEntityFactory, distanceFactory, graphLoadListener, graph );
@@ -213,200 +275,5 @@ public class OsmPbfDataSource implements MapDataSource {
 //            }
         }
 
-        private Graph preprocess( Graph graph ) {
-            List<Node> nodes = new ArrayList<>( graph.getNodes() );
-            int ptCounter = 0;
-            for ( int i = 0; i < nodes.size(); i++ ) {
-                if ( ( 100 * i ) / nodes.size() > ptCounter ) {
-                    System.out.println( ++ptCounter + "%" );
-                }
-                Node node = nodes.get( i );
-                if ( graph.getInDegreeOf( node ) == graph.getOutDegreeOf( node ) && graph.getOutDegreeOf( node ) == 1 ) {
-                    Node first = node;
-                    Node tmp;
-                    while ( ( tmp = getPrevious( graph, first ) ) != null ) {
-                        first = tmp;
-                    }
-                    List<Coordinate> coords = new LinkedList<>();
-                    Distance length = distanceFactory.createZeroDistance();
-                    coords.add( first.getCoordinates() );
-                    Node prev = first;
-                    while ( ( tmp = getNext( graph, prev ) ) != null ) {
-                        if ( !prev.equals( first ) ) {
-                            graph.removeNode( prev );
-                        }
-                        length = length.add( distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( prev.getCoordinates(), tmp.getCoordinates() ) ) );
-                        prev = tmp;
-                        coords.add( tmp.getCoordinates() );
-                    }
-                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), first, prev, length );
-                    edge.setCoordinates( coords );
-                    graph.addEdge( edge );
-                }
-            }
-            return graph;
-        }
-
-        private Node getPrevious( Graph graph, Node node ) {
-//            System.out.println( "node = " + node );
-            Set<Edge> edges = graph.getIncomingEdgesOf( node );
-            if ( edges.size() != 1 ) {
-                return null;
-            }
-            return edges.stream().findFirst().get().getSourceNode();
-        }
-
-        private Node getNext( Graph graph, Node node ) {
-            Set<Edge> edges = graph.getOutgoingEdgesOf( node );
-            if ( edges.size() != 1 ) {
-                return null;
-            }
-            return edges.stream().findFirst().get().getTargetNode();
-        }
-
     }
-
-    private class OsmBinaryProcessor extends BinaryParser {
-
-        private final GraphEntityFactory graphEntityFactory;
-        private final DistanceFactory distanceFactory;
-        private final GraphLoadListener graphLoadListener;
-
-        private final Map<Long, Node> nodeMap = new HashMap<>();
-        private final Graph graph;
-
-        public OsmBinaryProcessor( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener, Graph graph ) {
-            this.graphEntityFactory = graphEntityFactory;
-            this.distanceFactory = distanceFactory;
-            this.graphLoadListener = graphLoadListener;
-            this.graph = graph;
-        }
-
-        @Override
-        protected void parseRelations( List<Osmformat.Relation> list ) {
-        }
-
-        @Override
-        protected void parseDense( Osmformat.DenseNodes nodes ) {
-        }
-
-        @Override
-        protected void parseNodes( List<Osmformat.Node> nodes ) {
-//            System.out.println( "nodes: " + nodes.size() );
-            nodes.stream().map( ( node ) -> {
-                //                System.out.printf( "Regular node, ID %d @ %.6f,%.6f\n",
-//                        node.getId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
-                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
-                nodeMap.put( node.getId(), n );
-                return n;
-            } ).forEach( ( n ) -> {
-                graph.addNode( n );
-            } );
-        }
-
-        @Override
-        protected void parseWays( List<Osmformat.Way> ways ) {
-            ways.stream().forEach( ( w ) -> {
-                List<Node> redundantNodes = new ArrayList<>();
-                long lastRef = 0;
-                for ( Long ref : w.getRefsList() ) {
-                    Node sourceNode = null;
-                    Node targetNode = null;
-                    if ( lastRef != 0 ) {
-                        sourceNode = nodeMap.get( lastRef );
-                    }
-                    lastRef += ref;
-                    if ( sourceNode != null ) {
-                        targetNode = nodeMap.get( lastRef );
-
-                        if ( graph.getDegreeOf( targetNode ) == 2 && graph.getInDegreeOf( targetNode ) == 1 ) {
-                            redundantNodes.add( targetNode );
-                        } else if ( !redundantNodes.isEmpty() ) {
-                            String label = graph.getIncomingEdgesOf( redundantNodes.get( 0 ) ).stream().findFirst().get().getLabel();
-                            Node s = graph.getIncomingEdgesOf( redundantNodes.get( 0 ) ).stream().findFirst().get().getSourceNode();
-                            Node t = graph.getOutgoingEdgesOf( redundantNodes.get( redundantNodes.size() - 1 ) ).stream().findFirst().get().getTargetNode();
-                            Distance length = distanceFactory.createZeroDistance();
-                            List<Coordinate> coords = new LinkedList<>();
-                            coords.add( s.getCoordinates() );
-                            Node prev = s;
-                            for ( Node rn : redundantNodes ) {
-                                coords.add( rn.getCoordinates() );
-                                length = length.add( distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( prev.getCoordinates(), rn.getCoordinates() ) ) );
-                                prev = rn;
-                                graph.removeNode( rn );
-                            }
-                            coords.add( t.getCoordinates() );
-                            Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), s, t, length );
-                            edge.setCoordinates( coords );
-                            edge.setLabel( label );
-                            graph.addEdge( edge );
-                        }
-                    }
-                }
-            } );
-        }
-
-        @Override
-        protected void parse( Osmformat.HeaderBlock hb ) {
-        }
-
-        @Override
-        public void complete() {
-            System.out.println( "Complete processing!" );
-            graphLoadListener.onGraphLoaded( graph );
-        }
-
-        private Graph preprocess( Graph graph ) {
-            List<Node> nodes = new ArrayList<>( graph.getNodes() );
-            int ptCounter = 0;
-            for ( int i = 0; i < nodes.size(); i++ ) {
-                if ( ( 100 * i ) / nodes.size() > ptCounter ) {
-                    System.out.println( ++ptCounter + "%" );
-                }
-                Node node = nodes.get( i );
-                if ( graph.getInDegreeOf( node ) == graph.getOutDegreeOf( node ) && graph.getOutDegreeOf( node ) == 1 ) {
-                    Node first = node;
-                    Node tmp;
-                    while ( ( tmp = getPrevious( graph, first ) ) != null ) {
-                        first = tmp;
-                    }
-                    List<Coordinate> coords = new LinkedList<>();
-                    Distance length = distanceFactory.createZeroDistance();
-                    coords.add( first.getCoordinates() );
-                    Node prev = first;
-                    while ( ( tmp = getNext( graph, prev ) ) != null ) {
-                        if ( !prev.equals( first ) ) {
-                            graph.removeNode( prev );
-                        }
-                        length = length.add( distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( prev.getCoordinates(), tmp.getCoordinates() ) ) );
-                        prev = tmp;
-                        coords.add( tmp.getCoordinates() );
-                    }
-                    Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), first, prev, length );
-                    edge.setCoordinates( coords );
-                    graph.addEdge( edge );
-                }
-            }
-            return graph;
-        }
-
-        private Node getPrevious( Graph graph, Node node ) {
-//            System.out.println( "node = " + node );
-            Set<Edge> edges = graph.getIncomingEdgesOf( node );
-            if ( edges.size() != 1 ) {
-                return null;
-            }
-            return edges.stream().findFirst().get().getSourceNode();
-        }
-
-        private Node getNext( Graph graph, Node node ) {
-            Set<Edge> edges = graph.getOutgoingEdgesOf( node );
-            if ( edges.size() != 1 ) {
-                return null;
-            }
-            return edges.stream().findFirst().get().getTargetNode();
-        }
-
-    }
-
 }

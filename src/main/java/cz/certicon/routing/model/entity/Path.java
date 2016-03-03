@@ -64,7 +64,14 @@ public interface Path extends Iterable<Edge> {
      *
      * @return an instance of {@link Distance}
      */
-    public Distance getLength();
+    public Distance getDistance();
+
+    /**
+     * Getter for the overall length of this path
+     *
+     * @return double length
+     */
+    public double getLength();
 
     /**
      * Connects other path to the end of this path

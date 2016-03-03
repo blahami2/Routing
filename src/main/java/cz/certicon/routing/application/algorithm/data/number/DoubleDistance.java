@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.application.algorithm.data.simple;
+package cz.certicon.routing.application.algorithm.data.number;
 
 import cz.certicon.routing.application.algorithm.Distance;
 
@@ -11,16 +11,16 @@ import cz.certicon.routing.application.algorithm.Distance;
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */
-class DistanceImpl implements Distance {
+class DoubleDistance implements Distance {
 
     private final double dist;
     private static final double EPS = 10E-14;
 
-    public DistanceImpl() {
+    public DoubleDistance() {
         this.dist = Double.POSITIVE_INFINITY;
     }
 
-    public DistanceImpl( double dist ) {
+    public DoubleDistance( double dist ) {
         this.dist = dist;
     }
 
@@ -51,13 +51,13 @@ class DistanceImpl implements Distance {
 
     @Override
     public Distance add( Distance other ) {
-        DistanceImpl otherImpl = (DistanceImpl) other;
-        return new DistanceImpl( dist + otherImpl.dist );
+        DoubleDistance otherImpl = (DoubleDistance) other;
+        return new DoubleDistance( dist + otherImpl.dist );
     }
 
     @Override
     public int compareTo( Distance other ) {
-        DistanceImpl otherImpl = (DistanceImpl) other;
+        DoubleDistance otherImpl = (DoubleDistance) other;
         if ( dist < otherImpl.dist - EPS ) {
             return -1;
         }
@@ -85,7 +85,7 @@ class DistanceImpl implements Distance {
         if ( getClass() != obj.getClass() ) {
             return false;
         }
-        final DistanceImpl other = (DistanceImpl) obj;
+        final DoubleDistance other = (DoubleDistance) obj;
         return this.compareTo( other ) == 0;
     }
     

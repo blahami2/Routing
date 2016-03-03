@@ -6,10 +6,11 @@
 package cz.certicon.routing.algorithm.interfaces;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
-import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
+import cz.certicon.routing.application.algorithm.data.number.DoubleDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,29 +25,31 @@ import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 @RunWith( Parameterized.class )
 public class NodeDataStructureTest {
 
     private final NodeDataStructureImplFactory factory;
     private final DirectedNeighbourListGraphEntityFactory graphFactory;
-    private final SimpleDistanceFactory distanceFactory;
+    private final DoubleDistanceFactory distanceFactory;
     private final List<Node> nodes = new ArrayList<>();
     private final List<Edge> edges = new ArrayList<>();
 
     public NodeDataStructureTest( NodeDataStructureImplFactory factory ) {
+        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).build();
         this.factory = factory;
         this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
-        this.distanceFactory = new SimpleDistanceFactory();
+        this.distanceFactory = new DoubleDistanceFactory();
         int size = 20;
         for ( int i = 1; i < size; i++ ) {
             for ( int j = 1; j < size; j++ ) {
-                Node n = graphFactory.createNode(Node.Id.generateId(),  i, j );
-                n.setDistance( distanceFactory.createFromDouble(i * j ) );
+                Node n = graphFactory.createNode( Node.Id.generateId(), i, j );
+                n.setDistance( distanceFactory.createFromEdgeAttributes( edgeAttributes.copyWithNewLength( i * j ) ) );
                 nodes.add( n );
             }
         }

@@ -85,24 +85,12 @@ class JgraphtGraph implements Graph {
 
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
-        Set<Edge> incomingEdges = new HashSet<>();
-        for(Edge edge : innerGraph.edgesOf( node )){
-            if(getTargetNodeOf( edge ).equals( node )){
-                incomingEdges.add( edge );
-            }
-        }
-        return incomingEdges;
+        return innerGraph.edgesOf( node );
     }
 
     @Override
     public Set<Edge> getOutgoingEdgesOf( Node node ) {
-        Set<Edge> outgoingEdges = new HashSet<>();
-        for(Edge edge : innerGraph.edgesOf( node )){
-            if(getSourceNodeOf(edge ).equals( node )){
-                outgoingEdges.add( edge );
-            }
-        }
-        return outgoingEdges;
+        return innerGraph.edgesOf( node );
     }
 
     @Override

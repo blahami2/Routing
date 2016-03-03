@@ -8,9 +8,10 @@ package cz.certicon.routing.algorithm.interfaces;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.NodeEvaluator;
 import cz.certicon.routing.application.algorithm.AlgorithmConfiguration;
+import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
 import cz.certicon.routing.application.algorithm.algorithms.dijkstra.DijkstraRoutingAlgorithm;
-import cz.certicon.routing.application.algorithm.data.simple.SimpleDistanceFactory;
+import cz.certicon.routing.application.algorithm.data.number.DoubleDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
@@ -28,7 +29,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
+import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 
 /**
  *
@@ -39,14 +42,14 @@ public class RoutingAlgorithmTest {
 
     private final RoutingAlgorithmFactory routingAlgorithmFactory;
     private final DirectedNeighbourListGraphEntityFactory graphFactory;
-    private final SimpleDistanceFactory distanceFactory;
+    private final DoubleDistanceFactory distanceFactory;
     private final Graph graph;
 
     public RoutingAlgorithmTest( RoutingAlgorithmFactory routingAlgorithmFactory1 ) {
         this.routingAlgorithmFactory = routingAlgorithmFactory1;
         this.graph = routingAlgorithmFactory1.getGraph();
         this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
-        this.distanceFactory = new SimpleDistanceFactory();
+        this.distanceFactory = new DoubleDistanceFactory();
     }
 
     @BeforeClass
@@ -81,12 +84,12 @@ public class RoutingAlgorithmTest {
         Path expResult;
 
         Graph g = graphFactory.createGraph();
-        Edge ab = createEdge( graphFactory, distanceFactory, a, b );
-        Edge ac = createEdge( graphFactory, distanceFactory, a, c );
-        Edge be = createEdge( graphFactory, distanceFactory, b, e );
-        Edge cd = createEdge( graphFactory, distanceFactory, c, d );
-        Edge df = createEdge( graphFactory, distanceFactory, d, f );
-        Edge ef = createEdge( graphFactory, distanceFactory, e, f );
+        Edge ab = createEdge( graphFactory, distanceFactory, a, b, false );
+        Edge ac = createEdge( graphFactory, distanceFactory, a, c, false );
+        Edge be = createEdge( graphFactory, distanceFactory, b, e, false );
+        Edge cd = createEdge( graphFactory, distanceFactory, c, d, false );
+        Edge df = createEdge( graphFactory, distanceFactory, d, f, false );
+        Edge ef = createEdge( graphFactory, distanceFactory, e, f, true );
         g.addNode( a ).addNode( b ).addNode( c ).addNode( d ).addNode( e ).addNode( f )
                 .addEdge( ac )
                 .addEdge( cd )
@@ -94,8 +97,8 @@ public class RoutingAlgorithmTest {
 
         expResult = graphFactory.createPathWithSource( g, a ).addEdgeAsLast( ab ).addEdgeAsLast( be ).addEdgeAsLast( ef );
         Path result = instance.route( a, f );
-//        System.out.println( "expected: " + expResult );
-//        System.out.println( "result: " + result );
+        System.out.println( "expected: " + expResult );
+        System.out.println( "result: " + result );
         assertEquals( expResult, result );
 //        System.out.println( "result path: " + result );
     }
@@ -109,7 +112,7 @@ public class RoutingAlgorithmTest {
 
     public static Graph createGraph() {
         DirectedNeighbourListGraphEntityFactory entityFactory = new DirectedNeighbourListGraphEntityFactory();
-        SimpleDistanceFactory distanceFactory = new SimpleDistanceFactory();
+        DoubleDistanceFactory distanceFactory = new DoubleDistanceFactory();
         Graph graph = entityFactory.createGraph();
         Node a = entityFactory.createNode( Node.Id.generateId(), 50.1001831, 14.3856114 );
         Node b = entityFactory.createNode( Node.Id.generateId(), 50.1002725, 14.3872906 );
@@ -117,64 +120,49 @@ public class RoutingAlgorithmTest {
         Node d = entityFactory.createNode( Node.Id.generateId(), 50.1017039, 14.3871028 );
         Node e = entityFactory.createNode( Node.Id.generateId(), 50.1002828, 14.3878056 );
         Node f = entityFactory.createNode( Node.Id.generateId(), 50.1016489, 14.3876339 );
-        Edge ab = createEdge( entityFactory, distanceFactory, a, b );
-        Edge ba = createEdge( entityFactory, distanceFactory, b, a );
-        Edge ac = createEdge( entityFactory, distanceFactory, a, c );
-        Edge ca = createEdge( entityFactory, distanceFactory, c, a );
-        Edge db = createEdge( entityFactory, distanceFactory, d, b );
-        Edge cd = createEdge( entityFactory, distanceFactory, c, d );
-        Edge dc = createEdge( entityFactory, distanceFactory, d, c );
-        Edge be = createEdge( entityFactory, distanceFactory, b, e );
-        Edge eb = createEdge( entityFactory, distanceFactory, e, b );
-        Edge df = createEdge( entityFactory, distanceFactory, d, f );
-        Edge fd = createEdge( entityFactory, distanceFactory, f, d );
-        Edge ef = createEdge( entityFactory, distanceFactory, e, f );
+        Edge ab = createEdge( entityFactory, distanceFactory, a, b, false );
+        Edge ac = createEdge( entityFactory, distanceFactory, a, c, false );
+        Edge db = createEdge( entityFactory, distanceFactory, d, b, true );
+        Edge cd = createEdge( entityFactory, distanceFactory, c, d, false );
+        Edge be = createEdge( entityFactory, distanceFactory, b, e, false );
+        Edge df = createEdge( entityFactory, distanceFactory, d, f, false );
+        Edge ef = createEdge( entityFactory, distanceFactory, e, f, true );
         graph.addNode( a ).addNode( b ).addNode( c ).addNode( d ).addNode( e ).addNode( f );
         graph.addEdge( a, b, ab )
-                .addEdge( b, a, ba )
                 .addEdge( a, c, ac )
-                .addEdge( c, a, ca )
                 .addEdge( d, b, db )
                 .addEdge( c, d, cd )
-                .addEdge( c, d, dc )
                 .addEdge( b, e, be )
-                .addEdge( e, b, eb )
                 .addEdge( d, f, df )
-                .addEdge( f, d, fd )
                 .addEdge( e, f, ef );
 
         return graph;
     }
 
-    private static Edge createEdge( DirectedNeighbourListGraphEntityFactory entityFactory, SimpleDistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromDouble( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ) );
+    private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode, boolean oneWay ) {
+        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( oneWay ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();
+        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) )
+                .setAttributes( edgeAttributes );
     }
 
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
         final Graph graph = createGraph();
 
-        return Arrays.asList( new Object[]{
+        return Arrays.asList(new Object[]{
             new RoutingAlgorithmFactory() {
                 @Override
                 public RoutingAlgorithm createRoutingAlgorithm() {
                     return new DijkstraRoutingAlgorithm(
                             graph,
                             new DirectedNeighbourListGraphEntityFactory(),
-                            new TrivialNodeDataStructure(),
-                            new AlgorithmConfiguration() {/**/
-                    }, new RoutingConfiguration() {
+                            new TrivialNodeDataStructure(), () -> new NodeEvaluator() {
                         @Override
-                        public NodeEvaluator getNodeEvaluator() {
-                            return new NodeEvaluator() {
-                                @Override
-                                public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
-                                    return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
-                                }
-                            };
+                        public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
+                            return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
                         }
                     },
-                            new SimpleDistanceFactory()
+                            new DoubleDistanceFactory()
                     );
                 }
 
@@ -192,20 +180,13 @@ public class RoutingAlgorithmTest {
                     return new DijkstraRoutingAlgorithm(
                             graph,
                             new DirectedNeighbourListGraphEntityFactory(),
-                            new TrivialNodeDataStructure(),
-                            new AlgorithmConfiguration() {/**/
-                    }, new RoutingConfiguration() {
+                            new TrivialNodeDataStructure(), () -> new NodeEvaluator() {
                         @Override
-                        public NodeEvaluator getNodeEvaluator() {
-                            return new NodeEvaluator() {
-                                @Override
-                                public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
-                                    return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
-                                }
-                            };
+                        public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
+                            return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
                         }
                     },
-                            new SimpleDistanceFactory()
+                            new DoubleDistanceFactory()
                     );
                 }
 

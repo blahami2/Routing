@@ -37,7 +37,7 @@ public interface GraphEntityFactory {
      * @return an instance of {@link Edge}
      */
     public Edge createEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance length );
-
+    
     /**
      * Creates an empty path with a source node
      *

@@ -6,20 +6,22 @@
 package cz.certicon.routing.model.entity.jgrapht;
 
 import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.DirectedGraph;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
+import java.util.Collection;
 import java.util.Set;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.EdgeFactory;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-class DirectedJgraphtGraph implements Graph {
+class DirectedJgraphtGraph implements DirectedGraph {
 
     public final org.jgrapht.DirectedGraph<Node, Edge> innerGraph;
 
-    public DirectedJgraphtGraph( DirectedGraph<Node, Edge> innerGraph ) {
+    public DirectedJgraphtGraph( org.jgrapht.DirectedGraph<Node, Edge> innerGraph ) {
         this.innerGraph = innerGraph;
     }
 
@@ -38,12 +40,20 @@ class DirectedJgraphtGraph implements Graph {
     @Override
     public Graph addEdge( Edge edge ) {
         innerGraph.addEdge( edge.getSourceNode(), edge.getTargetNode(), edge );
+        if ( !edge.getAttributes().isOneWay() ) {
+            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
+            innerGraph.addEdge( opposite.getSourceNode(), opposite.getTargetNode(), opposite );
+        }
         return this;
     }
 
     @Override
     public Graph addEdge( Node sourceNode, Node targetNode, Edge edge ) {
         innerGraph.addEdge( sourceNode, targetNode, edge );
+        if ( !edge.getAttributes().isOneWay() ) {
+            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
+            innerGraph.addEdge( targetNode, sourceNode, opposite );
+        }
         return this;
     }
 

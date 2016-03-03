@@ -9,12 +9,10 @@ import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.application.algorithm.algorithms.AbstractRoutingAlgorithm;
-import cz.certicon.routing.application.algorithm.AlgorithmConfiguration;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
-import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 
@@ -24,12 +22,11 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
  */
 public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
-    private final AlgorithmConfiguration algorithmConfiguration;
     private final RoutingConfiguration routingConfiguration;
     private final NodeDataStructure nodeDataStructure;
     private final DistanceFactory distanceFactory;
 
-    public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, NodeDataStructure nodeDataStructure, AlgorithmConfiguration algorithmConfiguration, RoutingConfiguration routingConfiguration, DistanceFactory distanceFactory ) {
+    public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, NodeDataStructure nodeDataStructure, RoutingConfiguration routingConfiguration, DistanceFactory distanceFactory ) {
         super( graph, entityAbstractFactory );
 //        System.out.println( "============ DIJKSTRA =============" );
 //        for ( Node node : graph.getNodes() ) {
@@ -40,7 +37,6 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //        }
 
         this.nodeDataStructure = nodeDataStructure;
-        this.algorithmConfiguration = algorithmConfiguration;
         this.routingConfiguration = routingConfiguration;
         this.distanceFactory = distanceFactory;
     }

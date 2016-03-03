@@ -9,15 +9,6 @@ package cz.certicon.routing.model.entity;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface EdgeAttributes {
-
-    public double getSpeed();
-
-    public boolean isOneWay();
-
-    public boolean isPaid();
-
-    public double getLength();
+public interface DirectedGraph extends Graph {
     
-    public EdgeAttributes copyWithNewLength(double length);
 }

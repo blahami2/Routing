@@ -5,6 +5,9 @@
  */
 package cz.certicon.routing.application.algorithm;
 
+import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.EdgeAttributes;
+
 /**
  * The root interface for distance factories - classes for creating
  * {@link Distance} objects.
@@ -27,11 +30,13 @@ public interface DistanceFactory {
      */
     public Distance createInfiniteDistance();
 
-    /**
-     * Creates instance with the value of a given double number.
-     *
-     * @param distance abstract distance represented in double
-     * @return created {@link Distance} instance
-     */
-    public Distance createFromDouble( double distance );
+//    /**
+//     * Creates instance with the value of a given double number.
+//     *
+//     * @param distance abstract distance represented in double
+//     * @return created {@link Distance} instance
+//     */
+//    public Distance createFromDouble( double distance );
+    
+    public Distance createFromEdgeAttributes(EdgeAttributes edgeAttributes);
 }
