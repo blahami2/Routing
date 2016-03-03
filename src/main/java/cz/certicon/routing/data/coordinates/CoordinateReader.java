@@ -9,6 +9,8 @@ import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -19,6 +21,8 @@ public interface CoordinateReader {
     public CoordinateReader open() throws IOException;
 
     public List<Coordinate> findCoordinates( Edge edge ) throws IOException;
+
+    public Map<Edge, List<Coordinate>> findCoordinates( Set<Edge> edges ) throws IOException;
 
     public CoordinateReader close() throws IOException;
 }

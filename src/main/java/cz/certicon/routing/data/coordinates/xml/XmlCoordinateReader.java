@@ -16,6 +16,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import static cz.certicon.routing.data.coordinates.xml.Tag.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -42,14 +48,37 @@ public class XmlCoordinateReader implements CoordinateReader {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            EdgeHandler edgeHandler = new EdgeHandler( edge.getId() );
+            EdgeHandler edgeHandler = new EdgeHandler( new HashSet<>( Arrays.asList( edge.getId() ) ) );
             saxParser.parse( source.getInputStream(), edgeHandler );
         } catch ( UglyExceptionMechanism notEx ) {
-            return notEx.getCoords();
+            return notEx.getCoords().get( edge.getId() );
         } catch ( ParserConfigurationException | SAXException ex ) {
             throw new IOException( ex );
         }
         throw new IOException( "Id not found: " + edge.getId() );
+    }
+
+    @Override
+    public Map<Edge, List<Coordinate>> findCoordinates( Set<Edge> edges ) throws IOException {
+        EdgeHandler edgeHandler;
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            Set<Edge.Id> collect = edges.stream().map( e -> e.getId() ).collect( Collectors.toSet() );
+            edgeHandler = new EdgeHandler( collect );
+            saxParser.parse( source.getInputStream(), edgeHandler );
+        } catch ( UglyExceptionMechanism notEx ) {
+            return convert( edges, notEx.getCoords() );
+        } catch ( ParserConfigurationException | SAXException ex ) {
+            throw new IOException( ex );
+        }
+        throw new IOException( "Ids not found (size should be " + edges.size() + " but is " + edgeHandler.getCoords().size() );
+    }
+
+    private Map<Edge, List<Coordinate>> convert( Set<Edge> edges, Map<Edge.Id, List<Coordinate>> coords ) {
+        Map<Edge, List<Coordinate>> map = new HashMap<>();
+        edges.stream().forEach( e -> map.put( e, coords.get( e.getId() ) ) );
+        return map;
     }
 
     @Override
@@ -59,12 +88,13 @@ public class XmlCoordinateReader implements CoordinateReader {
 
     private static class EdgeHandler extends DefaultHandler {
 
-        private final Edge.Id lookupId;
-        private boolean collecting = false;
-        private final List<Coordinate> coords = new ArrayList<>();
+        private final Set<Edge.Id> edgeIds;
+        private Edge.Id collecting = null;
+        private List<Coordinate> coordList = null;
+        private final Map<Edge.Id, List<Coordinate>> coords = new HashMap<>();
 
-        public EdgeHandler( Edge.Id lookupId ) {
-            this.lookupId = lookupId;
+        public EdgeHandler( Set<Edge.Id> edgeIds ) {
+            this.edgeIds = edgeIds;
         }
 
         @Override
@@ -72,14 +102,16 @@ public class XmlCoordinateReader implements CoordinateReader {
             if ( qName.equalsIgnoreCase( EDGE.name() ) ) {
                 Edge.Id id = Edge.Id.fromString( attributes.getValue( ID.shortLowerName() ) );
 //                System.out.println( "current id = " + id );
-                if ( id.equals( lookupId ) ) {
-                    collecting = true;
+                if ( edgeIds.contains( id ) ) {
+//                    System.out.println( "started collecting" );
+                    collecting = id;
+                    coordList = new ArrayList<>();
                 }
             } else if ( qName.equalsIgnoreCase( COORDINATE.name() ) ) {
-                if ( collecting ) {
+                if ( collecting != null ) {
                     double latitude = Double.parseDouble( attributes.getValue( LATITUDE.shortLowerName() ) );
                     double longitude = Double.parseDouble( attributes.getValue( LONGITUDE.shortLowerName() ) );
-                    coords.add( new Coordinate( latitude, longitude ) );
+                    coordList.add( new Coordinate( latitude, longitude ) );
                 }
             }
         }
@@ -87,23 +119,33 @@ public class XmlCoordinateReader implements CoordinateReader {
         @Override
         public void endElement( String uri, String localName, String qName ) throws SAXException {
             if ( qName.equalsIgnoreCase( EDGE.name() ) ) {
-                if ( collecting ) {
-                    throw new UglyExceptionMechanism( coords );
+                if ( collecting != null ) {
+                    coords.put( collecting, coordList );
+//                    System.out.println( "ended collecting" );
+                    collecting = null;
+                    coordList = null;
+                    if ( edgeIds.size() == coords.size() ) {
+                        throw new UglyExceptionMechanism( coords );
+                    }
                 }
             }
+        }
+
+        public Map<Edge.Id, List<Coordinate>> getCoords() {
+            return coords;
         }
     }
 
     private static class UglyExceptionMechanism extends SAXException {
 
-        private final List<Coordinate> coords;
+        private final Map<Edge.Id, List<Coordinate>> coordMap;
 
-        public UglyExceptionMechanism( List<Coordinate> coords ) {
-            this.coords = coords;
+        public UglyExceptionMechanism( Map<Edge.Id, List<Coordinate>> coordMap ) {
+            this.coordMap = coordMap;
         }
 
-        public List<Coordinate> getCoords() {
-            return coords;
+        public Map<Edge.Id, List<Coordinate>> getCoords() {
+            return coordMap;
         }
     }
 
