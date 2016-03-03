@@ -69,9 +69,15 @@ public interface Path extends Iterable<Edge> {
     /**
      * Getter for the overall length of this path
      *
-     * @return double length
+     * @return double length in meters
      */
     public double getLength();
+    
+    /**
+     * Getter for the overall time of this path (estimated)
+     * @return double time in seconds
+     */
+    public double getTime();
 
     /**
      * Connects other path to the end of this path

@@ -21,4 +21,8 @@ public class SpeedUtils {
     public static double knotToKmph( double knots ) {
         return knots * KNOTS_TO_KPH_RATIO;
     }
+
+    public static double kmphToMps( double kmph ) {
+        return kmph / 3.6;
+    }
 }

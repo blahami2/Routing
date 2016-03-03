@@ -10,6 +10,7 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import cz.certicon.routing.utils.SpeedUtils;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -86,7 +87,16 @@ public abstract class SimplePath implements Path {
 
     @Override
     public double getLength() {
-        return edges.stream().mapToDouble( edge -> edge.getAttributes().getLength()).sum();
+        return edges.stream().mapToDouble( edge -> edge.getAttributes().getLength() ).sum();
+    }
+
+    @Override
+    public double getTime() {
+        return edges.stream().mapToDouble( edge -> {
+            double speed = SpeedUtils.kmphToMps( edge.getAttributes().getSpeed() );
+            double length = edge.getAttributes().getLength();
+            return length / speed;
+        } ).sum();
     }
 
     @Override
