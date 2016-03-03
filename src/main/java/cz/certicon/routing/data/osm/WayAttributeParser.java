@@ -26,10 +26,12 @@ public class WayAttributeParser {
     private static final MatchMap PAID = MatchMap.create( new Pair( "toll", "yes" ) );
     private static final MatchMap ONE_WAY = MatchMap.create( new Pair( "oneway", "yes" ), new Pair( "highway", "motorway" ) );
     private static final MatchMap MAXSPEED = MatchMap.create( "maxspeed" );
+    private static final MatchMap MAXSPEED_FORWARD = MatchMap.create( "maxspeed:forward" );
     private static final MatchMap MAXSPEED_NONE = MatchMap.create( new Pair( "maxspeed", "none" ) );
     private static final MatchMap MAXSPEED_LANES = MatchMap.create( "maxspeed:lanes" );
     private static final MatchMap SOURCE_MAXSPEED = MatchMap.create( "source:maxspeed" );
     private static final MatchMap SOURCE_MAXSPEED_IMPLICIT = MatchMap.create( new Pair( "source:maxspeed", "implicit" ) );
+    private static final MatchMap SOURCE_MAXSPEED_SIGN = MatchMap.create( new Pair( "source:maxspeed", "sign" ) );
     private static final MatchMap HIGHWAY = MatchMap.create( "highway" );
 
     public EdgeAttributes parse( String countryCode, boolean insideCity, List<Pair> pairs, double length ) {
@@ -56,6 +58,7 @@ public class WayAttributeParser {
 
         boolean none = false;
         boolean implicit = false;
+        boolean sign = false;
         String zoneType = null;
         String wayType = null;
 
@@ -68,19 +71,22 @@ public class WayAttributeParser {
                 oneWay = true;
             } else if ( MAXSPEED_NONE.contains( pair ) ) {
                 none = true;
-            } else if ( MAXSPEED.contains( pair ) ) {
+            } else if ( MAXSPEED.contains( pair ) || MAXSPEED_FORWARD.contains( pair ) ) { // ignores backward
                 // ^([0-9][\.0-9]+?)(?:[ ]?(?:km/h|kmh|kph|mph|knots))?$
-                if ( pair.key.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:km/h|kmh|kph))?$" ) ) {
-                    String number = pair.key.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:km/h|kmh|kph))?$", "$1" );
+                if ( pair.value.matches( "^([0-9][\\.0-9]+?)$" ) ) {
+                    String number = pair.value.replaceAll( "^([0-9][\\.0-9]+)$", "$1" );
                     speed = Integer.parseInt( number );
-                } else if ( pair.key.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:mph))?$" ) ) {
-                    String number = pair.key.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:mph))?$", "$1" );
+                } else if ( pair.value.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:km/h|kmh|kph))?$" ) ) {
+                    String number = pair.value.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:km/h|kmh|kph))?$", "$1" );
+                    speed = Integer.parseInt( number );
+                } else if ( pair.value.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:mph))?$" ) ) {
+                    String number = pair.value.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:mph))?$", "$1" );
                     speed = SpeedUtils.mphToKmph( Integer.parseInt( number ) );
-                } else if ( pair.key.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:knots))?$" ) ) {
-                    String number = pair.key.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:knots))?$", "$1" );
+                } else if ( pair.value.matches( "^([0-9][\\.0-9]+?)(?:[ ]?(?:knots))?$" ) ) {
+                    String number = pair.value.replaceAll( "^([0-9][\\.0-9]+?)(?:[ ]?(?:knots))?$", "$1" );
                     speed = SpeedUtils.knotToKmph( Integer.parseInt( number ) );
                 } else if ( pair.value.split( ":" ).length > 1 ) {
-                    zoneType = pair.value.replaceAll( ":", COUNTRY_CODE_DELIMITER );
+                    zoneType = pair.value;
                 }
             }
             if ( MAXSPEED_LANES.contains( pair ) ) {
@@ -89,6 +95,8 @@ public class WayAttributeParser {
             }
             if ( SOURCE_MAXSPEED_IMPLICIT.contains( pair ) ) {
                 implicit = true;
+            } else if ( SOURCE_MAXSPEED_SIGN.contains( pair ) ) {
+                sign = true;
             } else if ( SOURCE_MAXSPEED.contains( pair ) ) {
                 zoneType = pair.value;
             }
@@ -103,13 +111,13 @@ public class WayAttributeParser {
 //                    String zone = split[0];
 //                    String type = split[1];
                 try {
-                    speed = Integer.parseInt( maxSpeedProperties.getProperty( zoneType ) );
+                    speed = Integer.parseInt( maxSpeedProperties.getProperty( zoneType.replaceAll( ":", COUNTRY_CODE_DELIMITER ).toLowerCase() ) );
                 } catch ( NumberFormatException ex ) {
                     error( pairs );
                 }
             } else if ( wayType != null ) {
                 try {
-                    speed = Integer.parseInt( defaultSpeedProperties.getProperty( countryCode + COUNTRY_CODE_DELIMITER + wayType + ( insideCity ? "-inside" : "" ) ) );
+                    speed = Integer.parseInt( defaultSpeedProperties.getProperty( ( countryCode + COUNTRY_CODE_DELIMITER + wayType + ( insideCity ? "-inside" : "" ) ).toLowerCase() ) );
                 } catch ( NumberFormatException ex ) {
                     error( pairs );
                 }

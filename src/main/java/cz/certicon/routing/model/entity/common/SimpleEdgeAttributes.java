@@ -55,6 +55,43 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
         return "SimpleEdgeAttributes{" + "speed=" + speed + ", length=" + length + ", isOneWay=" + isOneWay + ", isPaid=" + isPaid + '}';
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + (int) ( Double.doubleToLongBits( this.speed ) ^ ( Double.doubleToLongBits( this.speed ) >>> 32 ) );
+        hash = 97 * hash + (int) ( Double.doubleToLongBits( this.length ) ^ ( Double.doubleToLongBits( this.length ) >>> 32 ) );
+        hash = 97 * hash + ( this.isOneWay ? 1 : 0 );
+        hash = 97 * hash + ( this.isPaid ? 1 : 0 );
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final SimpleEdgeAttributes other = (SimpleEdgeAttributes) obj;
+        if ( Double.doubleToLongBits( this.speed ) != Double.doubleToLongBits( other.speed ) ) {
+            return false;
+        }
+        if ( Double.doubleToLongBits( this.length ) != Double.doubleToLongBits( other.length ) ) {
+            return false;
+        }
+        if ( this.isOneWay != other.isOneWay ) {
+            return false;
+        }
+        if ( this.isPaid != other.isPaid ) {
+            return false;
+        }
+        return true;
+    }
+
     public static Builder builder( double speed ) {
         return new Builder( speed );
     }

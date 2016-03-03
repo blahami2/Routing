@@ -97,8 +97,8 @@ public class RoutingAlgorithmTest {
 
         expResult = graphFactory.createPathWithSource( g, a ).addEdgeAsLast( ab ).addEdgeAsLast( be ).addEdgeAsLast( ef );
         Path result = instance.route( a, f );
-        System.out.println( "expected: " + expResult );
-        System.out.println( "result: " + result );
+//        System.out.println( "expected: " + expResult );
+//        System.out.println( "result: " + result );
         assertEquals( expResult, result );
 //        System.out.println( "result path: " + result );
     }
