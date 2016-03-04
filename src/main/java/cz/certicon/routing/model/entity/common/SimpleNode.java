@@ -120,7 +120,7 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public String toString() {
-        return "SimpleNode{" + "coordinates=" + coordinates + ", distance=" + distance + ", label=" + label + ", predecessorEdge=" + predecessorEdge + '}';
+        return "SimpleNode{" + "coordinates=" + coordinates + ", distance=" + distance + ", label=" + label + '}';
     }
 
     private String generateLabel( int counter ) {

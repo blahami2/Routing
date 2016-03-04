@@ -6,7 +6,7 @@
 package cz.certicon.routing.algorithm.interfaces;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
-import cz.certicon.routing.application.algorithm.data.number.DoubleDistanceFactory;
+import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
@@ -36,7 +36,7 @@ public class NodeDataStructureTest {
 
     private final NodeDataStructureImplFactory factory;
     private final DirectedNeighbourListGraphEntityFactory graphFactory;
-    private final DoubleDistanceFactory distanceFactory;
+    private final LengthDistanceFactory distanceFactory;
     private final List<Node> nodes = new ArrayList<>();
     private final List<Edge> edges = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class NodeDataStructureTest {
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).build();
         this.factory = factory;
         this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
-        this.distanceFactory = new DoubleDistanceFactory();
+        this.distanceFactory = new LengthDistanceFactory();
         int size = 20;
         for ( int i = 1; i < size; i++ ) {
             for ( int j = 1; j < size; j++ ) {

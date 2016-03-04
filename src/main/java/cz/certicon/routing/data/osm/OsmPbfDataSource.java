@@ -93,6 +93,7 @@ public class OsmPbfDataSource implements MapDataSource {
                 lastLat += nodes.getLat( i );
                 lastLon += nodes.getLon( i );
                 Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( lastLat ), parseLon( lastLon ) );
+                n.setLabel( Long.toString( lastId ) );
                 nodeMap.put( lastId, n );
             }
         }
@@ -101,6 +102,7 @@ public class OsmPbfDataSource implements MapDataSource {
         protected void parseNodes( List<Osmformat.Node> nodes ) {
             nodes.stream().forEach( ( node ) -> {
                 Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
+                n.setLabel( Long.toString( node.getId() ) );
                 nodeMap.put( node.getId(), n );
             } );
         }
@@ -119,6 +121,15 @@ public class OsmPbfDataSource implements MapDataSource {
                         return restriction.isAllowed( pairs );
                     } )
                     .forEach( ( w ) -> {
+//                        boolean printThisWay = false;
+//                        long lr = 0;
+//                        for ( Long ref : w.getRefsList() ) {
+//                            lr += ref;
+//                            if ( lr == 130488448 || lr == 26165259 ) {
+//                                System.out.println( "found: " + lr );
+//                                printThisWay = true;
+//                            }
+//                        }
                         // oneway = -1 => reverse the way!!!
                         long lastRef = 0;
                         for ( Long ref : w.getRefsList() ) {
@@ -128,6 +139,7 @@ public class OsmPbfDataSource implements MapDataSource {
                                 sourceNode = nodeMap.get( lastRef );
                             }
                             lastRef += ref;
+
                             if ( sourceNode != null ) {
                                 targetNode = nodeMap.get( lastRef );
 
@@ -139,6 +151,12 @@ public class OsmPbfDataSource implements MapDataSource {
                                 }
                                 // country code and inside city, solve it!
                                 EdgeAttributes edgeAttributes = wayAttributeParser.parse( "CZ", true, pairs, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+
+//                                if ( printThisWay ) {
+//                                    System.out.println( "source = " + sourceNode );
+//                                    System.out.println( "target = " + targetNode );
+//                                    System.out.println( edgeAttributes );
+//                                }
 
                                 Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                         distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
@@ -180,7 +198,7 @@ public class OsmPbfDataSource implements MapDataSource {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
                 if ( list.size() != 2 ) {
-                    node.setLabel( node.getId() + "[" + list.size() + "]" );
+//                    node.setLabel( node.getId() + "[" + list.size() + "]" );
                     graph.addNode( node );
                 } else {
                 }
@@ -190,12 +208,30 @@ public class OsmPbfDataSource implements MapDataSource {
                 List<Edge> list = entry.getValue();
                 if ( list.size() != 2 ) {
                 } else {
-                    Edge a = list.get( 0 );
-                    Edge b = list.get( 1 );
+                    Edge a;
+                    Edge b;
+                    if ( list.get( 0 ).getTargetNode().equals( node ) ) {
+                        a = list.get( 0 );
+                        b = list.get( 1 );
+                    } else {
+                        a = list.get( 1 );
+                        b = list.get( 0 );
+                    }
                     Node nodeA = a.getOtherNode( node );
                     Node nodeB = b.getOtherNode( node );
                     Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
                     newEdge.setAttributes( a.getAttributes().copyWithNewLength( a.getAttributes().getLength() + b.getAttributes().getLength() ) );
+
+//                    if ( node.getLabel().equals( Long.toString( 1825970632L ) )
+//                            || node.getLabel().equals( Long.toString( 3220706718L ) )
+//                            || node.getLabel().equals( Long.toString( 798278046L ) ) ) {
+//                        System.out.println( "found: " + node.getLabel() );
+//                        System.out.println( "edge a: " + a );
+//                        System.out.println( "edge b: " + b );
+//                        System.out.println( "new attributes: " + newEdge.getAttributes() );
+//                        System.out.println( "new nodes: from " + nodeA.getLabel() + " to " + nodeB.getLabel() );
+//                    }
+
 //                    System.out.println( "distance a = " + a.getDistance() );
 //                    System.out.println( "distance b = " + b.getDistance() );
 //                    System.out.println( "distance new = " + newEdge.getDistance() );

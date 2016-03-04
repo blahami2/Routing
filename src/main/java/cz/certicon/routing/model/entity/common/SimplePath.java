@@ -11,8 +11,10 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.utils.SpeedUtils;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -70,6 +72,11 @@ public abstract class SimplePath implements Path {
     @Override
     public Graph getGraph() {
         return graph;
+    }
+
+    @Override
+    public List<Edge> getEdges() {
+        return new ArrayList<>( edges );
     }
 
     @Override

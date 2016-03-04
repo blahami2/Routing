@@ -99,6 +99,7 @@ public class XmlGraphReader implements GraphReader {
                 Node targetNode = nodes.get( targetId );
                 Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
                 edge.setLabel( edgeAttributes.toString() );
+                edge.setAttributes( edgeAttributes );
                 graph.addEdge( edge );
             }
         }

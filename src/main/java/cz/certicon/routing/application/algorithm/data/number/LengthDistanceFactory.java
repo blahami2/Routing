@@ -13,7 +13,7 @@ import cz.certicon.routing.model.entity.EdgeAttributes;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DoubleDistanceFactory implements DistanceFactory {
+public class LengthDistanceFactory implements DistanceFactory {
 
     @Override
     public Distance createZeroDistance() {

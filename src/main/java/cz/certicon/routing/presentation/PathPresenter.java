@@ -36,4 +36,16 @@ public interface PathPresenter {
      * @return this instance
      */
     public PathPresenter display();
+
+    /**
+     * Draws a single path
+     *
+     * @param path an instance of {@link Path} to be displayed
+     * @return this instance
+     */
+    public PathPresenter displayPath( Path path );
+
+    public PathPresenter setDisplayNodeText( boolean displayNodeText );
+
+    public PathPresenter setDisplayEdgeText( boolean displayEdgeText );
 }

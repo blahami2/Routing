@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import java.util.List;
 
 /**
  * The root interface for representation of path (as a sequence of edges)
@@ -101,6 +102,8 @@ public interface Path extends Iterable<Edge> {
      * @return integer amount of edges
      */
     public int size();
+    
+    public List<Edge> getEdges();
 
     /**
      * Creates a {@link Spliterator} over the elements in this collection.

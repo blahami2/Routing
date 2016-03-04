@@ -6,7 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.application.algorithm.data.number.DoubleDistanceFactory;
+import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtGraphEntityFactory;
@@ -34,7 +34,7 @@ public class DirectedGraphTest {
 
     private final int LOOPS = 10;
 
-    static final DoubleDistanceFactory distanceFactory = new DoubleDistanceFactory();
+    static final LengthDistanceFactory distanceFactory = new LengthDistanceFactory();
     private final GraphEntityFactory graphFactory;
 
     public DirectedGraphTest( GraphEntityFactory graphFactory ) {
