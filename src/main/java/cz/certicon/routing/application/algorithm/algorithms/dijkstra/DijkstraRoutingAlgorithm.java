@@ -13,6 +13,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
@@ -32,7 +33,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         this.endCondition = new EndCondition() {
             @Override
             public boolean isFinished( Graph graph, Node sourceNode, Node targetNode, Node currentNode ) {
-                return targetNode.equals( currentNode);
+                return targetNode.equals( currentNode );
             }
 
             @Override
@@ -92,6 +93,18 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             }
             // foreach neighbour T of node S
             getGraph().getOutgoingEdgesOf( currentNode ).stream().forEach( ( edge ) -> {
+//                {
+//                    Coordinate first = new Coordinate( 50.077595, 14.4304993 ); // 352744338
+//                    Coordinate second = new Coordinate( 50.0791829, 14.4327469 ); // 25936035
+//                    Node sourceNode = edge.getSourceNode();
+//                    Node targetNode = edge.getTargetNode();
+//                    if ( ( sourceNode.getCoordinates().equals( first ) && targetNode.getCoordinates().equals( second ) )
+//                            || ( sourceNode.getCoordinates().equals( second ) && targetNode.getCoordinates().equals( first ) ) ) {
+//                        System.out.println( edge );
+//                        System.out.println( "outgoing edges of: " + currentNode );
+//                    }
+//                }
+
 //                System.out.println( "edge = " + edge.getLabel() );
 //                System.out.println( "nodes: s = " + edge.getSourceNode().getLabel() + ", t = " + edge.getTargetNode().getLabel() );
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );

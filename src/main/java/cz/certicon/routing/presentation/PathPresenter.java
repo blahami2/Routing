@@ -44,6 +44,14 @@ public interface PathPresenter {
      * @return this instance
      */
     public PathPresenter displayPath( Path path );
+    
+    /**
+     * Draws a single path in steps (time intervals defined by the parameter millis)
+     * @param path an instance of {@link Path} to be displayed
+     * @param millis time interval in milliseconds between two subsequent steps
+     * @return  this instance
+     */
+    public PathPresenter displayPath( Path path, int millis );
 
     public PathPresenter setDisplayNodeText( boolean displayNodeText );
 

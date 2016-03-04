@@ -138,6 +138,11 @@ public class JxMapViewerFrame implements PathPresenter {
 
     @Override
     public PathPresenter displayPath( Path path ) {
+        return displayPath( path, -1 );
+    }
+
+    @Override
+    public PathPresenter displayPath( Path path, int millis ) {
         frame = new JFrame( "map" );
         frame.setContentPane( mapViewer );
         frame.setSize( 800, 600 );
@@ -190,10 +195,12 @@ public class JxMapViewerFrame implements PathPresenter {
             painters.add( p );
             CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
             mapViewer.setOverlayPainter( painter );
-            try {
-                Thread.sleep( 500 );
-            } catch ( InterruptedException ex ) {
-                Logger.getLogger( JxMapViewerFrame.class.getName() ).log( Level.SEVERE, null, ex );
+            if ( millis > 0 ) {
+                try {
+                    Thread.sleep( millis );
+                } catch ( InterruptedException ex ) {
+                    Logger.getLogger( JxMapViewerFrame.class.getName() ).log( Level.SEVERE, null, ex );
+                }
             }
         }
         addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );

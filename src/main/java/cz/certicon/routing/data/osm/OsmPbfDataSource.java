@@ -125,10 +125,24 @@ public class OsmPbfDataSource implements MapDataSource {
 //                        long lr = 0;
 //                        for ( Long ref : w.getRefsList() ) {
 //                            lr += ref;
-//                            if ( lr == 130488448 || lr == 26165259 ) {
-//                                System.out.println( "found: " + lr );
+//                            Node node = nodeMap.get( lr );
+//                            if ( node.getCoordinates().equals( new Coordinate( 50.0791829000, 14.4327469000 ) ) ) {
+//                                System.out.println( "found first: " + lr );
 //                                printThisWay = true;
 //                            }
+//                            if ( node.getCoordinates().equals( new Coordinate( 50.077595, 14.4304993 ) ) ) {
+//                                System.out.println( "found second: " + lr );
+//                                printThisWay = true;
+//                            }
+//                        }
+//                        if ( printThisWay ) {
+//                            StringBuilder sb = new StringBuilder();
+//                            for ( int i = 0; i < w.getKeysCount(); i++ ) {
+//                                String key = getStringById( w.getKeys( i ) );
+//                                String value = getStringById( w.getVals( i ) );
+//                                sb.append( key ).append( "=" ).append( value ).append( "\n" );
+//                            }
+//                            System.out.println( sb.toString() );
 //                        }
                         // oneway = -1 => reverse the way!!!
                         long lastRef = 0;
@@ -222,9 +236,14 @@ public class OsmPbfDataSource implements MapDataSource {
                     Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
                     newEdge.setAttributes( a.getAttributes().copyWithNewLength( a.getAttributes().getLength() + b.getAttributes().getLength() ) );
 
-//                    if ( node.getLabel().equals( Long.toString( 1825970632L ) )
-//                            || node.getLabel().equals( Long.toString( 3220706718L ) )
-//                            || node.getLabel().equals( Long.toString( 798278046L ) ) ) {
+//                    if ( node.getLabel().equals( Long.toString( 352744338L ) )
+//                            || node.getLabel().equals( Long.toString( 8810008L ) )
+//                            || node.getLabel().equals( Long.toString( 271021678L ) )
+//                            || node.getLabel().equals( Long.toString( 271021161L ) )
+//                            || node.getLabel().equals( Long.toString( 2266700742L ) )
+//                            || node.getLabel().equals( Long.toString( 8810009L ) )
+//                            || node.getLabel().equals( Long.toString( 25936035L ) ) ) {
+//                        System.out.println( "==================================================" );
 //                        System.out.println( "found: " + node.getLabel() );
 //                        System.out.println( "edge a: " + a );
 //                        System.out.println( "edge b: " + b );

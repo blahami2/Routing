@@ -14,7 +14,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 class DoubleDistance implements Distance {
 
     private final double dist;
-    private static final double EPS = 10E-14;
+    private static final double EPS = 10E-10;
 
     public DoubleDistance() {
         this.dist = Double.POSITIVE_INFINITY;

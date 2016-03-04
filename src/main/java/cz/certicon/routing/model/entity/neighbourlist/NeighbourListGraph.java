@@ -10,6 +10,7 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -118,19 +119,21 @@ public class NeighbourListGraph implements Graph {
 
     @Override
     public Set<Edge> getEdgesOf( Node node ) {
-        Set<Edge> edgeSet = getIncomingEdgesOf( node );
-        edgeSet.addAll( getOutgoingEdgesOf( node ) );
-        return edgeSet;
+        return safeType( node ).getEdges();
     }
 
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
-        return safeType( node ).getEdges();
+        return getEdgesOf( node ).stream()
+                .filter( ( edge ) -> ( !edge.getAttributes().isOneWay() || ( node.equals( edge.getTargetNode()) ) ) )
+                .collect( Collectors.toSet() );
     }
 
     @Override
     public Set<Edge> getOutgoingEdgesOf( Node node ) {
-        return safeType( node ).getEdges();
+        return getEdgesOf( node ).stream()
+                .filter( ( edge ) -> ( !edge.getAttributes().isOneWay() || ( node.equals( edge.getSourceNode() ) ) ) )
+                .collect( Collectors.toSet() );
     }
 
     @Override
