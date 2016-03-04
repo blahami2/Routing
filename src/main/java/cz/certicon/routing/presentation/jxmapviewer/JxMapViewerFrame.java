@@ -185,17 +185,17 @@ public class JxMapViewerFrame implements PathPresenter {
                 }
                 currentNode = edge.getSourceNode();
             }
-            RoutePainter routePainter = new RoutePainter( track );
-            waypoints.stream().forEach( ( waypoint ) -> {
-                mapViewer.add( waypoint.getComponent() );
-            } );
-            painters.add( routePainter );
-            LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
-            p.setWaypoints( waypoints );
-            painters.add( p );
-            CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
-            mapViewer.setOverlayPainter( painter );
             if ( millis > 0 ) {
+                RoutePainter routePainter = new RoutePainter( track );
+                waypoints.stream().forEach( ( waypoint ) -> {
+                    mapViewer.add( waypoint.getComponent() );
+                } );
+                painters.add( routePainter );
+                LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
+                p.setWaypoints( waypoints );
+                painters.add( p );
+                CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
+                mapViewer.setOverlayPainter( painter );
                 try {
                     Thread.sleep( millis );
                 } catch ( InterruptedException ex ) {
