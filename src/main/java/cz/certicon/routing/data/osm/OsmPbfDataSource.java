@@ -26,6 +26,7 @@ import cz.certicon.routing.data.MapDataSource;
 import cz.certicon.routing.data.Restriction;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.EdgeAttributes;
+import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -35,12 +36,35 @@ import java.util.LinkedList;
  */
 public class OsmPbfDataSource implements MapDataSource {
 
+    private static final double SPEED_EPS = 10E-2;
+
     private final DataSource source;
     private Restriction restriction;
+    private final List<JoinCondition> joinConditions;
 
     public OsmPbfDataSource( DataSource source ) throws IOException {
         this.source = source;
         this.restriction = Restriction.getDefault();
+        this.joinConditions = new LinkedList<>();
+
+        joinConditions.add( ( Node node, List<Edge> edges ) -> ( edges.size() == 2 ) );
+        joinConditions.add( ( Node node, List<Edge> edges ) -> {
+            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
+            return edgePair.first.getAttributes().isOneWay() == edgePair.second.getAttributes().isOneWay();
+        } );
+        joinConditions.add( ( Node node, List<Edge> edges ) -> {
+            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
+            return edgePair.first.getAttributes().isPaid() == edgePair.second.getAttributes().isPaid();
+        } );
+        joinConditions.add( ( Node node, List<Edge> edges ) -> {
+            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
+            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed(), edgePair.second.getAttributes().getSpeed(), SPEED_EPS );
+        } );
+    }
+
+    public OsmPbfDataSource addJoinCondition( JoinCondition joinCondition ) {
+        this.joinConditions.add( joinCondition );
+        return this;
     }
 
     @Override
@@ -171,7 +195,6 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( "target = " + targetNode );
 //                                    System.out.println( edgeAttributes );
 //                                }
-
                                 Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                         distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
                                 edge.setAttributes( edgeAttributes );
@@ -204,6 +227,10 @@ public class OsmPbfDataSource implements MapDataSource {
 //            System.out.println( "Got header block." );
         }
 
+        private boolean join( Node node, List<Edge> edges ) {
+            return joinConditions.stream().noneMatch( ( joinCondition ) -> ( !joinCondition.shouldJoin( node, edges ) ) );
+        }
+
         @Override
         public void complete() {
             System.out.println( "Complete loading! Starting processing." );
@@ -211,17 +238,15 @@ public class OsmPbfDataSource implements MapDataSource {
             for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
-                if ( list.size() != 2 ) {
+                if ( !join( node, list ) ) {
 //                    node.setLabel( node.getId() + "[" + list.size() + "]" );
                     graph.addNode( node );
-                } else {
                 }
             }
             for ( Map.Entry<Node, List<Edge>> entry : nodeEdgeMap.entrySet() ) {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
-                if ( list.size() != 2 ) {
-                } else {
+                if ( join( node, list ) ) {
                     Edge a;
                     Edge b;
                     if ( list.get( 0 ).getTargetNode().equals( node ) ) {
@@ -250,7 +275,6 @@ public class OsmPbfDataSource implements MapDataSource {
 //                        System.out.println( "new attributes: " + newEdge.getAttributes() );
 //                        System.out.println( "new nodes: from " + nodeA.getLabel() + " to " + nodeB.getLabel() );
 //                    }
-
 //                    System.out.println( "distance a = " + a.getDistance() );
 //                    System.out.println( "distance b = " + b.getDistance() );
 //                    System.out.println( "distance new = " + newEdge.getDistance() );
