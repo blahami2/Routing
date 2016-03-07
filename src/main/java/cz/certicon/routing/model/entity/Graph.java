@@ -57,15 +57,6 @@ public interface Graph {
     public Graph removeEdge( Edge edge );
 
     /**
-     * Removes edge from the graph based on given source and target nodes.
-     *
-     * @param sourceNode an instance of {@link Node} to determine the source node of an {@link Edge}
-     * @param targetNode an instance of {@link Node} to determine the target node of an {@link Edge}
-     * @return this instance
-     */
-    public Graph removeEdge( Node sourceNode, Node targetNode );
-
-    /**
      * Getter for the source node of the given edge
      *
      * @param edge an instance of {@link Edge} to determine the node

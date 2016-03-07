@@ -91,22 +91,6 @@ class DirectedNeighbourListGraph implements DirectedGraph {
     }
 
     @Override
-    public Graph removeEdge( Node sourceNode, Node targetNode ) {
-        Edge removeEdge = null;
-        for ( Edge edge : edges ) {
-            if ( safeType( edge ).getSourceNode().equals( sourceNode ) && safeType( edge ).getTargetNode().equals( targetNode ) ) {
-                removeEdge = edge;
-                break;
-            }
-        }
-        if ( removeEdge != null ) {
-            safeType( removeEdge.getSourceNode() ).removeEdge( removeEdge );
-            edges.remove( removeEdge );
-        }
-        return this;
-    }
-
-    @Override
     public Node getSourceNodeOf( Edge edge ) {
         return safeType( edge ).getSourceNode();
     }

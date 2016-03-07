@@ -66,12 +66,6 @@ class DirectedJgraphtGraph implements DirectedGraph {
     }
 
     @Override
-    public Graph removeEdge( Node sourceNode, Node targetNode ) {
-        innerGraph.removeEdge( sourceNode, targetNode );
-        return this;
-    }
-
-    @Override
     public Node getSourceNodeOf( Edge edge ) {
         return innerGraph.getEdgeSource( edge );
     }

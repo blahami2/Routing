@@ -149,23 +149,7 @@ public class GraphTest {
         instance.removeEdge( edge );
         assertFalse( containsEdge( instance, edge ) );
     }
-
-    /**
-     * Test of removeEdge method, of class Graph.
-     */
-    @Test
-    public void testRemoveEdge_Node_Node() {
-        System.out.println( "removeEdge" );
-        Graph instance = initGraph( graphFactory, LOOPS );
-        Node a = graphFactory.createNode( Node.Id.generateId(), LOOPS - 1, 0 );
-        Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
-        instance.addEdge( a, b, edge );
-        assertTrue( containsEdge( instance, edge ) );
-        instance.removeEdge( a, b );
-        assertFalse( containsEdge( instance, edge ) );
-    }
-
+    
     /**
      * Test of getSourceNodeOf method, of class Graph.
      */
