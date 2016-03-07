@@ -101,6 +101,11 @@ public class GraphTest {
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
+        Edge parallelEdge = createEdge( graphFactory, distanceFactory, a, b );
+        assertFalse( containsEdge( instance, parallelEdge ) );
+        instance.addEdge( a, b, parallelEdge );
+        assertTrue( containsEdge( instance, edge ) );
+        assertTrue( containsEdge( instance, parallelEdge ) );
     }
 
     /**
