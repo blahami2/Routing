@@ -11,8 +11,8 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import org.jgrapht.EdgeFactory;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import org.jgrapht.graph.DirectedMultigraph;
 
 /**
  *
@@ -42,7 +42,7 @@ public class JgraphtDirectedGraphEntityFactory implements GraphEntityFactory {
 
     @Override
     public Graph createGraph() {
-        return new DirectedJgraphtGraph( new SimpleDirectedGraph<>( new EdgeFactory<Node, Edge>() {
+        return new DirectedJgraphtGraph( new DirectedMultigraph<>( new EdgeFactory<Node, Edge>() {
             @Override
             public Edge createEdge( Node sourceNode, Node targetNode ) {
                 return new EdgeImpl( Edge.Id.generateId(), sourceNode, targetNode );

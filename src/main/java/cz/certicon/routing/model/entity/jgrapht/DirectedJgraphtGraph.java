@@ -19,10 +19,11 @@ import org.jgrapht.EdgeFactory;
  */
 class DirectedJgraphtGraph implements DirectedGraph {
 
-    public final org.jgrapht.DirectedGraph<Node, Edge> innerGraph;
+    public final org.jgrapht.graph.DirectedMultigraph<Node, Edge> innerGraph;
 
-    public DirectedJgraphtGraph( org.jgrapht.DirectedGraph<Node, Edge> innerGraph ) {
+    public DirectedJgraphtGraph( org.jgrapht.graph.DirectedMultigraph<Node, Edge> innerGraph ) {
         this.innerGraph = innerGraph;
+        
     }
 
     @Override

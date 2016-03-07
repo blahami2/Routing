@@ -17,9 +17,9 @@ import java.util.Set;
  */
 class JgraphtGraph implements Graph {
     
-    public final org.jgrapht.Graph<Node, Edge> innerGraph;
+    public final org.jgrapht.graph.Multigraph<Node, Edge> innerGraph;
 
-    public JgraphtGraph( org.jgrapht.Graph<Node, Edge> innerGraph ) {
+    public JgraphtGraph( org.jgrapht.graph.Multigraph<Node, Edge> innerGraph ) {
         this.innerGraph = innerGraph;
     }
 

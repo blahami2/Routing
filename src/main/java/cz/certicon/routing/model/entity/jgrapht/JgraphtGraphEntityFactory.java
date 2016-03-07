@@ -13,6 +13,7 @@ import cz.certicon.routing.model.entity.Path;
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.SimpleGraph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import org.jgrapht.graph.Multigraph;
 
 /**
  *
@@ -42,7 +43,7 @@ public class JgraphtGraphEntityFactory implements GraphEntityFactory {
 
     @Override
     public Graph createGraph() {
-        return new JgraphtGraph( new SimpleGraph<>( new EdgeFactory<Node, Edge>() {
+        return new JgraphtGraph( new Multigraph<>( new EdgeFactory<Node, Edge>() {
             @Override
             public Edge createEdge( Node sourceNode, Node targetNode ) {
                 return new EdgeImpl( Edge.Id.generateId(),sourceNode, targetNode );
