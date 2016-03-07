@@ -26,6 +26,7 @@ import org.jdesktop.swingx.OSMTileFactoryInfo;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
+import org.jdesktop.swingx.mapviewer.Waypoint;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
@@ -120,9 +121,9 @@ public class JxMapViewerFrame implements PathPresenter {
         mapKit.setTileFactory( tileFactory );
 //            mapViewer.setTileFactory( tileFactory );
         mapViewer.zoomToBestFit( fitGeoPosition, 0.8 );
-        waypoints.stream().forEach( ( waypoint ) -> {
+        for ( LabelWaypoint waypoint : waypoints ) {
             mapViewer.add( waypoint.getComponent() );
-        } );
+        }
         LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
         p.setWaypoints( waypoints );
         painters.add( p );
@@ -187,9 +188,9 @@ public class JxMapViewerFrame implements PathPresenter {
             }
             if ( millis > 0 ) {
                 RoutePainter routePainter = new RoutePainter( track );
-                waypoints.stream().forEach( ( waypoint ) -> {
+                for ( LabelWaypoint waypoint : waypoints ) {
                     mapViewer.add( waypoint.getComponent() );
-                } );
+                }
                 painters.add( routePainter );
                 LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
                 p.setWaypoints( waypoints );
@@ -206,9 +207,9 @@ public class JxMapViewerFrame implements PathPresenter {
         addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );
 
         RoutePainter routePainter = new RoutePainter( track );
-        waypoints.stream().forEach( ( waypoint ) -> {
+        for(LabelWaypoint waypoint : waypoints){
             mapViewer.add( waypoint.getComponent() );
-        } );
+        }
         painters.add( routePainter );
         LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
         p.setWaypoints( waypoints );

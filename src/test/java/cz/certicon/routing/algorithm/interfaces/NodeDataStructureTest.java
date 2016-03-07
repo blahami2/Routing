@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.algorithm.interfaces;
 
+import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
@@ -24,7 +25,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 
 /**
@@ -79,10 +79,16 @@ public class NodeDataStructureTest {
     public void testExtractMin() {
         System.out.println( "extractMin" );
         NodeDataStructure instance = factory.createNodeDataStructure();
-        nodes.stream().forEach( ( node ) -> {
+        for ( Node node : nodes ) {
             instance.add( node );
-        } );
-        Node expResult = nodes.stream().min( ( Node o1, Node o2 ) -> o1.getDistance().compareTo( o2.getDistance() ) ).get();
+        }
+        Node min = nodes.get( 0 );
+        for ( Node node : nodes ) {
+            if ( min.getDistance().isGreaterThan( node.getDistance() ) ) {
+                min = node;
+            }
+        }
+        Node expResult = min;
         Node result = instance.extractMin();
         assertEquals( expResult, result );
     }
@@ -133,9 +139,9 @@ public class NodeDataStructureTest {
     public void testClear() {
         System.out.println( "clear" );
         NodeDataStructure instance = factory.createNodeDataStructure();
-        nodes.stream().forEach( ( node ) -> {
+        for ( Node node : nodes ) {
             instance.add( node );
-        } );
+        }
         instance.clear();
         assertTrue( instance.isEmpty() );
     }

@@ -57,7 +57,12 @@ public class XmlGraphWriter implements GraphWriter {
         }
         try {
             List<Node> sortedNodes = new ArrayList<>( graph.getNodes() );
-            Collections.sort( sortedNodes, ( Node o1, Node o2 ) -> o1.getId().compareTo( o2.getId() ) );
+            Collections.sort(sortedNodes, new Comparator<Node>() {
+                @Override
+                public int compare( Node o1, Node o2 ) {
+                    return o1.getId().compareTo( o2.getId() );
+                }
+            });
             for ( Node node : sortedNodes ) {
                 writer.writeStartElement( NODE.shortLowerName() );
                 writer.writeAttribute( ID.shortLowerName(), Node.Id.toString( node.getId() ) );
@@ -66,7 +71,12 @@ public class XmlGraphWriter implements GraphWriter {
                 writer.writeEndElement();
             }
             List<Edge> sortedEdges = new ArrayList<>( graph.getEdges() );
-            Collections.sort( sortedEdges, ( Edge o1, Edge o2 ) -> o1.getId().compareTo( o2.getId() ) );
+            Collections.sort(sortedEdges, new Comparator<Edge>() {
+                @Override
+                public int compare( Edge o1, Edge o2 ) {
+                    return o1.getId().compareTo( o2.getId() );
+                }
+            });
             for ( Edge edge : sortedEdges ) {
                 writer.writeStartElement( EDGE.shortLowerName() );
                 writer.writeAttribute( ID.shortLowerName(), Edge.Id.toString( edge.getId() ) );

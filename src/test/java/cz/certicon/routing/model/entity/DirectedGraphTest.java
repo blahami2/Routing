@@ -9,9 +9,7 @@ import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
-import cz.certicon.routing.model.entity.jgrapht.JgraphtGraphEntityFactory;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
-import cz.certicon.routing.model.entity.neighbourlist.NeighbourListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -205,9 +203,11 @@ public class DirectedGraphTest {
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
         Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
-        assertEquals( new HashSet<Edge>( Arrays.asList() ),
+        Set<Edge> expResult = new HashSet<>();
+        assertEquals( expResult,
                 instance.getIncomingEdgesOf( a ) );
-        assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
+        expResult.add( edge );
+        assertEquals( expResult,
                 instance.getIncomingEdgesOf( b ) );
     }
 
@@ -222,10 +222,12 @@ public class DirectedGraphTest {
         Node b = graphFactory.createNode( Node.Id.generateId(), 0, LOOPS - 1 );
         Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
         instance.addEdge( edge );
-        assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
+        Set<Edge> expResult = new HashSet<>();
+        assertEquals( expResult,
+                instance.getOutgoingEdgesOf(b ) );
+        expResult.add( edge );
+        assertEquals( expResult,
                 instance.getOutgoingEdgesOf( a ) );
-        assertEquals( new HashSet<Edge>( Arrays.asList() ),
-                instance.getOutgoingEdgesOf( b ) );
     }
 
     /**
@@ -304,10 +306,6 @@ public class DirectedGraphTest {
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getEdges() );
     }
-
-
-
-
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode, boolean oneWay ) {
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( oneWay ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();

@@ -13,6 +13,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
+import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
@@ -91,7 +92,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 return endCondition.getResult( getGraph(), getEntityAbstractFactory(), nodeEqToFrom, nodeEqToTo );
             }
             // foreach neighbour T of node S
-            getGraph().getOutgoingEdgesOf( currentNode ).stream().forEach( ( edge ) -> {
+            for ( Edge edge : getGraph().getOutgoingEdgesOf( currentNode ) ) {
 //                {
 //                    Coordinate first = new Coordinate( 50.077595, 14.4304993 ); // 352744338
 //                    Coordinate second = new Coordinate( 50.0791829, 14.4327469 ); // 25936035
@@ -116,7 +117,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                     endNode.setPredecessorEdge( edge );
                     nodeDataStructure.notifyDataChange( endNode );
                 }
-            } );
+            }
         }
         throw new NoPathException( from, to );
     }

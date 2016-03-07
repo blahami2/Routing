@@ -37,10 +37,18 @@ public class CoordinateUtils {
                     sin( lat )
             ) );
         }
+        double sumX = 0;
+        double sumY = 0;
+        double sumZ = 0;
+        for(CartesianCoords c : ccoords){
+            sumX += c.x;
+            sumY += c.y;
+            sumZ += c.z;
+        }
         CartesianCoords mid = new CartesianCoords(
-                ccoords.stream().mapToDouble( c -> c.x ).sum() / ccoords.size(),
-                ccoords.stream().mapToDouble( c -> c.y ).sum() / ccoords.size(),
-                ccoords.stream().mapToDouble( c -> c.z ).sum() / ccoords.size()
+                sumX / ccoords.size(),
+                sumY / ccoords.size(),
+                sumZ / ccoords.size()
         );
         double lon = atan2( mid.y, mid.x );
         double hyp = sqrt( mid.x * mid.x + mid.y * mid.y );

@@ -45,9 +45,9 @@ public class NeighbourListGraph implements Graph {
     @Override
     public Graph removeNode( Node node ) {
         nodes.remove( node );
-        getEdgesOf( node ).stream().forEach( ( edge ) -> {
+        for ( Edge edge : getEdgesOf( node ) ) {
             edges.remove( edge );
-        } );
+        }
         return this;
     }
 
@@ -107,16 +107,24 @@ public class NeighbourListGraph implements Graph {
 
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
-        return getEdgesOf( node ).stream()
-                .filter( ( edge ) -> ( !edge.getAttributes().isOneWay() || ( node.equals( edge.getTargetNode()) ) ) )
-                .collect( Collectors.toSet() );
+        Set<Edge> edgeSet = new HashSet<>();
+        for(Edge edge : getEdgesOf( node )){
+            if(!edge.getAttributes().isOneWay() || node.equals( edge.getTargetNode())){
+                edgeSet.add( edge );
+            }
+        }
+        return edgeSet;
     }
 
     @Override
     public Set<Edge> getOutgoingEdgesOf( Node node ) {
-        return getEdgesOf( node ).stream()
-                .filter( ( edge ) -> ( !edge.getAttributes().isOneWay() || ( node.equals( edge.getSourceNode() ) ) ) )
-                .collect( Collectors.toSet() );
+        Set<Edge> edgeSet = new HashSet<>();
+        for(Edge edge : getEdgesOf( node )){
+            if(!edge.getAttributes().isOneWay() || node.equals( edge.getSourceNode())){
+                edgeSet.add( edge );
+            }
+        }
+        return edgeSet;
     }
 
     @Override

@@ -43,12 +43,17 @@ public class Restriction {
 
     public boolean isAllowed( List<Pair> pairs ) {
 //        System.out.println( "forbidden check" );
-        if ( pairs.stream().noneMatch( ( p ) -> ( isInMap( forbidden, p ) ) ) ) {
-        } else {
-            return false;
+        for(Pair pair :pairs){
+            if(isInMap( forbidden, pair)){
+                return false;
+            }
         }
-//        System.out.println( "allowed check" );
-        return pairs.stream().anyMatch( ( p ) -> ( isInMap( allowed, p ) ) );
+        for(Pair pair : pairs){
+            if(isInMap( allowed, pair )){
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isInMap( Map<String, Map<String, Integer>> keys, Pair pair ) {

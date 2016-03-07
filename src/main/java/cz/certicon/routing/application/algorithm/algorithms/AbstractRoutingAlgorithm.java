@@ -5,7 +5,9 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms;
 
+import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.NodeEvaluator;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
@@ -40,7 +42,19 @@ public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
         this.graph = graph;
         this.entityAbstractFactory = entityAbstractFactory;
         this.distanceFactory = distanceFactory;
-        this.routingConfiguration = () -> ( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) -> sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
+        this.routingConfiguration = new RoutingConfiguration() {
+            private final NodeEvaluator nodeEvaluator = new NodeEvaluator() {
+                @Override
+                public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
+                    return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
+                }
+            };
+
+            @Override
+            public NodeEvaluator getNodeEvaluator() {
+                return nodeEvaluator;
+            }
+        };
     }
 
     /**

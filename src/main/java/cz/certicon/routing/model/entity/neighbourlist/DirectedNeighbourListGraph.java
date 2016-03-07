@@ -45,9 +45,9 @@ class DirectedNeighbourListGraph implements DirectedGraph {
     @Override
     public Graph removeNode( Node node ) {
         nodes.remove( node );
-        getEdgesOf( node ).stream().forEach( ( edge ) -> {
+        for ( Edge edge : getEdgesOf( node ) ) {
             edges.remove( edge );
-        } );
+        }
         return this;
     }
 
@@ -119,9 +119,11 @@ class DirectedNeighbourListGraph implements DirectedGraph {
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
         Set<Edge> edgeSet = new HashSet<>();
-        edges.stream().filter( ( edge ) -> ( safeType( edge ).getTargetNode().equals( node ) ) ).forEach( ( edge ) -> {
-            edgeSet.add( edge );
-        } );
+        for(Edge edge : edges){
+            if(safeType( edge ).getTargetNode().equals( node )){
+                edgeSet.add( edge );
+            }
+        }
         return edgeSet;
     }
 

@@ -64,7 +64,10 @@ public class XmlCoordinateReader implements CoordinateReader {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            Set<Edge.Id> collect = edges.stream().map( e -> e.getId() ).collect( Collectors.toSet() );
+            Set<Edge.Id> collect = new HashSet<>();
+            for ( Edge edge : edges ) {
+                collect.add( edge.getId() );
+            }
             edgeHandler = new EdgeHandler( collect );
             saxParser.parse( source.getInputStream(), edgeHandler );
         } catch ( UglyExceptionMechanism notEx ) {
@@ -77,7 +80,9 @@ public class XmlCoordinateReader implements CoordinateReader {
 
     private Map<Edge, List<Coordinate>> convert( Set<Edge> edges, Map<Edge.Id, List<Coordinate>> coords ) {
         Map<Edge, List<Coordinate>> map = new HashMap<>();
-        edges.stream().forEach( e -> map.put( e, coords.get( e.getId() ) ) );
+        for ( Edge edge : edges ) {
+            map.put( edge, coords.get( edge.getId() ) );
+        }
         return map;
     }
 

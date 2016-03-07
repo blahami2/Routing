@@ -18,16 +18,16 @@ import org.jdesktop.swingx.mapviewer.WaypointPainter;
  */
 public class LabelWaypointOverlayPainter extends WaypointPainter<LabelWaypoint> {
 
-        @Override
-        protected void doPaint( Graphics2D g, JXMapViewer jxMapViewer, int width, int height ) {
-            getWaypoints().stream().forEach( ( waypoint ) -> {
-                Point2D point = jxMapViewer.getTileFactory().geoToPixel(
-                        waypoint.getPosition(), jxMapViewer.getZoom() );
-                Rectangle rectangle = jxMapViewer.getViewportBounds();
-                int buttonX = (int) ( point.getX() - rectangle.getX() );
-                int buttonY = (int) ( point.getY() - rectangle.getY() );
-                JComponent button = waypoint.getComponent();
-                button.setLocation( buttonX - button.getWidth() / 2, buttonY - button.getHeight() / 2 );
-            } );
+    @Override
+    protected void doPaint( Graphics2D g, JXMapViewer jxMapViewer, int width, int height ) {
+        for ( LabelWaypoint waypoint : getWaypoints() ) {
+            Point2D point = jxMapViewer.getTileFactory().geoToPixel(
+                    waypoint.getPosition(), jxMapViewer.getZoom() );
+            Rectangle rectangle = jxMapViewer.getViewportBounds();
+            int buttonX = (int) ( point.getX() - rectangle.getX() );
+            int buttonY = (int) ( point.getY() - rectangle.getY() );
+            JComponent button = waypoint.getComponent();
+            button.setLocation( buttonX - button.getWidth() / 2, buttonY - button.getHeight() / 2 );
         }
     }
+}

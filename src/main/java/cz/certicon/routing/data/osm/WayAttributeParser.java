@@ -134,9 +134,9 @@ public class WayAttributeParser {
 
     private void error( List<Pair> pairs ) {
         StringBuilder sb = new StringBuilder();
-        pairs.forEach( ( pair ) -> {
+        for ( Pair pair : pairs ) {
             sb.append( pair.key ).append( "=" ).append( pair.value ).append( "\n" );
-        } );
+        }
         throw new AssertionError( "Unknown speed! Attributes: \n" + sb.toString() );
     }
 
@@ -165,12 +165,13 @@ public class WayAttributeParser {
 
         public static MatchMap create( List<Pair> pairs, List<String> groups ) {
             MatchMap newMap = new MatchMap();
-            pairs.stream().forEach( ( pair ) -> {
+            for ( Pair pair : pairs ) {
                 newMap.add( pair );
-            } );
-            groups.stream().forEach( ( group ) -> {
+            }
+
+            for ( String group : groups ) {
                 newMap.add( group );
-            } );
+            }
             return newMap;
         }
 

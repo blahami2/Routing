@@ -29,6 +29,7 @@ import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 /**
  *
@@ -47,26 +48,46 @@ public class OsmPbfDataSource implements MapDataSource {
         this.restriction = Restriction.getDefault();
         this.joinConditions = new LinkedList<>();
 
-        joinConditions.add( ( Node node, List<Edge> edges ) -> ( edges.size() == 2 ) );
-        joinConditions.add( ( Node node, List<Edge> edges ) -> {
-            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return edgePair.first.getAttributes().isOneWay() == edgePair.second.getAttributes().isOneWay();
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                return edges.size() == 2;
+            }
         } );
-        joinConditions.add( ( Node node, List<Edge> edges ) -> {
-            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return edgePair.first.getAttributes().isPaid() == edgePair.second.getAttributes().isPaid();
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
+                return edgePair.first.getAttributes().isOneWay() == edgePair.second.getAttributes().isOneWay();
+            }
         } );
-        joinConditions.add( ( Node node, List<Edge> edges ) -> {
-            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( true ), edgePair.second.getAttributes().getSpeed( true ), SPEED_EPS );
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
+                return edgePair.first.getAttributes().isPaid() == edgePair.second.getAttributes().isPaid();
+            }
         } );
-        joinConditions.add( ( Node node, List<Edge> edges ) -> {
-            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( false ), edgePair.second.getAttributes().getSpeed( false ), SPEED_EPS );
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
+                return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( true ), edgePair.second.getAttributes().getSpeed( true ), SPEED_EPS );
+            }
         } );
-        joinConditions.add( ( Node node, List<Edge> edges ) -> {
-            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return edgePair.first.getTargetNode().equals( node ) && edgePair.second.getSourceNode().equals( node );
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
+                return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( false ), edgePair.second.getAttributes().getSpeed( false ), SPEED_EPS );
+            }
+        } );
+        joinConditions.add( new JoinCondition() {
+            @Override
+            public boolean shouldJoin( Node node, List<Edge> edges ) {
+                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
+                return edgePair.first.getTargetNode().equals( node ) && edgePair.second.getSourceNode().equals( node );
+            }
         } );
     }
 
@@ -132,93 +153,71 @@ public class OsmPbfDataSource implements MapDataSource {
 
         @Override
         protected void parseNodes( List<Osmformat.Node> nodes ) {
-            nodes.stream().forEach( ( node ) -> {
+            for ( Osmformat.Node node : nodes ) {
                 Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 n.setLabel( Long.toString( node.getId() ) );
                 nodeMap.put( node.getId(), n );
-            } );
+            }
         }
 
         @Override
         protected void parseWays( List<Osmformat.Way> ways ) {
             WayAttributeParser wayAttributeParser = new WayAttributeParser();
-            ways.stream()
-                    .filter( ( w ) -> {
-                        List<Restriction.Pair> pairs = new LinkedList<>();
-                        for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                            String key = getStringById( w.getKeys( i ) );
-                            String value = getStringById( w.getVals( i ) );
-                            pairs.add( new Restriction.Pair( key, value ) );
+            List<Osmformat.Way> filteredWays = new LinkedList<>();
+            for ( Osmformat.Way way : ways ) {
+                List<Restriction.Pair> pairs = new LinkedList<>();
+                for ( int i = 0; i < way.getKeysCount(); i++ ) {
+                    String key = getStringById( way.getKeys( i ) );
+                    String value = getStringById( way.getVals( i ) );
+                    pairs.add( new Restriction.Pair( key, value ) );
+                }
+                if ( restriction.isAllowed( pairs ) ) {
+                    filteredWays.add( way );
+                }
+            }
+            for ( Osmformat.Way way : filteredWays ) {
+                long lastRef = 0;
+                for ( Long ref : way.getRefsList() ) {
+                    Node sourceNode = null;
+                    Node targetNode = null;
+                    if ( lastRef != 0 ) {
+                        sourceNode = nodeMap.get( lastRef );
+                    }
+                    lastRef += ref;
+
+                    if ( sourceNode != null ) {
+                        targetNode = nodeMap.get( lastRef );
+
+                        List<WayAttributeParser.Pair> pairs = new LinkedList<>();
+                        for ( int i = 0; i < way.getKeysCount(); i++ ) {
+                            String key = getStringById( way.getKeys( i ) );
+                            String value = getStringById( way.getVals( i ) );
+                            pairs.add( new WayAttributeParser.Pair( key, value ) );
                         }
-                        return restriction.isAllowed( pairs );
-                    } )
-                    .forEach( ( w ) -> {
-//                        boolean printThisWay = false;
-//                        long lr = 0;
-//                        for ( Long ref : w.getRefsList() ) {
-//                            lr += ref;
-//                            Node node = nodeMap.get( lr );
-//                            if ( node.getCoordinates().equals( new Coordinate( 50.0791829000, 14.4327469000 ) ) ) {
-//                                System.out.println( "found first: " + lr );
-//                                printThisWay = true;
-//                            }
-//                            if ( node.getCoordinates().equals( new Coordinate( 50.077595, 14.4304993 ) ) ) {
-//                                System.out.println( "found second: " + lr );
-//                                printThisWay = true;
-//                            }
-//                        }
-//                        if ( printThisWay ) {
-//                            StringBuilder sb = new StringBuilder();
-//                            for ( int i = 0; i < w.getKeysCount(); i++ ) {
-//                                String key = getStringById( w.getKeys( i ) );
-//                                String value = getStringById( w.getVals( i ) );
-//                                sb.append( key ).append( "=" ).append( value ).append( "\n" );
-//                            }
-//                            System.out.println( sb.toString() );
-//                        }
-                        // oneway = -1 => reverse the way!!!
-                        long lastRef = 0;
-                        for ( Long ref : w.getRefsList() ) {
-                            Node sourceNode = null;
-                            Node targetNode = null;
-                            if ( lastRef != 0 ) {
-                                sourceNode = nodeMap.get( lastRef );
-                            }
-                            lastRef += ref;
-
-                            if ( sourceNode != null ) {
-                                targetNode = nodeMap.get( lastRef );
-
-                                List<WayAttributeParser.Pair> pairs = new LinkedList<>();
-                                for ( int i = 0; i < w.getKeysCount(); i++ ) {
-                                    String key = getStringById( w.getKeys( i ) );
-                                    String value = getStringById( w.getVals( i ) );
-                                    pairs.add( new WayAttributeParser.Pair( key, value ) );
-                                }
-                                // country code and inside city, solve it!
-                                EdgeAttributes edgeAttributes = wayAttributeParser.parse( "CZ", true, pairs, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+                        // country code and inside city, solve it!
+                        EdgeAttributes edgeAttributes = wayAttributeParser.parse( "CZ", true, pairs, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
 
 //                                if ( printThisWay ) {
 //                                    System.out.println( "source = " + sourceNode );
 //                                    System.out.println( "target = " + targetNode );
 //                                    System.out.println( edgeAttributes );
 //                                }
-                                Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
-                                        distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
-                                edge.setAttributes( edgeAttributes );
+                        Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
+                                distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
+                        edge.setAttributes( edgeAttributes );
 
 //                                StringBuilder sb = new StringBuilder();
 //                                pairs.forEach( ( pair ) -> {
 //                                    sb.append( pair.key ).append( "=" ).append( pair.value ).append( "\n" );
 //                                } );
 //                                edge.setLabel( edge.getAttributes().toString() + "\n" + sb.toString() );
-                                edge.setCoordinates( Arrays.asList( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+                        edge.setCoordinates( Arrays.asList( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
 //                                edge.setLabel( value );
-                                getFromMap( sourceNode ).add( edge );
-                                getFromMap( targetNode ).add( edge );
-                            }
-                        }
-                    } );
+                        getFromMap( sourceNode ).add( edge );
+                        getFromMap( targetNode ).add( edge );
+                    }
+                }
+            }
         }
 
         private List<Edge> getFromMap( Node node ) {
@@ -236,7 +235,12 @@ public class OsmPbfDataSource implements MapDataSource {
         }
 
         private boolean join( Node node, List<Edge> edges ) {
-            return joinConditions.stream().noneMatch( ( joinCondition ) -> ( !joinCondition.shouldJoin( node, edges ) ) );
+            for(JoinCondition joinCondition : joinConditions){
+                if(!joinCondition.shouldJoin( node, edges )){
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
