@@ -99,11 +99,15 @@ public abstract class SimplePath implements Path {
 
     @Override
     public double getTime() {
-        return edges.stream().mapToDouble( edge -> {
-            double speed = SpeedUtils.kmphToMps( edge.getAttributes().getSpeed() );
+        Node source = sourceNode;
+        double time = 0;
+        for ( Edge edge : edges ) {
+            double speed = edge.getAttributes().getSpeed( edge.getSourceNode().equals( source ) );
             double length = edge.getAttributes().getLength();
-            return length / speed;
-        } ).sum();
+            time += length / speed;
+            source = edge.getOtherNode( source );
+        }
+        return time;
     }
 
     @Override

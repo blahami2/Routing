@@ -11,7 +11,7 @@ package cz.certicon.routing.model.entity;
  */
 public interface EdgeAttributes {
 
-    public double getSpeed();
+    public double getSpeed(boolean forward);
 
     public boolean isOneWay();
 

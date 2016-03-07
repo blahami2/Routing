@@ -72,7 +72,8 @@ public class XmlGraphWriter implements GraphWriter {
                 writer.writeAttribute( ID.shortLowerName(), Edge.Id.toString( edge.getId() ) );
                 writer.writeAttribute( SOURCE.shortLowerName(), Node.Id.toString( edge.getSourceNode().getId()) );
                 writer.writeAttribute( TARGET.shortLowerName(), Node.Id.toString( edge.getTargetNode().getId()) );
-                writer.writeAttribute( SPEED.shortLowerName(), Double.toString( edge.getAttributes().getSpeed() ) );
+                writer.writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed(true) ) );
+                writer.writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed(false) ) );
                 writer.writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.getAttributes().getLength() ) );
                 writer.writeAttribute( ONEWAY.shortLowerName(), Boolean.toString( edge.getAttributes().isOneWay() ) );
                 writer.writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.getAttributes().isPaid() ) );

@@ -58,7 +58,11 @@ public class OsmPbfDataSource implements MapDataSource {
         } );
         joinConditions.add( ( Node node, List<Edge> edges ) -> {
             JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
-            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed(), edgePair.second.getAttributes().getSpeed(), SPEED_EPS );
+            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( true ), edgePair.second.getAttributes().getSpeed( true ), SPEED_EPS );
+        } );
+        joinConditions.add( ( Node node, List<Edge> edges ) -> {
+            JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );
+            return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( false ), edgePair.second.getAttributes().getSpeed( false ), SPEED_EPS );
         } );
         joinConditions.add( ( Node node, List<Edge> edges ) -> {
             JoinCondition.EdgePair edgePair = JoinCondition.getSortedPair( node, edges );

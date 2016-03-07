@@ -90,11 +90,12 @@ public class XmlGraphReader implements GraphReader {
                 Edge.Id id = Edge.Id.fromString( attributes.getValue( ID.shortLowerName() ) );
                 Node.Id sourceId = Node.Id.fromString( attributes.getValue( SOURCE.shortLowerName() ) );
                 Node.Id targetId = Node.Id.fromString( attributes.getValue( TARGET.shortLowerName() ) );
-                double speed = Double.parseDouble( attributes.getValue( SPEED.shortLowerName() ) );
+                double speed = Double.parseDouble( attributes.getValue( SPEED_FORWARD.shortLowerName() ) );
+                double speedBackward = Double.parseDouble( attributes.getValue( SPEED_BACKWARD.shortLowerName() ) );
                 double length = Double.parseDouble( attributes.getValue( LENGTH.shortLowerName() ) );
                 boolean isPaid = Boolean.parseBoolean( attributes.getValue( PAID.shortLowerName() ) );
                 boolean isOneWay = Boolean.parseBoolean( attributes.getValue( ONEWAY.shortLowerName() ) );
-                EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( speed ).setLength( length ).setOneWay( isOneWay ).setPaid( isPaid ).build();
+                EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( speed ).setBackwardSpeed( speedBackward ).setLength( length ).setOneWay( isOneWay ).setPaid( isPaid ).build();
                 Node sourceNode = nodes.get( sourceId );
                 Node targetNode = nodes.get( targetId );
                 Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
