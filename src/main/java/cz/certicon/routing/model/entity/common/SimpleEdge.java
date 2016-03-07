@@ -10,7 +10,6 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
-import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import java.util.Arrays;
 import java.util.List;
@@ -132,9 +131,8 @@ public abstract class SimpleEdge implements Edge {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode( this.sourceNode );
-        hash = 97 * hash + Objects.hashCode( this.targetNode );
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode( this.id );
         return hash;
     }
 
@@ -150,13 +148,7 @@ public abstract class SimpleEdge implements Edge {
             return false;
         }
         final SimpleEdge other = (SimpleEdge) obj;
-        if ( !Objects.equals( this.distance, other.distance ) ) {
-            return false;
-        }
-        if ( !Objects.equals( this.sourceNode, other.sourceNode ) ) {
-            return false;
-        }
-        if ( !Objects.equals( this.targetNode, other.targetNode ) ) {
+        if ( !Objects.equals( this.id, other.id ) ) {
             return false;
         }
         return true;
