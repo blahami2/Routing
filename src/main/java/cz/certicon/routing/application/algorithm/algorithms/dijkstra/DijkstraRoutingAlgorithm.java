@@ -81,9 +81,14 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         }
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
+        Distance infiniteDistance = getDistanceFactory().createInfiniteDistance();
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+            if ( currentNode.getDistance().equals( infiniteDistance ) ) {
+                return null;
+            }
+//            System.out.println( "currentNode = " + currentNode );
 //            System.out.println( "extracted node: " + currentNode.getLabel() );
 //            System.out.println( "nodes left: " + nodeDataStructure.size() );
             if ( endCondition.isFinished( getGraph(), nodeEqToFrom, nodeEqToTo, currentNode ) ) {
@@ -113,6 +118,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 Distance tmpNodeDistance = getRoutingConfiguration().getNodeEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
                 if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
+//                    System.out.println( "is lower" );
                     endNode.setDistance( tmpNodeDistance );
                     endNode.setPredecessorEdge( edge );
                     nodeDataStructure.notifyDataChange( endNode );
