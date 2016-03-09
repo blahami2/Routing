@@ -69,6 +69,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
             if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
+                nodeEqToFrom = node;
                 nodeDataStructure.add( node.setDistance( getDistanceFactory().createZeroDistance() ).setPredecessorEdge( null ) );
             } else { // set distance to infinity
                 nodeDataStructure.add( node.setDistance( getDistanceFactory().createInfiniteDistance() ).setPredecessorEdge( null ) );

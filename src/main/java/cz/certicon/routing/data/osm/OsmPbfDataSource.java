@@ -29,7 +29,6 @@ import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.function.Consumer;
 
 /**
  *
@@ -120,6 +119,8 @@ public class OsmPbfDataSource implements MapDataSource {
 
         private Map<Node, List<Edge>> nodeEdgeMap;
 
+        private Map<Long, Integer> wayMap = new HashMap<>();
+
         public OsmBinaryParser( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) {
             this.graphEntityFactory = graphEntityFactory;
             this.distanceFactory = distanceFactory;
@@ -145,7 +146,7 @@ public class OsmPbfDataSource implements MapDataSource {
                 lastId += nodes.getId( i );
                 lastLat += nodes.getLat( i );
                 lastLon += nodes.getLon( i );
-                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( lastLat ), parseLon( lastLon ) );
+                Node n = graphEntityFactory.createNode( Node.Id.createId( lastId ), parseLat( lastLat ), parseLon( lastLon ) );
                 n.setLabel( Long.toString( lastId ) );
                 nodeMap.put( lastId, n );
             }
@@ -154,7 +155,7 @@ public class OsmPbfDataSource implements MapDataSource {
         @Override
         protected void parseNodes( List<Osmformat.Node> nodes ) {
             for ( Osmformat.Node node : nodes ) {
-                Node n = graphEntityFactory.createNode( Node.Id.generateId(), parseLat( node.getLat() ), parseLon( node.getLon() ) );
+                Node n = graphEntityFactory.createNode( Node.Id.createId( node.getId() ), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 n.setLabel( Long.toString( node.getId() ) );
                 nodeMap.put( node.getId(), n );
             }
@@ -202,7 +203,7 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( "target = " + targetNode );
 //                                    System.out.println( edgeAttributes );
 //                                }
-                        Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
+                        Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( way.getId() ), sourceNode, targetNode,
                                 distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
                         edge.setAttributes( edgeAttributes );
 
@@ -251,7 +252,7 @@ public class OsmPbfDataSource implements MapDataSource {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
                 if ( !join( node, list ) ) {
-//                    node.setLabel( node.getId() + "[" + list.size() + "]" );
+//                    node.setLabel( node.getId() + "[" + list.size() + "]" ); 
                     graph.addNode( node );
                 }
             }
@@ -259,6 +260,9 @@ public class OsmPbfDataSource implements MapDataSource {
                 Node node = entry.getKey();
                 List<Edge> list = entry.getValue();
                 if ( join( node, list ) ) {
+                    if ( list.size() != 2 ) {
+                        throw new AssertionError();
+                    }
                     Edge a;
                     Edge b;
                     if ( list.get( 0 ).getTargetNode().equals( node ) ) {
@@ -268,9 +272,11 @@ public class OsmPbfDataSource implements MapDataSource {
                         a = list.get( 1 );
                         b = list.get( 0 );
                     }
+
                     Node nodeA = a.getOtherNode( node );
                     Node nodeB = b.getOtherNode( node );
-                    Edge newEdge = graphEntityFactory.createEdge( Edge.Id.generateId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
+                    // inherits ID of the first edge
+                    Edge newEdge = graphEntityFactory.createEdge( a.getId(), nodeA, nodeB, a.getDistance().add( b.getDistance() ) );
                     newEdge.setAttributes( a.getAttributes().copyWithNewLength( a.getAttributes().getLength() + b.getAttributes().getLength() ) );
 
 //                    if ( node.getLabel().equals( Long.toString( 352744338L ) )
@@ -319,10 +325,14 @@ public class OsmPbfDataSource implements MapDataSource {
 //                    System.out.println( "orig edge: " + nodeA.getLabel() + ":" + node.getLabel() + ":" + nodeB.getLabel() );
 //                    System.out.println( "new edge: " + newEdge.getLabel() );
                     List<Edge> aList = getFromMap( nodeA );
-                    aList.remove( a );
+                    if ( !aList.remove( a ) ) {
+                        throw new AssertionError( "Not removed!" );
+                    }
                     aList.add( newEdge );
                     List<Edge> bList = getFromMap( nodeB );
-                    bList.remove( b );
+                    if ( !bList.remove( b ) ) {
+                        throw new AssertionError( "Not removed!" );
+                    }
                     bList.add( newEdge );
                 }
             }
@@ -355,7 +365,6 @@ public class OsmPbfDataSource implements MapDataSource {
 //                newEdge.setLabel( newEdge.getAttributes().toString() );
 //                graph.addEdge( newEdge );
 //            }
-            
             System.out.println( "Processing done!" );
 
             graphLoadListener.onGraphLoaded( graph );

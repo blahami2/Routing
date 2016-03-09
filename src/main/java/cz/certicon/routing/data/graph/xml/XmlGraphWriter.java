@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -44,7 +46,10 @@ public class XmlGraphWriter extends AbstractXmlWriter implements GraphWriter {
                     return o1.getId().compareTo( o2.getId() );
                 }
             });
+            Map<Node.Id, Node> nodeMap = new HashMap<>();
             for ( Node node : sortedNodes ) {
+                nodeMap.put(node.getId(), node);
+                
                 getWriter().writeStartElement( NODE.shortLowerName() );
                 getWriter().writeAttribute( ID.shortLowerName(), Node.Id.toString( node.getId() ) );
                 getWriter().writeAttribute( LATITUDE.shortLowerName(), Double.toString( node.getCoordinates().getLatitude() ) );
@@ -58,7 +63,7 @@ public class XmlGraphWriter extends AbstractXmlWriter implements GraphWriter {
                     return o1.getId().compareTo( o2.getId() );
                 }
             });
-            for ( Edge edge : sortedEdges ) {
+            for ( Edge edge : sortedEdges ) {                
                 getWriter().writeStartElement( EDGE.shortLowerName() );
                 getWriter().writeAttribute( ID.shortLowerName(), Edge.Id.toString( edge.getId() ) );
                 getWriter().writeAttribute( SOURCE.shortLowerName(), Node.Id.toString( edge.getSourceNode().getId()) );
