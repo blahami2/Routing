@@ -164,7 +164,7 @@ public abstract class SimpleEdge implements Edge {
 
     @Override
     public String toString() {
-        return "SimpleEdge{" + "distance=" + distance + ", \n\tsourceNode=" + sourceNode + ", \n\ttargetNode=" + targetNode + ",\n\tattributes=" + attributes + '}';
+        return "SimpleEdge{" + "id=" + id + ", distance=" + distance + ", \n\tsourceNode=" + sourceNode + ", \n\ttargetNode=" + targetNode + ",\n\tattributes=" + attributes + '}';
     }
 
     @Override

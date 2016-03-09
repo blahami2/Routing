@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public abstract class SimpleNode implements Node {
 
@@ -25,7 +25,7 @@ public abstract class SimpleNode implements Node {
 
     private static int charCounter = 0;
 
-    public SimpleNode(Id id, Coordinate coordinates ) {
+    public SimpleNode( Id id, Coordinate coordinates ) {
         this.coordinates = coordinates;
         this.id = id;
         this.distance = null;
@@ -54,7 +54,7 @@ public abstract class SimpleNode implements Node {
         node.setLabel( label );
         return node;
     }
-    
+
     @Override
     public String getLabel() {
         return label;
@@ -123,7 +123,7 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public String toString() {
-        return "SimpleNode{" + "coordinates=" + coordinates + ", distance=" + distance + ", label=" + label + '}';
+        return "SimpleNode{" + "id=" + id+ ", coordinates=" + coordinates + ", distance=" + distance  + ", hasPredecessor=" + ( getPredecessorEdge() != null ) + '}';
     }
 
     private String generateLabel( int counter ) {
@@ -138,7 +138,7 @@ public abstract class SimpleNode implements Node {
 //        System.out.println( "generating label: " + sb.toString() );
         return sb.toString();
     }
-    
-    abstract protected Node createNew(Id id, Coordinate coordinates);
+
+    abstract protected Node createNew( Id id, Coordinate coordinates );
 
 }

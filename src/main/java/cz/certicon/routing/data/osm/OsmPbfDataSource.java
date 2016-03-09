@@ -117,9 +117,7 @@ public class OsmPbfDataSource implements MapDataSource {
         private Map<Long, Node> nodeMap = new HashMap<>();
         private Graph graph;
 
-        private Map<Node, List<Edge>> nodeEdgeMap;
-
-        private Map<Long, Integer> wayMap = new HashMap<>();
+        private final Map<Node, List<Edge>> nodeEdgeMap;
 
         public OsmBinaryParser( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) {
             this.graphEntityFactory = graphEntityFactory;
@@ -203,7 +201,7 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( "target = " + targetNode );
 //                                    System.out.println( edgeAttributes );
 //                                }
-                        Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( way.getId() ), sourceNode, targetNode,
+                        Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                 distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
                         edge.setAttributes( edgeAttributes );
 
