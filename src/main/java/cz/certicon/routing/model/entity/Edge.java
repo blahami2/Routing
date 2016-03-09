@@ -138,13 +138,13 @@ public interface Edge {
 
     public static class Id implements Serializable, Comparable<Id> {
 
-        private static int counter = 0;
+        private static long counter = 0;
 
         public static Id generateId() {
             return new Id( counter++ );
         }
 
-        public static Id createId( int id ) {
+        public static Id createId( long id ) {
             return new Id( id );
         }
 
@@ -156,21 +156,20 @@ public interface Edge {
             return createId( Integer.parseInt( str ) );
         }
 
-        private final int id;
+        private final long id;
 
-        private Id( int id ) {
+        private Id( long id ) {
             this.id = id;
         }
         
-        public int getValue(){
+        public long getValue(){
             return id;
         }
 
-
         @Override
         public int hashCode() {
-            int hash = 7;
-            hash = 59 * hash + this.id;
+            int hash = 3;
+            hash = 41 * hash + (int) ( this.id ^ ( this.id >>> 32 ) );
             return hash;
         }
 
@@ -199,7 +198,7 @@ public interface Edge {
 
         @Override
         public int compareTo( Id o ) {
-            return Integer.compare( this.id, o.id );
+            return Long.compare( this.id, o.id );
         }
 
     }
