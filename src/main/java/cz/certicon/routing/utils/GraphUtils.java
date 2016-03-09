@@ -5,10 +5,14 @@
  */
 package cz.certicon.routing.utils;
 
+import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -24,5 +28,12 @@ public class GraphUtils {
             currentNode = graph.getOtherNodeOf( currentNode.getPredecessorEdge(), currentNode );
         }
         return path;
+    }
+
+    public static List<Edge> fillWithCoordinates( List<Edge> edges, Map<Edge, List<Coordinate>> coordinateMap ) {
+        for ( Edge edge : edges ) {
+            edge.setCoordinates( coordinateMap.get( edge ) );
+        }
+        return edges;
     }
 }
