@@ -62,7 +62,7 @@ public abstract class SimplePath implements Path {
     @Override
     public List<Node> getNodes() {
         Node currentNode = sourceNode;
-        List<Node> nodes = new LinkedList<>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add( sourceNode );
         for ( Edge edge : this ) {
             nodes.add( currentNode = edge.getOtherNode( currentNode ) );
