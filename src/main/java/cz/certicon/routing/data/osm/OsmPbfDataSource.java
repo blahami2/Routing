@@ -235,8 +235,8 @@ public class OsmPbfDataSource implements MapDataSource {
         }
 
         private boolean join( Node node, List<Edge> edges ) {
-            for(JoinCondition joinCondition : joinConditions){
-                if(!joinCondition.shouldJoin( node, edges )){
+            for ( JoinCondition joinCondition : joinConditions ) {
+                if ( !joinCondition.shouldJoin( node, edges ) ) {
                     return false;
                 }
             }
@@ -337,28 +337,25 @@ public class OsmPbfDataSource implements MapDataSource {
             }
 
             // map ids to sequence
-            Graph g = graph;
-            graph = graphEntityFactory.createGraph();
-
-            Map<Node, Node> oldToNewMap = new HashMap<>();
-            int nodeCounter = 0;
-            for ( Node node : g.getNodes() ) {
-                Node newNode = node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) );
-                newNode.setLabel( newNode.getId() + "[" + getFromMap( node ).size() + "]" );
-                oldToNewMap.put( node, newNode ); // old node edge set is copied to the new node
-                graph.addNode( newNode );
-            }
-            int edgeCounter = 0;
-            for ( Edge edge : g.getEdges() ) {
-//                System.out.println( "old old edge has " + edge.getCoordinates().size() + " coordinates" );
-                edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
-//                System.out.println( "old edge has " + edge.getCoordinates().size() + " coordinates" );
-                Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
-//                newEdge.setLabel( newEdge.getId() + "|" + newEdge.getSourceNode().getLabel() + ":" + newEdge.getTargetNode().getLabel() );
-//                System.out.println( "new edge has " + newEdge.getCoordinates().size() + " coordinates" );
-                newEdge.setLabel( newEdge.getAttributes().toString() );
-                graph.addEdge( newEdge );
-            }
+//            Graph g = graph;
+//            graph = graphEntityFactory.createGraph();
+//
+//            Map<Node, Node> oldToNewMap = new HashMap<>();
+//            int nodeCounter = 0;
+//            for ( Node node : g.getNodes() ) {
+//                Node newNode = node.createCopyWithNewId( Node.Id.createId( nodeCounter++ ) );
+//                newNode.setLabel( newNode.getId() + "[" + getFromMap( node ).size() + "]" );
+//                oldToNewMap.put( node, newNode ); // old node edge set is copied to the new node
+//                graph.addNode( newNode );
+//            }
+//            int edgeCounter = 0;
+//            for ( Edge edge : g.getEdges() ) {
+//                edge = edge.newNodes( oldToNewMap.get( edge.getSourceNode() ), oldToNewMap.get( edge.getTargetNode() ) );
+//                Edge newEdge = edge.createCopyWithNewId( Edge.Id.createId( edgeCounter++ ) );
+//                newEdge.setLabel( newEdge.getAttributes().toString() );
+//                graph.addEdge( newEdge );
+//            }
+            
             System.out.println( "Processing done!" );
 
             graphLoadListener.onGraphLoaded( graph );
