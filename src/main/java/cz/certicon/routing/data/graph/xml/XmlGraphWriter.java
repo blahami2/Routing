@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.data.graph.xml;
 
+import cz.certicon.routing.data.basic.xml.AbstractXmlWriter;
 import cz.certicon.routing.data.DataDestination;
 import static cz.certicon.routing.data.graph.xml.Tag.*;
 import cz.certicon.routing.data.graph.GraphWriter;

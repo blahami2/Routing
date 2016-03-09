@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.data.graph;
 
+import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import java.io.IOException;

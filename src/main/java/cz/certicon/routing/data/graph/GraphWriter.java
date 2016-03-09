@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.data.graph;
 
+import cz.certicon.routing.data.Writer;
 import cz.certicon.routing.model.entity.Graph;
 import java.io.IOException;
 

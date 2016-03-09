@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.graph.xml;
+package cz.certicon.routing.data.basic.xml;
 
 import cz.certicon.routing.data.DataDestination;
-import cz.certicon.routing.data.graph.Writer;
+import cz.certicon.routing.data.Writer;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.xml.stream.XMLOutputFactory;
