@@ -5,20 +5,15 @@
  */
 package cz.certicon.routing.data.graph;
 
-import cz.certicon.routing.model.entity.Graph;
 import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphWriter extends Writer {
+public interface Writer {
 
-    @Override
     public void open() throws IOException;
 
-    public void write( Graph graph ) throws IOException;
-
-    @Override
     public void close() throws IOException;
 }

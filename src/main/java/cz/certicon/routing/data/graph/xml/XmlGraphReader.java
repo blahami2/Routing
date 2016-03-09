@@ -31,36 +31,23 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class XmlGraphReader implements GraphReader {
-
-    private final DataSource source;
+public class XmlGraphReader extends AbstractXmlReader implements GraphReader {
 
     public XmlGraphReader( DataSource source ) {
-        this.source = source;
+        super( source );
     }
 
     @Override
-    public GraphReader open() throws IOException {
-        return this;
-    }
-
-    @Override
-    public Graph load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException {
+    public void load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException {
         Graph graph = graphEntityFactory.createGraph();
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             Handler edgeHandler = new Handler( graph, graphEntityFactory, distanceFactory );
-            saxParser.parse( source.getInputStream(), edgeHandler );
+            saxParser.parse( getDataSource().getInputStream(), edgeHandler );
         } catch ( ParserConfigurationException | SAXException ex ) {
             throw new IOException( ex );
         }
-        return graph;
-    }
-
-    @Override
-    public GraphReader close() throws IOException {
-        return this;
     }
 
     private static class Handler extends DefaultHandler {
