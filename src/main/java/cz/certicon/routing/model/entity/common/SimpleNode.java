@@ -115,6 +115,9 @@ public abstract class SimpleNode implements Node {
         if ( !Objects.equals( this.coordinates, other.coordinates ) ) {
             return false;
         }
+        if ( !Objects.equals( this.id, other.id ) ) {
+            return false;
+        }
         return true;
     }
 

@@ -148,11 +148,19 @@ public abstract class SimpleEdge implements Edge {
             return false;
         }
         final SimpleEdge other = (SimpleEdge) obj;
+        if ( !Objects.equals( this.sourceNode, other.sourceNode ) ) {
+            return false;
+        }
+        if ( !Objects.equals( this.targetNode, other.targetNode ) ) {
+            return false;
+        }
         if ( !Objects.equals( this.id, other.id ) ) {
             return false;
         }
         return true;
     }
+    
+    
 
     @Override
     public String toString() {

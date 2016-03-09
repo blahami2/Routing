@@ -105,7 +105,7 @@ public interface Node {
         }
 
         public static Id fromString( String str ) {
-            return createId( Integer.parseInt( str ) );
+            return createId( Long.parseLong( str ) );
         }
 
         private final long id;
