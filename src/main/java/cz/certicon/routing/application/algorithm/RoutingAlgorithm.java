@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 
@@ -23,8 +22,7 @@ public interface RoutingAlgorithm {
      * 
      * @param from source point
      * @param to target point
-     * @return instance of {@link Path} representing sequence of edges (ways)
-     * @throws NoPathException thrown when no path was found between the two points
+     * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the two points.
      */
-    public Path route( Node from, Node to ) throws NoPathException;
+    public Path route( Node from, Node to );
 }

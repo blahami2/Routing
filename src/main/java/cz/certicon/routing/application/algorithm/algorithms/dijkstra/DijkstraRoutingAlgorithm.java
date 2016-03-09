@@ -14,7 +14,6 @@ import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.NoPathException;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
 
@@ -61,7 +60,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
     }
 
     @Override
-    public Path route( Node from, Node to ) throws NoPathException {
+    public Path route( Node from, Node to ) {
 //        System.out.println( "routing from: " + from.getLabel() + " to " + to.getLabel() );
         // clear the data structure
         nodeDataStructure.clear();
@@ -119,7 +118,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 }
             }
         }
-        throw new NoPathException( from, to );
+        return null;
     }
 
 }
