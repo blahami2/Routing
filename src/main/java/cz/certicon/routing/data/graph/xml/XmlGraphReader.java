@@ -39,7 +39,7 @@ public class XmlGraphReader extends AbstractXmlReader implements GraphReader {
     }
 
     @Override
-    public void load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException {
+    public Graph load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException {
         Graph graph = graphEntityFactory.createGraph();
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -49,6 +49,7 @@ public class XmlGraphReader extends AbstractXmlReader implements GraphReader {
         } catch ( ParserConfigurationException | SAXException ex ) {
             throw new IOException( ex );
         }
+        return graph;
     }
 
     private static class Handler extends DefaultHandler {
