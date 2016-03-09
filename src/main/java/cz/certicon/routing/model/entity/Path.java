@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -104,6 +105,10 @@ public interface Path extends Iterable<Edge> {
     public int size();
     
     public List<Edge> getEdges();
+    
+    public List<Node> getNodes();
+    
+    public List<Coordinate> getCoordinates();
 
     /**
      * Creates a {@link Spliterator} over the elements in this collection.

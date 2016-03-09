@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -59,6 +60,38 @@ public abstract class SimplePath implements Path {
     }
 
     @Override
+    public List<Node> getNodes() {
+        Node currentNode = sourceNode;
+        List<Node> nodes = new LinkedList<>();
+        nodes.add( sourceNode );
+        for ( Edge edge : this ) {
+            nodes.add( currentNode = edge.getOtherNode( currentNode ) );
+        }
+        return nodes;
+    }
+
+    @Override
+    public List<Coordinate> getCoordinates() {
+        Node currentNode = sourceNode;
+        List<Coordinate> coordinates = new LinkedList<>();
+        for ( Edge edge : this ) {
+            List<Coordinate> edgeCoordinates = edge.getCoordinates();
+            if ( currentNode.equals( edge.getSourceNode() ) ) {
+                for ( int i = 0; i < edgeCoordinates.size(); i++ ) {
+                    coordinates.add( edgeCoordinates.get( i ) );
+                }
+                currentNode = edge.getTargetNode();
+            } else {
+                for ( int i = edgeCoordinates.size() - 1; i >= 0; i-- ) {
+                    coordinates.add( edgeCoordinates.get( i ) );
+                }
+                currentNode = edge.getSourceNode();
+            }
+        }
+        return coordinates;
+    }
+
+    @Override
     public Node getSourceNode() {
         return sourceNode;
     }
@@ -94,7 +127,7 @@ public abstract class SimplePath implements Path {
     @Override
     public double getLength() {
         double sum = 0;
-        for(Edge edge : edges){
+        for ( Edge edge : edges ) {
             sum += edge.getAttributes().getLength();
         }
         return sum;
