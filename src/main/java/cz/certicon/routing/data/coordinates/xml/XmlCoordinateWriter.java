@@ -48,7 +48,6 @@ public class XmlCoordinateWriter extends AbstractXmlWriter<Pair<Edge, List<Coord
         } catch ( XMLStreamException ex ) {
             throw new IOException( ex );
         }
-        close();
     }
 
 }
