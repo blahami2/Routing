@@ -138,8 +138,9 @@ public abstract class SimplePath implements Path {
         Node source = sourceNode;
         double time = 0;
         for ( Edge edge : edges ) {
-            double speed = edge.getAttributes().getSpeed( edge.getSourceNode().equals( source ) );
-            double length = edge.getAttributes().getLength();
+            double speed = edge.getAttributes().getSpeed( edge.getSourceNode().equals( source ) ); // kmh
+            double length = edge.getAttributes().getLength(); // meters
+            speed /= 3.6; // to mps
             time += length / speed;
             source = edge.getOtherNode( source );
         }
