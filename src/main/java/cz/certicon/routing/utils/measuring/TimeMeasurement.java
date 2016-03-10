@@ -10,19 +10,24 @@ package cz.certicon.routing.utils.measuring;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class TimeMeasurement {
+
     private long start;
     private long time;
-    
-    public void start(){
+
+    public void start() {
         start = System.nanoTime();
     }
-    
-    public long stop(){
+
+    public long stop() {
         time = getCurrentTimeElapsed();
         return time;
     }
-    
-    public long getCurrentTimeElapsed(){
+
+    public long getTimeElapsed() {
+        return time;
+    }
+
+    public long getCurrentTimeElapsed() {
         return System.nanoTime() - start;
     }
 }
