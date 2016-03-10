@@ -11,6 +11,8 @@ package cz.certicon.routing.utils.measuring;
  */
 public class TimeMeasurement {
 
+    private static final long TO_MILLISECONDS = 1;
+
     private long start;
     private long time;
 
@@ -20,14 +22,14 @@ public class TimeMeasurement {
 
     public long stop() {
         time = getCurrentTimeElapsed();
-        return time;
+        return time / TO_MILLISECONDS;
     }
 
     public long getTimeElapsed() {
-        return time;
+        return time / TO_MILLISECONDS;
     }
 
     public long getCurrentTimeElapsed() {
-        return System.nanoTime() - start;
+        return ( System.nanoTime() - start ) / TO_MILLISECONDS;
     }
 }
