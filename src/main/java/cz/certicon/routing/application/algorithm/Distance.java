@@ -9,7 +9,7 @@ package cz.certicon.routing.application.algorithm;
  * The root interface for realization of distances between nodes or lengths of
  * edges.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface Distance extends Comparable<Distance> {
 
@@ -62,5 +62,13 @@ public interface Distance extends Comparable<Distance> {
      * @return result of the addition (new instance)
      */
     public Distance add( Distance other );
+
+    /**
+     * Returns a double representation of the distance for various numerical
+     * operations.
+     *
+     * @return representation (some kind of a fitness) of the distance
+     */
+    public double getEvaluableValue();
 
 }

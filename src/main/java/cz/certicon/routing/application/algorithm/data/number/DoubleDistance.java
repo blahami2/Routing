@@ -9,7 +9,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class DoubleDistance implements Distance {
 
@@ -47,6 +47,11 @@ class DoubleDistance implements Distance {
     @Override
     public boolean isEqualTo( Distance other ) {
         return compareTo( other ) == 0;
+    }
+
+    @Override
+    public double getEvaluableValue() {
+        return dist;
     }
 
     @Override
@@ -88,8 +93,6 @@ class DoubleDistance implements Distance {
         final DoubleDistance other = (DoubleDistance) obj;
         return this.compareTo( other ) == 0;
     }
-    
-    
 
     @Override
     public String toString() {

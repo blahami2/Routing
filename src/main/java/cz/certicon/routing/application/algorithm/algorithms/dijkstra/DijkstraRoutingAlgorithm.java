@@ -12,6 +12,7 @@ import cz.certicon.routing.application.algorithm.algorithms.AbstractRoutingAlgor
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
+import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
@@ -28,7 +29,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory ) {
         super( graph, entityAbstractFactory, distanceFactory );
-        this.nodeDataStructure = new TrivialNodeDataStructure();
+        this.nodeDataStructure = new JgraphtFibonacciDataStructure();
         this.endCondition = new EndCondition() {
             @Override
             public boolean isFinished( Graph graph, Node sourceNode, Node targetNode, Node currentNode ) {
