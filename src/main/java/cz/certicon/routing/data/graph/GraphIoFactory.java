@@ -13,6 +13,8 @@ import cz.certicon.routing.data.DataSource;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface GraphIoFactory {
-    public GraphReader createGraphReader(DataSource dataSource);
-    public GraphWriter createGraphWriter(DataDestination dataDestination);
+
+    public GraphReader createGraphReader( DataSource dataSource );
+
+    public GraphWriter createGraphWriter( DataDestination dataDestination );
 }

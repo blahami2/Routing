@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.data.coordinates;
 
+import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import java.io.IOException;
@@ -16,13 +17,6 @@ import java.util.Set;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateReader {
+public interface CoordinateReader extends Reader<Set<Edge>, Map<Edge, List<Coordinate>>> {
 
-    public CoordinateReader open() throws IOException;
-
-    public List<Coordinate> findCoordinates( Edge edge ) throws IOException;
-
-    public Map<Edge, List<Coordinate>> findCoordinates( Set<Edge> edges ) throws IOException;
-
-    public CoordinateReader close() throws IOException;
 }

@@ -11,9 +11,13 @@ import java.io.IOException;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface Reader {
+public interface Reader<In,Out> {
 
     public void open() throws IOException;
 
+    public Out read(In in) throws IOException;
+    
     public void close() throws IOException;
+    
+    public boolean isOpen();
 }

@@ -17,13 +17,14 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class AbstractXmlWriter implements Writer {
+public abstract class AbstractXmlWriter<Out> implements Writer<Out> {
 
     private static final String ROOT = "root";
 
     private final DataDestination destination;
     private OutputStream output;
     private XMLStreamWriter writer;
+    private boolean isOpen = false;
 
     public AbstractXmlWriter( DataDestination destination ) {
         this.destination = destination;
@@ -40,21 +41,40 @@ public class AbstractXmlWriter implements Writer {
         } catch ( XMLStreamException ex ) {
             throw new IOException( ex );
         }
+        isOpen = true;
     }
 
     @Override
     public void close() throws IOException {
-        try {
-            writer.writeEndElement();
-            writer.writeEndDocument();
-            writer.close();
-        } catch ( XMLStreamException ex ) {
-            throw new IOException( ex );
+        if ( isOpen ) {
+            try {
+                writer.writeEndElement();
+                writer.writeEndDocument();
+                writer.close();
+            } catch ( XMLStreamException ex ) {
+                throw new IOException( ex );
+            }
+            output.close();
+            isOpen = false;
         }
-        output.close();
     }
-    
-    protected XMLStreamWriter getWriter(){
+
+    protected XMLStreamWriter getWriter() {
         return writer;
+    }
+
+    @Override
+    public void write( Out out ) throws IOException {
+        if ( !isOpen ) {
+            open();
+        }
+        openedWrite( out );
+    }
+
+    abstract protected void openedWrite( Out out ) throws IOException;
+
+    @Override
+    public boolean isOpen() {
+        return isOpen;
     }
 }

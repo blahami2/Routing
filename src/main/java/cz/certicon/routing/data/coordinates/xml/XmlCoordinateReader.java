@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.coordinates.xml;
 
 import cz.certicon.routing.data.DataSource;
+import cz.certicon.routing.data.basic.xml.AbstractXmlReader;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
@@ -15,67 +16,23 @@ import java.util.List;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import static cz.certicon.routing.data.coordinates.xml.Tag.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import static cz.certicon.routing.data.coordinates.xml.Tag.*;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class XmlCoordinateReader implements CoordinateReader {
-
-    private final DataSource source;
+public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, List<Coordinate>>> implements CoordinateReader {
 
     public XmlCoordinateReader( DataSource source ) {
-        this.source = source;
-    }
-
-    @Override
-    public CoordinateReader open() throws IOException {
-        return this;
-    }
-
-    @Override
-    public List<Coordinate> findCoordinates( Edge edge ) throws IOException {
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            EdgeHandler edgeHandler = new EdgeHandler( new HashSet<>( Arrays.asList( edge.getId() ) ) );
-            saxParser.parse( source.getInputStream(), edgeHandler );
-        } catch ( UglyExceptionMechanism notEx ) {
-            return notEx.getCoords().get( edge.getId() );
-        } catch ( ParserConfigurationException | SAXException ex ) {
-            throw new IOException( ex );
-        }
-        throw new IOException( "Id not found: " + edge.getId() );
-    }
-
-    @Override
-    public Map<Edge, List<Coordinate>> findCoordinates( Set<Edge> edges ) throws IOException {
-        EdgeHandler edgeHandler;
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            Set<Edge.Id> collect = new HashSet<>();
-            for ( Edge edge : edges ) {
-                collect.add( edge.getId() );
-            }
-            edgeHandler = new EdgeHandler( collect );
-            saxParser.parse( source.getInputStream(), edgeHandler );
-        } catch ( UglyExceptionMechanism notEx ) {
-            return convert( edges, notEx.getCoords() );
-        } catch ( ParserConfigurationException | SAXException ex ) {
-            throw new IOException( ex );
-        }
-        throw new IOException( "Ids not found (size should be " + edges.size() + " but is " + edgeHandler.getCoords().size() );
+        super( source );
     }
 
     private Map<Edge, List<Coordinate>> convert( Set<Edge> edges, Map<Edge.Id, List<Coordinate>> coords ) {
@@ -87,8 +44,25 @@ public class XmlCoordinateReader implements CoordinateReader {
     }
 
     @Override
-    public CoordinateReader close() throws IOException {
-        return this;
+    protected Map<Edge, List<Coordinate>> openedRead( Set<Edge> edges ) throws IOException {
+        EdgeHandler edgeHandler;
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            Set<Edge.Id> collect = new HashSet<>();
+            for ( Edge edge : edges ) {
+                collect.add( edge.getId() );
+            }
+            edgeHandler = new EdgeHandler( collect );
+            saxParser.parse( getDataSource().getInputStream(), edgeHandler );
+        } catch ( UglyExceptionMechanism notEx ) {
+            close();
+            return convert( edges, notEx.getCoords() );
+        } catch ( ParserConfigurationException | SAXException ex ) {
+            throw new IOException( ex );
+        }
+        close();
+        throw new IOException( "Ids not found (size should be " + edges.size() + " but is " + edgeHandler.getCoords().size() );
     }
 
     private static class EdgeHandler extends DefaultHandler {

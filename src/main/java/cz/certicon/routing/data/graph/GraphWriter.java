@@ -13,11 +13,12 @@ import java.io.IOException;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphWriter extends Writer {
+public interface GraphWriter extends Writer<Graph> {
 
     @Override
     public void open() throws IOException;
 
+    @Override
     public void write( Graph graph ) throws IOException;
 
     @Override

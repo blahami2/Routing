@@ -7,16 +7,14 @@ package cz.certicon.routing.data.graph;
 
 import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
-import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphReader extends Reader {
-
-    public Graph load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException;
+public interface GraphReader extends Reader<Pair<GraphEntityFactory,DistanceFactory>,Graph> {
 
 }

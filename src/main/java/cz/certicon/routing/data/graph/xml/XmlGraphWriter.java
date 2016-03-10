@@ -26,30 +26,29 @@ import javax.xml.stream.XMLStreamException;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class XmlGraphWriter extends AbstractXmlWriter implements GraphWriter {
-
+public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWriter {
 
     XmlGraphWriter( DataDestination destination ) {
-        super(destination);
+        super( destination );
     }
 
     @Override
-    public void write( Graph graph ) throws IOException {
+    protected void openedWrite( Graph graph ) throws IOException {
         if ( graph instanceof DirectedGraph ) {
             throw new IllegalArgumentException( "ERROR! Directed graph performs hardly reversible operations and is not supported for universal export." );
         }
         try {
             List<Node> sortedNodes = new ArrayList<>( graph.getNodes() );
-            Collections.sort(sortedNodes, new Comparator<Node>() {
+            Collections.sort( sortedNodes, new Comparator<Node>() {
                 @Override
                 public int compare( Node o1, Node o2 ) {
                     return o1.getId().compareTo( o2.getId() );
                 }
-            });
+            } );
             Map<Node.Id, Node> nodeMap = new HashMap<>();
             for ( Node node : sortedNodes ) {
-                nodeMap.put(node.getId(), node);
-                
+                nodeMap.put( node.getId(), node );
+
                 getWriter().writeStartElement( NODE.shortLowerName() );
                 getWriter().writeAttribute( ID.shortLowerName(), Node.Id.toString( node.getId() ) );
                 getWriter().writeAttribute( LATITUDE.shortLowerName(), Double.toString( node.getCoordinates().getLatitude() ) );
@@ -57,19 +56,19 @@ public class XmlGraphWriter extends AbstractXmlWriter implements GraphWriter {
                 getWriter().writeEndElement();
             }
             List<Edge> sortedEdges = new ArrayList<>( graph.getEdges() );
-            Collections.sort(sortedEdges, new Comparator<Edge>() {
+            Collections.sort( sortedEdges, new Comparator<Edge>() {
                 @Override
                 public int compare( Edge o1, Edge o2 ) {
                     return o1.getId().compareTo( o2.getId() );
                 }
-            });
-            for ( Edge edge : sortedEdges ) {                
+            } );
+            for ( Edge edge : sortedEdges ) {
                 getWriter().writeStartElement( EDGE.shortLowerName() );
                 getWriter().writeAttribute( ID.shortLowerName(), Edge.Id.toString( edge.getId() ) );
-                getWriter().writeAttribute( SOURCE.shortLowerName(), Node.Id.toString( edge.getSourceNode().getId()) );
-                getWriter().writeAttribute( TARGET.shortLowerName(), Node.Id.toString( edge.getTargetNode().getId()) );
-                getWriter().writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed(true) ) );
-                getWriter().writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed(false) ) );
+                getWriter().writeAttribute( SOURCE.shortLowerName(), Node.Id.toString( edge.getSourceNode().getId() ) );
+                getWriter().writeAttribute( TARGET.shortLowerName(), Node.Id.toString( edge.getTargetNode().getId() ) );
+                getWriter().writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed( true ) ) );
+                getWriter().writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed( false ) ) );
                 getWriter().writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.getAttributes().getLength() ) );
                 getWriter().writeAttribute( ONEWAY.shortLowerName(), Boolean.toString( edge.getAttributes().isOneWay() ) );
                 getWriter().writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.getAttributes().isPaid() ) );
@@ -79,6 +78,7 @@ public class XmlGraphWriter extends AbstractXmlWriter implements GraphWriter {
         } catch ( XMLStreamException ex ) {
             throw new IOException( ex );
         }
+        close();
     }
 
 }

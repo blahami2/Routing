@@ -5,20 +5,15 @@
  */
 package cz.certicon.routing.data.coordinates;
 
+import cz.certicon.routing.data.Writer;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
-import java.io.IOException;
 import java.util.List;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateWriter {
-
-    public CoordinateWriter open() throws IOException;
-
-    public CoordinateWriter write( Edge edge, List<Coordinate> coordinates ) throws IOException;
-
-    public CoordinateWriter close() throws IOException;
+public interface CoordinateWriter extends Writer<Pair<Edge,List<Coordinate>>> {
 }

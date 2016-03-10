@@ -8,10 +8,12 @@ package cz.certicon.routing.data.graph.xml;
 import cz.certicon.routing.data.basic.xml.AbstractXmlReader;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.data.DataSource;
+import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import static cz.certicon.routing.data.graph.xml.Tag.*;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
@@ -30,14 +32,16 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class XmlGraphReader extends AbstractXmlReader implements GraphReader {
+public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, DistanceFactory>, Graph> implements GraphReader {
 
     public XmlGraphReader( DataSource source ) {
         super( source );
     }
 
     @Override
-    public Graph load( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) throws IOException {
+    protected Graph openedRead( Pair<GraphEntityFactory, DistanceFactory> in ) throws IOException {
+        GraphEntityFactory graphEntityFactory = in.a;
+        DistanceFactory distanceFactory = in.b;
         Graph graph = graphEntityFactory.createGraph();
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -47,6 +51,7 @@ public class XmlGraphReader extends AbstractXmlReader implements GraphReader {
         } catch ( ParserConfigurationException | SAXException ex ) {
             throw new IOException( ex );
         }
+        close();
         return graph;
     }
 

@@ -3,21 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data;
-
-import java.io.IOException;
+package cz.certicon.routing.model.basic;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface Writer<Out> {
+public class Trinity<A, B, C> extends Pair<A, B> {
 
-    public void open() throws IOException;
+    public final C c;
 
-    public void close() throws IOException;
-
-    public void write( Out out ) throws IOException;
-
-    public boolean isOpen();
+    public Trinity( A a, B b, C c ) {
+        super( a, b );
+        this.c = c;
+    }
 }
