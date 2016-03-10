@@ -6,6 +6,7 @@
 package cz.certicon.routing.data;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import java.io.IOException;
 
@@ -29,4 +30,18 @@ public interface MapDataSource {
      * @throws IOException thrown when an error occurs during the data retrieval
      */
     public void loadGraph( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, GraphLoadListener graphLoadListener ) throws IOException;
+
+    /**
+     * An interface for callback method (on graph creation) used by
+     * {@link DataSource}
+     */
+    public interface GraphLoadListener {
+
+        /**
+         * Method called when the graph is created.
+         *
+         * @param graph filled instance of {@link Graph}
+         */
+        public void onGraphLoaded( Graph graph );
+    }
 }

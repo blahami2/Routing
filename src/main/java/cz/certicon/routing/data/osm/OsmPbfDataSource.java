@@ -7,7 +7,6 @@ package cz.certicon.routing.data.osm;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.data.DataSource;
-import cz.certicon.routing.data.GraphLoadListener;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
@@ -109,10 +108,14 @@ public class OsmPbfDataSource implements MapDataSource {
     }
 
     private class OsmBinaryParser extends BinaryParser {
+        
+        private static final int PRINT_FREQUENCY = 1000000;
 
         private final GraphEntityFactory graphEntityFactory;
         private final DistanceFactory distanceFactory;
         private final GraphLoadListener graphLoadListener;
+        private int nodeCounter = 0;
+        private int edgeCounter = 0;
 
         private Map<Long, Node> nodeMap = new HashMap<>();
         private Graph graph;
@@ -140,12 +143,25 @@ public class OsmPbfDataSource implements MapDataSource {
             long lastId = 0;
             long lastLat = 0;
             long lastLon = 0;
+//            System.out.println( "nodes count = " + nodes.getIdCount() );
+//            System.out.println( "keyvals count = " + nodes.getKeysValsCount() );
+//            for ( int i = 0; i < nodes.getKeysValsCount(); i++ ) {
+//                System.out.println( "'" + getStringById( nodes.getKeysVals( i ) ) + "'" );
+//
+//            }
             for ( int i = 0; i < nodes.getIdCount(); i++ ) {
                 lastId += nodes.getId( i );
                 lastLat += nodes.getLat( i );
                 lastLon += nodes.getLon( i );
                 Node n = graphEntityFactory.createNode( Node.Id.createId( lastId ), parseLat( lastLat ), parseLon( lastLon ) );
                 n.setLabel( Long.toString( lastId ) );
+                if ( ++nodeCounter % PRINT_FREQUENCY == 0 ) {
+                    System.out.println( "loaded nodes: " + nodeCounter );
+                }
+//                System.out.println( "keyvals size = " + nodes.getKeysValsCount() + ", id = " + lastId );
+//                for ( int j = 0; j < nodes.getKeysValsCount(); j++ ) {
+//                    System.out.println( "'" + getStringById( nodes.getKeysVals( j ) ) + "'" );
+//                }
                 nodeMap.put( lastId, n );
             }
         }
@@ -155,6 +171,9 @@ public class OsmPbfDataSource implements MapDataSource {
             for ( Osmformat.Node node : nodes ) {
                 Node n = graphEntityFactory.createNode( Node.Id.createId( node.getId() ), parseLat( node.getLat() ), parseLon( node.getLon() ) );
                 n.setLabel( Long.toString( node.getId() ) );
+                if ( ++nodeCounter % PRINT_FREQUENCY == 0 ) {
+                    System.out.println( "loaded nodes: " + nodeCounter );
+                }
                 nodeMap.put( node.getId(), n );
             }
         }
@@ -176,6 +195,12 @@ public class OsmPbfDataSource implements MapDataSource {
             }
             for ( Osmformat.Way way : filteredWays ) {
                 long lastRef = 0;
+                List<WayAttributeParser.Pair> pairs = new LinkedList<>();
+                for ( int i = 0; i < way.getKeysCount(); i++ ) {
+                    String key = getStringById( way.getKeys( i ) );
+                    String value = getStringById( way.getVals( i ) );
+                    pairs.add( new WayAttributeParser.Pair( key, value ) );
+                }
                 for ( Long ref : way.getRefsList() ) {
                     Node sourceNode = null;
                     Node targetNode = null;
@@ -187,12 +212,6 @@ public class OsmPbfDataSource implements MapDataSource {
                     if ( sourceNode != null ) {
                         targetNode = nodeMap.get( lastRef );
 
-                        List<WayAttributeParser.Pair> pairs = new LinkedList<>();
-                        for ( int i = 0; i < way.getKeysCount(); i++ ) {
-                            String key = getStringById( way.getKeys( i ) );
-                            String value = getStringById( way.getVals( i ) );
-                            pairs.add( new WayAttributeParser.Pair( key, value ) );
-                        }
                         // country code and inside city, solve it!
                         EdgeAttributes edgeAttributes = wayAttributeParser.parse( "CZ", true, pairs, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
 
@@ -214,6 +233,9 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                edge.setLabel( value );
                         getFromMap( sourceNode ).add( edge );
                         getFromMap( targetNode ).add( edge );
+                        if ( ++edgeCounter % PRINT_FREQUENCY == 0 ) {
+                            System.out.println( "loaded edges: " + edgeCounter );
+                        }
                     }
                 }
             }
