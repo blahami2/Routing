@@ -5,16 +5,11 @@
  */
 package cz.certicon.routing.data.coordinates;
 
-import cz.certicon.routing.data.DataDestination;
-import cz.certicon.routing.data.DataSource;
+import cz.certicon.routing.data.IoFactory;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateSupplyFactory {
-
-    public CoordinateReader createReader( DataSource source );
-
-    public CoordinateWriter createWriter( DataDestination destination );
+public interface CoordinateSupplyFactory extends IoFactory<CoordinateReader, CoordinateWriter> {
 }

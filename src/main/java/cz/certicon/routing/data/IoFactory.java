@@ -3,13 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.graph;
-
-import cz.certicon.routing.data.IoFactory;
+package cz.certicon.routing.data;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphIoFactory extends IoFactory<GraphReader, GraphWriter> {
+public interface IoFactory<R extends Reader, W extends Writer> {
+
+    public R createReader( DataSource dataSource );
+
+    public W createWriter( DataDestination dataDestination );
+
 }

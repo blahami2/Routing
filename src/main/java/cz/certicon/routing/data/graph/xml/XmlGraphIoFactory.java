@@ -18,12 +18,12 @@ import cz.certicon.routing.data.graph.GraphWriter;
 public class XmlGraphIoFactory implements GraphIoFactory {
 
     @Override
-    public GraphReader createGraphReader( DataSource dataSource ) {
+    public GraphReader createReader( DataSource dataSource ) {
         return new XmlGraphReader( dataSource );
     }
 
     @Override
-    public GraphWriter createGraphWriter( DataDestination dataDestination ) {
+    public GraphWriter createWriter( DataDestination dataDestination ) {
         return new XmlGraphWriter( dataDestination );
     }
 
