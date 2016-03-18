@@ -167,7 +167,7 @@ public class JxMapViewerFrame implements PathPresenter {
         for ( Edge edge : path ) {
             sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
 //            sb.append( currentNode.getCoordinates() ).append( ", " ).append( currentNode.getDistance() ).append( "\n" );
-            addWaypoint( edge, edge.getLabel() + "\nfrom: " + edge.getSourceNode() + "\nto: " + edge.getTargetNode() );
+            addWaypoint( edge, edge.getLabel() + "\n" + edge );
             if ( !currentNode.equals( path.getSourceNode() ) && !currentNode.equals( path.getTargetNode() ) ) {
                 addWaypoint( currentNode, currentNode.getDistance().toString() + "\n" + sb.toString() );
             }
