@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWriter {
 
-    XmlGraphWriter( DataDestination destination ) {
+    public XmlGraphWriter( DataDestination destination ) {
         super( destination );
     }
 

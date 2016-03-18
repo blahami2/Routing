@@ -6,14 +6,14 @@
 package cz.certicon.routing.data.coordinates;
 
 import cz.certicon.routing.data.Writer;
-import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateWriter extends Writer<Pair<Edge,List<Coordinate>>> {
+public interface CoordinateWriter extends Writer<Map<Edge,List<Coordinate>>> {
 }

@@ -9,6 +9,7 @@ import cz.certicon.routing.data.basic.xml.AbstractXmlReader;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.Reader;
+import cz.certicon.routing.data.basic.FileSource;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
