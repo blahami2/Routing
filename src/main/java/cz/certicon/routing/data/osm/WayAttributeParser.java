@@ -38,10 +38,10 @@ public class WayAttributeParser {
         Properties defaultSpeedProperties = new Properties();
         Properties maxSpeedProperties = new Properties();
         try {
-            InputStream in = getClass().getResourceAsStream( "osm_defaultspeed_zone_type.properties" );
+            InputStream in = getClass().getClassLoader().getResourceAsStream( "cz/certicon/routing/data/osm/osm_defaultspeed_zone_type.properties" );
             defaultSpeedProperties.load( in );
             in.close();
-            in = getClass().getResourceAsStream( "osm_maxspeed_source_zones.properties" );
+            in = getClass().getClassLoader().getResourceAsStream( "cz/certicon/routing/data/osm/osm_maxspeed_source_zones.properties" );
             maxSpeedProperties.load( in );
             in.close();
         } catch ( IOException ex ) {

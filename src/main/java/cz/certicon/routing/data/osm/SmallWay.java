@@ -5,8 +5,11 @@
  */
 package cz.certicon.routing.data.osm;
 
-import java.util.LinkedList;
+import cz.certicon.routing.model.entity.Coordinate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -15,10 +18,23 @@ import java.util.List;
 public class SmallWay {
 
     public final long wayId;
-    public final List<SmallNode> nodes = new LinkedList<>();
+    public final List<Long> nodes;
+    public final Map<Long, Coordinate> coordinateMap = new HashMap<>();
 
-    public SmallWay( long wayId ) {
+    public SmallWay( long wayId, int size ) {
         this.wayId = wayId;
+        this.nodes = new ArrayList<>( size );
+    }
+
+    public void addNode( Long nodeId ) {
+        nodes.add( nodeId );
+        coordinateMap.put( nodeId, null );
+    }
+
+    public void addCoordinate( Long nodeId, Coordinate coordinate ) {
+        if ( coordinateMap.containsKey( nodeId ) ) {
+            coordinateMap.put( nodeId, coordinate );
+        }
     }
 
 }

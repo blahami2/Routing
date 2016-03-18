@@ -183,7 +183,7 @@ public class OsmPbfDataSource implements MapDataSource {
             WayAttributeParser wayAttributeParser = new WayAttributeParser();
             List<Osmformat.Way> filteredWays = new LinkedList<>();
             for ( Osmformat.Way way : ways ) {
-                List<Restriction.Pair> pairs = new LinkedList<>();
+                List<Restriction.Pair> pairs = new LinkedList<>();  
                 for ( int i = 0; i < way.getKeysCount(); i++ ) {
                     String key = getStringById( way.getKeys( i ) );
                     String value = getStringById( way.getVals( i ) );
