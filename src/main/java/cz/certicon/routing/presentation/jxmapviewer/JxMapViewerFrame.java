@@ -26,7 +26,6 @@ import org.jdesktop.swingx.OSMTileFactoryInfo;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
-import org.jdesktop.swingx.mapviewer.Waypoint;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
@@ -242,5 +241,11 @@ public class JxMapViewerFrame implements PathPresenter {
             Coordinate midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
             waypoints.add( new LabelWaypoint( text, new GeoPosition( midpoint.getLatitude(), midpoint.getLongitude() ) ) );
         }
+    }
+
+    @Override
+    public PathPresenter addWaypoint( Coordinate coordinate, String text ) {
+        waypoints.add( new LabelWaypoint( text, new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) ) );
+        return this;
     }
 }

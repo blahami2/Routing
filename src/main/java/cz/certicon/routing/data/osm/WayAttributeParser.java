@@ -26,7 +26,7 @@ public class WayAttributeParser {
     private static final MatchMap PAID = MatchMap.create( new Pair( "toll", "yes" ) );
     private static final MatchMap ONE_WAY = MatchMap.create( new Pair( "oneway", "yes" ), new Pair( "highway", "motorway" ) );
     private static final MatchMap MAXSPEED = MatchMap.create( "maxspeed" );
-    private static final MatchMap MAXSPEED_FORWARD = MatchMap.create( "maxspeed:forward" );
+    private static final MatchMap MAXSPEED_FORWARD   = MatchMap.create( "maxspeed:forward" );
     private static final MatchMap MAXSPEED_NONE = MatchMap.create( new Pair( "maxspeed", "none" ) );
     private static final MatchMap MAXSPEED_LANES = MatchMap.create( "maxspeed:lanes" );
     private static final MatchMap SOURCE_MAXSPEED = MatchMap.create( "source:maxspeed" );
@@ -129,7 +129,7 @@ public class WayAttributeParser {
 //            }
         }
 
-        return SimpleEdgeAttributes.builder( speed ).setLength( length ).setOneWay( oneWay ).setPaid( paid ).build();
+        return SimpleEdgeAttributes.builder( ).setLength( length ).setPaid( paid ).build();
     }
 
     private void error( List<Pair> pairs ) {
