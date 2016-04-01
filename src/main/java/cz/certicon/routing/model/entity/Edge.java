@@ -24,6 +24,9 @@ public interface Edge {
      * @return {@link Distance}
      */
     public Distance getDistance();
+    
+    public int getSpeed();
+    public void setSpeed(int speed);
 
     /**
      * Getter for attributes

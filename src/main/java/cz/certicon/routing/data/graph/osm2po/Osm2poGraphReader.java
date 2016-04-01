@@ -52,13 +52,13 @@ public class Osm2poGraphReader extends AbstractDatabase<Graph, Pair<GraphEntityF
             double reverseCost = r.getDouble( "reverse_cost" );
             double length = r.getDouble( "km" );
             double speed = r.getDouble( "kmh" );
-            EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( speed )
+            EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder()
                     .setLength( length )
-                    .setOneWay( DoubleComparator.isGreaterOrEqualTo( reverseCost, 99999, 10E-10 ) ) // not working
                     .setPaid( false ) // determine paid? See config for details, extend tag stuff class
                     .build();
-            Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( id ), nodeMap.get( source ), nodeMap.get( target ), distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
+            Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( id ), nodeMap.get( source ), nodeMap.get( target ), distanceFactory.createInfiniteDistance() );
             edge.setAttributes( edgeAttributes );
+            edge.setDistance( distanceFactory.createFromEdge( edge));
             edge.setLabel( r.getString( "osm_meta" ) );
             graph.addEdge( edge );
         }

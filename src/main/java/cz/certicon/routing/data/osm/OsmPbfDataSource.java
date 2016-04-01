@@ -56,28 +56,7 @@ public class OsmPbfDataSource implements MapDataSource {
             @Override
             public boolean shouldJoin( Node node, List<Edge> edges ) {
                 JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
-                return edgePair.first.getAttributes().isOneWay() == edgePair.second.getAttributes().isOneWay();
-            }
-        } );
-        joinConditions.add( new JoinCondition() {
-            @Override
-            public boolean shouldJoin( Node node, List<Edge> edges ) {
-                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
                 return edgePair.first.getAttributes().isPaid() == edgePair.second.getAttributes().isPaid();
-            }
-        } );
-        joinConditions.add( new JoinCondition() {
-            @Override
-            public boolean shouldJoin( Node node, List<Edge> edges ) {
-                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
-                return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( true ), edgePair.second.getAttributes().getSpeed( true ), SPEED_EPS );
-            }
-        } );
-        joinConditions.add( new JoinCondition() {
-            @Override
-            public boolean shouldJoin( Node node, List<Edge> edges ) {
-                JoinCondition.EdgePair edgePair = JoinCondition.EdgePair.getSortedPair( node, edges );
-                return DoubleComparator.isEqualTo( edgePair.first.getAttributes().getSpeed( false ), edgePair.second.getAttributes().getSpeed( false ), SPEED_EPS );
             }
         } );
         joinConditions.add( new JoinCondition() {
@@ -108,7 +87,7 @@ public class OsmPbfDataSource implements MapDataSource {
     }
 
     private class OsmBinaryParser extends BinaryParser {
-        
+
         private static final int PRINT_FREQUENCY = 1000000;
 
         private final GraphEntityFactory graphEntityFactory;
@@ -183,7 +162,7 @@ public class OsmPbfDataSource implements MapDataSource {
             WayAttributeParser wayAttributeParser = new WayAttributeParser();
             List<Osmformat.Way> filteredWays = new LinkedList<>();
             for ( Osmformat.Way way : ways ) {
-                List<Restriction.Pair> pairs = new LinkedList<>();  
+                List<Restriction.Pair> pairs = new LinkedList<>();
                 for ( int i = 0; i < way.getKeysCount(); i++ ) {
                     String key = getStringById( way.getKeys( i ) );
                     String value = getStringById( way.getVals( i ) );
@@ -221,7 +200,8 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( edgeAttributes );
 //                                }
                         Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
-                                distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
+                                distanceFactory.createInfiniteDistance() );
+                        edge.setDistance( distanceFactory.createFromEdge( edge ) );
                         edge.setAttributes( edgeAttributes );
 
 //                                StringBuilder sb = new StringBuilder();

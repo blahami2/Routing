@@ -278,10 +278,7 @@ public class OsmPbfDataMinimizer implements MapDataMinimizer {
                     streamWriter.writeAttribute( WAY_ID.name().toLowerCase(), Long.toString( edge.wayId ) );
                     streamWriter.writeAttribute( SOURCE.name().toLowerCase(), Long.toString( edge.sourceId ) );
                     streamWriter.writeAttribute( TARGET.name().toLowerCase(), Long.toString( edge.targetId ) );
-                    streamWriter.writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.edgeAttributes.getSpeed( true ) ) );
-                    streamWriter.writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.edgeAttributes.getSpeed( false ) ) );
                     streamWriter.writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.edgeAttributes.getLength() ) );
-                    streamWriter.writeAttribute( ONEWAY.shortLowerName(), Boolean.toString( edge.edgeAttributes.isOneWay() ) );
                     streamWriter.writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.edgeAttributes.isPaid() ) );
                     streamWriter.writeEndElement();
                 }
@@ -368,10 +365,7 @@ public class OsmPbfDataMinimizer implements MapDataMinimizer {
                     streamWriter.writeAttribute( WAY_ID.name().toLowerCase(), Long.toString( edge.wayId ) );
                     streamWriter.writeAttribute( SOURCE.name().toLowerCase(), Long.toString( edge.sourceId ) );
                     streamWriter.writeAttribute( TARGET.name().toLowerCase(), Long.toString( edge.targetId ) );
-                    streamWriter.writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.edgeAttributes.getSpeed( true ) ) );
-                    streamWriter.writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.edgeAttributes.getSpeed( false ) ) );
                     streamWriter.writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.edgeAttributes.getLength() ) );
-                    streamWriter.writeAttribute( ONEWAY.shortLowerName(), Boolean.toString( edge.edgeAttributes.isOneWay() ) );
                     streamWriter.writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.edgeAttributes.isPaid() ) );
                     streamWriter.writeEndElement();
                 }

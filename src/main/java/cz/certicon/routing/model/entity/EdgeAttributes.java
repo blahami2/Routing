@@ -11,13 +11,13 @@ package cz.certicon.routing.model.entity;
  */
 public interface EdgeAttributes {
 
-    public double getSpeed(boolean forward);
-
-    public boolean isOneWay();
-
     public boolean isPaid();
 
     public double getLength();
+    
+    public void putAdditionalAttribute(String key, String value);
+    
+    public String getAdditionalAttribute(String key);
     
     public EdgeAttributes copyWithNewLength(double length);
 }
