@@ -129,7 +129,7 @@ public class WayAttributeParser {
 //            }
         }
 
-        return SimpleEdgeAttributes.builder(speed ).setLength( length ).setPaid( paid ).build();
+        return SimpleEdgeAttributes.builder().setLength( length ).setPaid( paid ).build();
     }
 
     private void error( List<Pair> pairs ) {
