@@ -30,6 +30,7 @@ import static cz.certicon.routing.data.coordinates.xml.Tag.*;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, List<Coordinate>>> implements CoordinateReader {
+    
 
     public XmlCoordinateReader( DataSource source ) {
         super( source );
