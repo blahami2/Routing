@@ -54,12 +54,12 @@ class DirectedNeighbourListGraph implements DirectedGraph {
     @Override
     public Graph addEdge( Edge edge ) {
         edges.add( edge );
-        if ( !edge.getAttributes().isOneWay() ) {
-            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
-            safeType( opposite.getSourceNode() ).addEdge( opposite );
-            safeType( opposite ).setReversed( true );
-            edges.add( opposite );
-        }
+//        if ( !edge.getAttributes().isOneWay() ) {
+//            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
+//            safeType( opposite.getSourceNode() ).addEdge( opposite );
+//            safeType( opposite ).setReversed( true );
+//            edges.add( opposite );
+//        }
         safeType( edge.getSourceNode() ).addEdge( edge );
         return this;
     }
@@ -73,12 +73,12 @@ class DirectedNeighbourListGraph implements DirectedGraph {
             e = edge;
         }
         edges.add( e );
-        if ( !edge.getAttributes().isOneWay() ) {
-            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
-            safeType( opposite.getSourceNode() ).addEdge( opposite );
-            safeType( opposite ).setReversed( true );
-            edges.add( opposite );
-        }
+//        if ( !edge.getAttributes().isOneWay() ) {
+//            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
+//            safeType( opposite.getSourceNode() ).addEdge( opposite );
+//            safeType( opposite ).setReversed( true );
+//            edges.add( opposite );
+//        }
         safeType( sourceNode ).addEdge( e );
         return this;
     }

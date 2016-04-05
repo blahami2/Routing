@@ -37,5 +37,5 @@ public interface DistanceFactory {
 //     */
 //    public Distance createFromDouble( double distance );
     
-    public Distance createFromEdge(Edge edge);
+    public Distance createFromEdgeData(EdgeData edgeData);
 }

@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.osm;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
@@ -25,6 +26,7 @@ import cz.certicon.routing.data.MapDataSource;
 import cz.certicon.routing.data.Restriction;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.EdgeAttributes;
+import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -199,9 +201,11 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( "target = " + targetNode );
 //                                    System.out.println( edgeAttributes );
 //                                }
+                        String speedStr = edgeAttributes.getAdditionalAttribute( "speed" );
+                        EdgeData edgeData = new SimpleEdgeData( sourceNode, targetNode, ( speedStr != null ) ? Integer.parseInt( speedStr ) : 50, edgeAttributes.isPaid(), edgeAttributes.getLength() );
                         Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                 distanceFactory.createInfiniteDistance() );
-                        edge.setDistance( distanceFactory.createFromEdge( edge ) );
+                        edge.setDistance( distanceFactory.createFromEdgeData( edgeData ) );
                         edge.setAttributes( edgeAttributes );
 
 //                                StringBuilder sb = new StringBuilder();

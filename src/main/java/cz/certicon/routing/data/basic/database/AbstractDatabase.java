@@ -25,15 +25,19 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
     private Connection connection;
     private boolean isOpened = false;
     private Properties connectionProperties;
+    
+    public AbstractDatabase(Properties connectionProperties){
+        this.connectionProperties = connectionProperties;
+    }
 
     @Override
     public void open() throws IOException {
-        if ( connectionProperties == null ) {
-            InputStream in = getClass().getClassLoader().getResourceAsStream( "cz/certicon/routing/data/basic/database/database_connection.properties" );
-            connectionProperties = new Properties();
-            connectionProperties.load( in );
-            in.close();
-        }
+//        if ( connectionProperties == null ) {
+//            InputStream in = getClass().getClassLoader().getResourceAsStream( "cz/certicon/routing/data/basic/database/database_connection.properties" );
+//            connectionProperties = new Properties();
+//            connectionProperties.load( in );
+//            in.close();
+//        }
         if ( !isOpened ) {
             try {
                 Class.forName( getDriverClass() );

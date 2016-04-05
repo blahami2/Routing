@@ -67,9 +67,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed", "50" ),
                 new Pair( "source:maxspeed", "cz:urban" )
         );
-        expResult = SimpleEdgeAttributes.builder( 50 )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -84,9 +83,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed", "50 kmh" ),
                 new Pair( "source:maxspeed", "cz:urban" )
         );
-        expResult = SimpleEdgeAttributes.builder( 50 )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( true )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -101,9 +99,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed", "50 mph" ),
                 new Pair( "source:maxspeed", "cz:urban" )
         );
-        expResult = SimpleEdgeAttributes.builder( SpeedUtils.mphToKmph( 50 ) )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -118,9 +115,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed", "50 knots" ),
                 new Pair( "source:maxspeed", "cz:urban" )
         );
-        expResult = SimpleEdgeAttributes.builder( SpeedUtils.knotToKmph( 50 ) )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -135,9 +131,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed", "none" ),
                 new Pair( "source:maxspeed", "cz:urban" )
         );
-        expResult = SimpleEdgeAttributes.builder( 50 )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -153,9 +148,8 @@ public class WayAttributeParserTest {
                 new Pair( "maxspeed:forward", "50" ),
                 new Pair( "maxspeed:backward", "40" )
         );
-        expResult = SimpleEdgeAttributes.builder( 50 )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
@@ -169,9 +163,8 @@ public class WayAttributeParserTest {
                 new Pair( "source:maxspeed", "sign" ),
                 new Pair( "maxspeed:backward", "40" )
         );
-        expResult = SimpleEdgeAttributes.builder( 50 )
+        expResult = SimpleEdgeAttributes.builder()
                 .setLength( length )
-                .setOneWay( false )
                 .build();
         result = instance.parse( countryCode, insideCity, pairs, length );
         assertEquals( expResult, result );
