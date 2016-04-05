@@ -6,6 +6,8 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.model.entity.EdgeAttributes;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -13,32 +15,13 @@ import cz.certicon.routing.model.entity.EdgeAttributes;
  */
 public class SimpleEdgeAttributes implements EdgeAttributes {
 
-    private final double speedForward;
-    private final double speedBackward;
     private final double length;
-    private final boolean isOneWay;
     private final boolean isPaid;
+    private Map<String, String> attrMap;
 
-    private SimpleEdgeAttributes( double speedForward, double speedBackward, double length, boolean isOneWay, boolean isPaid ) {
-        this.speedForward = speedForward;
-        this.speedBackward = speedBackward;
+    private SimpleEdgeAttributes( double length, boolean isPaid ) {
         this.length = length;
-        this.isOneWay = isOneWay;
         this.isPaid = isPaid;
-    }
-
-    @Override
-    public double getSpeed( boolean forward ) {
-        if ( forward ) {
-            return speedForward;
-        } else {
-            return speedBackward;
-        }
-    }
-
-    @Override
-    public boolean isOneWay() {
-        return isOneWay;
     }
 
     @Override
@@ -53,20 +36,18 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
 
     @Override
     public EdgeAttributes copyWithNewLength( double length ) {
-        return builder( speedForward ).setLength( length ).setOneWay( isOneWay ).setPaid( isPaid ).build();
+        return builder().setLength( length ).setPaid( isPaid ).build();
     }
 
     @Override
     public String toString() {
-        return "SimpleEdgeAttributes{" + "speed=" + speedForward + ", length=" + length + ", isOneWay=" + isOneWay + ", isPaid=" + isPaid + '}';
+        return "SimpleEdgeAttributes{" + "length=" + length + ", isPaid=" + isPaid + '}';
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (int) ( Double.doubleToLongBits( this.speedForward ) ^ ( Double.doubleToLongBits( this.speedForward ) >>> 32 ) );
         hash = 97 * hash + (int) ( Double.doubleToLongBits( this.length ) ^ ( Double.doubleToLongBits( this.length ) >>> 32 ) );
-        hash = 97 * hash + ( this.isOneWay ? 1 : 0 );
         hash = 97 * hash + ( this.isPaid ? 1 : 0 );
         return hash;
     }
@@ -83,13 +64,7 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
             return false;
         }
         final SimpleEdgeAttributes other = (SimpleEdgeAttributes) obj;
-        if ( Double.doubleToLongBits( this.speedForward ) != Double.doubleToLongBits( other.speedForward ) ) {
-            return false;
-        }
         if ( Double.doubleToLongBits( this.length ) != Double.doubleToLongBits( other.length ) ) {
-            return false;
-        }
-        if ( this.isOneWay != other.isOneWay ) {
             return false;
         }
         if ( this.isPaid != other.isPaid ) {
@@ -98,35 +73,39 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
         return true;
     }
 
-    public static Builder builder( double speed ) {
-        return new Builder( speed );
+    @Override
+    public void putAdditionalAttribute( String key, String value ) {
+        if ( attrMap == null ) {
+            attrMap = new HashMap<>();
+        }
+        attrMap.put( key, value );
+    }
+
+    @Override
+    public String getAdditionalAttribute( String key ) {
+        if ( attrMap == null ) {
+            throw new IllegalStateException( "Map not initialized at all" );
+        }
+        if ( !attrMap.containsKey( key ) ) {
+            throw new IllegalArgumentException( "Unknown key: '" + key + "'" );
+        }
+        return attrMap.get( key );
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {
 
-        private final double speed;
-        private double speedBackward;
         private double length = 1;
-        private boolean isOneWay = false;
         private boolean isPaid = false;
 
-        public Builder( double speed ) {
-            this.speed = speed;
-            this.speedBackward = speed;
-        }
-
-        public Builder setBackwardSpeed( double speed ) {
-            this.speedBackward = speed;
-            return this;
+        public Builder() {
         }
 
         public Builder setLength( double length ) {
             this.length = length;
-            return this;
-        }
-
-        public Builder setOneWay( boolean isOneWay ) {
-            this.isOneWay = isOneWay;
             return this;
         }
 
@@ -136,7 +115,7 @@ public class SimpleEdgeAttributes implements EdgeAttributes {
         }
 
         public EdgeAttributes build() {
-            return new SimpleEdgeAttributes( speed, speedBackward, length, isOneWay, isPaid );
+            return new SimpleEdgeAttributes( length, isPaid );
         }
 
     }

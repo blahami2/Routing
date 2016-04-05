@@ -41,22 +41,22 @@ class DirectedJgraphtGraph implements DirectedGraph {
     @Override
     public Graph addEdge( Edge edge ) {
         innerGraph.addEdge( edge.getSourceNode(), edge.getTargetNode(), edge );
-        if ( !edge.getAttributes().isOneWay() ) {
-            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
-            safeType( opposite).setReversed( true );
-            innerGraph.addEdge( opposite.getSourceNode(), opposite.getTargetNode(), opposite );
-        }
+//        if ( !edge.getAttributes().isOneWay() ) {
+//            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( edge.getTargetNode(), edge.getSourceNode() );
+//            safeType( opposite).setReversed( true );
+//            innerGraph.addEdge( opposite.getSourceNode(), opposite.getTargetNode(), opposite );
+//        }
         return this;
     }
 
     @Override
     public Graph addEdge( Node sourceNode, Node targetNode, Edge edge ) {
         innerGraph.addEdge( sourceNode, targetNode, edge );
-        if ( !edge.getAttributes().isOneWay() ) {
-            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
-            safeType( opposite).setReversed( true );
-            innerGraph.addEdge( targetNode, sourceNode, opposite );
-        }
+//        if ( !edge.getAttributes().isOneWay() ) {
+//            Edge opposite = edge.createCopyWithNewId( edge.getId() ).newNodes( targetNode, sourceNode );
+//            safeType( opposite).setReversed( true );
+//            innerGraph.addEdge( targetNode, sourceNode, opposite );
+//        }
         return this;
     }
 

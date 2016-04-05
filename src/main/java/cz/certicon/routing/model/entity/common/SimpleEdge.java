@@ -26,6 +26,7 @@ public abstract class SimpleEdge implements Edge {
     private final Node sourceNode;
     private final Node targetNode;
     private final Edge.Id id;
+    private int speed;
     private Distance distance;
     private String label;
     private List<Coordinate> coordinates;
@@ -36,8 +37,8 @@ public abstract class SimpleEdge implements Edge {
         this.targetNode = targetNode;
         this.id = id;
         this.label = generateLabel( sourceNode, targetNode );
-        this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
-        this.distance = new LengthDistanceFactory().createFromEdgeAttributes( attributes );
+        this.attributes = SimpleEdgeAttributes.builder().build();
+        this.distance = new LengthDistanceFactory().createFromEdgeData( new SimpleEdgeData( sourceNode, targetNode, 50, false, 1 ) );
     }
 
     public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance distance ) {
@@ -46,12 +47,22 @@ public abstract class SimpleEdge implements Edge {
         this.id = id;
         this.distance = distance;
         this.label = generateLabel( sourceNode, targetNode );
-        this.attributes = SimpleEdgeAttributes.builder( 90 ).build();
+        this.attributes = SimpleEdgeAttributes.builder().build();
     }
 
     @Override
     public Id getId() {
         return id;
+    }
+
+    @Override
+    public int getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public void setSpeed( int speed ) {
+        this.speed = speed;
     }
 
     @Override
@@ -159,8 +170,6 @@ public abstract class SimpleEdge implements Edge {
         }
         return true;
     }
-    
-    
 
     @Override
     public String toString() {

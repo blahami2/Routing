@@ -7,6 +7,7 @@ package cz.certicon.routing.data.graph.xml;
 
 import cz.certicon.routing.data.basic.xml.AbstractXmlReader;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.data.basic.FileSource;
@@ -19,6 +20,7 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
+import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,17 +85,17 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
                 Edge.Id id = Edge.Id.fromString( attributes.getValue( ID.shortLowerName() ) );
                 Node.Id sourceId = Node.Id.fromString( attributes.getValue( SOURCE.shortLowerName() ) );
                 Node.Id targetId = Node.Id.fromString( attributes.getValue( TARGET.shortLowerName() ) );
-                double speed = Double.parseDouble( attributes.getValue( SPEED_FORWARD.shortLowerName() ) );
-                double speedBackward = Double.parseDouble( attributes.getValue( SPEED_BACKWARD.shortLowerName() ) );
+                int speed = Integer.parseInt( attributes.getValue( SPEED.shortLowerName() ) );
                 double length = Double.parseDouble( attributes.getValue( LENGTH.shortLowerName() ) );
                 boolean isPaid = Boolean.parseBoolean( attributes.getValue( PAID.shortLowerName() ) );
-                boolean isOneWay = Boolean.parseBoolean( attributes.getValue( ONEWAY.shortLowerName() ) );
-                EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( speed ).setBackwardSpeed( speedBackward ).setLength( length ).setOneWay( isOneWay ).setPaid( isPaid ).build();
+                EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( length ).setPaid( isPaid ).build();
                 Node sourceNode = nodes.get( sourceId );
                 Node targetNode = nodes.get( targetId );
-                Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
-                edge.setLabel( edgeAttributes.toString() );
+                EdgeData edgeData = new SimpleEdgeData(sourceNode, targetNode, speed, isPaid, length );
+                Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
+                edge.setSpeed( speed );
                 edge.setAttributes( edgeAttributes );
+                edge.setLabel( edgeAttributes.toString() );
                 graph.addEdge( edge );
             }
         }

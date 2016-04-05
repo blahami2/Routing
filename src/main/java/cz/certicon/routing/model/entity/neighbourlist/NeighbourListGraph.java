@@ -107,24 +107,26 @@ public class NeighbourListGraph implements Graph {
 
     @Override
     public Set<Edge> getIncomingEdgesOf( Node node ) {
-        Set<Edge> edgeSet = new HashSet<>();
-        for(Edge edge : getEdgesOf( node )){
-            if(!edge.getAttributes().isOneWay() || node.equals( edge.getTargetNode())){
-                edgeSet.add( edge );
-            }
-        }
-        return edgeSet;
+        return getEdgesOf( node );
+//        Set<Edge> edgeSet = new HashSet<>();
+//        for ( Edge edge : getEdgesOf( node ) ) {
+//            if ( node.equals( edge.getTargetNode() ) ) {
+//                edgeSet.add( edge );
+//            }
+//        }
+//        return edgeSet;
     }
 
     @Override
     public Set<Edge> getOutgoingEdgesOf( Node node ) {
-        Set<Edge> edgeSet = new HashSet<>();
-        for(Edge edge : getEdgesOf( node )){
-            if(!edge.getAttributes().isOneWay() || node.equals( edge.getSourceNode())){
-                edgeSet.add( edge );
-            }
-        }
-        return edgeSet;
+        return getEdgesOf( node );
+//        Set<Edge> edgeSet = new HashSet<>();
+//        for ( Edge edge : getEdgesOf( node ) ) {
+//            if ( node.equals( edge.getSourceNode() ) ) {
+//                edgeSet.add( edge );
+//            }
+//        }
+//        return edgeSet;
     }
 
     @Override

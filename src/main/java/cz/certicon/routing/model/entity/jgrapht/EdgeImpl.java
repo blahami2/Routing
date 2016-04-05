@@ -11,7 +11,6 @@ import cz.certicon.routing.model.entity.common.SimpleEdge;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,8 +18,6 @@ import java.util.List;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class EdgeImpl extends SimpleEdge {
-
-    boolean isReversed = false;
 
     public EdgeImpl( Id id, Node sourceNode, Node targetNode ) {
         super( id, sourceNode, targetNode );
@@ -35,16 +32,9 @@ class EdgeImpl extends SimpleEdge {
         return new EdgeImpl( id, sourceNode, targetNode, length );
     }
 
-    public void setReversed( boolean isReversed ) {
-        this.isReversed = isReversed;
-    }
-
     @Override
     public List<Coordinate> getCoordinates() {
         List<Coordinate> coords = new ArrayList<>( super.getCoordinates() );
-        if ( isReversed ) {
-            Collections.reverse( coords );
-        }
         return coords;
     }
 }

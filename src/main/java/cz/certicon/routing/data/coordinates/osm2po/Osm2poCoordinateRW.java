@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import org.postgis.PGgeometry;
@@ -29,6 +30,10 @@ import org.postgis.Point;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class Osm2poCoordinateRW extends AbstractDatabase<Map<Edge, List<Coordinate>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
+
+    public Osm2poCoordinateRW( Properties connectionProperties ) {
+        super( connectionProperties );
+    }
 
     @Override
     protected Map<Edge, List<Coordinate>> checkedRead( Set<Edge> in ) throws SQLException {

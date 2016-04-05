@@ -6,8 +6,10 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
+import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtGraphEntityFactory;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
@@ -209,6 +211,8 @@ public class GraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
+        System.out.println( "a = " + a );
+        System.out.println( "b = " + b );
         Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
@@ -312,8 +316,9 @@ public class GraphTest {
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( false ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();
-        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) )
+        EdgeData edgeData = new SimpleEdgeData( sourceNode, targetNode, 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( edgeData.getLength() ).build();
+        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) )
                 .setAttributes( edgeAttributes );
     }
 

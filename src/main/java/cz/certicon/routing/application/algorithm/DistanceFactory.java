@@ -6,7 +6,6 @@
 package cz.certicon.routing.application.algorithm;
 
 import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.EdgeAttributes;
 
 /**
  * The root interface for distance factories - classes for creating
@@ -38,5 +37,5 @@ public interface DistanceFactory {
 //     */
 //    public Distance createFromDouble( double distance );
     
-    public Distance createFromEdgeAttributes(EdgeAttributes edgeAttributes);
+    public Distance createFromEdgeData(EdgeData edgeData);
 }

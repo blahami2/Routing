@@ -10,7 +10,7 @@ package cz.certicon.routing.data.graph.xml;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum Tag {
-    ROOT, EDGE, NODE, ID, COORDINATE, LATITUDE, LONGITUDE, SPEED_FORWARD, SPEED_BACKWARD, ONEWAY, PAID, LENGTH, SOURCE, TARGET, WAY_ID;
+    ROOT, EDGE, NODE, ID, COORDINATE, LATITUDE, LONGITUDE, SPEED, ONEWAY, PAID, LENGTH, SOURCE, TARGET, WAY_ID;
     
     public String shortLowerName() {
         return this.name().toLowerCase();

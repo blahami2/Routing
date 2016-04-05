@@ -6,8 +6,10 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
+import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
 import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
@@ -96,7 +98,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b);
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
@@ -111,7 +113,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addNode( a ).addNode( b );
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( edge );
@@ -127,7 +129,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b);
         assertFalse( containsEdge( instance, edge ) );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
@@ -143,7 +145,7 @@ public class DirectedGraphTest {
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
         instance.addNode( a ).addNode( b );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( a, b, edge );
         assertTrue( containsEdge( instance, edge ) );
         instance.removeEdge( edge );
@@ -160,7 +162,7 @@ public class DirectedGraphTest {
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
         instance.addNode( a ).addNode( b );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( a, instance.getSourceNodeOf( edge ) );
     }
@@ -175,7 +177,7 @@ public class DirectedGraphTest {
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
         instance.addNode( a ).addNode( b );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( b, instance.getTargetNodeOf( edge ) );
     }
@@ -189,7 +191,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getEdgesOf( a ) );
@@ -206,7 +208,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         Set<Edge> expResult = new HashSet<>();
         assertEquals( expResult,
@@ -225,7 +227,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         Set<Edge> expResult = new HashSet<>();
         assertEquals( expResult,
@@ -244,7 +246,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b);
         instance.addEdge( edge );
         assertEquals( 1, instance.getDegreeOf( a ) );
         assertEquals( 1, instance.getDegreeOf( b ) );
@@ -259,7 +261,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( 0, instance.getInDegreeOf( a ) );
         assertEquals( 1, instance.getInDegreeOf( b ) );
@@ -274,7 +276,7 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( 1, instance.getOutDegreeOf( a ) );
         assertEquals( 0, instance.getOutDegreeOf( b ) );
@@ -306,15 +308,17 @@ public class DirectedGraphTest {
         Graph instance = initGraph( graphFactory, LOOPS );
         Node a = findNode( instance, LOOPS - 1, 0 );
         Node b = findNode( instance, 0, LOOPS - 1 );
-        Edge edge = createEdge( graphFactory, distanceFactory, a, b, true );
+        Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
         assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
                 instance.getEdges() );
     }
 
-    private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode, boolean oneWay ) {
-        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( 50 ).setOneWay( oneWay ).setLength( CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) ).build();
-        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeAttributes( edgeAttributes ) )
+ 
+    private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
+        EdgeData edgeData = new SimpleEdgeData( sourceNode, targetNode, 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+        EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( edgeData.getLength() ).build();
+        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) )
                 .setAttributes( edgeAttributes );
     }
 
@@ -361,7 +365,7 @@ public class DirectedGraphTest {
         for ( Node a : instance.getNodes() ) {
             for ( Node b : instance.getNodes() ) {
                 if ( !a.equals( b ) ) {
-                    instance.addEdge( createEdge( factory, distanceFactory, a, b, true ) );
+                    instance.addEdge( createEdge( factory, distanceFactory, a, b ) );
                 }
             }
         }

@@ -3,21 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.model.entity;
+package cz.certicon.routing.application.algorithm;
+
+import cz.certicon.routing.model.entity.Node;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface EdgeAttributes {
+public interface EdgeData {
+    
+    public Node getSource();
+    
+    public Node getTarget();
+    
+    public int getSpeed();
 
     public boolean isPaid();
 
     public double getLength();
-    
-    public void putAdditionalAttribute(String key, String value);
-    
-    public String getAdditionalAttribute(String key);
-    
-    public EdgeAttributes copyWithNewLength(double length);
 }

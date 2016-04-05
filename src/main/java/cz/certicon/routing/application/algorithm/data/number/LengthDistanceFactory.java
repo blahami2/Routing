@@ -7,7 +7,7 @@ package cz.certicon.routing.application.algorithm.data.number;
 
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.model.entity.EdgeAttributes;
+import cz.certicon.routing.application.algorithm.EdgeData;
 
 /**
  *
@@ -31,8 +31,8 @@ public class LengthDistanceFactory implements DistanceFactory {
 //    }
 
     @Override
-    public Distance createFromEdgeAttributes( EdgeAttributes edgeAttributes ) {
-        return new DoubleDistance( edgeAttributes.getLength() );
+    public Distance createFromEdgeData( EdgeData edgeData ) {
+        return new DoubleDistance( edgeData.getLength() );
     }
 
 }

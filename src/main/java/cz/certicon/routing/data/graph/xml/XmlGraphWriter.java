@@ -34,9 +34,9 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
 
     @Override
     protected void openedWrite( Graph graph ) throws IOException {
-        if ( graph instanceof DirectedGraph ) {
-            throw new IllegalArgumentException( "ERROR! Directed graph performs hardly reversible operations and is not supported for universal export." );
-        }
+//        if ( graph instanceof DirectedGraph ) {
+//            throw new IllegalArgumentException( "ERROR! Directed graph performs hardly reversible operations and is not supported for universal export." );
+//        }
         try {
             List<Node> sortedNodes = new ArrayList<>( graph.getNodes() );
             Collections.sort( sortedNodes, new Comparator<Node>() {
@@ -67,10 +67,8 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
                 getWriter().writeAttribute( ID.shortLowerName(), Edge.Id.toString( edge.getId() ) );
                 getWriter().writeAttribute( SOURCE.shortLowerName(), Node.Id.toString( edge.getSourceNode().getId() ) );
                 getWriter().writeAttribute( TARGET.shortLowerName(), Node.Id.toString( edge.getTargetNode().getId() ) );
-                getWriter().writeAttribute( SPEED_FORWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed( true ) ) );
-                getWriter().writeAttribute( SPEED_BACKWARD.shortLowerName(), Double.toString( edge.getAttributes().getSpeed( false ) ) );
+                getWriter().writeAttribute( SPEED.shortLowerName(), Integer.toString( edge.getSpeed() ) );
                 getWriter().writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.getAttributes().getLength() ) );
-                getWriter().writeAttribute( ONEWAY.shortLowerName(), Boolean.toString( edge.getAttributes().isOneWay() ) );
                 getWriter().writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.getAttributes().isPaid() ) );
                 getWriter().writeEndElement();
             }

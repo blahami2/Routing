@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.graph.osm2po;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.basic.database.AbstractDatabase;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.model.basic.Pair;
@@ -15,17 +16,23 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
+import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.DoubleComparator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class Osm2poGraphReader extends AbstractDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader {
+
+    public Osm2poGraphReader( Properties connectionProperties ) {
+        super( connectionProperties );
+    }
 
     @Override
     protected Graph checkedRead( Pair<GraphEntityFactory, DistanceFactory> in ) throws SQLException {
@@ -51,13 +58,17 @@ public class Osm2poGraphReader extends AbstractDatabase<Graph, Pair<GraphEntityF
             double cost = r.getDouble( "cost" );
             double reverseCost = r.getDouble( "reverse_cost" );
             double length = r.getDouble( "km" );
-            double speed = r.getDouble( "kmh" );
-            EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder( speed )
+            int speed = r.getInt( "kmh" );
+            EdgeData edgeData = new SimpleEdgeData(nodeMap.get( source )
+                    , nodeMap.get( target )
+                    , speed
+                    , false
+                    , length );
+            EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder()
                     .setLength( length )
-                    .setOneWay( DoubleComparator.isGreaterOrEqualTo( reverseCost, 99999, 10E-10 ) ) // not working
                     .setPaid( false ) // determine paid? See config for details, extend tag stuff class
                     .build();
-            Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( id ), nodeMap.get( source ), nodeMap.get( target ), distanceFactory.createFromEdgeAttributes( edgeAttributes ) );
+            Edge edge = graphEntityFactory.createEdge( Edge.Id.createId( id ), edgeData.getSource(), edgeData.getTarget(), distanceFactory.createFromEdgeData( edgeData ) );
             edge.setAttributes( edgeAttributes );
             edge.setLabel( r.getString( "osm_meta" ) );
             graph.addEdge( edge );
