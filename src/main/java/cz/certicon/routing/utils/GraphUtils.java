@@ -23,7 +23,9 @@ public class GraphUtils {
     public static Path createPath( Graph graph, GraphEntityFactory graphEntityFactory, Node sourceNode, Node targetNode ) {
         Path path = graphEntityFactory.createPathWithTarget( graph, targetNode );
         Node currentNode = targetNode;
-        while ( !currentNode.equals( sourceNode ) ) {
+        while ( !currentNode.getCoordinates().equals( sourceNode.getCoordinates() ) ) {
+//            System.out.println( "current node = " + currentNode );
+//            System.out.println( "edge = " + currentNode.getPredecessorEdge() );
             path.addEdgeAsFirst( currentNode.getPredecessorEdge() );
             currentNode = graph.getOtherNodeOf( currentNode.getPredecessorEdge(), currentNode );
         }
