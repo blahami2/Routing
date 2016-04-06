@@ -29,6 +29,8 @@ import org.graphstream.ui.view.Viewer;
 public class GraphStreamPathPresenter implements PathPresenter {
 
     private final GraphEntityFactory graphEntityFactory;
+    private boolean displayNodes = true;
+    private boolean displayEdges = true;
 
     public GraphStreamPathPresenter( GraphEntityFactory graphEntityFactory ) {
         this.graphEntityFactory = graphEntityFactory;
@@ -100,7 +102,9 @@ public class GraphStreamPathPresenter implements PathPresenter {
                     CoordinateUtils.toPointFromWGS84( scaleDimension, node.getCoordinates() ),
                     targetDimension );
             n.setAttribute( "xy", p.x, p.y );
-            n.setAttribute( "ui.label", id.toString() );
+            if ( displayNodes ) {
+                n.setAttribute( "ui.label", id.toString() );
+            }
 //            System.out.println( "printing to: " + p );
         }
         Map<Edge.Id, Boolean> edgeMap = new HashMap<>();
@@ -130,12 +134,14 @@ public class GraphStreamPathPresenter implements PathPresenter {
 
     @Override
     public PathPresenter setDisplayNodeText( boolean displayNodeText ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+//        displayNodes = displayNodeText;
+        return this;
     }
 
     @Override
     public PathPresenter setDisplayEdgeText( boolean displayEdgeText ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        displayEdges = displayEdgeText;
+        return this;
     }
 
 }
