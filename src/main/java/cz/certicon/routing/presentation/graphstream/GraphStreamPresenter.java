@@ -14,6 +14,8 @@ import cz.certicon.routing.utils.GeometryUtils;
 import cz.certicon.routing.utils.GraphUtils;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.HashMap;
+import java.util.Map;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.view.Viewer;
@@ -26,6 +28,8 @@ public class GraphStreamPresenter implements GraphPresenter {
 
     @Override
     public void displayGraph( cz.certicon.routing.model.entity.Graph graph ) {
+        int counter = 0;
+        Map<Coordinate, Integer> idMap = new HashMap<>();
         Graph displayGraph = new org.graphstream.graph.implementations.MultiGraph( "graph-id" );
         displayGraph.addAttribute( "ui.stylesheet", "edge {"
                 //+ "shape: line;"
@@ -54,6 +58,11 @@ public class GraphStreamPresenter implements GraphPresenter {
 
         for ( cz.certicon.routing.model.entity.Node node : graph.getNodes() ) {
             Node n = displayGraph.addNode( node.getId().toString() );
+            Integer id = idMap.get( node.getCoordinates() );
+            if ( id == null ) {
+                id = counter++;
+                idMap.put( node.getCoordinates(), id );
+            }
 //            System.out.println( "point: " + node.getCoordinates() );
             Point p = GeometryUtils.getScaledPoint(
                     min,
@@ -61,8 +70,8 @@ public class GraphStreamPresenter implements GraphPresenter {
                     CoordinateUtils.toPointFromWGS84( scaleDimension, node.getCoordinates() ),
                     targetDimension );
             n.setAttribute( "xy", p.x, p.y );
+            n.setAttribute( "ui.label", id.toString() );
 //            System.out.println( "printing to: " + p );
-            n.setAttribute( "ui.label", node.getCoordinates().toString() );
         }
         for ( Edge edge : graph.getEdges() ) {
             displayGraph.addEdge( edge.getId().toString(), edge.getSourceNode().getId().toString(), edge.getTargetNode().getId().toString(), true );
