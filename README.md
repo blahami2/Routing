@@ -12,3 +12,4 @@ Used for routing from A to B via OSM maps.
 - [JXMapViewer2](https://github.com/msteiger/jxmapviewer2)
 - [OSM-binary](https://github.com/openstreetmap/osmosis/tree/master/osmosis-osm-binary)
 - [Protocol buffers](https://github.com/google/protobuf)
+- [GraphStream](http://graphstream-project.org/)
