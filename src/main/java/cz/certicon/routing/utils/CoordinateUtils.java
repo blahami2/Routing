@@ -5,7 +5,10 @@
  */
 package cz.certicon.routing.utils;
 
+import cz.certicon.routing.model.entity.CartesianCoords;
 import cz.certicon.routing.model.entity.Coordinate;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import static java.lang.Math.*;
@@ -40,19 +43,19 @@ public class CoordinateUtils {
         double sumX = 0;
         double sumY = 0;
         double sumZ = 0;
-        for(CartesianCoords c : ccoords){
-            sumX += c.x;
-            sumY += c.y;
-            sumZ += c.z;
+        for ( CartesianCoords c : ccoords ) {
+            sumX += c.getX();
+            sumY += c.getY();
+            sumZ += c.getZ();
         }
         CartesianCoords mid = new CartesianCoords(
                 sumX / ccoords.size(),
                 sumY / ccoords.size(),
                 sumZ / ccoords.size()
         );
-        double lon = atan2( mid.y, mid.x );
-        double hyp = sqrt( mid.x * mid.x + mid.y * mid.y );
-        double lat = atan2( mid.z, hyp );
+        double lon = atan2( mid.getY(), mid.getX() );
+        double hyp = sqrt( mid.getX() * mid.getX() + mid.getY() * mid.getY() );
+        double lat = atan2( mid.getZ(), hyp );
         return new Coordinate( toDegrees( lat ), toDegrees( lon ) );
     }
 
@@ -110,17 +113,19 @@ public class CoordinateUtils {
         return coords;
     }
 
-    private static class CartesianCoords {
+    public static CartesianCoords toCartesianFromWGS84( Coordinate coords ) {
+        return new CartesianCoords(
+                EARTH_RADIUS * Math.cos( coords.getLatitude() ) * Math.cos( coords.getLongitude() ),
+                EARTH_RADIUS * Math.cos( coords.getLatitude() ) * Math.sin( coords.getLongitude() ),
+                EARTH_RADIUS * Math.sin( coords.getLatitude() )
+        );
+    }
 
-        final double x;
-        final double y;
-        final double z;
-
-        public CartesianCoords( double x, double y, double z ) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
+    public static Point toPointFromWGS84( Dimension container, Coordinate coords ) {
+//        int x = (int) ( ( container.width / 360.0 ) * ( 180 + coords.getLatitude() ) );
+//        int y = (int) ( ( container.height / 180.0 ) * ( 90 - coords.getLongitude() ) );
+        int x = (int) ( ( container.width / 360.0 ) * ( coords.getLongitude() ) );
+        int y = (int) ( ( container.height / 180.0 ) * ( coords.getLatitude() ) );
+        return new Point( x, y );
     }
 }
