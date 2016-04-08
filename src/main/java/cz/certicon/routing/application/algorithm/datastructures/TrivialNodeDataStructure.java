@@ -6,61 +6,63 @@
 package cz.certicon.routing.application.algorithm.datastructures;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
-import cz.certicon.routing.model.entity.Node;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <T> node type
  */
-public class TrivialNodeDataStructure implements NodeDataStructure {
+public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
 
-    private final List<Node> nodes;
+    private final List<NodeContainer<T>> nodes;
 
     public TrivialNodeDataStructure() {
         this.nodes = new LinkedList<>();
     }
 
     @Override
-    public Node extractMin() {
+    public T extractMin() {
         if ( nodes.isEmpty() ) {
             throw new IllegalStateException( "NodeStructure is empty." );
         }
-        Node min = nodes.get( 0 );
-        for ( Node node : nodes ) {
-            if ( node.getDistance().isLowerThan( min.getDistance() ) ) {
+        NodeContainer<T> min = nodes.get( 0 );
+        for ( NodeContainer<T> node : nodes ) {
+            if ( node.value < min.value ) {
                 min = node;
             }
         }
         nodes.remove( min );
-        return min;
+        return min.node;
     }
 
     @Override
-    public NodeDataStructure add( Node node ) {
-        nodes.add( node );
-        return this;
+    public void add( T node, double value ) {
+        nodes.add( new NodeContainer<>( node, value ) );
     }
 
     @Override
-    public NodeDataStructure remove( Node node ) {
-        nodes.remove( node );
-        return this;
-    }
-
-    @Override
-    public NodeDataStructure notifyDataChange( Node node ) {
-        if ( !nodes.contains( node ) ) {
-            add( node );
+    public void remove( T node ) {
+        for ( int i = 0; i < nodes.size(); i++ ) {
+            if ( nodes.get( i ).node == node ) {
+                nodes.remove( i );
+            }
         }
-        return this;
     }
 
     @Override
-    public NodeDataStructure clear() {
+    public void notifyDataChange( T node, double value ) {
+        for ( int i = 0; i < nodes.size(); i++ ) {
+            if ( nodes.get( i ).node == node ) {
+                nodes.get( i ).value = value;
+            }
+        }
+    }
+
+    @Override
+    public void clear() {
         nodes.clear();
-        return this;
     }
 
     @Override
@@ -71,6 +73,16 @@ public class TrivialNodeDataStructure implements NodeDataStructure {
     @Override
     public int size() {
         return nodes.size();
+    }
+    
+    private static class NodeContainer<T> {
+        public final T node;
+        public double value;
+
+        public NodeContainer( T node, double value ) {
+            this.node = node;
+            this.value = value;
+        }
     }
 
 }

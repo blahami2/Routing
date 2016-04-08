@@ -6,7 +6,6 @@
 package cz.certicon.routing.application.algorithm.datastructures;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
-import cz.certicon.routing.model.entity.Node;
 import java.util.HashMap;
 import java.util.Map;
 import org.jgrapht.util.FibonacciHeap;
@@ -15,11 +14,12 @@ import org.jgrapht.util.FibonacciHeapNode;
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <T> node type
  */
-public class JgraphtFibonacciDataStructure implements NodeDataStructure {
+public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
 
-    private final Map<Node, FibonacciHeapNode<Node>> nodeMap;
-    private final org.jgrapht.util.FibonacciHeap<Node> fibonacciHeap;
+    private final Map<T, FibonacciHeapNode<T>> nodeMap;
+    private final org.jgrapht.util.FibonacciHeap<T> fibonacciHeap;
 
     public JgraphtFibonacciDataStructure() {
         this.fibonacciHeap = new FibonacciHeap<>();
@@ -27,45 +27,41 @@ public class JgraphtFibonacciDataStructure implements NodeDataStructure {
     }
 
     @Override
-    public Node extractMin() {
-        FibonacciHeapNode<Node> min = fibonacciHeap.removeMin();
+    public T extractMin() {
+        FibonacciHeapNode<T> min = fibonacciHeap.removeMin();
         nodeMap.remove( min.getData() );
         return min.getData();
     }
 
     @Override
-    public NodeDataStructure add( Node node ) {
-        FibonacciHeapNode<Node> n = new FibonacciHeapNode<>( node );
+    public void add( T node, double value ) {
+        FibonacciHeapNode<T> n = new FibonacciHeapNode<>( node );
         nodeMap.put( node, n );
-        fibonacciHeap.insert( n, node.getDistance().getEvaluableValue() );
-        return this;
+        fibonacciHeap.insert( n, value );
     }
 
     @Override
-    public NodeDataStructure remove( Node node ) {
-        FibonacciHeapNode<Node> n = nodeMap.get( node );
+    public void remove( T node ) {
+        FibonacciHeapNode<T> n = nodeMap.get( node );
         fibonacciHeap.delete( n );
-        return this;
     }
 
     @Override
-    public NodeDataStructure notifyDataChange( Node node ) {
-        FibonacciHeapNode<Node> n = nodeMap.get( node );
+    public void notifyDataChange( T node, double value ) {
+        FibonacciHeapNode<T> n = nodeMap.get( node );
         if ( n == null ) {
             n = new FibonacciHeapNode<>( node );
             nodeMap.put( node, n );
-            fibonacciHeap.insert( n, node.getDistance().getEvaluableValue() );
+            fibonacciHeap.insert( n, value );
         } else {
-            fibonacciHeap.decreaseKey( n, node.getDistance().getEvaluableValue() );
+            fibonacciHeap.decreaseKey( n, value );
         }
-        return this;
     }
 
     @Override
-    public NodeDataStructure clear() {
+    public void clear() {
         nodeMap.clear();
         fibonacciHeap.clear();
-        return this;
     }
 
     @Override

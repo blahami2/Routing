@@ -81,9 +81,9 @@ public class NodeDataStructureTest {
     @Test
     public void testExtractMin() {
         System.out.println( "extractMin" );
-        NodeDataStructure instance = factory.createNodeDataStructure();
+        NodeDataStructure<Node> instance = factory.createNodeDataStructure();
         for ( Node node : nodes ) {
-            instance.add( node );
+            instance.add( node, node.getDistance().getEvaluableValue() );
         }
         Node min = nodes.get( 0 );
         for ( Node node : nodes ) {
@@ -103,8 +103,8 @@ public class NodeDataStructureTest {
     public void testAdd() {
         System.out.println( "add" );
         Node node = nodes.get( 0 );
-        NodeDataStructure instance = factory.createNodeDataStructure();
-        instance.add( node );
+        NodeDataStructure<Node> instance = factory.createNodeDataStructure();
+        instance.add( node, node.getDistance().getEvaluableValue() );
         Node expResult = node;
         Node result = instance.extractMin();
         assertEquals( expResult, result );
@@ -118,8 +118,9 @@ public class NodeDataStructureTest {
         System.out.println( "remove" );
         Node node = nodes.get( 0 );
         Node max = nodes.get( nodes.size() - 1 );
-        NodeDataStructure instance = factory.createNodeDataStructure();
-        instance.add( node ).add( max );
+        NodeDataStructure<Node> instance = factory.createNodeDataStructure();
+        instance.add( node, node.getDistance().getEvaluableValue() );
+        instance.add( max, max.getDistance().getEvaluableValue() );
         Node expResult = max;
         instance.remove( node );
         Node result = instance.extractMin();
@@ -141,9 +142,9 @@ public class NodeDataStructureTest {
     @Test
     public void testClear() {
         System.out.println( "clear" );
-        NodeDataStructure instance = factory.createNodeDataStructure();
+        NodeDataStructure<Node> instance = factory.createNodeDataStructure();
         for ( Node node : nodes ) {
-            instance.add( node );
+            instance.add( node, node.getDistance().getEvaluableValue() );
         }
         instance.clear();
         assertTrue( instance.isEmpty() );
@@ -155,9 +156,9 @@ public class NodeDataStructureTest {
     @Test
     public void testIsEmpty() {
         System.out.println( "isEmpty" );
-        NodeDataStructure instance = factory.createNodeDataStructure();
+        NodeDataStructure<Node> instance = factory.createNodeDataStructure();
         assertEquals( true, instance.isEmpty() );
-        instance.add( nodes.get( 0 ) );
+        instance.add( nodes.get( 0 ), nodes.get( 0 ).getDistance().getEvaluableValue() );
         assertEquals( false, instance.isEmpty() );
     }
 

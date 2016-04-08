@@ -24,7 +24,7 @@ import cz.certicon.routing.utils.GraphUtils;
  */
 public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
-    private NodeDataStructure nodeDataStructure;
+    private NodeDataStructure<Node> nodeDataStructure;
     private EndCondition endCondition;
 
     public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory ) {
@@ -70,19 +70,15 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
             if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
-//                nodeEqToFrom = node;
-                nodeDataStructure.add( node.setDistance( getDistanceFactory().createZeroDistance() ).setPredecessorEdge( null ) );
+                node.setDistance( getDistanceFactory().createZeroDistance() );
+                nodeDataStructure.add( node, 0 );
             } else { // set distance to infinity
-                nodeDataStructure.add( node.setDistance( getDistanceFactory().createInfiniteDistance() ).setPredecessorEdge( null ) );
-                if ( node.getCoordinates().equals( to.getCoordinates() ) ) {
-//                    nodeEqToTo = node;
-                }
+                node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
 //            System.out.println( "node (" + node.getLabel() + ") distance = " + node.getDistance() );
         }
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
-        Distance infiniteDistance = getDistanceFactory().createInfiniteDistance();
 //        System.out.println( "datastructure size = " + nodeDataStructure.size() );
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
@@ -124,7 +120,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //                    System.out.println( "is lower" );
                     endNode.setDistance( tmpNodeDistance );
                     endNode.setPredecessorEdge( edge );
-                    nodeDataStructure.notifyDataChange( endNode );
+                    nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
                 }
             }
         }

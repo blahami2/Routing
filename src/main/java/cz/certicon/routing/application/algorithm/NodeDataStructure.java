@@ -5,53 +5,48 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Node;
-
 /**
  * The root interface for various data structures used by algorithms.
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */
-public interface NodeDataStructure {
+public interface NodeDataStructure<T> {
 
     /**
      * Extract node with the minimal distance. Should be as fast as possible.
      *
      * @return node with the minimal distance
      */
-    public Node extractMin();
+    public T extractMin();
 
     /**
      * Adds node to the structure.
      *
      * @param node node to be added
-     * @return this structure
+     * @param value value to be associated with the node
      */
-    public NodeDataStructure add( Node node );
+    public void add( T node, double value );
 
     /**
      * Removes node from the structure.
      *
      * @param node node to be removed
-     * @return this structure
      */
-    public NodeDataStructure remove( Node node );
+    public void remove( T node );
 
     /**
      * Notifies the structure about distance change (invoking so called
      * decrease-key operation). Add the given node if not present already.
      *
-     * @param node node which had data changed
-     * @return this structure
+     * @param node node to change
+     * @param value value to be associated with the node
      */
-    public NodeDataStructure notifyDataChange( Node node );
+    public void notifyDataChange( T node, double value );
 
     /**
      * Wipes out the data from this structure.
-     *
-     * @return this structure
      */
-    public NodeDataStructure clear();
+    public void clear();
 
     /**
      * Returns true or false whether this structure contains nodes or not.
