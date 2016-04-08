@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
+import cz.certicon.routing.application.algorithm.algorithms.astar.StraightLineAStarRoutingAlgorithm;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
@@ -190,12 +191,11 @@ public class RoutingAlgorithmTest {
                 }
 
             } },
-                // pointlessly second test
                 new Object[]{
                     new RoutingAlgorithmFactory() {
                 @Override
                 public RoutingAlgorithm createRoutingAlgorithm() {
-                    return new DijkstraRoutingAlgorithm(
+                    return new StraightLineAStarRoutingAlgorithm(
                             input,
                             new DirectedNeighbourListGraphEntityFactory(),
                             new LengthDistanceFactory()

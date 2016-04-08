@@ -64,7 +64,7 @@ public class CoordinateUtils {
      *
      * @param a first point in {@link Coordinate}
      * @param b second point in {@link Coordinate}
-     * @return calculated distance in double
+     * @return calculated distance in meters
      */
     public static double calculateDistance( Coordinate a, Coordinate b ) {
 //        System.out.println( "calcualting distance:" );

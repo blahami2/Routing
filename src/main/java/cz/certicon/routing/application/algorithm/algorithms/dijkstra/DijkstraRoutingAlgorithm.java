@@ -50,14 +50,12 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //        }
     }
 
-    public DijkstraRoutingAlgorithm setEndCondition( EndCondition endCondition ) {
+    public void setEndCondition( EndCondition endCondition ) {
         this.endCondition = endCondition;
-        return this;
     }
 
-    public DijkstraRoutingAlgorithm setNodeDataStructure( NodeDataStructure nodeDataStructure ) {
+    public void setNodeDataStructure( NodeDataStructure nodeDataStructure ) {
         this.nodeDataStructure = nodeDataStructure;
-        return this;
     }
 
     @Override

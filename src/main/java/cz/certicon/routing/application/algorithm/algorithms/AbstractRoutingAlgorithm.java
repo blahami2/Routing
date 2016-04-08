@@ -84,9 +84,8 @@ public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
         return distanceFactory;
     }
 
-    public AbstractRoutingAlgorithm setRoutingConfiguration( RoutingConfiguration routingConfiguration ) {
+    public void setRoutingConfiguration( RoutingConfiguration routingConfiguration ) {
         this.routingConfiguration = routingConfiguration;
-        return this;
     }
 
 }

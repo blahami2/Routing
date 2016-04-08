@@ -8,6 +8,8 @@ package cz.certicon.routing.application.algorithm.data.number;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
+import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.utils.CoordinateUtils;
 
 /**
  *
@@ -29,10 +31,14 @@ public class LengthDistanceFactory implements DistanceFactory {
 //    public Distance createFromDouble( double d ) {
 //        return new DistanceImpl( d );
 //    }
-
     @Override
     public Distance createFromEdgeData( EdgeData edgeData ) {
         return new DoubleDistance( edgeData.getLength() );
+    }
+
+    @Override
+    public Distance createApproximateFromNodes( Node a, Node b ) {
+        return new DoubleDistance( CoordinateUtils.calculateDistance( a.getCoordinates(), b.getCoordinates() ) / 1000 );
     }
 
 }
