@@ -30,7 +30,6 @@ import static cz.certicon.routing.data.coordinates.xml.Tag.*;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, List<Coordinate>>> implements CoordinateReader {
-    
 
     public XmlCoordinateReader( DataSource source ) {
         super( source );
@@ -63,7 +62,11 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
             throw new IOException( ex );
         }
         close();
-        throw new IOException( "Ids not found (size should be " + edges.size() + " but is " + edgeHandler.getCoords().size() );
+        if ( !edges.isEmpty() ) {
+            throw new IOException( "Ids not found (size should be " + edges.size() + " but is " + edgeHandler.getCoords().size() );
+        } else {
+            return new HashMap<>();
+        }
     }
 
     private static class EdgeHandler extends DefaultHandler {
