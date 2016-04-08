@@ -13,8 +13,10 @@ import cz.certicon.routing.presentation.PathPresenter;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.utils.GeometryUtils;
 import cz.certicon.routing.utils.GraphUtils;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +30,38 @@ import org.graphstream.ui.view.Viewer;
  */
 public class GraphStreamPathPresenter implements PathPresenter {
 
+    private static final int MOVE = 15;
+    private static final int NUM_COLORS = 20;
+
     private final GraphEntityFactory graphEntityFactory;
     private boolean displayNodes = true;
     private boolean displayEdges = true;
 
+    private final List<Color> colorList;
+//    private final String stylesheet;
+    private int colorCounter = 0;
+
     public GraphStreamPathPresenter( GraphEntityFactory graphEntityFactory ) {
         this.graphEntityFactory = graphEntityFactory;
+//        StringBuilder styleSheetBuilder = new StringBuilder();
+//        styleSheetBuilder.append( "edge {"
+//                //+ "shape: line;"
+//                //+ "fill-color: #222;"
+//                + "arrow-shape: arrow;"
+//                + "arrow-size: 8px, 4px;"
+//                + "}"
+//                + "edge.route {"
+//                + "fill-color: red;"
+//                + "}" );
+        this.colorList = new ArrayList<>();
+        float interval = 360 / ( NUM_COLORS );
+        for ( float x = 0; x < 360; x += interval ) {
+            Color c = Color.getHSBColor( x / 360, 1, 1 );
+            colorList.add( c );
+//            styleSheetBuilder.append( "node.color" ).append( Integer.toString( c.getRGB() ) ).append( "{" )
+//                    .append( "fill-color: " );
+        }
+//        stylesheet = styleSheetBuilder.toString();
     }
 
     @Override
@@ -55,10 +83,9 @@ public class GraphStreamPathPresenter implements PathPresenter {
     public PathPresenter displayPath( Path path ) {
         List<cz.certicon.routing.model.entity.Node> nodes = path.getNodes();
         cz.certicon.routing.model.entity.Node center = nodes.get( nodes.size() / 2 );
-        int distance = nodes.size() / 2 + 2;
+        int distance = nodes.size() / 2 + 3;
         cz.certicon.routing.model.entity.Graph subgraph = GraphUtils.subgraph( path.getGraph(), graphEntityFactory, center, distance );
-        int counter = 0;
-        Map<Coordinate, Integer> idMap = new HashMap<>();
+        Map<Coordinate, List<cz.certicon.routing.model.entity.Node>> nodeMap = new HashMap<>();
         Graph displayGraph = new org.graphstream.graph.implementations.MultiGraph( "graph-id" );
         displayGraph.addAttribute( "ui.stylesheet", "edge {"
                 //+ "shape: line;"
@@ -89,23 +116,44 @@ public class GraphStreamPathPresenter implements PathPresenter {
         Point max = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinate( maxLat, maxLon ) );
 
         for ( cz.certicon.routing.model.entity.Node node : subgraph.getNodes() ) {
-            Node n = displayGraph.addNode( node.getId().toString() );
-            Integer id = idMap.get( node.getCoordinates() );
-            if ( id == null ) {
-                id = counter++;
-                idMap.put( node.getCoordinates(), id );
+            List<cz.certicon.routing.model.entity.Node> nodeList = nodeMap.get( node.getCoordinates() );
+            if ( nodeList == null ) {
+                nodeList = new ArrayList<>();
+                nodeMap.put( node.getCoordinates(), nodeList );
             }
-//            System.out.println( "point: " + node.getCoordinates() );
+            nodeList.add( node );
+        }
+        for ( List<cz.certicon.routing.model.entity.Node> nodeList : nodeMap.values() ) {
+            Color c = nextColor();
+            String fillColor = "fill-color: " + toCssRgb( c ) + ";";
             Point p = GeometryUtils.getScaledPoint(
                     min,
                     max,
-                    CoordinateUtils.toPointFromWGS84( scaleDimension, node.getCoordinates() ),
+                    CoordinateUtils.toPointFromWGS84( scaleDimension, nodeList.get( 0 ).getCoordinates() ),
                     targetDimension );
-            n.setAttribute( "xy", p.x, p.y );
-            if ( displayNodes ) {
-                n.setAttribute( "ui.label", id.toString() );
+            if ( nodeList.size() == 1 ) {
+                Node n = displayGraph.addNode( nodeList.get( 0 ).getId().toString() );
+                n.setAttribute( "xy", p.x, p.y );
+                n.addAttribute( "ui.style", fillColor );
+                if ( displayNodes ) {
+                    n.setAttribute( "ui.label", Integer.toString( nodeList.get( 0 ).getCoordinates().hashCode() ) );
+                }
+            } else {
+                int step = 360 / nodeList.size();
+                int degree = 0;
+                for ( int i = 0; i < nodeList.size(); i++ ) {
+                    double alpha = 2 * Math.PI * degree / 360;
+                    int xDiff = (int) Math.round( MOVE * Math.cos( alpha ) );
+                    int yDiff = (int) Math.round( MOVE * Math.sin( alpha ) );
+                    Node n = displayGraph.addNode( nodeList.get( i ).getId().toString() );
+                    n.setAttribute( "xy", p.x + xDiff, p.y + yDiff );
+                    n.addAttribute( "ui.style", fillColor );
+                    if ( displayNodes ) {
+                        n.setAttribute( "ui.label", Integer.toString( nodeList.get( i ).getCoordinates().hashCode() ) );
+                    }
+                    degree += step;
+                }
             }
-//            System.out.println( "printing to: " + p );
         }
         Map<Edge.Id, Boolean> edgeMap = new HashMap<>();
         for ( Edge edge : path.getEdges() ) {
@@ -134,7 +182,7 @@ public class GraphStreamPathPresenter implements PathPresenter {
 
     @Override
     public PathPresenter setDisplayNodeText( boolean displayNodeText ) {
-//        displayNodes = displayNodeText;
+        displayNodes = displayNodeText;
         return this;
     }
 
@@ -142,6 +190,14 @@ public class GraphStreamPathPresenter implements PathPresenter {
     public PathPresenter setDisplayEdgeText( boolean displayEdgeText ) {
         displayEdges = displayEdgeText;
         return this;
+    }
+
+    private Color nextColor() {
+        return colorList.get( colorCounter++ % colorList.size() );
+    }
+
+    private String toCssRgb( Color color ) {
+        return "rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")";
     }
 
 }
