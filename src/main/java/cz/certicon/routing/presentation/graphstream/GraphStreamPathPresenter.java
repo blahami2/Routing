@@ -95,6 +95,7 @@ public class GraphStreamPathPresenter implements PathPresenter {
                 + "}"
                 + "edge.route {"
                 + "fill-color: red;"
+                + "size: 3px;"
                 + "}" );
 
         Dimension scaleDimension = new Dimension( Integer.MAX_VALUE, Integer.MAX_VALUE );
