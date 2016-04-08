@@ -33,7 +33,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         this.endCondition = new EndCondition() {
             @Override
             public boolean isFinished( Graph graph, Node sourceNode, Node targetNode, Node currentNode ) {
-                return targetNode.equals( currentNode );
+                return targetNode.getCoordinates().equals( currentNode.getCoordinates() );
             }
 
             @Override
@@ -65,17 +65,17 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //        System.out.println( "routing from: " + from.getLabel() + " to " + to.getLabel() );
         // clear the data structure
         nodeDataStructure.clear();
-        Node nodeEqToFrom = from;
-        Node nodeEqToTo = to;
+//        Node nodeEqToFrom = from;
+//        Node nodeEqToTo = to;
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
             if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
-                nodeEqToFrom = node;
+//                nodeEqToFrom = node;
                 nodeDataStructure.add( node.setDistance( getDistanceFactory().createZeroDistance() ).setPredecessorEdge( null ) );
             } else { // set distance to infinity
                 nodeDataStructure.add( node.setDistance( getDistanceFactory().createInfiniteDistance() ).setPredecessorEdge( null ) );
                 if ( node.getCoordinates().equals( to.getCoordinates() ) ) {
-                    nodeEqToTo = node;
+//                    nodeEqToTo = node;
                 }
             }
 //            System.out.println( "node (" + node.getLabel() + ") distance = " + node.getDistance() );
@@ -83,19 +83,21 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         Distance infiniteDistance = getDistanceFactory().createInfiniteDistance();
+//        System.out.println( "datastructure size = " + nodeDataStructure.size() );
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+//            System.out.println( "current node  = " + currentNode );
             if ( currentNode.getDistance().equals( infiniteDistance ) ) {
                 return null;
             }
 //            System.out.println( "currentNode = " + currentNode );
 //            System.out.println( "extracted node: " + currentNode.getLabel() );
 //            System.out.println( "nodes left: " + nodeDataStructure.size() );
-            if ( endCondition.isFinished( getGraph(), nodeEqToFrom, nodeEqToTo, currentNode ) ) {
+            if ( endCondition.isFinished( getGraph(), from, to, currentNode ) ) {
 //                System.out.println( "found, breaking" );
                 // build path from predecessors and return
-                return endCondition.getResult( getGraph(), getEntityAbstractFactory(), nodeEqToFrom, nodeEqToTo );
+                return endCondition.getResult( getGraph(), getEntityAbstractFactory(), from, currentNode );
             }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getOutgoingEdgesOf( currentNode ) ) {
