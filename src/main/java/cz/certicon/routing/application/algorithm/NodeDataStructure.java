@@ -39,7 +39,7 @@ public interface NodeDataStructure {
 
     /**
      * Notifies the structure about distance change (invoking so called
-     * decrease-key operation).
+     * decrease-key operation). Add the given node if not present already.
      *
      * @param node node which had data changed
      * @return this structure

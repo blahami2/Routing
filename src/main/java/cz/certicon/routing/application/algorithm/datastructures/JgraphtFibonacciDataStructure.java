@@ -51,7 +51,13 @@ public class JgraphtFibonacciDataStructure implements NodeDataStructure {
     @Override
     public NodeDataStructure notifyDataChange( Node node ) {
         FibonacciHeapNode<Node> n = nodeMap.get( node );
-        fibonacciHeap.decreaseKey( n, node.getDistance().getEvaluableValue() );
+        if ( n == null ) {
+            n = new FibonacciHeapNode<>( node );
+            nodeMap.put( node, n );
+            fibonacciHeap.insert( n, node.getDistance().getEvaluableValue() );
+        } else {
+            fibonacciHeap.decreaseKey( n, node.getDistance().getEvaluableValue() );
+        }
         return this;
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class TrivialNodeDataStructure implements NodeDataStructure {
 
@@ -51,6 +51,9 @@ public class TrivialNodeDataStructure implements NodeDataStructure {
 
     @Override
     public NodeDataStructure notifyDataChange( Node node ) {
+        if ( !nodes.contains( node ) ) {
+            add( node );
+        }
         return this;
     }
 
