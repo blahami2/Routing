@@ -9,14 +9,25 @@ package cz.certicon.routing.application.algorithm;
  * The root interface for routing configurations. The routing configuration
  * serves as additional query criteria.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface RoutingConfiguration {
 
     /**
-     * Serves simply as a supplier of {@link NodeEvaluator}.
+     * Serves simply as a supplier of {@link DistanceEvaluator}.
      *
      * @return evaluator for calculating the node distance.
      */
-    public NodeEvaluator getNodeEvaluator();
+    public DistanceEvaluator getDistanceEvaluator();
+
+    public void setDistanceEvaluator( DistanceEvaluator distanceEvaluator );
+
+    /**
+     * Serves simply as a supplier of {@link EdgeEvaluator}.
+     *
+     * @return validator for determining whether the edge is valid
+     */
+    public EdgeValidator getEdgeValidator();
+
+    public void setEdgeValidator( EdgeValidator edgeValidator );
 }

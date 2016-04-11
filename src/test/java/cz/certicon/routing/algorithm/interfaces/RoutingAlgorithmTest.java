@@ -7,7 +7,6 @@ package cz.certicon.routing.algorithm.interfaces;
 
 import com.sun.javafx.scene.NodeHelper;
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.application.algorithm.NodeEvaluator;
 import cz.certicon.routing.application.algorithm.AlgorithmConfiguration;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
@@ -39,6 +38,7 @@ import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import cz.certicon.routing.application.algorithm.DistanceEvaluator;
 
 /**
  *

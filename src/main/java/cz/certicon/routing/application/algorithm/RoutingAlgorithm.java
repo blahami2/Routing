@@ -25,4 +25,6 @@ public interface RoutingAlgorithm {
      * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the two points.
      */
     public Path route( Node from, Node to );
+    
+    public RoutingConfiguration getRoutingConfiguration();
 }

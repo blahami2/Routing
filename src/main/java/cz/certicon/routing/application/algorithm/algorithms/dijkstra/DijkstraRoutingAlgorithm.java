@@ -95,6 +95,9 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getOutgoingEdgesOf( currentNode ) ) {
+                if(!getRoutingConfiguration().getEdgeValidator().validate( edge )){
+                    continue;
+                }
 //                {
 //                    Coordinate first = new Coordinate( 50.077595, 14.4304993 ); // 352744338
 //                    Coordinate second = new Coordinate( 50.0791829, 14.4327469 ); // 25936035
@@ -112,7 +115,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
 //                System.out.println( "checking node: " + endNode.getLabel() + " with distance = " + endNode.getDistance() );
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getNodeEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
                 if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
 //                    System.out.println( "is lower" );

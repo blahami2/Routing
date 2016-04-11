@@ -14,7 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A* implementation of the routing algorithm, based on the node-flight-distance heuristic function.
+ * A* implementation of the routing algorithm, based on the node-flight-distance
+ * heuristic function.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -53,18 +54,21 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             Node currentNode = nodeDataStructure.extractMin();
             if ( currentNode.getCoordinates().equals( to.getCoordinates() ) ) {
                 // build path from predecessors and return
-                return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), from, currentNode);
+                return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), from, currentNode );
             }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getOutgoingEdgesOf( currentNode ) ) {
+                if ( !getRoutingConfiguration().getEdgeValidator().validate( edge ) ) {
+                    continue;
+                }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getNodeEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
                 if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
                     endNode.setDistance( tmpNodeDistance );
                     endNode.setPredecessorEdge( edge );
-                    nodeDataStructure.notifyDataChange( endNode, calculateDistance( getDistanceFactory(), endNode, to).getEvaluableValue() );
+                    nodeDataStructure.notifyDataChange( endNode, calculateDistance( getDistanceFactory(), endNode, to ).getEvaluableValue() );
                 }
             }
         }
