@@ -12,8 +12,8 @@ import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtGraphEntityFactory;
-import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
-import cz.certicon.routing.model.entity.neighbourlist.NeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighborListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.NeighborListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -375,12 +375,11 @@ public class GraphTest {
 
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
-        return Arrays.asList(
-                new Object[]{
+        return Arrays.asList(new Object[]{
                     new JgraphtGraphEntityFactory()
                 },
                 new Object[]{
-                    new NeighbourListGraphEntityFactory()
+                    new NeighborListGraphEntityFactory()
                 }
         );
     }

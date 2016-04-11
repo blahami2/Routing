@@ -8,10 +8,10 @@ package cz.certicon.routing.model.entity.jgrapht;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * An implementation of {@link Graph} adapting {@link org.jgrapht.graph.Multigraph} object.
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */

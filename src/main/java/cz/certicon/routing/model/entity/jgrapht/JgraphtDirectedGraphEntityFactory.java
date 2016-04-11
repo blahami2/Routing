@@ -15,6 +15,7 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
+ * An implementation of {@link GraphEntityFactory} creating {@link DirectedJgraphtGraph}-related objects.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

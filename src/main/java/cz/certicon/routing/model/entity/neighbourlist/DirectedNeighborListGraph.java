@@ -13,15 +13,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * An implementation of {@link DirectedGraph} using neighbor lists.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-class DirectedNeighbourListGraph implements DirectedGraph {
+class DirectedNeighborListGraph implements DirectedGraph {
 
     private final Set<Node> nodes;
     private final Set<Edge> edges;
 
-    public DirectedNeighbourListGraph() {
+    public DirectedNeighborListGraph() {
         this.nodes = new HashSet<>();
         this.edges = new HashSet<>();
     }

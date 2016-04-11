@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * An implementation of {@link Edge} using a {@link SimpleEdge}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

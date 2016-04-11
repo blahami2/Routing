@@ -9,6 +9,7 @@ import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.model.entity.Node;
 
 /**
+ * A basic implementation of {@link EdgeData}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

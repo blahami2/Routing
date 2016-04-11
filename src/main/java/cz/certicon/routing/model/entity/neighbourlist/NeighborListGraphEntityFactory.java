@@ -13,14 +13,15 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 
 /**
+ * An implementation of {@link GraphEntityFactory} creating {@link NeighborListGraphEntityFactory}-related objects.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DirectedNeighbourListGraphEntityFactory implements GraphEntityFactory {
+public class NeighborListGraphEntityFactory implements GraphEntityFactory {
 
     @Override
-    public Node createNode( Node.Id id,double latitude, double longitude ) {
-        return new NodeImpl( id,  latitude, longitude );
+    public Node createNode( Node.Id id, double latitude, double longitude ) {
+        return new NodeImpl( id, latitude, longitude );
     }
 
     @Override
@@ -40,7 +41,7 @@ public class DirectedNeighbourListGraphEntityFactory implements GraphEntityFacto
 
     @Override
     public Graph createGraph() {
-        return new DirectedNeighbourListGraph();
+        return new NeighborListGraph();
     }
 
 }

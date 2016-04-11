@@ -15,7 +15,7 @@ import cz.certicon.routing.application.algorithm.RoutingConfiguration;
 import cz.certicon.routing.application.algorithm.algorithms.dijkstra.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
-import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighborListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -48,12 +48,12 @@ import java.util.Map;
 public class RoutingAlgorithmTest {
 
     private final RoutingAlgorithmFactory routingAlgorithmFactory;
-    private final DirectedNeighbourListGraphEntityFactory graphFactory;
+    private final DirectedNeighborListGraphEntityFactory graphFactory;
     private final LengthDistanceFactory distanceFactory;
 
     public RoutingAlgorithmTest( RoutingAlgorithmFactory routingAlgorithmFactory1 ) {
         this.routingAlgorithmFactory = routingAlgorithmFactory1;
-        this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
+        this.graphFactory = new DirectedNeighborListGraphEntityFactory();
         this.distanceFactory = new LengthDistanceFactory();
     }
 
@@ -125,7 +125,7 @@ public class RoutingAlgorithmTest {
     }
 
     public static Graph createGraph() {
-        DirectedNeighbourListGraphEntityFactory entityFactory = new DirectedNeighbourListGraphEntityFactory();
+        DirectedNeighborListGraphEntityFactory entityFactory = new DirectedNeighborListGraphEntityFactory();
         LengthDistanceFactory distanceFactory = new LengthDistanceFactory();
         Graph graph = entityFactory.createGraph();
         Node a = entityFactory.createNode( Node.Id.generateId(), 50.1001831, 14.3856114 );
@@ -185,7 +185,7 @@ public class RoutingAlgorithmTest {
                 public RoutingAlgorithm createRoutingAlgorithm() {
                     return new DijkstraRoutingAlgorithm(
                             input,
-                            new DirectedNeighbourListGraphEntityFactory(),
+                            new DirectedNeighborListGraphEntityFactory(),
                             new LengthDistanceFactory()
                     );
                 }
@@ -197,7 +197,7 @@ public class RoutingAlgorithmTest {
                 public RoutingAlgorithm createRoutingAlgorithm() {
                     return new StraightLineAStarRoutingAlgorithm(
                             input,
-                            new DirectedNeighbourListGraphEntityFactory(),
+                            new DirectedNeighborListGraphEntityFactory(),
                             new LengthDistanceFactory()
                     );
                 }

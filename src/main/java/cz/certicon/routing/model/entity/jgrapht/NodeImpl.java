@@ -10,6 +10,7 @@ import cz.certicon.routing.model.entity.common.SimpleNode;
 import cz.certicon.routing.model.entity.Node;
 
 /**
+ * An implementation of {@link Node} using a {@link SimpleNode}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

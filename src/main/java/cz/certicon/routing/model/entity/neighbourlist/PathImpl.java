@@ -10,6 +10,7 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 
 /**
+ * An implementation of {@link Path} using a {@link SimplePath}
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */

@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 /**
+ * Class representation of edge attributes.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

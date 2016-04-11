@@ -10,7 +10,7 @@ import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
-import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighborListGraphEntityFactory;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
@@ -37,7 +37,7 @@ import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 public class NodeDataStructureTest {
 
     private final NodeDataStructureImplFactory factory;
-    private final DirectedNeighbourListGraphEntityFactory graphFactory;
+    private final DirectedNeighborListGraphEntityFactory graphFactory;
     private final LengthDistanceFactory distanceFactory;
     private final List<Node> nodes = new ArrayList<>();
     private final List<Edge> edges = new ArrayList<>();
@@ -45,7 +45,7 @@ public class NodeDataStructureTest {
     public NodeDataStructureTest( NodeDataStructureImplFactory factory ) {
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().build();
         this.factory = factory;
-        this.graphFactory = new DirectedNeighbourListGraphEntityFactory();
+        this.graphFactory = new DirectedNeighborListGraphEntityFactory();
         this.distanceFactory = new LengthDistanceFactory();
         int size = 20;
         for ( int i = 1; i < size; i++ ) {

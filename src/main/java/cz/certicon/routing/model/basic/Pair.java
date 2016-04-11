@@ -6,8 +6,12 @@
 package cz.certicon.routing.model.basic;
 
 /**
+ * A generic container class for two objects.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <A> class of the first object
+ * @param <B> class of the second object
+ * 
  */
 public class Pair<A,B> {
     public final A a;

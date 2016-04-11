@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A basic implementation of [@link EdgeAttributes}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

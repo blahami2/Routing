@@ -13,15 +13,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * An implementation of {@link Graph} using neighbor lists.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class NeighbourListGraph implements Graph {
+public class NeighborListGraph implements Graph {
 
     private final Set<Node> nodes;
     private final Set<Edge> edges;
 
-    public NeighbourListGraph() {
+    public NeighborListGraph() {
         this.nodes = new HashSet<>();
         this.edges = new HashSet<>();
     }

@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 /**
+ * The root interface for directed graphs.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

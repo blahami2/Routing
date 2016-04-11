@@ -24,9 +24,20 @@ public interface Edge {
      * @return {@link Distance}
      */
     public Distance getDistance();
-    
+
+    /**
+     * Returns maximal speed
+     *
+     * @return speed in kmph
+     */
     public int getSpeed();
-    public void setSpeed(int speed);
+
+    /**
+     * Sets maximal speed
+     * 
+     * @param speed kmph 
+     */
+    public void setSpeed( int speed );
 
     /**
      * Getter for attributes
@@ -164,8 +175,8 @@ public interface Edge {
         private Id( long id ) {
             this.id = id;
         }
-        
-        public long getValue(){
+
+        public long getValue() {
             return id;
         }
 

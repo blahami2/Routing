@@ -8,7 +8,7 @@ package cz.certicon.routing.model.entity;
 import java.util.Set;
 
 /**
- * The root interface for graph representation of a map topology
+ * The root interface for graph representation of a map topology. Ignores edge direction.
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */

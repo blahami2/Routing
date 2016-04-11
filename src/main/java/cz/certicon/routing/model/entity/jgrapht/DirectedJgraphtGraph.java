@@ -9,11 +9,10 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.DirectedGraph;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
-import java.util.Collection;
 import java.util.Set;
-import org.jgrapht.EdgeFactory;
 
 /**
+ * An implementation of {@link DirectedGraph} adapting {@link org.jgrapht.graph.DirectedMultigraph} object.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

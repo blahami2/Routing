@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * An implementation of {@link Node} using a {@link SimpleNode}
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */

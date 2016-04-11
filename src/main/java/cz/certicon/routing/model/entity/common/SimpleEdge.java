@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * A basic abstract implementation of {@link Edge}.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

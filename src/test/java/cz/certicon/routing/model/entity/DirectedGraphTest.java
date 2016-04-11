@@ -11,7 +11,7 @@ import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFacto
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.model.entity.jgrapht.JgraphtDirectedGraphEntityFactory;
-import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighbourListGraphEntityFactory;
+import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighborListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -374,12 +374,11 @@ public class DirectedGraphTest {
 
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
-        return Arrays.asList(
-                new Object[]{
+        return Arrays.asList(new Object[]{
                     new JgraphtDirectedGraphEntityFactory()
                 },
                 new Object[]{
-                    new DirectedNeighbourListGraphEntityFactory()
+                    new DirectedNeighborListGraphEntityFactory()
                 }
         );
     }

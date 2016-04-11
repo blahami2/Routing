@@ -12,6 +12,7 @@ import cz.certicon.routing.model.entity.Node;
 import java.util.Objects;
 
 /**
+ * A basic implementation of {@link Node}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

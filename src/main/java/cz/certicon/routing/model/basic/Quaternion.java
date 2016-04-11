@@ -6,8 +6,14 @@
 package cz.certicon.routing.model.basic;
 
 /**
+ * A generic container class for four objects.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <A> class of the first object
+ * @param <B> class of the second object
+ * @param <C> class of the third object
+ * @param <D> class of the fourth object
+ * 
  */
 public class Quaternion<A, B, C, D> extends Trinity<A, B, C> {
 

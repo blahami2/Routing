@@ -6,8 +6,13 @@
 package cz.certicon.routing.model.basic;
 
 /**
+ * A generic container class for three objects.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <A> class of the first object
+ * @param <B> class of the second object
+ * @param <C> class of the third object
+ * 
  */
 public class Trinity<A, B, C> extends Pair<A, B> {
 

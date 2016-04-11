@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * A basic implementation of {@link Path}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
