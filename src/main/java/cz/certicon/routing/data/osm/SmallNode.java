@@ -6,7 +6,8 @@
 package cz.certicon.routing.data.osm;
 
 /**
- *
+ *  Minimalistic node container
+ * 
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class SmallNode {

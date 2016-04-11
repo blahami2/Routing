@@ -12,6 +12,7 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 
 /**
+ * An interface for {@link Graph} reading using a {@link Reader} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

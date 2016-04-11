@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * An implementation of {@link DataDestination} using a {@link String}. Obtain result via the {@link #getResult() getResult} method.
  *
  * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
  */
@@ -35,6 +36,10 @@ public class StringDestination implements DataDestination {
         return this;
     }
     
+    /**
+     * Returns the current content of this {@link DataDestination}
+     * @return {@link String} representation of the content
+     */
     public String getResult(){
         return sb.toString();
     }

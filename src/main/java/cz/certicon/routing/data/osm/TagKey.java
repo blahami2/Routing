@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.osm;
 
 /**
+ * Way tags
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

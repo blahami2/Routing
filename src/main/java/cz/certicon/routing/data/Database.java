@@ -8,6 +8,7 @@ package cz.certicon.routing.data;
 import java.sql.ResultSet;
 
 /**
+ * A database interface
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

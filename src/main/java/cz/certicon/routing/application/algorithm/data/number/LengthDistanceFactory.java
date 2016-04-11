@@ -12,6 +12,7 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.utils.CoordinateUtils;
 
 /**
+ * {@link DistanceFactory} implementation using geographical distance between two points.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

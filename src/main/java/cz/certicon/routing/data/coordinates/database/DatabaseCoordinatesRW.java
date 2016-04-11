@@ -5,21 +5,12 @@
  */
 package cz.certicon.routing.data.coordinates.database;
 
-import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.basic.database.AbstractDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
-import cz.certicon.routing.data.graph.GraphReader;
-import cz.certicon.routing.data.graph.GraphWriter;
-import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
-import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
-import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +22,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
+ * An implementation of the {@link CoordinateReader}/{@link CoordinateWriter} interfaces using the {@link AbstractDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

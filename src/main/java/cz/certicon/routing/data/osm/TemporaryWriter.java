@@ -17,6 +17,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
+ * 
+ * @deprecated java osm parsing not supported anymore, use database or other external application
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

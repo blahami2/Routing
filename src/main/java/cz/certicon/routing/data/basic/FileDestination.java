@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 /**
+ * An implementation of {@link DataDestination} using a {@link File}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

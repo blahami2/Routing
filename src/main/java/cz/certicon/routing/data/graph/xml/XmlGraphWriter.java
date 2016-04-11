@@ -9,7 +9,6 @@ import cz.certicon.routing.data.basic.xml.AbstractXmlWriter;
 import cz.certicon.routing.data.DataDestination;
 import static cz.certicon.routing.data.graph.xml.Tag.*;
 import cz.certicon.routing.data.graph.GraphWriter;
-import cz.certicon.routing.model.entity.DirectedGraph;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -23,6 +22,7 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 
 /**
+ * An implementation of the {@link GraphWriter} interfaces using the {@link AbstractXmlWriter} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -33,7 +33,7 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
     }
 
     @Override
-    protected void openedWrite( Graph graph ) throws IOException {
+    protected void checkedWrite( Graph graph ) throws IOException {
 //        if ( graph instanceof DirectedGraph ) {
 //            throw new IllegalArgumentException( "ERROR! Directed graph performs hardly reversible operations and is not supported for universal export." );
 //        }

@@ -10,8 +10,11 @@ import cz.certicon.routing.data.Reader;
 import java.io.IOException;
 
 /**
+ * An abstract implementation of the Reader interfaces for the XML. Encapsulates access, controls the state before reading and opens the stream if necessary.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <In> additional data
+ * @param <Out> actual output (of reading)
  */
 public abstract class AbstractXmlReader<In,Out> implements Reader<In,Out> {
 
@@ -32,10 +35,17 @@ public abstract class AbstractXmlReader<In,Out> implements Reader<In,Out> {
         if(!isOpen){
             open();
         }
-        return openedRead( in );
+        return checkedRead( in );
     }
-    
-    protected abstract Out openedRead(In in) throws IOException;
+        
+    /**
+     * Checks the state before reading and opens the source if necessary.
+     * 
+     * @param in additional data (passed)
+     * @return the read output
+     * @throws IOException reading exception
+     */
+    protected abstract Out checkedRead(In in) throws IOException;
 
     @Override
     public void close() throws IOException {

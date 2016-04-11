@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * Parser for way attributes, creates new {@link EdgeAttributes} (should use {@link EdgeData}
  *
+ * @deprecated java osm parsing not supported anymore, use database or other external application
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class WayAttributeParser {

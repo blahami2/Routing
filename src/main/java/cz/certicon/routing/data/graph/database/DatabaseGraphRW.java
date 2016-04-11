@@ -12,7 +12,6 @@ import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.data.graph.GraphWriter;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * An implementation of the {@link GraphReader}/{@link GraphWriter} interfaces using the {@link AbstractDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

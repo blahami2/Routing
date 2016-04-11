@@ -26,6 +26,7 @@ import javax.xml.parsers.SAXParserFactory;
 import static cz.certicon.routing.data.coordinates.xml.Tag.*;
 
 /**
+ * An implementation of the {@link CoordinateReader} interfaces using the {@link AbstractXmlReader} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -44,7 +45,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
     }
 
     @Override
-    protected Map<Edge, List<Coordinate>> openedRead( Set<Edge> edges ) throws IOException {
+    protected Map<Edge, List<Coordinate>> checkedRead( Set<Edge> edges ) throws IOException {
         EdgeHandler edgeHandler;
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();

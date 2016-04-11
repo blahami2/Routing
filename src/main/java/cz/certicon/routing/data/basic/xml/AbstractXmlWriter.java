@@ -14,8 +14,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
+ * An abstract implementation of the {@link Writer} interfaces for the XML. Encapsulates access, controls the state before writing and opens the stream if necessary.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <Out> actual input (to be written)
  */
 public abstract class AbstractXmlWriter<Out> implements Writer<Out> {
 
@@ -68,10 +70,16 @@ public abstract class AbstractXmlWriter<Out> implements Writer<Out> {
         if ( !isOpen ) {
             open();
         }
-        openedWrite( out );
+        checkedWrite( out );
     }
-
-    abstract protected void openedWrite( Out out ) throws IOException;
+    
+    /**
+     * Checks the state before writing and opens the source if necessary.
+     * 
+     * @param out output to be written
+     * @throws IOException reading exception
+     */
+    abstract protected void checkedWrite( Out out ) throws IOException;
 
     @Override
     public boolean isOpen() {

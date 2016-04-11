@@ -13,12 +13,12 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
-import cz.certicon.routing.application.algorithm.datastructures.TrivialNodeDataStructure;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
 
 /**
+ * Basic routing algorithm implementation using the optimal Dijkstra.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

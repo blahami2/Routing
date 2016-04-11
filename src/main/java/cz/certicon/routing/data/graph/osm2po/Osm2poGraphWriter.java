@@ -11,6 +11,7 @@ import java.io.IOException;
 
 /**
  *
+ * @deprecated osm2po is not supported anymore
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class Osm2poGraphWriter implements GraphWriter {

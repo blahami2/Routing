@@ -11,6 +11,7 @@ import cz.certicon.routing.data.TemporaryMemory;
 import java.io.File;
 
 /**
+ * An implementation of {@link TemporaryMemory} storing data in the {@link File}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

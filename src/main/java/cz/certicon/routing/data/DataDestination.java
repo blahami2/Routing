@@ -32,6 +32,12 @@ public interface DataDestination {
      */
     public DataDestination write( String str ) throws IOException;
 
+    /**
+     * Returns output stream of this destination
+     * 
+     * @return an instance of {@link OutputStream}
+     * @throws IOException 
+     */
     public OutputStream getOutputStream() throws IOException;
 
     /**

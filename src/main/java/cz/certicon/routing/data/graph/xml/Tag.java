@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.graph.xml;
 
 /**
+ * An enumeration for XML tags.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

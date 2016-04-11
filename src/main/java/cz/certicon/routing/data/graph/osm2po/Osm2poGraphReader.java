@@ -26,6 +26,7 @@ import java.util.Properties;
 
 /**
  *
+ * @deprecated osm2po is not supported anymore
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class Osm2poGraphReader extends AbstractDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader {

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A* implementation of the routing algorithm, based on the node-flight-distance heuristic function.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

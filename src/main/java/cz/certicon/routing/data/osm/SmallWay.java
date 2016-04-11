@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Minimalistic way container
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

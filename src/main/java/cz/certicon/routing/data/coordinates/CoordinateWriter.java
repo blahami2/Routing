@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * An interface for {@link Coordinate} writing (using an Edge/Coordinate map) using a {@link Writer} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

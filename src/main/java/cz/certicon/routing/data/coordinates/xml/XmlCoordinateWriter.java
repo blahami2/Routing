@@ -16,8 +16,8 @@ import static cz.certicon.routing.data.coordinates.xml.Tag.*;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
 import java.util.Map;
 
-//static import cz.certicon.routing.data.coordinates.xml.Tags;
 /**
+ * An implementation of the {@link CoordinateWriter} interfaces using the {@link AbstractXmlWriter} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -28,7 +28,7 @@ public class XmlCoordinateWriter extends AbstractXmlWriter<Map<Edge, List<Coordi
     }
 
     @Override
-    protected void openedWrite( Map<Edge, List<Coordinate>> out ) throws IOException {
+    protected void checkedWrite( Map<Edge, List<Coordinate>> out ) throws IOException {
         for ( Map.Entry<Edge, List<Coordinate>> entry : out.entrySet() ) {
             Edge edge = entry.getKey();
             List<Coordinate> coordinates = entry.getValue();

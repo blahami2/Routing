@@ -7,6 +7,7 @@ package cz.certicon.routing.data;
 
 /**
  *
+ * @deprecated it does not make any sense to use this
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface IoFactory<R extends Reader, W extends Writer> {

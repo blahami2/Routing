@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
+ * An implementation of the {@link GraphReader} interfaces using the {@link AbstractXmlReader} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -42,7 +43,7 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
     }
 
     @Override
-    protected Graph openedRead( Pair<GraphEntityFactory, DistanceFactory> in ) throws IOException {
+    protected Graph checkedRead( Pair<GraphEntityFactory, DistanceFactory> in ) throws IOException {
         GraphEntityFactory graphEntityFactory = in.a;
         DistanceFactory distanceFactory = in.b;
         Graph graph = graphEntityFactory.createGraph();

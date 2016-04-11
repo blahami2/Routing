@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * An implementation of {@link PathExporter} for the JavaScript seznam API
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

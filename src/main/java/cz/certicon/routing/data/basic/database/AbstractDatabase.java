@@ -8,7 +8,6 @@ package cz.certicon.routing.data.basic.database;
 import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.data.Writer;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,8 +15,11 @@ import java.sql.Statement;
 import java.util.Properties;
 
 /**
+ * An abstract implementation of the {@link Reader}/{@link Writer} interfaces for the database access. Encapsulates database access (connection creating), controls the state before reading/writing and opens the connection if necessary.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <Entity> entity to be read or written
+ * @param <AdditionalData> input data for the read
  */
 public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader<AdditionalData, Entity>, Writer<Entity> {
 
@@ -82,8 +84,21 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
         return connection;
     }
 
+    /**
+     * Checks the state before reading and opens the source if necessary.
+     * 
+     * @param in additional data (passed)
+     * @return the read entity
+     * @throws SQLException database exception
+     */
     abstract protected Entity checkedRead( AdditionalData in ) throws SQLException;
 
+    /**
+     * Checks the state before writing and opens the target if necessary.
+     * 
+     * @param in the entity to be written
+     * @throws SQLException database exception
+     */
     abstract protected void checkedWrite( Entity in ) throws SQLException;
 
     @Override
@@ -104,18 +119,34 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
         return isOpened;
     }
 
+    /**
+     * Returns 'driver' value of the given properties. Overwrite if necessary.
+     * @return driver class
+     */
     protected String getDriverClass() {
         return connectionProperties.getProperty( "driver" );
     }
 
+     /**
+     * Returns 'url' value of the given properties. Overwrite if necessary.
+     * @return database url
+     */
     protected String getDatabaseUrl() {
         return connectionProperties.getProperty( "url" );
     }
 
+     /**
+     * Returns 'user' value of the given properties. Overwrite if necessary.
+     * @return database username
+     */
     protected String getUsername() {
         return connectionProperties.getProperty( "user" );
     }
 
+     /**
+     * Returns 'password' value of the given properties. Overwrite if necessary.
+     * @return database password
+     */
     protected String getPassword() {
         return connectionProperties.getProperty( "password" );
     }

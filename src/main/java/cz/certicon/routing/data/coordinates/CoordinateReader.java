@@ -8,12 +8,12 @@ package cz.certicon.routing.data.coordinates;
 import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * An interface for {@link Coordinate} reading (based on the set of edges) using a {@link Reader} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

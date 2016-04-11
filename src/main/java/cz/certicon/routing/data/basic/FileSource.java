@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 /**
+ * An implementation of {@link DataSource} using a {@link File}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

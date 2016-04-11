@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Basic {@link NodeDataStructure} implementation using an array.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <T> node type

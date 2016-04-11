@@ -8,6 +8,7 @@ package cz.certicon.routing.data.osm;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 
 /**
+ * Minimalistic edge container.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

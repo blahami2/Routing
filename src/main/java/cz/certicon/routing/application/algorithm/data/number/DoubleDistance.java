@@ -8,6 +8,7 @@ package cz.certicon.routing.application.algorithm.data.number;
 import cz.certicon.routing.application.algorithm.Distance;
 
 /**
+ * {@link Distance} implementation containing a double value.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
