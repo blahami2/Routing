@@ -56,9 +56,28 @@ public interface PathPresenter {
      */
     public PathPresenter displayPath( Path path, int millis );
 
+    /**
+     * Add waypoint to be displayed on the given coordinates.
+     *
+     * @param coordinate target coordinates
+     * @param text label content
+     * @return this instance
+     */
     public PathPresenter addWaypoint( Coordinate coordinate, String text );
 
+    /**
+     * Sets whether to display node labels or not
+     *
+     * @param displayNodeText
+     * @return this instance
+     */
     public PathPresenter setDisplayNodeText( boolean displayNodeText );
 
+    /**
+     * Sets whether to display edge labels or not
+     *
+     * @param displayEdgeText
+     * @return this instance
+     */
     public PathPresenter setDisplayEdgeText( boolean displayEdgeText );
 }

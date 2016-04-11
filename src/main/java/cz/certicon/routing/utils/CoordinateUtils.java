@@ -113,6 +113,11 @@ public class CoordinateUtils {
         return coords;
     }
 
+    /**
+     * Converts coordinates in WGS84 format into Cartesian coordinates
+     * @param coords {@link Coordinate} in WGS84
+     * @return {@link CartesianCoords} representation of the given coordinates 
+     */
     public static CartesianCoords toCartesianFromWGS84( Coordinate coords ) {
         return new CartesianCoords(
                 EARTH_RADIUS * Math.cos( coords.getLatitude() ) * Math.cos( coords.getLongitude() ),
@@ -121,6 +126,12 @@ public class CoordinateUtils {
         );
     }
 
+    /**
+     * Converts WGS84 coordinates to point in the given container.
+     * @param container an instance of {@link Dimension} for the point to fit in (scaled)
+     * @param coords {@link Coordinate} in WGS84
+     * @return scaled {@link Point} for the given container based on the given coordinates
+     */
     public static Point toPointFromWGS84( Dimension container, Coordinate coords ) {
 //        int x = (int) ( ( container.width / 360.0 ) * ( 180 + coords.getLatitude() ) );
 //        int y = (int) ( ( container.height / 180.0 ) * ( 90 - coords.getLongitude() ) );

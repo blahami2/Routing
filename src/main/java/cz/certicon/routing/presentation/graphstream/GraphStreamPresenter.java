@@ -5,13 +5,11 @@
  */
 package cz.certicon.routing.presentation.graphstream;
 
-import cz.certicon.routing.model.entity.CartesianCoords;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.presentation.GraphPresenter;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.utils.GeometryUtils;
-import cz.certicon.routing.utils.GraphUtils;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.HashMap;
@@ -21,6 +19,7 @@ import org.graphstream.graph.Node;
 import org.graphstream.ui.view.Viewer;
 
 /**
+ * An implementation of {@link GraphPresenter} using a GraphStream library.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

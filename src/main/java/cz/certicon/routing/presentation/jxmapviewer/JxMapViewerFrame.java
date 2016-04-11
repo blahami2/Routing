@@ -30,6 +30,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 /**
+ * An implementation of {@link PathPresenter} using a JXMapViewer library.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

@@ -8,9 +8,16 @@ package cz.certicon.routing.presentation;
 import cz.certicon.routing.model.entity.Graph;
 
 /**
+ * An interface for a visual graph representation.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface GraphPresenter {
-    public void displayGraph(Graph graph);
+
+    /**
+     * Displays a given graph.
+     *
+     * @param graph an instance of {@link Graph} to be displayed
+     */
+    public void displayGraph( Graph graph );
 }

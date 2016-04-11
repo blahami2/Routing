@@ -16,6 +16,7 @@ import org.jdesktop.swingx.mapviewer.DefaultWaypoint;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 /**
+ * A waypoint class representing a waypoint with as a label
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

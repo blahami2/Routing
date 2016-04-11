@@ -25,6 +25,7 @@ import org.graphstream.graph.Node;
 import org.graphstream.ui.view.Viewer;
 
 /**
+ * An implementation of {@link PathPresenter} using a GraphStream library.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
