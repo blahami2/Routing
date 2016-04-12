@@ -5,12 +5,13 @@
  */
 package cz.certicon.routing.utils;
 
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import cz.certicon.routing.data.coordinates.CoordinateReader;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,16 +33,15 @@ public class GraphUtils {
      * @param graph an instance of {@link Graph} containing the two nodes
      * @param graphEntityFactory an instance of {@link GraphEntityFactory}
      * consistent with the given graph
-     * @param sourceNode a source {@link Node} of the path
      * @param targetNode a target {@link Node} of the path, must have
      * predecessor edge set
      * @return an instance of {@link Path} between the two nodes in the given
      * graph.
      */
-    public static Path createPath( Graph graph, GraphEntityFactory graphEntityFactory, Node sourceNode, Node targetNode ) {
+    public static Path createPath( Graph graph, GraphEntityFactory graphEntityFactory, Node targetNode ) {
         Path path = graphEntityFactory.createPathWithTarget( graph, targetNode );
         Node currentNode = targetNode;
-        while ( !currentNode.getCoordinates().equals( sourceNode.getCoordinates() ) ) {
+        while ( currentNode.getPredecessorEdge() != null ) {
 //            System.out.println( "current node = " + currentNode );
 //            System.out.println( "edge = " + currentNode.getPredecessorEdge() );
             path.addEdgeAsFirst( currentNode.getPredecessorEdge() );
@@ -51,13 +51,14 @@ public class GraphUtils {
     }
 
     /**
-     * Fills edges with coordinates from the given map. Usually used with the {@link CoordinateReader}
-     * 
+     * Fills edges with coordinates from the given map. Usually used with the
+     * {@link CoordinateReader}
+     *
      * @param edges list of {@link Edge}s
-     * @param coordinateMap map of {@link Edge}s and their {@link Coordinate}s
+     * @param coordinateMap map of {@link Edge}s and their {@link Coordinates}s
      * @return given list of edges with the filled coordinates (geometry)
      */
-    public static List<Edge> fillWithCoordinates( List<Edge> edges, Map<Edge, List<Coordinate>> coordinateMap ) {
+    public static List<Edge> fillWithCoordinates( List<Edge> edges, Map<Edge, List<Coordinates>> coordinateMap ) {
         for ( Edge edge : edges ) {
             edge.setCoordinates( coordinateMap.get( edge ) );
         }
@@ -65,8 +66,9 @@ public class GraphUtils {
     }
 
     /**
-     * Creates subgraph of the given graph with a given node in the center and all the nodes/edges in the given distance from it.
-     * 
+     * Creates subgraph of the given graph with a given node in the center and
+     * all the nodes/edges in the given distance from it.
+     *
      * @param graph base {@link Graph}
      * @param graphEntityFactory graph-related {@link GraphEntityFactory}
      * @param centerNode {@link Node} in the center of the subgraph

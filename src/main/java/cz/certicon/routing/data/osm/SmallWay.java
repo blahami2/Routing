@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.data.osm;
 
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ public class SmallWay {
 
     public final long wayId;
     public final List<Long> nodes;
-    public final Map<Long, Coordinate> coordinateMap = new HashMap<>();
+    public final Map<Long, Coordinates> coordinateMap = new HashMap<>();
 
     public SmallWay( long wayId, int size ) {
         this.wayId = wayId;
@@ -32,7 +32,7 @@ public class SmallWay {
         coordinateMap.put( nodeId, null );
     }
 
-    public void addCoordinate( Long nodeId, Coordinate coordinate ) {
+    public void addCoordinate( Long nodeId, Coordinates coordinate ) {
         if ( coordinateMap.containsKey( nodeId ) ) {
             coordinateMap.put( nodeId, coordinate );
         }

@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
@@ -76,18 +76,18 @@ public class JxMapViewerFrame implements PathPresenter {
                 addWaypoint( currentNode, currentNode.getDistance().toString() );
             }
 
-            List<Coordinate> coordinates = edge.getCoordinates();
+            List<Coordinates> coordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getSourceNode() ) ) {
 //                System.out.println( "from " + currentNode );
                 for ( int i = 0; i < coordinates.size(); i++ ) {
-                    Coordinate coord = coordinates.get( i );
+                    Coordinates coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getTargetNode();
             } else {
 //                System.out.println( "from " + edge.getTargetNode() );
                 for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
-                    Coordinate coord = coordinates.get( i );
+                    Coordinates coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getSourceNode();
@@ -172,16 +172,16 @@ public class JxMapViewerFrame implements PathPresenter {
                 addWaypoint( currentNode, currentNode.getDistance().toString() + "\n" + sb.toString() );
             }
 
-            List<Coordinate> coordinates = edge.getCoordinates();
+            List<Coordinates> coordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getSourceNode() ) ) {
                 for ( int i = 0; i < coordinates.size(); i++ ) {
-                    Coordinate coord = coordinates.get( i );
+                    Coordinates coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getTargetNode();
             } else {
                 for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
-                    Coordinate coord = coordinates.get( i );
+                    Coordinates coord = coordinates.get( i );
                     track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
                 }
                 currentNode = edge.getSourceNode();
@@ -239,13 +239,13 @@ public class JxMapViewerFrame implements PathPresenter {
 
     private void addWaypoint( Edge edge, String text ) {
         if ( displayEdgeText ) {
-            Coordinate midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
+            Coordinates midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
             waypoints.add( new LabelWaypoint( text, new GeoPosition( midpoint.getLatitude(), midpoint.getLongitude() ) ) );
         }
     }
 
     @Override
-    public PathPresenter addWaypoint( Coordinate coordinate, String text ) {
+    public PathPresenter addWaypoint( Coordinates coordinate, String text ) {
         waypoints.add( new LabelWaypoint( text, new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) ) );
         return this;
     }

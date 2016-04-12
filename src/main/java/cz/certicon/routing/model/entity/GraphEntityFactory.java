@@ -51,10 +51,10 @@ public interface GraphEntityFactory {
     /**
      * Creates an empty path with a target node
      *
-     * @param graph
+     * @param graph input corresponding {@link Graph}
      * @param targetNode an instance of {@link Node} representing an end point
      * of this path
-     * @return
+     * @return an instance of {@link Path}
      */
     public Path createPathWithTarget( Graph graph, Node targetNode );
 

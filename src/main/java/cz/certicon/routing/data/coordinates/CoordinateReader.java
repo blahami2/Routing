@@ -6,17 +6,17 @@
 package cz.certicon.routing.data.coordinates;
 
 import cz.certicon.routing.data.Reader;
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * An interface for {@link Coordinate} reading (based on the set of edges) using a {@link Reader} interface.
+ * An interface for {@link Coordinates} reading (based on the set of edges) using a {@link Reader} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateReader extends Reader<Set<Edge>, Map<Edge, List<Coordinate>>> {
+public interface CoordinateReader extends Reader<Set<Edge>, Map<Edge, List<Coordinates>>> {
 
 }

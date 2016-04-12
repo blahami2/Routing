@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.model.entity.jgrapht;
 
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.common.SimpleNode;
 import cz.certicon.routing.model.entity.Node;
 
@@ -16,7 +16,7 @@ import cz.certicon.routing.model.entity.Node;
  */
 class NodeImpl extends SimpleNode {
 
-    public NodeImpl( Id id, Coordinate coordinates ) {
+    public NodeImpl( Id id, Coordinates coordinates ) {
         super( id, coordinates );
     }
 
@@ -25,7 +25,7 @@ class NodeImpl extends SimpleNode {
     }
 
     @Override
-    protected Node createNew( Id id, Coordinate coordinates ) {
+    protected Node createNew( Id id, Coordinates coordinates ) {
         return new NodeImpl( id, coordinates );
     }
 

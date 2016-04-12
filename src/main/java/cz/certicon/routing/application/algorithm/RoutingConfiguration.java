@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.application.algorithm;
 
+import cz.certicon.routing.application.algorithm.EdgeValidator;
+
 /**
  * The root interface for routing configurations. The routing configuration
  * serves as additional query criteria.
@@ -23,7 +25,7 @@ public interface RoutingConfiguration {
     public void setDistanceEvaluator( DistanceEvaluator distanceEvaluator );
 
     /**
-     * Serves simply as a supplier of {@link EdgeEvaluator}.
+     * Serves simply as a supplier of {@link EdgeValidator}.
      *
      * @return validator for determining whether the edge is valid
      */

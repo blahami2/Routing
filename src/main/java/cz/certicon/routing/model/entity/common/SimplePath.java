@@ -6,7 +6,7 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -72,11 +72,11 @@ public abstract class SimplePath implements Path {
     }
 
     @Override
-    public List<Coordinate> getCoordinates() {
+    public List<Coordinates> getCoordinates() {
         Node currentNode = sourceNode;
-        List<Coordinate> coordinates = new LinkedList<>();
+        List<Coordinates> coordinates = new LinkedList<>();
         for ( Edge edge : this ) {
-            List<Coordinate> edgeCoordinates = edge.getCoordinates();
+            List<Coordinates> edgeCoordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getSourceNode() ) ) {
                 for ( int i = 0; i < edgeCoordinates.size(); i++ ) {
                     coordinates.add( edgeCoordinates.get( i ) );

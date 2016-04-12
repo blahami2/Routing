@@ -7,7 +7,7 @@ package cz.certicon.routing.data.pathexport;
 
 import cz.certicon.routing.data.DataDestination;
 import cz.certicon.routing.data.PathExporter;
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.utils.CoordinateUtils;
@@ -38,22 +38,20 @@ public class SeznamApiPathExporter implements PathExporter {
                 + "            <script type=\"text/javascript\">\n"
         );
 
-        List<Coordinate> coordinates = new LinkedList<>();
+        List<Coordinates> coordinates = new LinkedList<>();
         for ( Edge edge : path ) {
             coordinates.add( path.getGraph().getSourceNodeOf( edge ).getCoordinates() );
         }
         coordinates.add( path.getTargetNode().getCoordinates() );
-        Coordinate midpoint = CoordinateUtils.calculateGeographicMidpoint( coordinates );
+        Coordinates midpoint = CoordinateUtils.calculateGeographicMidpoint( coordinates );
 
         destination.write( "                var coords = [];\n" );
-        for ( Edge edge : path ) {
-            for ( Coordinate coord : edge.getCoordinates() ) {
+        for ( Coordinates coord : path.getCoordinates()) {
                 destination.write(
                         "                coords.push(\n"
                         + "                    SMap.Coords.fromWGS84(" + coord.getLongitude() + ", " + coord.getLatitude() + ")\n"
                         + "                );\n"
                 );
-            }
         }
         destination.write(
                 "                var centerMap = SMap.Coords.fromWGS84(" + midpoint.getLongitude() + ", " + midpoint.getLatitude() + ");\n"

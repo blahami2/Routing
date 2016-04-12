@@ -5,23 +5,17 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms;
 
-import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.application.algorithm.DistanceEvaluator;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.application.algorithm.EdgeValidator;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
 import cz.certicon.routing.application.algorithm.basic.SimpleRoutingConfiguration;
-import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
-import cz.certicon.routing.model.entity.Node;
 
 /**
  * Base abstract class for routing algorithms.
  *
- * @authoimport cz.certicon.routing.application.algorithm.DistanceEvaluator; r
- * Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
 

@@ -5,8 +5,10 @@
  */
 package cz.certicon.routing.application.algorithm;
 
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
+import java.util.List;
 
 /**
  * The root interface for distance factories - classes for creating
@@ -37,21 +39,30 @@ public interface DistanceFactory {
 //     * @return created {@link Distance} instance
 //     */
 //    public Distance createFromDouble( double distance );
-    
     /**
      * Creates an instance using attributes of the edge (its data)
-     * 
+     *
      * @param edgeData {@link EdgeData} container
      * @return an instance of {@link Distance}
      */
-    public Distance createFromEdgeData(EdgeData edgeData);
-    
+    public Distance createFromEdgeData( EdgeData edgeData );
+
     /**
-     * Creates an instance using approximate distance calculation from the two given nodes.
-     * 
+     * Creates an instance based on the edge data (attributes) and an actual length
+     *
+     * @param edgeData edge data (for calculation data)
+     * @param lengthInKilometers length in km
+     * @return an instance of {@link Distance}
+     */
+    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double lengthInKilometers );
+
+    /**
+     * Creates an instance using approximate distance calculation from the two
+     * given nodes.
+     *
      * @param a the first {@link Node}
      * @param b the second {@link Node}
      * @return an instance of {@link Distance}
      */
-    public Distance createApproximateFromNodes(Node a, Node b);
+    public Distance createApproximateFromNodes( Node a, Node b );
 }

@@ -8,6 +8,7 @@ package cz.certicon.routing.data.osm;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.utils.SpeedUtils;
+import cz.certicon.routing.application.algorithm.EdgeData;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;

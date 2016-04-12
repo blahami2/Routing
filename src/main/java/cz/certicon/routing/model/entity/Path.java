@@ -107,5 +107,5 @@ public interface Path extends Iterable<Edge> {
     
     public List<Node> getNodes();
     
-    public List<Coordinate> getCoordinates();
+    public List<Coordinates> getCoordinates();
 }

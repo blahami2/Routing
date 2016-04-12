@@ -323,7 +323,7 @@ public class GraphTest {
     }
 
     private static Node findNode( Graph g, double latitude, double longitude ) {
-        Coordinate c = new Coordinate( latitude, longitude );
+        Coordinates c = new Coordinates( latitude, longitude );
         for ( Node n : g.getNodes() ) {
             if ( n.getCoordinates().equals( c ) ) {
                 return n;

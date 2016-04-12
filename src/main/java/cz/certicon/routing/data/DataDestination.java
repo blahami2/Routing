@@ -36,7 +36,7 @@ public interface DataDestination {
      * Returns output stream of this destination
      * 
      * @return an instance of {@link OutputStream}
-     * @throws IOException 
+     * @throws IOException thrown when an error appears while obtaining output stream
      */
     public OutputStream getOutputStream() throws IOException;
 

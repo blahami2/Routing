@@ -82,7 +82,7 @@ public interface Edge {
      *
      * @return path coordinates
      */
-    public List<Coordinate> getCoordinates();
+    public List<Coordinates> getCoordinates();
 
     /**
      * Setter for coordinates of the path
@@ -90,7 +90,7 @@ public interface Edge {
      * @param coordinates list of coordinates representing the path
      * @return this instance
      */
-    public Edge setCoordinates( List<Coordinate> coordinates );
+    public Edge setCoordinates( List<Coordinates> coordinates );
 
     /**
      * Getter for the source point of this edge

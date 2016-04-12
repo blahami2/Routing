@@ -37,9 +37,9 @@ public interface Node {
     /**
      * Getter for the coordinates of this node
      *
-     * @return an instance of {@link Coordinate}
+     * @return an instance of {@link Coordinates}
      */
-    public Coordinate getCoordinates();
+    public Coordinates getCoordinates();
 
     /**
      * Getter for the label of this node

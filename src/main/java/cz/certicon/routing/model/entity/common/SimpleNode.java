@@ -6,7 +6,7 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import java.util.Objects;
@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 public abstract class SimpleNode implements Node {
 
-    private final Coordinate coordinates;
+    private final Coordinates coordinates;
     private final Id id;
     private Distance distance;
     private Edge predecessorEdge;
@@ -26,7 +26,7 @@ public abstract class SimpleNode implements Node {
 
     private static int charCounter = 0;
 
-    public SimpleNode( Id id, Coordinate coordinates ) {
+    public SimpleNode( Id id, Coordinates coordinates ) {
         this.coordinates = coordinates;
         this.id = id;
         this.distance = null;
@@ -35,7 +35,7 @@ public abstract class SimpleNode implements Node {
     }
 
     public SimpleNode( Id id, double latitude, double longitude ) {
-        this.coordinates = new Coordinate( latitude, longitude );
+        this.coordinates = new Coordinates( latitude, longitude );
         this.id = id;
         this.distance = null;
         this.predecessorEdge = null;
@@ -68,7 +68,7 @@ public abstract class SimpleNode implements Node {
     }
 
     @Override
-    public Coordinate getCoordinates() {
+    public Coordinates getCoordinates() {
         return coordinates;
     }
 
@@ -140,6 +140,6 @@ public abstract class SimpleNode implements Node {
         return sb.toString();
     }
 
-    abstract protected Node createNew( Id id, Coordinate coordinates );
+    abstract protected Node createNew( Id id, Coordinates coordinates );
 
 }

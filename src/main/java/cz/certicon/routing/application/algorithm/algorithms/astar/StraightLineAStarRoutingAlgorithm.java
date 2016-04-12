@@ -12,6 +12,7 @@ import cz.certicon.routing.model.entity.*;
 import cz.certicon.routing.utils.GraphUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A* implementation of the routing algorithm, based on the node-flight-distance
@@ -47,6 +48,32 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
         }
+        return route( to );
+    }
+
+    @Override
+    public Path route( Set<Node> from, Node to ) {
+        // clear the data structure
+        nodeDataStructure.clear();
+        // foreach node in G
+        for ( Node node : getGraph().getNodes() ) {
+            boolean set = false;
+            for ( Node fromNode : from ) {
+                if ( node.getCoordinates().equals( fromNode.getCoordinates() ) ) {
+                    node.setDistance( fromNode.getDistance() );
+                    nodeDataStructure.add( node, fromNode.getDistance().getEvaluableValue() );
+                    set = true;
+                    break;
+                }
+            }
+            if ( !set ) { // set distance to infinity
+                node.setDistance( getDistanceFactory().createInfiniteDistance() );
+            }
+        }
+        return route( to );
+    }
+
+    private Path route( Node to ) {
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
@@ -54,7 +81,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             Node currentNode = nodeDataStructure.extractMin();
             if ( currentNode.getCoordinates().equals( to.getCoordinates() ) ) {
                 // build path from predecessors and return
-                return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), from, currentNode );
+                return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
             }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getOutgoingEdgesOf( currentNode ) ) {

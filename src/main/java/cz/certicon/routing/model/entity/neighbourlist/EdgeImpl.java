@@ -6,7 +6,7 @@
 package cz.certicon.routing.model.entity.neighbourlist;
 
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.common.SimpleEdge;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
@@ -41,8 +41,8 @@ class EdgeImpl extends SimpleEdge {
     }
 
     @Override
-    public List<Coordinate> getCoordinates() {
-        List<Coordinate> coords = new ArrayList<>( super.getCoordinates() );
+    public List<Coordinates> getCoordinates() {
+        List<Coordinates> coords = new ArrayList<>( super.getCoordinates() );
         if ( isReversed ) {
             Collections.reverse( coords );
         }

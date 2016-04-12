@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.presentation;
 
-import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Path;
 
 /**
@@ -63,12 +63,12 @@ public interface PathPresenter {
      * @param text label content
      * @return this instance
      */
-    public PathPresenter addWaypoint( Coordinate coordinate, String text );
+    public PathPresenter addWaypoint( Coordinates coordinate, String text );
 
     /**
      * Sets whether to display node labels or not
      *
-     * @param displayNodeText
+     * @param displayNodeText boolean
      * @return this instance
      */
     public PathPresenter setDisplayNodeText( boolean displayNodeText );
@@ -76,7 +76,7 @@ public interface PathPresenter {
     /**
      * Sets whether to display edge labels or not
      *
-     * @param displayEdgeText
+     * @param displayEdgeText boolean
      * @return this instance
      */
     public PathPresenter setDisplayEdgeText( boolean displayEdgeText );

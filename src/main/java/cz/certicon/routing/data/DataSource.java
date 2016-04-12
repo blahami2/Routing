@@ -35,7 +35,7 @@ public interface DataSource {
      * Returns input stream of this source
      * 
      * @return an instance of {@link InputStream}
-     * @throws IOException 
+     * @throws IOException thrown when an error appears while obtaining input stream
      */
     public InputStream getInputStream() throws IOException;
     

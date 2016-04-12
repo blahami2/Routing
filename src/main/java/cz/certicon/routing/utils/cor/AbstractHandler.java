@@ -6,10 +6,10 @@
 package cz.certicon.routing.utils.cor;
 
 /**
- * @since 1.X, X > 2
+ * @since 1.X, X &gt; 2
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
- * @param <In>
- * @param <Out>
+ * @param <In> in
+ * @param <Out> out
  */
 public abstract class AbstractHandler<In, Out> implements Handler<In, Out> {
 

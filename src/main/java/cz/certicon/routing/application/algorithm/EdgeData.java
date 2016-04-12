@@ -6,6 +6,7 @@
 package cz.certicon.routing.application.algorithm;
 
 import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.model.entity.Edge;
 
 /**
  * A container for {@link Edge} attributes and additional data.

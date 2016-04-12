@@ -12,7 +12,8 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.utils.CoordinateUtils;
 
 /**
- * {@link DistanceFactory} implementation using geographical distance between two points.
+ * {@link DistanceFactory} implementation using geographical distance between
+ * two points.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -40,6 +41,11 @@ public class LengthDistanceFactory implements DistanceFactory {
     @Override
     public Distance createApproximateFromNodes( Node a, Node b ) {
         return new DoubleDistance( CoordinateUtils.calculateDistance( a.getCoordinates(), b.getCoordinates() ) / 1000 );
+    }
+
+    @Override
+    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double lengthInKilometers ) {
+        return new DoubleDistance( lengthInKilometers );
     }
 
 }
