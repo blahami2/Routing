@@ -39,7 +39,7 @@ public abstract class SimpleEdge implements Edge {
         this.id = id;
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder().build();
-        this.distance = new LengthDistanceFactory().createFromEdgeData( new SimpleEdgeData( sourceNode, targetNode, 50, false, 1 ) );
+        this.distance = new LengthDistanceFactory().createFromEdgeData( new SimpleEdgeData( 50, false, 1 ) );
     }
 
     public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode, Distance distance ) {

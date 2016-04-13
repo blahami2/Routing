@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * An implementation of the {@link GraphReader}/{@link GraphWriter} interfaces using the {@link AbstractDatabase} class.
+ * An implementation of the {@link GraphReader}/{@link GraphWriter} interfaces
+ * using the {@link AbstractDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -69,16 +70,15 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
         while ( rs.next() ) {
             Node.Id sourceId = Node.Id.createId( rs.getLong( sourceColumnIndex ) );
             Node.Id targetId = Node.Id.createId( rs.getLong( targetColumnIndex ) );
-            EdgeData edgeData = new SimpleEdgeData( nodeMap.get( sourceId ),
-                    nodeMap.get( targetId ),
+            EdgeData edgeData = new SimpleEdgeData(
                     rs.getInt( speedColumnIndex ),
                     rs.getBoolean( paidColumnIndex ),
                     rs.getDouble( lengthColumnIndex )
             );
             Edge edge = graphEntityFactory.createEdge(
                     Edge.Id.createId( rs.getLong( idColumnIdx ) ),
-                    edgeData.getSource(),
-                    edgeData.getTarget(),
+                    nodeMap.get( sourceId ),
+                    nodeMap.get( targetId ),
                     distanceFactory.createFromEdgeData( edgeData )
             );
             edge.setAttributes( SimpleEdgeAttributes.builder()

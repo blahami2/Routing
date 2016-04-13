@@ -203,7 +203,7 @@ public class OsmPbfDataSource implements MapDataSource {
 //                                    System.out.println( edgeAttributes );
 //                                }
                         String speedStr = edgeAttributes.getAdditionalAttribute( "speed" );
-                        EdgeData edgeData = new SimpleEdgeData( sourceNode, targetNode, ( speedStr != null ) ? Integer.parseInt( speedStr ) : 50, edgeAttributes.isPaid(), edgeAttributes.getLength() );
+                        EdgeData edgeData = new SimpleEdgeData( ( speedStr != null ) ? Integer.parseInt( speedStr ) : 50, edgeAttributes.isPaid(), edgeAttributes.getLength() );
                         Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode,
                                 distanceFactory.createInfiniteDistance() );
                         edge.setDistance( distanceFactory.createFromEdgeData( edgeData ) );

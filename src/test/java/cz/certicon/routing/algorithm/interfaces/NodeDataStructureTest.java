@@ -51,7 +51,7 @@ public class NodeDataStructureTest {
         for ( int i = 1; i < size; i++ ) {
             for ( int j = 1; j < size; j++ ) {
                 Node n = graphFactory.createNode( Node.Id.generateId(), i, j );
-                EdgeData edgeData = new SimpleEdgeData( null, null, 0, true, i * j );
+                EdgeData edgeData = new SimpleEdgeData( 0, true, i * j );
                 n.setDistance( distanceFactory.createFromEdgeData( edgeData ) );
                 nodes.add( n );
             }

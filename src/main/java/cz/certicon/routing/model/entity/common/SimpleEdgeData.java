@@ -15,29 +15,30 @@ import cz.certicon.routing.model.entity.Node;
  */
 public class SimpleEdgeData implements EdgeData {
 
-    private final Node sourceNode;
-    private final Node targetNode;
+//    private final Node sourceNode;
+//    private final Node targetNode;
     private final int speed;
     private final boolean isPaid;
     private final double length;
 
-    public SimpleEdgeData( Node sourceNode, Node targetNode, int speed, boolean isPaid, double length ) {
-        this.sourceNode = sourceNode;
-        this.targetNode = targetNode;
+    public SimpleEdgeData( //Node sourceNode, Node targetNode, 
+            int speed, boolean isPaid, double length ) {
+//        this.sourceNode = sourceNode;
+//        this.targetNode = targetNode;
         this.speed = speed;
         this.isPaid = isPaid;
         this.length = length;
     }
 
-    @Override
-    public Node getSource() {
-        return sourceNode;
-    }
-
-    @Override
-    public Node getTarget() {
-        return targetNode;
-    }
+//    @Override
+//    public Node getSource() {
+//        return sourceNode;
+//    }
+//
+//    @Override
+//    public Node getTarget() {
+//        return targetNode;
+//    }
 
     @Override
     public int getSpeed() {

@@ -316,7 +316,7 @@ public class GraphTest {
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
-        EdgeData edgeData = new SimpleEdgeData( sourceNode, targetNode, 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
+        EdgeData edgeData = new SimpleEdgeData( 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( edgeData.getLength() ).build();
         return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) )
                 .setAttributes( edgeAttributes );
@@ -375,9 +375,9 @@ public class GraphTest {
 
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
-        return Arrays.asList(new Object[]{
-                    new JgraphtGraphEntityFactory()
-                },
+        return Arrays.asList( new Object[]{
+            new JgraphtGraphEntityFactory()
+        },
                 new Object[]{
                     new NeighborListGraphEntityFactory()
                 }

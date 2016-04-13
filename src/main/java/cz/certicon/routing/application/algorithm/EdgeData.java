@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Edge;
 
 /**
@@ -20,14 +19,14 @@ public interface EdgeData {
      * 
      * @return source {@link Node}
      */
-    public Node getSource();
+    //public Node getSource();
     
     /**
      * Returns target node of the edge
      * 
      * @return target {@link Node}
      */
-    public Node getTarget();
+    //public Node getTarget();
     
     /**
      * Returns maximal speed of the edge.
@@ -49,4 +48,6 @@ public interface EdgeData {
      * @return edge length in kilometers
      */
     public double getLength();
+    
+    // todo road type
 }

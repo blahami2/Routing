@@ -92,7 +92,7 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
                 EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( length ).setPaid( isPaid ).build();
                 Node sourceNode = nodes.get( sourceId );
                 Node targetNode = nodes.get( targetId );
-                EdgeData edgeData = new SimpleEdgeData(sourceNode, targetNode, speed, isPaid, length );
+                EdgeData edgeData = new SimpleEdgeData(speed, isPaid, length );
                 Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
                 edge.setSpeed( speed );
                 edge.setAttributes( edgeAttributes );
