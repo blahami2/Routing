@@ -5,9 +5,9 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Path;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * The root interface for routing algorithms. It's purpose is to find the
@@ -25,15 +25,15 @@ public interface RoutingAlgorithm {
      * @param to target point
      * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the two points.
      */
-    public Path route( Node from, Node to );
+    public Path route( Coordinates from, Coordinates to );
     
     /**
      * Find shortest path between a set of starting points and a target point
-     * @param from set of source points (with distances!)
-     * @param to target point
-     * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the source set and the target point.
+     * @param from map of source points (with distances)
+     * @param to map of target points (with distances)
+     * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the source set and the target set.
      */
-    public Path route(Set<Node> from, Node to);
+    public Path route(Map<Coordinates, Distance> from, Map<Coordinates, Distance> to);
     
     public RoutingConfiguration getRoutingConfiguration();
 }

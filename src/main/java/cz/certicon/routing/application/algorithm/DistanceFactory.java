@@ -60,9 +60,9 @@ public interface DistanceFactory {
      * Creates an instance using approximate distance calculation from the two
      * given nodes.
      *
-     * @param a the first {@link Node}
-     * @param b the second {@link Node}
+     * @param a the first {@link Coordinates}
+     * @param b the second {@link Coordinates}
      * @return an instance of {@link Distance}
      */
-    public Distance createApproximateFromNodes( Node a, Node b );
+    public Distance createApproximateFromCoordinates( Coordinates a, Coordinates b );
 }

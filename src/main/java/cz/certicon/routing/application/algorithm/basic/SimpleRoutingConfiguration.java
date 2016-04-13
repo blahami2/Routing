@@ -23,6 +23,11 @@ public class SimpleRoutingConfiguration implements RoutingConfiguration {
         public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
             return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
         }
+
+        @Override
+        public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode, Distance targetNodeDistanceToTarget ) {
+            return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() ).add( targetNodeDistanceToTarget );
+        }
     };
     private EdgeValidator edgeValidator = new EdgeValidator() {
         @Override

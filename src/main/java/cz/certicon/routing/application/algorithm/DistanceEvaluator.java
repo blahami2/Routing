@@ -25,4 +25,15 @@ public interface DistanceEvaluator {
      * @return distance of the target node
      */
     public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode );
+    
+        /**
+     * Evaluates distance of the target node.
+     *
+     * @param sourceNode node to start the calculation from
+     * @param edgeFromSourceToTarget edge used for calculation
+     * @param targetNode target node
+     * @param targetNodeDistanceToTarget distance of the target node to the actual target (precomputed)
+     * @return distance of the target node
+     */
+    public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode, Distance targetNodeDistanceToTarget );
 }

@@ -12,7 +12,8 @@ import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
 
 /**
- * {@link NodeDataStructure} implementation using Fibonacci's heap (adapter to JGraphT lib. Fibonacci).
+ * {@link NodeDataStructure} implementation using Fibonacci's heap (adapter to
+ * JGraphT lib. Fibonacci).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <T> node type

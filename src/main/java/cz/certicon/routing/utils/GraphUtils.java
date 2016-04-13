@@ -42,8 +42,6 @@ public class GraphUtils {
         Path path = graphEntityFactory.createPathWithTarget( graph, targetNode );
         Node currentNode = targetNode;
         while ( currentNode.getPredecessorEdge() != null ) {
-//            System.out.println( "current node = " + currentNode );
-//            System.out.println( "edge = " + currentNode.getPredecessorEdge() );
             path.addEdgeAsFirst( currentNode.getPredecessorEdge() );
             currentNode = graph.getOtherNodeOf( currentNode.getPredecessorEdge(), currentNode );
         }

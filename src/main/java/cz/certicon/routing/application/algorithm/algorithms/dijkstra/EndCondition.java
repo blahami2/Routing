@@ -5,10 +5,13 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms.dijkstra;
 
+import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import java.util.Map;
 
 /**
  * Algorithm determination  class, enables various settings of the same algorithm.
@@ -16,16 +19,16 @@ import cz.certicon.routing.model.entity.Path;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface EndCondition {
-
+    
     /**
      * Determines, whether the computation is done (the algorithm has reached a result).
      * 
      * @param graph graph upon which is the computation performed
-     * @param targetNode target node of the route
+     * @param targetSet target set of the route
      * @param currentNode currently examined node
      * @return true if the algorithm is supposed to end, false otherwise
      */
-    public boolean isFinished( Graph graph, Node targetNode, Node currentNode );
+    public boolean isFinished( Graph graph, Map<Coordinates, Distance> targetSet, Node currentNode );
 
     /**
      * Creates required result based on the algorithm progress

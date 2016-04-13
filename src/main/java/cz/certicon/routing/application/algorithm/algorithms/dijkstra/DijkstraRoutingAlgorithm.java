@@ -13,10 +13,12 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Basic routing algorithm implementation using the optimal Dijkstra.
@@ -32,9 +34,10 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         super( graph, entityAbstractFactory, distanceFactory );
         this.nodeDataStructure = new JgraphtFibonacciDataStructure();
         this.endCondition = new EndCondition() {
+
             @Override
-            public boolean isFinished( Graph graph, Node targetNode, Node currentNode ) {
-                return targetNode.getCoordinates().equals( currentNode.getCoordinates() );
+            public boolean isFinished( Graph graph, Map<Coordinates, Distance> targetSet, Node currentNode ) {
+                return targetSet.containsKey( currentNode.getCoordinates() );
             }
 
             @Override
@@ -60,16 +63,37 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
     }
 
     @Override
-    public Path route( Node from, Node to ) {
+    public Path route( Coordinates from, Coordinates to ) {
         // clear the data structure
         nodeDataStructure.clear();
 //        Node nodeEqToFrom = from;
 //        Node nodeEqToTo = to;
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
-            if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
+            if ( node.getCoordinates().equals( from ) ) {
                 node.setDistance( getDistanceFactory().createZeroDistance() );
                 nodeDataStructure.add( node, 0 );
+            } else { // set distance to infinity
+                node.setDistance( getDistanceFactory().createInfiniteDistance() );
+            }
+        }
+        Map<Coordinates, Distance> targetNodeMap = new HashMap<>();
+        targetNodeMap.put( to, getDistanceFactory().createZeroDistance() );
+        return route( targetNodeMap );
+    }
+
+    @Override
+    public Path route( Map<Coordinates, Distance> from, Map<Coordinates, Distance> to ) {
+        // clear the data structure
+        nodeDataStructure.clear();
+//        Node nodeEqToFrom = from;
+//        Node nodeEqToTo = to;
+        // foreach node in G
+        for ( Node node : getGraph().getNodes() ) {
+            if ( from.containsKey( node.getCoordinates() ) ) {
+                Distance nodeDistance = from.get( node.getCoordinates() );
+                node.setDistance( nodeDistance );
+                nodeDataStructure.add( node, nodeDistance.getEvaluableValue() );
             } else { // set distance to infinity
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
@@ -77,37 +101,15 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         return route( to );
     }
 
-    @Override
-    public Path route( Set<Node> from, Node to ) {
-        // clear the data structure
-        nodeDataStructure.clear();
-//        Node nodeEqToFrom = from;
-//        Node nodeEqToTo = to;
-        // foreach node in G
-        for ( Node node : getGraph().getNodes() ) {
-            boolean set = false;
-            for ( Node fromNode : from ) {
-                if ( node.getCoordinates().equals( fromNode.getCoordinates() ) ) {
-                    node.setDistance( fromNode.getDistance() );
-                    nodeDataStructure.add( node, fromNode.getDistance().getEvaluableValue() );
-                    set = true;
-                    break;
-                }
-            }
-            if ( !set ) { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( to );
-    }
-
-    private Path route( Node to ) {
+    private Path route( Map<Coordinates, Distance> to ) {
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+            System.out.println( "current node = " + currentNode );
             if ( endCondition.isFinished( getGraph(), to, currentNode ) ) {
+                System.out.println( "is finished: " + to.containsKey( currentNode.getCoordinates() ) );
                 // build path from predecessors and return
                 return endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
             }
@@ -118,7 +120,12 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance;
+                if ( to.containsKey( currentNode.getCoordinates() ) ) {
+                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getCoordinates() ) );
+                } else {
+                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                }
                 // replace is lower than actual
                 if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
 //                    System.out.println( "is lower" );

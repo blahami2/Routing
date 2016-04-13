@@ -12,7 +12,6 @@ import cz.certicon.routing.model.entity.*;
 import cz.certicon.routing.utils.GraphUtils;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A* implementation of the routing algorithm, based on the node-flight-distance
@@ -23,7 +22,7 @@ import java.util.Set;
 public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     private NodeDataStructure<Node> nodeDataStructure;
-    private Map<Node.Id, Distance> distanceMap;
+    private final Map<Node.Id, Distance> distanceMap;
 
     public StraightLineAStarRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory ) {
         super( graph, entityAbstractFactory, distanceFactory );
@@ -36,14 +35,37 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
     }
 
     @Override
-    public Path route( Node from, Node to ) {
+    public Path route( Coordinates from, Coordinates to ) {
         // clear the data structure
         nodeDataStructure.clear();
+//        Node nodeEqToFrom = from;
+//        Node nodeEqToTo = to;
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
-            if ( node.getCoordinates().equals( from.getCoordinates() ) ) {
+            if ( node.getCoordinates().equals( from ) ) {
                 node.setDistance( getDistanceFactory().createZeroDistance() );
                 nodeDataStructure.add( node, 0 );
+            } else { // set distance to infinity
+                node.setDistance( getDistanceFactory().createInfiniteDistance() );
+            }
+        }
+        Map<Coordinates, Distance> targetNodeMap = new HashMap<>();
+        targetNodeMap.put( to, getDistanceFactory().createZeroDistance() );
+        return route( targetNodeMap );
+    }
+
+    @Override
+    public Path route( Map<Coordinates, Distance> from, Map<Coordinates, Distance> to ) {
+        // clear the data structure
+        nodeDataStructure.clear();
+//        Node nodeEqToFrom = from;
+//        Node nodeEqToTo = to;
+        // foreach node in G
+        for ( Node node : getGraph().getNodes() ) {
+            if ( from.containsKey( node.getCoordinates() ) ) {
+                Distance nodeDistance = from.get( node.getCoordinates() );
+                node.setDistance( nodeDistance );
+                nodeDataStructure.add( node, nodeDistance.getEvaluableValue() );
             } else { // set distance to infinity
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
@@ -51,35 +73,14 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
         return route( to );
     }
 
-    @Override
-    public Path route( Set<Node> from, Node to ) {
-        // clear the data structure
-        nodeDataStructure.clear();
-        // foreach node in G
-        for ( Node node : getGraph().getNodes() ) {
-            boolean set = false;
-            for ( Node fromNode : from ) {
-                if ( node.getCoordinates().equals( fromNode.getCoordinates() ) ) {
-                    node.setDistance( fromNode.getDistance() );
-                    nodeDataStructure.add( node, fromNode.getDistance().getEvaluableValue() );
-                    set = true;
-                    break;
-                }
-            }
-            if ( !set ) { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( to );
-    }
-
-    private Path route( Node to ) {
+    private Path route( Map<Coordinates, Distance> to ) {
+        distanceMap.clear();
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
-            if ( currentNode.getCoordinates().equals( to.getCoordinates() ) ) {
+            if ( to.containsKey( currentNode.getCoordinates() ) ) {
                 // build path from predecessors and return
                 return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
             }
@@ -90,7 +91,12 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance;
+                if ( to.containsKey( currentNode.getCoordinates() ) ) {
+                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getCoordinates() ) );
+                } else {
+                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                }
                 // replace is lower than actual
                 if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
                     endNode.setDistance( tmpNodeDistance );
@@ -102,10 +108,17 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
         return null;
     }
 
-    private Distance calculateDistance( DistanceFactory distanceFactory, Node node, Node target ) {
+    private Distance calculateDistance( DistanceFactory distanceFactory, Node node, Map<Coordinates, Distance> target ) {
         Distance dist = distanceMap.get( node.getId() );
         if ( dist == null ) {
-            dist = distanceFactory.createApproximateFromNodes( node, target );
+            Distance min = distanceFactory.createInfiniteDistance();
+            for ( Map.Entry<Coordinates, Distance> entry : target.entrySet() ) {
+                dist = distanceFactory.createApproximateFromCoordinates( node.getCoordinates(), entry.getKey() );
+                if ( min.isGreaterThan( dist ) ) {
+                    min = dist;
+                }
+            }
+            dist = min;
             distanceMap.put( node.getId(), dist );
         }
         return node.getDistance().add( dist );
