@@ -107,9 +107,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
-            System.out.println( "current node = " + currentNode );
             if ( endCondition.isFinished( getGraph(), to, currentNode ) ) {
-                System.out.println( "is finished: " + to.containsKey( currentNode.getCoordinates() ) );
                 // build path from predecessors and return
                 return endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
             }
