@@ -42,11 +42,12 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
         DistanceFactory distanceFactory = in.b;
         Graph graph = graphEntityFactory.createGraph();
         ResultSet rs;
-        rs = getStatement().executeQuery( "SELECT n.id, ST_AsText(d.geom) AS point "
+        rs = getStatement().executeQuery( "SELECT n.id, ST_AsText(d.geom) AS point, d.osm_id "
                 + "FROM nodes_routing n "
                 + "JOIN nodes_data_routing d ON n.data_id = d.id;" );
         int idColumnIdx = rs.findColumn( "id" );
         int pointColumnIdx = rs.findColumn( "point" );
+        int osmIdColumnIdx = rs.findColumn( "osm_id" );
         while ( rs.next() ) {
             String content = rs.getString( pointColumnIdx );
             content = content.substring( "POINT(".length(), content.length() - ")".length() );
@@ -55,10 +56,11 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
                     Double.parseDouble( lonlat[1] ),
                     Double.parseDouble( lonlat[0] )
             );
+            node.setOsmId( rs.getLong( osmIdColumnIdx ) );
             graph.addNode( node );
             nodeMap.put( node.getId(), node );
         }
-        rs = getStatement().executeQuery( "SELECT e.id, e.source_id, e.target_id, d.length, d.is_paid, e.speed "
+        rs = getStatement().executeQuery( "SELECT e.id, e.source_id, e.target_id, d.length, d.is_paid, e.speed, d.osm_id "
                 + "FROM edges_routing e "
                 + "JOIN edges_data_routing d ON e.data_id = d.id;" );
         idColumnIdx = rs.findColumn( "id" );
@@ -67,6 +69,7 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
         int lengthColumnIndex = rs.findColumn( "length" );
         int paidColumnIndex = rs.findColumn( "is_paid" );
         int speedColumnIndex = rs.findColumn( "speed" );
+        int osmIdColumnIndex = rs.findColumn( "osm_id" );
         while ( rs.next() ) {
             Node.Id sourceId = Node.Id.createId( rs.getLong( sourceColumnIndex ) );
             Node.Id targetId = Node.Id.createId( rs.getLong( targetColumnIndex ) );
@@ -86,6 +89,7 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
                     .setPaid( edgeData.isPaid() )
                     .build() );
             edge.setSpeed( edgeData.getSpeed() );
+            edge.setOsmId( rs.getLong( osmIdColumnIndex ) );
             graph.addEdge( edge );
         }
         return graph;

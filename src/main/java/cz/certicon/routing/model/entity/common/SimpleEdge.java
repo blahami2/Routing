@@ -27,6 +27,7 @@ public abstract class SimpleEdge implements Edge {
     private final Node sourceNode;
     private final Node targetNode;
     private final Edge.Id id;
+    private long osmId = -1;
     private int speed;
     private Distance distance;
     private String label;
@@ -54,6 +55,16 @@ public abstract class SimpleEdge implements Edge {
     @Override
     public Id getId() {
         return id;
+    }
+
+    @Override
+    public long getOsmId() {
+        return osmId;
+    }
+
+    @Override
+    public void setOsmId( long osmId ) {
+        this.osmId = osmId;
     }
 
     @Override

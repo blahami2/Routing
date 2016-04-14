@@ -20,6 +20,7 @@ public abstract class SimpleNode implements Node {
 
     private final Coordinates coordinates;
     private final Id id;
+    private long osmId = -1;
     private Distance distance;
     private Edge predecessorEdge;
     private String label;
@@ -48,11 +49,22 @@ public abstract class SimpleNode implements Node {
     }
 
     @Override
+    public long getOsmId() {
+        return osmId;
+    }
+
+    @Override
+    public void setOsmId( long osmId ) {
+        this.osmId = osmId;
+    }
+
+    @Override
     public Node createCopyWithNewId( Id id ) {
         Node node = createNew( id, coordinates );
         node.setDistance( distance );
         node.setPredecessorEdge( predecessorEdge );
         node.setLabel( label );
+        node.setOsmId( osmId );
         return node;
     }
 

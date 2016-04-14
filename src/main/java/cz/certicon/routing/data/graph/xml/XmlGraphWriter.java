@@ -22,7 +22,8 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * An implementation of the {@link GraphWriter} interfaces using the {@link AbstractXmlWriter} class.
+ * An implementation of the {@link GraphWriter} interfaces using the
+ * {@link AbstractXmlWriter} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -53,6 +54,7 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
                 getWriter().writeAttribute( ID.shortLowerName(), Node.Id.toString( node.getId() ) );
                 getWriter().writeAttribute( LATITUDE.shortLowerName(), Double.toString( node.getCoordinates().getLatitude() ) );
                 getWriter().writeAttribute( LONGITUDE.shortLowerName(), Double.toString( node.getCoordinates().getLongitude() ) );
+                getWriter().writeAttribute( OSM_ID.shortLowerName(), Long.toString( node.getOsmId() ) );
                 getWriter().writeEndElement();
             }
             List<Edge> sortedEdges = new ArrayList<>( graph.getEdges() );
@@ -70,6 +72,7 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
                 getWriter().writeAttribute( SPEED.shortLowerName(), Integer.toString( edge.getSpeed() ) );
                 getWriter().writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.getAttributes().getLength() ) );
                 getWriter().writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.getAttributes().isPaid() ) );
+                getWriter().writeAttribute( OSM_ID.shortLowerName(), Long.toString( edge.getOsmId() ) );
                 getWriter().writeEndElement();
             }
             getWriter().flush();

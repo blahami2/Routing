@@ -32,7 +32,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * An implementation of the {@link GraphReader} interfaces using the {@link AbstractXmlReader} class.
+ * An implementation of the {@link GraphReader} interfaces using the
+ * {@link AbstractXmlReader} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -79,7 +80,9 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
                 Node.Id id = Node.Id.fromString( attributes.getValue( ID.shortLowerName() ) );
                 double latitude = Double.parseDouble( attributes.getValue( LATITUDE.shortLowerName() ) );
                 double longitude = Double.parseDouble( attributes.getValue( LONGITUDE.shortLowerName() ) );
+                long osmId = Long.parseLong( attributes.getValue( OSM_ID.shortLowerName() ) );
                 Node node = graphEntityFactory.createNode( id, latitude, longitude );
+                node.setOsmId( osmId );
                 nodes.put( id, node );
                 graph.addNode( node );
             } else if ( qName.equalsIgnoreCase( EDGE.name() ) ) {
@@ -89,11 +92,13 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
                 int speed = Integer.parseInt( attributes.getValue( SPEED.shortLowerName() ) );
                 double length = Double.parseDouble( attributes.getValue( LENGTH.shortLowerName() ) );
                 boolean isPaid = Boolean.parseBoolean( attributes.getValue( PAID.shortLowerName() ) );
+                long osmId = Long.parseLong( attributes.getValue( OSM_ID.shortLowerName() ) );
                 EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( length ).setPaid( isPaid ).build();
                 Node sourceNode = nodes.get( sourceId );
                 Node targetNode = nodes.get( targetId );
-                EdgeData edgeData = new SimpleEdgeData(speed, isPaid, length );
+                EdgeData edgeData = new SimpleEdgeData( speed, isPaid, length );
                 Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
+                edge.setOsmId( osmId );
                 edge.setSpeed( speed );
                 edge.setAttributes( edgeAttributes );
                 edge.setLabel( edgeAttributes.toString() );

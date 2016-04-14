@@ -18,6 +18,10 @@ public interface Edge {
 
     public Id getId();
 
+    public long getOsmId();
+
+    public void setOsmId( long osmId );
+
     /**
      * Getter for length represented by an instance of {@link Distance}
      *
@@ -34,8 +38,8 @@ public interface Edge {
 
     /**
      * Sets maximal speed
-     * 
-     * @param speed kmph 
+     *
+     * @param speed kmph
      */
     public void setSpeed( int speed );
 

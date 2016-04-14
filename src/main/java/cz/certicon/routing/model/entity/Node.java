@@ -22,6 +22,10 @@ public interface Node {
      */
     public Id getId();
 
+    public long getOsmId();
+
+    public void setOsmId( long osmId );
+
     /**
      * Creates a copy of this node. Should the node be directly associated with
      * other nodes via edges, those edges are NOT a part of the new copy (it is
