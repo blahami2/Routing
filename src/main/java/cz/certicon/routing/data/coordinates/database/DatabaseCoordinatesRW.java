@@ -46,13 +46,9 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
         }
         if ( edges.size() > 0 ) {
             inArray.delete( inArray.length() - 2, inArray.length() );
+        } else {
+            return coordinateMap;
         }
-//        System.out.println( "SELECT e.id, ST_AsText(d.geom) AS linestring, d.source_lat, d.source_lon, d.target_lat, d.target_lon "
-//                + "FROM edges_routing e "
-//                + "JOIN edges_data_routing d ON e.data_id = d.id "
-//                + "WHERE e.id IN ("
-//                + inArray.toString()
-//                + ")" );
         rs = getStatement().executeQuery( "SELECT e.id, ST_AsText(d.geom) AS linestring, d.source_lat, d.source_lon, d.target_lat, d.target_lon "
                 + "FROM edges_routing e "
                 + "JOIN edges_data_routing d ON e.data_id = d.id "
