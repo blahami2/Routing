@@ -42,6 +42,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
 //        Node nodeEqToTo = to;
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
+            node.setPredecessorEdge( null );
             if ( node.getCoordinates().equals( from ) ) {
                 node.setDistance( getDistanceFactory().createZeroDistance() );
                 nodeDataStructure.add( node, 0 );
@@ -62,6 +63,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
 //        Node nodeEqToTo = to;
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
+            node.setPredecessorEdge( null );
             if ( from.containsKey( node.getCoordinates() ) ) {
                 Distance nodeDistance = from.get( node.getCoordinates() );
                 node.setDistance( nodeDistance );
