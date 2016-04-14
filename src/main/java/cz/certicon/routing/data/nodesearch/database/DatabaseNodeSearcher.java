@@ -13,6 +13,7 @@ import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
+import cz.certicon.routing.utils.DoubleComparator;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -56,11 +57,12 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         @Override
         protected Map<Coordinates, Distance> checkedRead( Coordinates in ) throws SQLException {
             Map<Coordinates, Distance> map = new HashMap<>();
-            ResultSet rs = getStatement().executeQuery( "SELECT * FROM nodes_view n WHERE ST_Equals(n.geom, ST_GeomFromText('POINT(" + in.getLongitude() + " " + in.getLatitude() + ")',4326));" );
-            if ( rs.next() ) {
-                map.put( in, distanceFactory.createZeroDistance() );
-                return map;
-            }
+            ResultSet rs;
+//            rs = getStatement().executeQuery( "SELECT * FROM nodes_view n WHERE ST_Equals(n.geom, ST_GeomFromText('POINT(" + in.getLongitude() + " " + in.getLatitude() + ")',4326));" );
+//            if ( rs.next() ) {
+//                map.put( in, distanceFactory.createZeroDistance() );
+//                return map;
+//            }
             rs = getStatement().executeQuery( "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH
             ) + ", ST_AsText(out_point) AS point, out_distance AS distance FROM public.\"find_node\"(" + in.getLongitude() + ", " + in.getLatitude() + ");" );
 
@@ -74,12 +76,12 @@ public class DatabaseNodeSearcher implements NodeSearcher {
                         Double.parseDouble( lonlat[0] )
                 );
                 Double length = rs.getDouble( "distance" );
-                EdgeData edgeData = new SimpleEdgeData( edgeResultHelper.getSpeed(), edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
-                if ( Double.compare( 0, length ) == 0 ) {
+                if ( DoubleComparator.compare( 0, length, 0.0000001 ) == 0 ) {
                     map.clear();
-                    map.put( node, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
+                    map.put( node, distanceFactory.createZeroDistance() );
                     return map;
                 }
+                EdgeData edgeData = new SimpleEdgeData( edgeResultHelper.getSpeed(), edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
                 map.put( node, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
             }
 
