@@ -10,9 +10,12 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.presentation.GraphPresenter;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.utils.GeometryUtils;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -25,10 +28,26 @@ import org.graphstream.ui.view.Viewer;
  */
 public class GraphStreamPresenter implements GraphPresenter {
 
+    private static final int MOVE = 15;
+    private static final int NUM_COLORS = 20;
+    private final List<Color> colorList;
+    private boolean displayNodes = true;
+    private int colorCounter = 0;
+
+    public GraphStreamPresenter() {
+        this.colorList = new ArrayList<>();
+        float interval = 360 / ( NUM_COLORS );
+        for ( float x = 0; x < 360; x += interval ) {
+            Color c = Color.getHSBColor( x / 360, 1, 1 );
+            colorList.add( c );
+        }
+    }
+
     @Override
     public void displayGraph( cz.certicon.routing.model.entity.Graph graph ) {
         int counter = 0;
         Map<Coordinates, Integer> idMap = new HashMap<>();
+        Map<Coordinates, List<cz.certicon.routing.model.entity.Node>> nodeMap = new HashMap<>();
         Graph displayGraph = new org.graphstream.graph.implementations.MultiGraph( "graph-id" );
         displayGraph.addAttribute( "ui.stylesheet", "edge {"
                 //+ "shape: line;"
@@ -52,31 +71,62 @@ public class GraphStreamPresenter implements GraphPresenter {
         }
 //        System.out.println( "min: " + minLat + ", " + minLon );
 //        System.out.println( "max: " + maxLat + ", " + maxLon );
-        Point min = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinates( minLat, minLon ) );
-        Point max = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinates( maxLat, maxLon ) );
+        Point min = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( minLat, minLon ) );
+        Point max = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( maxLat, maxLon ) );
+
 
         for ( cz.certicon.routing.model.entity.Node node : graph.getNodes() ) {
-            Node n = displayGraph.addNode( node.getId().toString() );
-            Integer id = idMap.get( node.getCoordinates() );
-            if ( id == null ) {
-                id = counter++;
-                idMap.put( node.getCoordinates(), id );
+            List<cz.certicon.routing.model.entity.Node> nodeList = nodeMap.get( node.getCoordinates() );
+            if ( nodeList == null ) {
+                nodeList = new ArrayList<>();
+                nodeMap.put( node.getCoordinates(), nodeList );
             }
-//            System.out.println( "point: " + node.getCoordinates() );
+            nodeList.add( node );
+        }
+        for ( List<cz.certicon.routing.model.entity.Node> nodeList : nodeMap.values() ) {
+            Color c = nextColor();
+            String fillColor = "fill-color: " + toCssRgb( c ) + ";";
             Point p = GeometryUtils.getScaledPoint(
                     min,
                     max,
-                    CoordinateUtils.toPointFromWGS84( scaleDimension, node.getCoordinates() ),
+                    CoordinateUtils.toPointFromWGS84( scaleDimension, nodeList.get( 0 ).getCoordinates() ),
                     targetDimension );
-            n.setAttribute( "xy", p.x, p.y );
-            n.setAttribute( "ui.label", id.toString() );
-//            System.out.println( "printing to: " + p );
+            if ( nodeList.size() == 1 ) {
+                Node n = displayGraph.addNode( nodeList.get( 0 ).getId().toString() );
+                n.setAttribute( "xy", p.x, p.y );
+                n.addAttribute( "ui.style", fillColor );
+                if ( displayNodes ) {
+                    n.setAttribute( "ui.label", Integer.toString( nodeList.get( 0 ).getCoordinates().hashCode() ) );
+                }
+            } else {
+                int step = 360 / nodeList.size();
+                int degree = 0;
+                for ( int i = 0; i < nodeList.size(); i++ ) {
+                    double alpha = 2 * Math.PI * degree / 360;
+                    int xDiff = (int) Math.round( MOVE * Math.cos( alpha ) );
+                    int yDiff = (int) Math.round( MOVE * Math.sin( alpha ) );
+                    Node n = displayGraph.addNode( nodeList.get( i ).getId().toString() );
+                    n.setAttribute( "xy", p.x + xDiff, p.y + yDiff );
+                    n.addAttribute( "ui.style", fillColor );
+                    if ( displayNodes ) {
+                        n.setAttribute( "ui.label", Integer.toString( nodeList.get( i ).getCoordinates().hashCode() ) );
+                    }
+                    degree += step;
+                }
+            }
         }
         for ( Edge edge : graph.getEdges() ) {
-            displayGraph.addEdge( edge.getId().toString(), edge.getSourceNode().getId().toString(), edge.getTargetNode().getId().toString(), true );
+            org.graphstream.graph.Edge addEdge = displayGraph.addEdge( edge.getId().toString(), edge.getSourceNode().getId().toString(), edge.getTargetNode().getId().toString(), true );
         }
         Viewer viewer = displayGraph.display();
         viewer.disableAutoLayout();
     }
 
+    private Color nextColor() {
+        return colorList.get( colorCounter++ % colorList.size() );
+    }
+
+    private String toCssRgb( Color color ) {
+        return "rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")";
+    }
 }

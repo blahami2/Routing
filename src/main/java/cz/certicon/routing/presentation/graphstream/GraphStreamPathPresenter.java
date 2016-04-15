@@ -85,7 +85,7 @@ public class GraphStreamPathPresenter implements PathPresenter {
         List<cz.certicon.routing.model.entity.Node> nodes = path.getNodes();
         cz.certicon.routing.model.entity.Node center = nodes.get( nodes.size() / 2 );
         int distance = nodes.size() / 2 + 3;
-        cz.certicon.routing.model.entity.Graph subgraph = GraphUtils.subgraph( path.getGraph(), graphEntityFactory, center, distance );
+        cz.certicon.routing.model.entity.Graph subgraph = GraphUtils.subgraph( path.getGraph(), graphEntityFactory, center.getCoordinates(), distance );
         Map<Coordinates, List<cz.certicon.routing.model.entity.Node>> nodeMap = new HashMap<>();
         Graph displayGraph = new org.graphstream.graph.implementations.MultiGraph( "graph-id" );
         displayGraph.addAttribute( "ui.stylesheet", "edge {"
