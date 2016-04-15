@@ -31,7 +31,7 @@ public class TimeMeasurement {
      * @return elapsed time in {@link TimeUnits}
      */
     public long stop() {
-        time = getCurrentTimeElapsed();
+        time = System.nanoTime() - start;
         return timeUnits.fromNano( time );
     }
 

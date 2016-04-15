@@ -13,6 +13,7 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -69,18 +70,21 @@ public class GraphUtils {
      *
      * @param graph base {@link Graph}
      * @param graphEntityFactory graph-related {@link GraphEntityFactory}
-     * @param centerNode {@link Node} in the center of the subgraph
+     * @param centerNode {@link Set} of {@link Node} in the center of the
+     * subgraph
      * @param distance rank of the farthest node
      * @return subgraph as an instance of {@link Graph}
      */
-    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Node centerNode, int distance ) {
+    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Set<Node> centerNode, int distance ) {
         Graph subgraph = graphEntityFactory.createGraph();
         Map<Node.Id, Boolean> visitedNodes = new HashMap<>();
         Map<Edge.Id, Boolean> visitedEdges = new HashMap<>();
         Queue<NodeContainer> nodeQueue = new LinkedList<>();
-        subgraph.addNode( centerNode );
-        visitedNodes.put( centerNode.getId(), Boolean.TRUE );
-        nodeQueue.add( new NodeContainer( centerNode, 0 ) );
+        for ( Node node : centerNode ) {
+            subgraph.addNode( node );
+            visitedNodes.put( node.getId(), Boolean.TRUE );
+            nodeQueue.add( new NodeContainer( node, 0 ) );
+        }
         while ( !nodeQueue.isEmpty() ) {
             NodeContainer currentNode = nodeQueue.poll();
             if ( currentNode.distance < distance ) {
@@ -100,6 +104,42 @@ public class GraphUtils {
             }
         }
         return subgraph;
+    }
+
+    /**
+     * Creates subgraph of the given graph with a given node in the center and
+     * all the nodes/edges in the given distance from it.
+     *
+     * @param graph base {@link Graph}
+     * @param graphEntityFactory graph-related {@link GraphEntityFactory}
+     * @param centerNode {@link Node} in the center of the subgraph
+     * @param distance rank of the farthest node
+     * @return subgraph as an instance of {@link Graph}
+     */
+    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Node centerNode, int distance ) {
+        Set<Node> nodeSet = new HashSet<>();
+        nodeSet.add( centerNode );
+        return subgraph( graph, graphEntityFactory, nodeSet, distance );
+    }
+
+    /**
+     * Creates subgraph of the given graph with a given node in the center and
+     * all the nodes/edges in the given distance from it.
+     *
+     * @param graph base {@link Graph}
+     * @param graphEntityFactory graph-related {@link GraphEntityFactory}
+     * @param centerNode {@link Coordinates} in the center of the subgraph
+     * @param distance rank of the farthest node
+     * @return subgraph as an instance of {@link Graph}
+     */
+    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Coordinates centerNode, int distance ) {
+        Set<Node> nodeSet = new HashSet<>();
+        for ( Node node : graph.getNodes() ) {
+            if ( node.getCoordinates().equals( centerNode ) ) {
+                nodeSet.add( node );
+            }
+        }
+        return subgraph( graph, graphEntityFactory, nodeSet, distance );
     }
 
     private static class NodeContainer {
