@@ -37,6 +37,7 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
 
     @Override
     public void add( T node, double value ) {
+//        System.out.println( "Adding " + node + " with value " + value );
         FibonacciHeapNode<T> n = new FibonacciHeapNode<>( node );
         nodeMap.put( node, n );
         fibonacciHeap.insert( n, value );
@@ -50,6 +51,7 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
 
     @Override
     public void notifyDataChange( T node, double value ) {
+//        System.out.println( "Changing " + node + " to value " + value );
         FibonacciHeapNode<T> n = nodeMap.get( node );
         if ( n == null ) {
             n = new FibonacciHeapNode<>( node );

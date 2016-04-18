@@ -67,7 +67,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             if ( from.containsKey( node.getCoordinates() ) ) {
                 Distance nodeDistance = from.get( node.getCoordinates() );
                 node.setDistance( nodeDistance );
-                nodeDataStructure.add( node, nodeDistance.getEvaluableValue() );
+                nodeDataStructure.add( node, calculateDistance( getDistanceFactory(), node, to ).getEvaluableValue() );
             } else { // set distance to infinity
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
