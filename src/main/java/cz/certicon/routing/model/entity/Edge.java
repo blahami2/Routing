@@ -22,6 +22,10 @@ public interface Edge {
 
     public void setOsmId( long osmId );
 
+    public long getDataId();
+
+    public void setDataId( long dataId );
+
     /**
      * Getter for length represented by an instance of {@link Distance}
      *

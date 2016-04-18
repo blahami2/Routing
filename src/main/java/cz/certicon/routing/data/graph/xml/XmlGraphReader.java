@@ -93,12 +93,14 @@ public class XmlGraphReader extends AbstractXmlReader<Pair<GraphEntityFactory, D
                 double length = Double.parseDouble( attributes.getValue( LENGTH.shortLowerName() ) );
                 boolean isPaid = Boolean.parseBoolean( attributes.getValue( PAID.shortLowerName() ) );
                 long osmId = Long.parseLong( attributes.getValue( OSM_ID.shortLowerName() ) );
+                long dataId = Long.parseLong( attributes.getValue( DATA_ID.shortLowerName() ) );
                 EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( length ).setPaid( isPaid ).build();
                 Node sourceNode = nodes.get( sourceId );
                 Node targetNode = nodes.get( targetId );
                 EdgeData edgeData = new SimpleEdgeData( speed, isPaid, length );
                 Edge edge = graphEntityFactory.createEdge( id, sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
                 edge.setOsmId( osmId );
+                edge.setDataId( dataId );
                 edge.setSpeed( speed );
                 edge.setAttributes( edgeAttributes );
                 edge.setLabel( edgeAttributes.toString() );

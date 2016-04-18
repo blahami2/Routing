@@ -28,6 +28,7 @@ public abstract class SimpleEdge implements Edge {
     private final Node targetNode;
     private final Edge.Id id;
     private long osmId = -1;
+    private long dataId = -1;
     private int speed;
     private Distance distance;
     private String label;
@@ -51,10 +52,20 @@ public abstract class SimpleEdge implements Edge {
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder().build();
     }
-
+    
     @Override
     public Id getId() {
         return id;
+    }
+
+    @Override
+    public long getDataId() {
+        return dataId;
+    }
+
+    @Override
+    public void setDataId( long dataId ) {
+        this.dataId = dataId;
     }
 
     @Override

@@ -11,7 +11,7 @@ package cz.certicon.routing.data.coordinates.xml;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum Tag {
-    ROOT, ID, EDGE, COORDINATE, LATITUDE, LONGITUDE;
+    ROOT, DATA_ID, ID, EDGE, COORDINATE, LATITUDE, LONGITUDE;
 
     public String shortLowerName() {
         return this.name().toLowerCase();

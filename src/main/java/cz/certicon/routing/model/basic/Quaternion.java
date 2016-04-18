@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.model.basic;
 
+import java.util.Objects;
+
 /**
  * A generic container class for four objects.
  *
@@ -23,5 +25,32 @@ public class Quaternion<A, B, C, D> extends Trinity<A, B, C> {
         super( a, b, c );
         this.d = d;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = 41 * hash + d.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final Quaternion<?, ?, ?, ?> other = (Quaternion<?, ?, ?, ?>) obj;
+        if ( !Objects.equals( this.d, other.d ) ) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
 }

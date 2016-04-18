@@ -73,6 +73,7 @@ public class XmlGraphWriter extends AbstractXmlWriter<Graph> implements GraphWri
                 getWriter().writeAttribute( LENGTH.shortLowerName(), Double.toString( edge.getAttributes().getLength() ) );
                 getWriter().writeAttribute( PAID.shortLowerName(), Boolean.toString( edge.getAttributes().isPaid() ) );
                 getWriter().writeAttribute( OSM_ID.shortLowerName(), Long.toString( edge.getOsmId() ) );
+                getWriter().writeAttribute( DATA_ID.shortLowerName(), Long.toString( edge.getDataId() ) );
                 getWriter().writeEndElement();
             }
             getWriter().flush();

@@ -14,6 +14,7 @@ import java.util.Set;
 
 /**
  * An interface for {@link Coordinates} reading (based on the set of edges) using a {@link Reader} interface.
+ * Uses a set of dataIds and a map for them.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

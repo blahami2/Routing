@@ -73,20 +73,20 @@ public abstract class SimplePath implements Path {
 
     @Override
     public List<Coordinates> getCoordinates() {
-        Node currentNode = sourceNode;
+        Coordinates currentNode = sourceNode.getCoordinates();
         List<Coordinates> coordinates = new LinkedList<>();
         for ( Edge edge : this ) {
             List<Coordinates> edgeCoordinates = edge.getCoordinates();
-            if ( currentNode.equals( edge.getSourceNode() ) ) {
+            if ( currentNode.equals( edge.getCoordinates().get( 0 ) ) ) {
                 for ( int i = 0; i < edgeCoordinates.size(); i++ ) {
                     coordinates.add( edgeCoordinates.get( i ) );
+                    currentNode = edgeCoordinates.get( i );
                 }
-                currentNode = edge.getTargetNode();
             } else {
                 for ( int i = edgeCoordinates.size() - 1; i >= 0; i-- ) {
                     coordinates.add( edgeCoordinates.get( i ) );
+                    currentNode = edgeCoordinates.get( i );
                 }
-                currentNode = edge.getSourceNode();
             }
         }
         return coordinates;

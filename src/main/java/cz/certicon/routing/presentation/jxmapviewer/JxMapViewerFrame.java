@@ -69,29 +69,32 @@ public class JxMapViewerFrame implements PathPresenter {
         Node currentNode = source;
         StringBuilder sb = new StringBuilder();
         addWaypoint( path.getSourceNode(), "SOURCE = " + path.getSourceNode().getDistance() );
-        for ( Edge edge : path ) {
-            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
-            addWaypoint( edge, edge.getLabel() + "\nfrom: " + edge.getSourceNode() + "\nto: " + edge.getTargetNode() );
-            if ( !currentNode.equals( path.getSourceNode() ) && !currentNode.equals( path.getTargetNode() ) ) {
-                addWaypoint( currentNode, currentNode.getDistance().toString() );
-            }
-
-            List<Coordinates> coordinates = edge.getCoordinates();
-            if ( currentNode.equals( edge.getSourceNode() ) ) {
-//                System.out.println( "from " + currentNode );
-                for ( int i = 0; i < coordinates.size(); i++ ) {
-                    Coordinates coord = coordinates.get( i );
-                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
-                }
-                currentNode = edge.getTargetNode();
-            } else {
-//                System.out.println( "from " + edge.getTargetNode() );
-                for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
-                    Coordinates coord = coordinates.get( i );
-                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
-                }
-                currentNode = edge.getSourceNode();
-            }
+//        for ( Edge edge : path ) {
+//            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
+//            addWaypoint( edge, edge.getLabel() + "\nfrom: " + edge.getSourceNode() + "\nto: " + edge.getTargetNode() );
+//            if ( !currentNode.equals( path.getSourceNode() ) && !currentNode.equals( path.getTargetNode() ) ) {
+//                addWaypoint( currentNode, currentNode.getDistance().toString() );
+//            }
+//
+//            List<Coordinates> coordinates = edge.getCoordinates();
+//            if ( currentNode.equals( edge.getSourceNode() ) ) {
+////                System.out.println( "from " + currentNode );
+//                for ( int i = 0; i < coordinates.size(); i++ ) {
+//                    Coordinates coord = coordinates.get( i );
+//                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
+//                }
+//                currentNode = edge.getTargetNode();
+//            } else {
+////                System.out.println( "from " + edge.getTargetNode() );
+//                for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
+//                    Coordinates coord = coordinates.get( i );
+//                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
+//                }
+//                currentNode = edge.getSourceNode();
+//            }
+//        }
+        for ( Coordinates coordinate : path.getCoordinates() ) {
+            track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
         }
         if ( path.size() > 1 ) {
             System.out.println( "path size = " + path.size() );
@@ -164,50 +167,53 @@ public class JxMapViewerFrame implements PathPresenter {
         Node currentNode = source;
         StringBuilder sb = new StringBuilder();
         addWaypoint( path.getSourceNode(), "SOURCE = " + path.getSourceNode().getDistance() );
-        for ( Edge edge : path ) {
-            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
-//            sb.append( currentNode.getCoordinates() ).append( ", " ).append( currentNode.getDistance() ).append( "\n" );
-            addWaypoint( edge, edge.getLabel() + "\n" + edge );
-            if ( !currentNode.equals( path.getSourceNode() ) && !currentNode.equals( path.getTargetNode() ) ) {
-                addWaypoint( currentNode, currentNode.getDistance().toString() + "\n" + sb.toString() );
-            }
-
-            List<Coordinates> coordinates = edge.getCoordinates();
-            if ( currentNode.equals( edge.getSourceNode() ) ) {
-                for ( int i = 0; i < coordinates.size(); i++ ) {
-                    Coordinates coord = coordinates.get( i );
-                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
-                }
-                currentNode = edge.getTargetNode();
-            } else {
-                for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
-                    Coordinates coord = coordinates.get( i );
-                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
-                }
-                currentNode = edge.getSourceNode();
-            }
-            if ( millis > 0 ) {
-                RoutePainter routePainter = new RoutePainter( track );
-                for ( LabelWaypoint waypoint : waypoints ) {
-                    mapViewer.add( waypoint.getComponent() );
-                }
-                painters.add( routePainter );
-                LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
-                p.setWaypoints( waypoints );
-                painters.add( p );
-                CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
-                mapViewer.setOverlayPainter( painter );
-                try {
-                    Thread.sleep( millis );
-                } catch ( InterruptedException ex ) {
-                    Logger.getLogger( JxMapViewerFrame.class.getName() ).log( Level.SEVERE, null, ex );
-                }
-            }
+//        for ( Edge edge : path ) {
+//            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
+////            sb.append( currentNode.getCoordinates() ).append( ", " ).append( currentNode.getDistance() ).append( "\n" );
+//            addWaypoint( edge, edge.getLabel() + "\n" + edge );
+//            if ( !currentNode.equals( path.getSourceNode() ) && !currentNode.equals( path.getTargetNode() ) ) {
+//                addWaypoint( currentNode, currentNode.getDistance().toString() + "\n" + sb.toString() );
+//            }
+//
+//            List<Coordinates> coordinates = edge.getCoordinates();
+//            if ( currentNode.equals( edge.getSourceNode() ) ) {
+//                for ( int i = 0; i < coordinates.size(); i++ ) {
+//                    Coordinates coord = coordinates.get( i );
+//                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
+//                }
+//                currentNode = edge.getTargetNode();
+//            } else {
+//                for ( int i = coordinates.size() - 1; i >= 0; i-- ) {
+//                    Coordinates coord = coordinates.get( i );
+//                    track.add( new GeoPosition( coord.getLatitude(), coord.getLongitude() ) );
+//                }
+//                currentNode = edge.getSourceNode();
+//            }
+//            if ( millis > 0 ) {
+//                RoutePainter routePainter = new RoutePainter( track );
+//                for ( LabelWaypoint waypoint : waypoints ) {
+//                    mapViewer.add( waypoint.getComponent() );
+//                }
+//                painters.add( routePainter );
+//                LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
+//                p.setWaypoints( waypoints );
+//                painters.add( p );
+//                CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
+//                mapViewer.setOverlayPainter( painter );
+//                try {
+//                    Thread.sleep( millis );
+//                } catch ( InterruptedException ex ) {
+//                    Logger.getLogger( JxMapViewerFrame.class.getName() ).log( Level.SEVERE, null, ex );
+//                }
+//            }
+//        }
+        for ( Coordinates coordinate : path.getCoordinates() ) {
+            track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
         }
         addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );
 
         RoutePainter routePainter = new RoutePainter( track );
-        for(LabelWaypoint waypoint : waypoints){
+        for ( LabelWaypoint waypoint : waypoints ) {
             mapViewer.add( waypoint.getComponent() );
         }
         painters.add( routePainter );

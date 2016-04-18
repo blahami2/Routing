@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.model.basic;
 
+import java.util.Objects;
+
 /**
  * A generic container class for two objects.
  *
@@ -21,4 +23,35 @@ public class Pair<A,B> {
         this.a = a;
         this.b = b;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 83 * hash + a.hashCode();
+        hash = 83 * hash + b.hashCode();
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final Pair<?, ?> other = (Pair<?, ?>) obj;
+        if ( !Objects.equals( this.a, other.a ) ) {
+            return false;
+        }
+        if ( !Objects.equals( this.b, other.b ) ) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

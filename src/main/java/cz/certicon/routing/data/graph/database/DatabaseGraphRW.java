@@ -60,10 +60,11 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
             graph.addNode( node );
             nodeMap.put( node.getId(), node );
         }
-        rs = getStatement().executeQuery( "SELECT e.id, e.source_id, e.target_id, d.length, d.is_paid, e.speed, d.osm_id "
+        rs = getStatement().executeQuery( "SELECT e.id, e.data_id, e.source_id, e.target_id, d.length, d.is_paid, e.speed, d.osm_id "
                 + "FROM edges_routing e "
                 + "JOIN edges_data_routing d ON e.data_id = d.id;" );
         idColumnIdx = rs.findColumn( "id" );
+        int dataIdColumnIndex = rs.findColumn( "data_id" );
         int sourceColumnIndex = rs.findColumn( "source_id" );
         int targetColumnIndex = rs.findColumn( "target_id" );
         int lengthColumnIndex = rs.findColumn( "length" );
@@ -90,6 +91,7 @@ public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFac
                     .build() );
             edge.setSpeed( edgeData.getSpeed() );
             edge.setOsmId( rs.getLong( osmIdColumnIndex ) );
+            edge.setDataId( rs.getLong( dataIdColumnIndex ) );
             graph.addEdge( edge );
         }
         return graph;

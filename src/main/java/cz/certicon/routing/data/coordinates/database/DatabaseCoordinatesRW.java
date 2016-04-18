@@ -8,6 +8,7 @@ package cz.certicon.routing.data.coordinates.database;
 import cz.certicon.routing.data.basic.database.AbstractDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
@@ -22,7 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * An implementation of the {@link CoordinateReader}/{@link CoordinateWriter} interfaces using the {@link AbstractDatabase} class.
+ * An implementation of the {@link CoordinateReader}/{@link CoordinateWriter}
+ * interfaces using the {@link AbstractDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -34,28 +36,28 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
 
     @Override
     protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> edges ) throws SQLException {
+        Map<Pair<Long, Coordinates>, List<Coordinates>> dataCoordinatesMap = new HashMap<>();
         Map<Edge, List<Coordinates>> coordinateMap = new HashMap<>();
-        Map<Edge.Id, Edge> edgeMap = new HashMap<>();
+        Map<Long, Edge> edgeMap = new HashMap<>();
         for ( Edge edge : edges ) {
-            edgeMap.put( edge.getId(), edge );
+            edgeMap.put( edge.getDataId(), edge );
         }
         ResultSet rs;
         StringBuilder inArray = new StringBuilder();
         for ( Edge edge : edges ) {
-            inArray.append( edge.getId().getValue() ).append( ", " );
+            inArray.append( edge.getDataId() ).append( ", " );
         }
         if ( edges.size() > 0 ) {
             inArray.delete( inArray.length() - 2, inArray.length() );
         } else {
             return coordinateMap;
         }
-        rs = getStatement().executeQuery( "SELECT e.id, ST_AsText(d.geom) AS linestring, d.source_lat, d.source_lon, d.target_lat, d.target_lon "
-                + "FROM edges_routing e "
-                + "JOIN edges_data_routing d ON e.data_id = d.id "
-                + "WHERE e.id IN ("
+        rs = getStatement().executeQuery( "SELECT data_id, ST_AsText(geom) AS linestring, source_lat, source_lon, target_lat, target_lon "
+                + "FROM edges_view "
+                + "WHERE data_id IN ("
                 + inArray.toString()
                 + ")" );
-        int idColumnIdx = rs.findColumn( "id" );
+        int idColumnIdx = rs.findColumn( "data_id" );
         int linestringColumnIdx = rs.findColumn( "linestring" );
         int sourceLonColumnIdx = rs.findColumn( "source_lon" );
         int sourceLatColumnIdx = rs.findColumn( "source_lat" );
@@ -64,32 +66,38 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
         while ( rs.next() ) {
             Coordinates sourceCoord = parseCoord( rs, sourceLatColumnIdx, sourceLonColumnIdx );
             Coordinates targetCoord = parseCoord( rs, sourceLatColumnIdx, sourceLonColumnIdx );
-            List<Coordinates> coordinates = new ArrayList<>();
-            String linestring = rs.getString( linestringColumnIdx );
-            linestring = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
-            for ( String cord : linestring.split( "," ) ) {
-                Coordinates coord = new Coordinates(
-                        Double.parseDouble( cord.split( " " )[1] ),
-                        Double.parseDouble( cord.split( " " )[0] )
-                );
-                coordinates.add( coord );
+            Pair<Long, Coordinates> key = new Pair<>( rs.getLong( idColumnIdx ), sourceCoord );
+            if ( !dataCoordinatesMap.containsKey( key ) ) {
+                List<Coordinates> coordinates = new ArrayList<>();
+                String linestring = rs.getString( linestringColumnIdx );
+                linestring = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
+                for ( String cord : linestring.split( "," ) ) {
+                    Coordinates coord = new Coordinates(
+                            Double.parseDouble( cord.split( " " )[1] ),
+                            Double.parseDouble( cord.split( " " )[0] )
+                    );
+                    coordinates.add( coord );
+                }
+                Edge edge = edgeMap.get( rs.getLong( idColumnIdx ) );
+                Node sourceNode = edge.getSourceNode();
+                Node targetNode = edge.getTargetNode();
+                if ( sourceCoord.equals( sourceNode.getCoordinates() ) ) {
+                } else if ( sourceCoord.equals( targetNode.getCoordinates() ) ) {
+                    Collections.reverse( coordinates ); // pointless??
+                } else {
+                    // test target coord?
+//                System.out.println( "edge id = " + rs.getLong( idColumnIdx ) );
+//                System.out.println( "source coord = " + sourceCoord );
+//                System.out.println( "target coord = " + targetCoord );
+//                System.out.println( "node source coord = " + sourceNode.getCoordinates() );
+//                System.out.println( "node target coord = " + targetNode.getCoordinates() );
+                    throw new IllegalArgumentException( "Edge and it's coordinates do not match." );
+                }
+                dataCoordinatesMap.put( key, coordinates );
             }
-            Edge edge = edgeMap.get( Edge.Id.createId( rs.getLong( idColumnIdx ) ) );
-            Node sourceNode = edge.getSourceNode();
-            Node targetNode = edge.getTargetNode();
-            if ( sourceCoord.equals( sourceNode.getCoordinates() ) ) {
-            } else if ( sourceCoord.equals( targetNode.getCoordinates() ) ) {
-                Collections.reverse( coordinates );
-            } else {
-                // test target coord?
-                System.out.println( "edge id = " + rs.getLong( idColumnIdx ) );
-                System.out.println( "source coord = " + sourceCoord );
-                System.out.println( "target coord = " + targetCoord );
-                System.out.println( "node source coord = " + sourceNode.getCoordinates() );
-                System.out.println( "node target coord = " + targetNode.getCoordinates() );
-                throw new IllegalArgumentException( "Edge and it's coordinates do not match." );
-            }
-            coordinateMap.put( edge, coordinates );
+        }
+        for ( Map.Entry<Pair<Long, Coordinates>, List<Coordinates>> entry : dataCoordinatesMap.entrySet() ) {
+            coordinateMap.put( edgeMap.get( entry.getKey().a ), entry.getValue() );
         }
         return coordinateMap;
     }
