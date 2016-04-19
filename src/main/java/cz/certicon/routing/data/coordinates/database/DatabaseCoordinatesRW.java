@@ -36,7 +36,7 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
 
     @Override
     protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> edges ) throws SQLException {
-        Map<Pair<Long, Coordinates>, List<Coordinates>> dataCoordinatesMap = new HashMap<>();
+        Map<Long, List<Coordinates>> dataCoordinatesMap = new HashMap<>();
         Map<Edge, List<Coordinates>> coordinateMap = new HashMap<>();
         Map<Long, Edge> edgeMap = new HashMap<>();
         for ( Edge edge : edges ) {
@@ -52,21 +52,15 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
         } else {
             return coordinateMap;
         }
-        rs = getStatement().executeQuery( "SELECT data_id, ST_AsText(geom) AS linestring, source_lat, source_lon, target_lat, target_lon "
-                + "FROM edges_view "
-                + "WHERE data_id IN ("
+        rs = getStatement().executeQuery( "SELECT id, ST_AsText(geom) AS linestring "
+                + "FROM edges_data_routing "
+                + "WHERE id IN ("
                 + inArray.toString()
                 + ")" );
-        int idColumnIdx = rs.findColumn( "data_id" );
+        int idColumnIdx = rs.findColumn( "id" );
         int linestringColumnIdx = rs.findColumn( "linestring" );
-        int sourceLonColumnIdx = rs.findColumn( "source_lon" );
-        int sourceLatColumnIdx = rs.findColumn( "source_lat" );
-        int targetLonColumnIdx = rs.findColumn( "target_lon" );
-        int targetLatColumnIdx = rs.findColumn( "target_lat" );
         while ( rs.next() ) {
-            Coordinates sourceCoord = parseCoord( rs, sourceLatColumnIdx, sourceLonColumnIdx );
-            Coordinates targetCoord = parseCoord( rs, sourceLatColumnIdx, sourceLonColumnIdx );
-            Pair<Long, Coordinates> key = new Pair<>( rs.getLong( idColumnIdx ), sourceCoord );
+            Long key = rs.getLong( idColumnIdx );
             if ( !dataCoordinatesMap.containsKey( key ) ) {
                 List<Coordinates> coordinates = new ArrayList<>();
                 String linestring = rs.getString( linestringColumnIdx );
@@ -78,26 +72,11 @@ public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coord
                     );
                     coordinates.add( coord );
                 }
-                Edge edge = edgeMap.get( rs.getLong( idColumnIdx ) );
-                Node sourceNode = edge.getSourceNode();
-                Node targetNode = edge.getTargetNode();
-                if ( sourceCoord.equals( sourceNode.getCoordinates() ) ) {
-                } else if ( sourceCoord.equals( targetNode.getCoordinates() ) ) {
-                    Collections.reverse( coordinates ); // pointless??
-                } else {
-                    // test target coord?
-//                System.out.println( "edge id = " + rs.getLong( idColumnIdx ) );
-//                System.out.println( "source coord = " + sourceCoord );
-//                System.out.println( "target coord = " + targetCoord );
-//                System.out.println( "node source coord = " + sourceNode.getCoordinates() );
-//                System.out.println( "node target coord = " + targetNode.getCoordinates() );
-                    throw new IllegalArgumentException( "Edge and it's coordinates do not match." );
-                }
                 dataCoordinatesMap.put( key, coordinates );
             }
         }
-        for ( Map.Entry<Pair<Long, Coordinates>, List<Coordinates>> entry : dataCoordinatesMap.entrySet() ) {
-            coordinateMap.put( edgeMap.get( entry.getKey().a ), entry.getValue() );
+        for ( Edge edge : edges) {
+            coordinateMap.put( edge, dataCoordinatesMap.get( edge.getDataId()) );
         }
         return coordinateMap;
     }

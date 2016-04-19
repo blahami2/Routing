@@ -52,7 +52,7 @@ public abstract class SimpleEdge implements Edge {
         this.label = generateLabel( sourceNode, targetNode );
         this.attributes = SimpleEdgeAttributes.builder().build();
     }
-    
+
     @Override
     public Id getId() {
         return id;

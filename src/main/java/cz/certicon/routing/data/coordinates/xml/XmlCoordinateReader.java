@@ -50,7 +50,9 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
     protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> edges ) throws IOException {
         Map<Edge, List<Coordinates>> coordinateMap = new HashMap<>();
         Map<Long, Edge> edgeMap = new HashMap<>();
+        int counter = 0;
         for ( Edge edge : edges ) {
+            counter++;
             edgeMap.put( edge.getDataId(), edge );
         }
         EdgeHandler edgeHandler;
@@ -60,9 +62,9 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
             edgeHandler = new EdgeHandler( edgeMap );
             saxParser.parse( getDataSource().getInputStream(), edgeHandler );
             close();
-            Map<Pair<Long, Coordinates>, List<Coordinates>> dataCoordinatesMap = edgeHandler.getDataCoordinatesMap();
-            for ( Map.Entry<Pair<Long, Coordinates>, List<Coordinates>> entry : dataCoordinatesMap.entrySet() ) {
-                coordinateMap.put( edgeMap.get( entry.getKey().a ), entry.getValue() );
+            Map<Long, List<Coordinates>> dataCoordinatesMap = edgeHandler.getDataCoordinatesMap();
+            for ( Edge edge : edges ) {
+                coordinateMap.put( edge, dataCoordinatesMap.get( edge.getDataId() ) );
             }
             return coordinateMap;
         } catch ( ParserConfigurationException | SAXException ex ) {
@@ -73,7 +75,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
     private static class EdgeHandler extends DefaultHandler {
 
         private final Map<Long, Edge> edgeMap;
-        private final Map<Pair<Long, Coordinates>, List<Coordinates>> dataCoordinatesMap;
+        private final Map<Long, List<Coordinates>> dataCoordinatesMap;
         private Long collecting = null;
         private List<Coordinates> coordList = null;
 
@@ -105,8 +107,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
         public void endElement( String uri, String localName, String qName ) throws SAXException {
             if ( qName.equalsIgnoreCase( EDGE.name() ) ) {
                 if ( collecting != null ) {
-                    Pair<Long, Coordinates> key = new Pair<>( collecting, coordList.get( 0 ) );
-                    dataCoordinatesMap.put( key, coordList );
+                    dataCoordinatesMap.put( collecting, coordList );
 //                    System.out.println( "ended collecting" );
                     collecting = null;
                     coordList = null;
@@ -114,7 +115,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
             }
         }
 
-        public Map<Pair<Long, Coordinates>, List<Coordinates>> getDataCoordinatesMap() {
+        public Map<Long, List<Coordinates>> getDataCoordinatesMap() {
             return dataCoordinatesMap;
         }
     }
