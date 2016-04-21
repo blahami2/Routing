@@ -3,8 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.data.nodesearch.xml;
+package cz.certicon.routing.data.nodesearch.graph;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.CoordinateSequenceComparator;
+import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
+import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.GeometryFilter;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.index.SpatialIndex;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
@@ -32,14 +48,39 @@ public class GraphNodeSearcher implements NodeSearcher {
     private static final double EPS = 10E-9;
 
     private Graph graph;
+    private SpatialIndex quadtree;
 
     public GraphNodeSearcher( Graph graph ) {
         this.graph = graph;
+        quadtree = new Quadtree();
+        Map<List<Coordinates>, List<Edge>> map = new HashMap<>();
+        for ( Edge edge : graph.getEdges() ) {
+            List<Coordinates> coordinates = edge.getCoordinates();
+            List<Edge> edges = map.get( coordinates );
+            if ( edges == null ) {
+                edges = new ArrayList<>();
+                map.put( coordinates, edges );
+            }
+            edges.add( edge );
+        }
+        GeometryFactory geometryFactory = new GeometryFactory( new PrecisionModel( PrecisionModel.FLOATING ), 4326 );
+        for ( Map.Entry<List<Coordinates>, List<Edge>> entry : map.entrySet() ) {
+            Coordinate[] coords = new Coordinate[entry.getKey().size()];
+            for ( int i = 0; i < entry.getKey().size(); i++ ) {
+                Coordinates coordinates = entry.getKey().get( i );
+                coords[i] = new Coordinate( coordinates.getLongitude(), coordinates.getLatitude() );
+            }
+            LineString linestring = geometryFactory.createLineString( coords );
+            quadtree.insert( linestring.getEnvelopeInternal(), entry.getValue() );
+        }
     }
 
     @Override
     public Map<Coordinates, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory ) throws IOException {
         Edge closestEdge = null;
+
+        List query = quadtree.query( null );
+
         Coordinates closestCoords = null;
         double distance = Double.MAX_VALUE;
         for ( Edge edge : graph.getEdges() ) {

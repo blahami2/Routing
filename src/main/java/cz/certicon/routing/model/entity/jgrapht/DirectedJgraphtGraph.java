@@ -21,8 +21,7 @@ class DirectedJgraphtGraph implements DirectedGraph {
     public final org.jgrapht.graph.DirectedMultigraph<Node, Edge> innerGraph;
 
     public DirectedJgraphtGraph( org.jgrapht.graph.DirectedMultigraph<Node, Edge> innerGraph ) {
-        this.innerGraph = innerGraph;
-        
+        this.innerGraph = innerGraph;        
     }
 
     @Override
