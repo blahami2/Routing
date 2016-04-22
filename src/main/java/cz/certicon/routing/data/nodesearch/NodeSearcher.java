@@ -8,6 +8,7 @@ package cz.certicon.routing.data.nodesearch;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Node;
 import java.io.IOException;
 import java.util.Map;
 
@@ -22,8 +23,13 @@ public interface NodeSearcher {
      * 
      * @param coordinates a geographical point specifying the approximate location
      * @param distanceFactory factory for distance creation
-     * @return a {@link Map} of {@link Coordinates} and distances (in kilometers) representing the set of closest nodes, from which the correct one cannot easily be determined
+     * @param searchfor determines what to search for
+     * @return a {@link Map} of node id's and distances (in kilometers) representing the set of closest nodes, from which the correct one cannot easily be determined
      * @throws java.io.IOException thrown when an error occurs while searching
      */
-    public Map<Coordinates, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory ) throws IOException;
+    public Map<Node.Id, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchfor ) throws IOException;
+    
+    public static enum SearchFor {
+        SOURCE, TARGET;
+    }
 }

@@ -12,6 +12,7 @@ import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
+import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.utils.DoubleComparator;
@@ -38,8 +39,8 @@ public class GraphNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Map<Coordinates, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory ) throws IOException {
-        Edge closestEdge = null;
+    public Map<Node.Id, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
+        List<Edge> closestEdges = new ArrayList<>();
         Coordinates closestCoords = null;
         double distance = Double.MAX_VALUE;
         for ( Edge edge : graph.getEdges() ) {
@@ -54,28 +55,39 @@ public class GraphNodeSearcher implements NodeSearcher {
             }
             if ( DoubleComparator.isLowerThan( currentMin, distance, EPS ) ) {
                 distance = currentMin;
-                closestEdge = edge;
+                closestEdges.clear();
+                closestEdges.add( edge );
                 closestCoords = currentCoords;
+            } else if ( DoubleComparator.isEqualTo( currentMin, distance, EPS ) ) {
+                closestEdges.add( edge );
             }
         }
-        if ( closestEdge != null ) {
-            Map<Coordinates, Distance> distanceMap = new HashMap<>();
-            EdgeData edgeData = new SimpleEdgeData( closestEdge.getSpeed(), closestEdge.getAttributes().isPaid(), closestEdge.getAttributes().getLength() );
-            Coordinates start = closestEdge.getCoordinates().get( 0 );
-            Coordinates end = closestEdge.getCoordinates().get( closestEdge.getCoordinates().size() - 1 );
-            double length1 = 0;
-            double length2 = 0;
-            double tmpLength = 0;
-            for ( Coordinates coordinate : closestEdge.getCoordinates() ) {
-                tmpLength += CoordinateUtils.calculateDistance( start, coordinate );
-                if ( coordinate.equals( closestCoords ) ) {
-                    length1 = tmpLength;
-                    tmpLength = 0;
+        if ( !closestEdges.isEmpty() ) {
+            Map<Node.Id, Distance> distanceMap = new HashMap<>();
+            for ( Edge edge : closestEdges ) {
+                EdgeData edgeData = new SimpleEdgeData( edge.getSpeed(), edge.getAttributes().isPaid(), edge.getAttributes().getLength() );
+                Coordinates start = edge.getCoordinates().get( 0 );
+                Coordinates end = edge.getCoordinates().get( edge.getCoordinates().size() - 1 );
+                double lengthFromStart = 0;
+                double lengthToEnd = 0;
+                double tmpLength = 0;
+                for ( Coordinates coordinate : edge.getCoordinates() ) {
+                    tmpLength += CoordinateUtils.calculateDistance( start, coordinate );
+                    if ( coordinate.equals( closestCoords ) ) {
+                        lengthFromStart = tmpLength;
+                        tmpLength = 0;
+                    }
+                }
+                lengthToEnd = tmpLength;
+                Node.Id nodeId = ( edge.getSourceNode().getCoordinates().equals( start ) )
+                        ? edge.getTargetNode().getId()
+                        : edge.getSourceNode().getId();
+                if ( searchFor.equals( SearchFor.SOURCE ) ) {
+                    distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, lengthToEnd ) );
+                } else {
+                    distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, lengthFromStart ) );
                 }
             }
-            length2 = tmpLength;
-            distanceMap.put( start, distanceFactory.createFromEdgeDataAndLength( edgeData, length1 ) );
-            distanceMap.put( end, distanceFactory.createFromEdgeDataAndLength( edgeData, length2 ) );
             return distanceMap;
         } else {
             return null;
