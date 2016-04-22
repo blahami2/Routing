@@ -12,6 +12,7 @@ import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.DoubleComparator;
 import java.io.IOException;
@@ -34,15 +35,15 @@ public class DatabaseNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Map<Coordinates, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory ) throws IOException {
+    public Map<Node.Id, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
         database.setDistanceFactory( distanceFactory );
         database.open();
-        Map<Coordinates, Distance> read = database.read( coordinates );
+        Map<Node.Id, Distance> read = database.read( coordinates );
         database.close();
         return read;
     }
 
-    private static class NodeSearchDB extends AbstractServerDatabase<Map<Coordinates, Distance>, Coordinates> {
+    private static class NodeSearchDB extends AbstractServerDatabase<Map<Node.Id, Distance>, Coordinates> {
 
         private DistanceFactory distanceFactory;
 
@@ -55,8 +56,8 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         }
 
         @Override
-        protected Map<Coordinates, Distance> checkedRead( Coordinates in ) throws SQLException {
-            Map<Coordinates, Distance> map = new HashMap<>();
+        protected Map<Node.Id, Distance> checkedRead( Coordinates in ) throws SQLException {
+            Map<Node.Id, Distance> map = new HashMap<>();
             ResultSet rs;
 //            rs = getStatement().executeQuery( "SELECT * FROM nodes_view n WHERE ST_Equals(n.geom, ST_GeomFromText('POINT(" + in.getLongitude() + " " + in.getLatitude() + ")',4326));" );
 //            if ( rs.next() ) {
@@ -64,25 +65,19 @@ public class DatabaseNodeSearcher implements NodeSearcher {
 //                return map;
 //            }
             rs = getStatement().executeQuery( "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH
-            ) + ", ST_AsText(out_point) AS point, out_distance AS distance FROM public.\"find_node\"(" + in.getLongitude() + ", " + in.getLatitude() + ");" );
+            ) + ", out_point AS point, out_distance AS distance FROM public.\"find_node\"(" + in.getLongitude() + ", " + in.getLatitude() + ");" );
 
             while ( rs.next() ) {
                 EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
-                String value = rs.getString( "point" );
-                value = value.substring( "POINT(".length(), value.length() - ")".length() );
-                String[] lonlat = value.split( " " );
-                Coordinates node = new Coordinates(
-                        Double.parseDouble( lonlat[1] ),
-                        Double.parseDouble( lonlat[0] )
-                );
-                Double length = rs.getDouble( "distance" );
+                long nodeId = rs.getLong( "point" );
+                double length = rs.getDouble( "distance" );
                 if ( DoubleComparator.compare( 0, length, 0.0000001 ) == 0 ) {
                     map.clear();
-                    map.put( node, distanceFactory.createZeroDistance() );
+                    map.put( Node.Id.createId( nodeId ), distanceFactory.createZeroDistance() );
                     return map;
                 }
                 EdgeData edgeData = new SimpleEdgeData( edgeResultHelper.getSpeed(), edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
-                map.put( node, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
+                map.put( Node.Id.createId( nodeId ), distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
             }
 
 //            DSLContext dsl = DSL.using( getConnection(), SQLDialect.POSTGRES_9_5 );
@@ -109,7 +104,7 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         }
 
         @Override
-        protected void checkedWrite( Map<Coordinates, Distance> in ) throws SQLException {
+        protected void checkedWrite( Map<Node.Id, Distance> in ) throws SQLException {
             throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
         }
 
