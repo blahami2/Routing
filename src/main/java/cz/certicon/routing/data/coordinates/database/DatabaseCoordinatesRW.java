@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.data.coordinates.database;
 
-import cz.certicon.routing.data.basic.database.AbstractDatabase;
+import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
 import cz.certicon.routing.model.basic.Pair;
@@ -24,11 +24,11 @@ import java.util.Set;
 
 /**
  * An implementation of the {@link CoordinateReader}/{@link CoordinateWriter}
- * interfaces using the {@link AbstractDatabase} class.
+ * interfaces using the {@link AbstractServerDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DatabaseCoordinatesRW extends AbstractDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
+public class DatabaseCoordinatesRW extends AbstractServerDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
 
     public DatabaseCoordinatesRW( Properties connectionProperties ) {
         super( connectionProperties );

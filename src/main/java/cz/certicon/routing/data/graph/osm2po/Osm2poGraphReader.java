@@ -7,7 +7,7 @@ package cz.certicon.routing.data.graph.osm2po;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
-import cz.certicon.routing.data.basic.database.AbstractDatabase;
+import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Edge;
@@ -29,7 +29,7 @@ import java.util.Properties;
  * @deprecated osm2po is not supported anymore
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class Osm2poGraphReader extends AbstractDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader {
+public class Osm2poGraphReader extends AbstractServerDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader {
 
     public Osm2poGraphReader( Properties connectionProperties ) {
         super( connectionProperties );

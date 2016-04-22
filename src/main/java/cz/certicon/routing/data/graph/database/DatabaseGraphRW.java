@@ -7,7 +7,7 @@ package cz.certicon.routing.data.graph.database;
 
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
-import cz.certicon.routing.data.basic.database.AbstractDatabase;
+import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.data.graph.GraphWriter;
 import cz.certicon.routing.model.basic.Pair;
@@ -25,11 +25,11 @@ import java.util.Properties;
 
 /**
  * An implementation of the {@link GraphReader}/{@link GraphWriter} interfaces
- * using the {@link AbstractDatabase} class.
+ * using the {@link AbstractServerDatabase} class.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DatabaseGraphRW extends AbstractDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader, GraphWriter {
+public class DatabaseGraphRW extends AbstractServerDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader, GraphWriter {
 
     public DatabaseGraphRW( Properties connectionProperties ) {
         super( connectionProperties );
