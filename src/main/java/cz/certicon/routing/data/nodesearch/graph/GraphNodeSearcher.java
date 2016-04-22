@@ -79,14 +79,16 @@ public class GraphNodeSearcher implements NodeSearcher {
                     }
                 }
                 lengthToEnd = tmpLength;
-                Node.Id nodeId = ( edge.getSourceNode().getCoordinates().equals( start ) )
-                        ? edge.getTargetNode().getId()
-                        : edge.getSourceNode().getId();
+                double length;
+                Node.Id nodeId;
                 if ( searchFor.equals( SearchFor.SOURCE ) ) {
-                    distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, lengthToEnd ) );
+                    nodeId = edge.getTargetNode().getId();
+                    length = ( edge.getSourceNode().getCoordinates().equals( start ) ) ? lengthToEnd : lengthFromStart;
                 } else {
-                    distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, lengthFromStart ) );
+                    nodeId = edge.getSourceNode().getId();
+                    length = ( edge.getSourceNode().getCoordinates().equals( start ) ) ? lengthFromStart : lengthToEnd;
                 }
+                distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
             }
             return distanceMap;
         } else {
