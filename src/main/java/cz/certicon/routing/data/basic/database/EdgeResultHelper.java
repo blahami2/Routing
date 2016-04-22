@@ -59,6 +59,10 @@ public class EdgeResultHelper {
         return resultSet.getDouble( Columns.LENGTH.getName() );
     }
 
+    public boolean getIsForward() throws SQLException {
+        return resultSet.getBoolean( Columns.IS_FORWARD.getName() );
+    }
+
     public List<Coordinates> getGeometry() throws SQLException {
         List<Coordinates> coordinates = new ArrayList<>();
         String linestring = resultSet.getString( Columns.GEOMETRY.getName() );
@@ -74,7 +78,7 @@ public class EdgeResultHelper {
     }
 
     public static enum Columns implements ColumnInterface {
-        ID( "id" ), OSM_ID( "osm_id" ), DATA_ID( "data_id" ), SOURCE( "source_id" ), TARGET( "target_id" ), SPEED( "speed" ), IS_PAID( "is_paid" ), ROAD_TYPE( "road_type" ), GEOMETRY( "ST_AsText(geom)" ), LENGTH( "length" );
+        ID( "id" ), IS_FORWARD( "is_forward" ), OSM_ID( "osm_id" ), DATA_ID( "data_id" ), SOURCE( "source_id" ), TARGET( "target_id" ), SPEED( "speed" ), IS_PAID( "is_paid" ), ROAD_TYPE( "road_type" ), GEOMETRY( "ST_AsText(geom)" ), LENGTH( "length" );
 
         private final String name;
 
