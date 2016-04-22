@@ -44,7 +44,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
             ResultSet rs = database.read( "SELECT n.id FROM nodes_view n WHERE ST_Equals("
                     + "ST_SnapToGrid(" + pointString + ", 0.000001),"
                     + "ST_SnapToGrid(n.geom, 0.000001)"
-                    + ");" );
+                    + ")" );
             boolean isCrossroad = false;
             while ( rs.next() ) { // for all nodes found
                 isCrossroad = true;
@@ -63,7 +63,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
                         + "        ORDER BY e.geom <-> x.point "
                         + "        LIMIT 1 "
                         + ") AS e2 "
-                        + "ON e.data_id = e2.data_id;" );
+                        + "ON e.data_id = e2.data_id" );
                 while ( rs.next() ) {
                     EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
                     EdgeData edgeData = new SimpleEdgeData( edgeResultHelper.getSpeed(), edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );

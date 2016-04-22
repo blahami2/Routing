@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.utils;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import cz.certicon.routing.model.entity.CartesianCoords;
 import cz.certicon.routing.model.entity.Coordinates;
 import java.awt.Dimension;
@@ -12,6 +13,7 @@ import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import static java.lang.Math.*;
+import java.util.ArrayList;
 
 /**
  * Utilities for coordinates
@@ -108,15 +110,16 @@ public class CoordinateUtils {
         for ( int i = 0; i < count; i++ ) {
             double avgLat = ( ( count - 1 - i ) * aLat + ( i ) * bLat ) / ( count - 1 );
             double avgLon = ( ( count - 1 - i ) * aLon + ( i ) * bLon ) / ( count - 1 );
-            coords.add(new Coordinates( avgLat, avgLon ) );
+            coords.add( new Coordinates( avgLat, avgLon ) );
         }
         return coords;
     }
 
     /**
      * Converts coordinates in WGS84 format into Cartesian coordinates
+     *
      * @param coords {@link Coordinates} in WGS84
-     * @return {@link CartesianCoords} representation of the given coordinates 
+     * @return {@link CartesianCoords} representation of the given coordinates
      */
     public static CartesianCoords toCartesianFromWGS84( Coordinates coords ) {
         return new CartesianCoords(
@@ -128,9 +131,12 @@ public class CoordinateUtils {
 
     /**
      * Converts WGS84 coordinates to point in the given container.
-     * @param container an instance of {@link Dimension} for the point to fit in (scaled)
+     *
+     * @param container an instance of {@link Dimension} for the point to fit in
+     * (scaled)
      * @param coords {@link Coordinates} in WGS84
-     * @return scaled {@link Point} for the given container based on the given coordinates
+     * @return scaled {@link Point} for the given container based on the given
+     * coordinates
      */
     public static Point toPointFromWGS84( Dimension container, Coordinates coords ) {
 //        int x = (int) ( ( container.width / 360.0 ) * ( 180 + coords.getLatitude() ) );
@@ -138,5 +144,29 @@ public class CoordinateUtils {
         int x = (int) ( ( container.width / 360.0 ) * ( coords.getLongitude() ) );
         int y = (int) ( ( container.height / 180.0 ) * ( coords.getLatitude() ) );
         return new Point( x, y );
+    }
+
+    public static Coordinates jtsToCoordinates( Coordinate coordinate ) {
+        return new Coordinates( coordinate.y, coordinate.x );
+    }
+
+    public static Coordinate coordinatesToJts( Coordinates coordinates ) {
+        return new Coordinate( coordinates.getLongitude(), coordinates.getLatitude() );
+    }
+
+    public static List<Coordinates> jtsToCoordinates( Coordinate[] coordinates ) {
+        List<Coordinates> coords = new ArrayList<>();
+        for ( Coordinate c : coordinates ) {
+            coords.add( jtsToCoordinates( c ) );
+        }
+        return coords;
+    }
+
+    public static Coordinate[] coordinatesToJts( List<Coordinates> coordinates ) {
+        Coordinate[] coords = new Coordinate[coordinates.size()];
+        for ( int i = 0; i < coordinates.size(); i++ ) {
+            coords[i] = coordinatesToJts( coordinates.get( i ) );
+        }
+        return coords;
     }
 }
