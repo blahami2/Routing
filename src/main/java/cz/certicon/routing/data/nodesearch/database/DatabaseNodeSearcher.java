@@ -8,7 +8,7 @@ package cz.certicon.routing.data.nodesearch.database;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
-import cz.certicon.routing.data.basic.database.AbstractDatabase;
+import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.Coordinates;
@@ -42,7 +42,7 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         return read;
     }
 
-    private static class NodeSearchDB extends AbstractDatabase<Map<Coordinates, Distance>, Coordinates> {
+    private static class NodeSearchDB extends AbstractServerDatabase<Map<Coordinates, Distance>, Coordinates> {
 
         private DistanceFactory distanceFactory;
 
