@@ -6,6 +6,7 @@
 package cz.certicon.routing.application.algorithm;
 
 import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public interface RoutingAlgorithm {
      * @param to map of target points (with distances)
      * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the source set and the target set.
      */
-    public Path route(Map<Coordinates, Distance> from, Map<Coordinates, Distance> to);
+    public Path route(Map<Node.Id, Distance> from, Map<Node.Id, Distance> to);
     
     public RoutingConfiguration getRoutingConfiguration();
 }

@@ -16,6 +16,7 @@ import cz.certicon.routing.model.entity.neighbourlist.DirectedNeighborListGraphE
 import cz.certicon.routing.model.entity.neighbourlist.NeighborListGraphEntityFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.text.SimpleAttributeSet;
@@ -290,13 +291,13 @@ public class GraphTest {
     public void testGetNodes() {
         System.out.println( "getNodes" );
         Graph instance = initGraph( graphFactory, LOOPS );
-        Set<Node> expResult = new HashSet<>();
+        Collection<Node> expResult = new HashSet<>();
         for ( int i = 0; i < LOOPS; i++ ) {
             for ( int j = 0; j < LOOPS; j++ ) {
                 expResult.add( findNode( instance, i, j ) );
             }
         }
-        Set<Node> result = instance.getNodes();
+        Set<Node> result = new HashSet<>( instance.getNodes() );
         assertEquals( expResult, result );
     }
 
@@ -311,8 +312,8 @@ public class GraphTest {
         Node b = findNode( instance, 0, LOOPS - 1 );
         Edge edge = createEdge( graphFactory, distanceFactory, a, b );
         instance.addEdge( edge );
-        assertEquals( new HashSet<Edge>( Arrays.asList( edge ) ),
-                instance.getEdges() );
+        assertEquals( new HashSet<>( Arrays.asList( edge ) ),
+                new HashSet<>( instance.getEdges() ) );
     }
 
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {

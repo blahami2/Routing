@@ -36,8 +36,8 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         this.endCondition = new EndCondition() {
 
             @Override
-            public boolean isFinished( Graph graph, Map<Coordinates, Distance> targetSet, Node currentNode ) {
-                return targetSet.containsKey( currentNode.getCoordinates() );
+            public boolean isFinished( Graph graph, Map<Node.Id, Distance> targetSet, Node currentNode ) {
+                return targetSet.containsKey( currentNode.getId() );
             }
 
             @Override
@@ -69,22 +69,24 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //        Node nodeEqToFrom = from;
 //        Node nodeEqToTo = to;
         // foreach node in G
+        Map<Node.Id, Distance> targetNodeMap = new HashMap<>();
         for ( Node node : getGraph().getNodes() ) {
             node.setPredecessorEdge( null );
             if ( node.getCoordinates().equals( from ) ) {
                 node.setDistance( getDistanceFactory().createZeroDistance() );
                 nodeDataStructure.add( node, 0 );
+            } else if ( node.getCoordinates().equals( to ) ) {
+                node.setDistance( getDistanceFactory().createInfiniteDistance() );
+                targetNodeMap.put( node.getId(), getDistanceFactory().createZeroDistance() );
             } else { // set distance to infinity
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
             }
         }
-        Map<Coordinates, Distance> targetNodeMap = new HashMap<>();
-        targetNodeMap.put( to, getDistanceFactory().createZeroDistance() );
         return route( targetNodeMap );
     }
 
     @Override
-    public Path route( Map<Coordinates, Distance> from, Map<Coordinates, Distance> to ) {
+    public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
         // clear the data structure
         nodeDataStructure.clear();
 //        Node nodeEqToFrom = from;
@@ -92,8 +94,8 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         // foreach node in G
         for ( Node node : getGraph().getNodes() ) {
             node.setPredecessorEdge( null );
-            if ( from.containsKey( node.getCoordinates() ) ) {
-                Distance nodeDistance = from.get( node.getCoordinates() );
+            if ( from.containsKey( node.getId() ) ) {
+                Distance nodeDistance = from.get( node.getId() );
                 node.setDistance( nodeDistance );
                 nodeDataStructure.add( node, nodeDistance.getEvaluableValue() );
             } else { // set distance to infinity
@@ -103,7 +105,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         return route( to );
     }
 
-    private Path route( Map<Coordinates, Distance> to ) {
+    private Path route( Map<Node.Id, Distance> to ) {
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
@@ -121,8 +123,8 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance;
-                if ( to.containsKey( currentNode.getCoordinates() ) ) {
-                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getCoordinates() ) );
+                if ( to.containsKey( currentNode.getId() ) ) {
+                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getId() ) );
                 } else {
                     tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 }

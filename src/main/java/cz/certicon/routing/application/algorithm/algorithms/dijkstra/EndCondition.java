@@ -28,7 +28,7 @@ public interface EndCondition {
      * @param currentNode currently examined node
      * @return true if the algorithm is supposed to end, false otherwise
      */
-    public boolean isFinished( Graph graph, Map<Coordinates, Distance> targetSet, Node currentNode );
+    public boolean isFinished( Graph graph, Map<Node.Id, Distance> targetSet, Node currentNode );
 
     /**
      * Creates required result based on the algorithm progress
