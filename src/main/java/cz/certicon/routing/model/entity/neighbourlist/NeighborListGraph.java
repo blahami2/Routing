@@ -8,9 +8,10 @@ package cz.certicon.routing.model.entity.neighbourlist;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An implementation of {@link Graph} using neighbor lists.
@@ -19,42 +20,42 @@ import java.util.stream.Collectors;
  */
 public class NeighborListGraph implements Graph {
 
-    private final Set<Node> nodes;
-    private final Set<Edge> edges;
+    private final Map<Node.Id, Node> nodes;
+    private final Map<Edge.Id, Edge> edges;
 
     public NeighborListGraph() {
-        this.nodes = new HashSet<>();
-        this.edges = new HashSet<>();
+        this.nodes = new HashMap<>();
+        this.edges = new HashMap<>();
     }
 
     @Override
-    public Set<Node> getNodes() {
-        return nodes;
+    public Collection<Node> getNodes() {
+        return nodes.values();
     }
 
     @Override
-    public Set<Edge> getEdges() {
-        return edges;
+    public Collection<Edge> getEdges() {
+        return edges.values();
     }
 
     @Override
     public Graph addNode( Node node ) {
-        nodes.add( node );
+        nodes.put( node.getId(), node );
         return this;
     }
 
     @Override
     public Graph removeNode( Node node ) {
-        nodes.remove( node );
+        nodes.remove( node.getId() );
         for ( Edge edge : getEdgesOf( node ) ) {
-            edges.remove( edge );
+            edges.remove( edge.getId() );
         }
         return this;
     }
 
     @Override
     public Graph addEdge( Edge edge ) {
-        edges.add( edge );
+        edges.put( edge.getId(), edge );
         safeType( edge.getSourceNode() ).addEdge( edge );
         safeType( edge.getTargetNode() ).addEdge( edge );
         return this;
@@ -68,7 +69,7 @@ public class NeighborListGraph implements Graph {
         } else {
             e = edge;
         }
-        edges.add( e );
+        edges.put( e.getId(), e );
         safeType( sourceNode ).addEdge( e );
         safeType( targetNode ).addEdge( e );
         return this;
@@ -78,7 +79,7 @@ public class NeighborListGraph implements Graph {
     public Graph removeEdge( Edge edge ) {
         safeType( edge.getSourceNode() ).removeEdge( edge );
         safeType( edge.getTargetNode() ).removeEdge( edge );
-        edges.remove( edge );
+        edges.remove( edge.getId() );
         return this;
     }
 
@@ -151,5 +152,15 @@ public class NeighborListGraph implements Graph {
 
     private EdgeImpl safeType( Edge edge ) {
         return (EdgeImpl) edge;
+    }
+
+    @Override
+    public Node getNode( Node.Id id ) {
+        return nodes.get( id );
+    }
+
+    @Override
+    public Edge getEdge( Edge.Id id ) {
+        return edges.get( id );
     }
 }

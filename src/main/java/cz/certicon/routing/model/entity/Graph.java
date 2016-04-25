@@ -5,12 +5,14 @@
  */
 package cz.certicon.routing.model.entity;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
- * The root interface for graph representation of a map topology. Ignores edge direction.
+ * The root interface for graph representation of a map topology. Ignores edge
+ * direction.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface Graph {
 
@@ -39,7 +41,8 @@ public interface Graph {
     public Graph addEdge( Edge edge );
 
     /**
-     * Adds edge to the graph, sets source and target node to the edge if necessary
+     * Adds edge to the graph, sets source and target node to the edge if
+     * necessary
      *
      * @param sourceNode source {@link Node} of the given {@link Edge}
      * @param targetNode target {@link Node} of the given {@link Edge}
@@ -71,8 +74,8 @@ public interface Graph {
      * @return target {@link Node}
      */
     public Node getTargetNodeOf( Edge edge );
-    
-/**
+
+    /**
      * Getter for the other node connected to the edge than the given node
      *
      * @param edge an instance of {@link Edge} connected to the two nodes
@@ -81,7 +84,7 @@ public interface Graph {
      * @throws IllegalArgumentException thrown when a node is not connected to
      * this edge
      */
-    public Node getOtherNodeOf(Edge edge, Node node);
+    public Node getOtherNodeOf( Edge edge, Node node );
 
     /**
      * Getter for all the edges of the given node
@@ -108,7 +111,8 @@ public interface Graph {
     public Set<Edge> getOutgoingEdgesOf( Node node );
 
     /**
-     * Getter for the degree of the given node (amount of all the edges somehow directly connected to this node)
+     * Getter for the degree of the given node (amount of all the edges somehow
+     * directly connected to this node)
      *
      * @param node an instance of {@link Node}
      * @return integer number of connected edges
@@ -116,7 +120,8 @@ public interface Graph {
     public int getDegreeOf( Node node );
 
     /**
-     * Getter for the in degree of the given node (amount of the incoming edges directly connected to this node)
+     * Getter for the in degree of the given node (amount of the incoming edges
+     * directly connected to this node)
      *
      * @param node an instance of {@link Node}
      * @return integer number of incoming edges
@@ -124,7 +129,8 @@ public interface Graph {
     public int getInDegreeOf( Node node );
 
     /**
-     * Getter for the out degree of the given node (amount of the outgoing edges directly connected to this node)
+     * Getter for the out degree of the given node (amount of the outgoing edges
+     * directly connected to this node)
      *
      * @param node an instance of {@link Node}
      * @return integer number of outgoing edges
@@ -134,14 +140,18 @@ public interface Graph {
     /**
      * Getter for all the nodes in this graph
      *
-     * @return {@link Set} of {@link Node}s
+     * @return {@link Collection} of {@link Node}s
      */
-    public Set<Node> getNodes();
+    public Collection<Node> getNodes();
 
     /**
      * Getter for all the edges in this graph
      *
-     * @return {@link Set} of {@link Node}s
+     * @return {@link Collection} of {@link Node}s
      */
-    public Set<Edge> getEdges();
+    public Collection<Edge> getEdges();
+
+    public Node getNode( Node.Id id );
+
+    public Edge getEdge( Edge.Id id );
 }

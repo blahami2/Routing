@@ -11,12 +11,13 @@ import cz.certicon.routing.model.entity.Node;
 import java.util.Set;
 
 /**
- * An implementation of {@link Graph} adapting {@link org.jgrapht.graph.Multigraph} object.
+ * An implementation of {@link Graph} adapting
+ * {@link org.jgrapht.graph.Multigraph} object.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 class JgraphtGraph implements Graph {
-    
+
     public final org.jgrapht.graph.Multigraph<Node, Edge> innerGraph;
 
     public JgraphtGraph( org.jgrapht.graph.Multigraph<Node, Edge> innerGraph ) {
@@ -111,5 +112,25 @@ class JgraphtGraph implements Graph {
     public Set<Edge> getEdges() {
         return innerGraph.edgeSet();
     }
-    
+
+    @Override
+    public Node getNode( Node.Id id ) {
+        for ( Node node : innerGraph.vertexSet() ) {
+            if ( node.getId().equals( id ) ) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Edge getEdge( Edge.Id id ) {
+        for ( Edge edge : innerGraph.edgeSet() ) {
+            if ( edge.getId().equals( id ) ) {
+                return edge;
+            }
+        }
+        return null;
+    }
+
 }
