@@ -51,7 +51,6 @@ public class SqliteGraphRW extends AbstractEmbeddedDatabase<Graph, Pair<GraphEnt
         int idColumnIdx = rs.findColumn( "id" );
         int pointColumnIdx = rs.findColumn( "geom" );
         int osmIdColumnIdx = rs.findColumn( "osm_id" );
-        GeometryFactory geometryFactory = new GeometryFactory( new PrecisionModel( PrecisionModel.FLOATING ), 4326 );
         while ( rs.next() ) {
             String content = rs.getString( pointColumnIdx );
             content = content.substring( "POINT(".length(), content.length() - ")".length() );
