@@ -11,6 +11,7 @@ import cz.certicon.routing.data.coordinates.CoordinateWriter;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.utils.GeometryUtils;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.sqlite.SQLiteConfig;
 
 /**
  *
@@ -26,8 +28,27 @@ import java.util.Set;
  */
 public class SqliteCoordinateRW extends AbstractEmbeddedDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
 
+    private final String spatialitePath;
+
     public SqliteCoordinateRW( Properties connectionProperties ) {
         super( connectionProperties );
+        SQLiteConfig config = new SQLiteConfig();
+        config.enableLoadExtension( true );
+        for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
+            connectionProperties.put( entry.getKey(), entry.getValue() );
+        }
+        this.spatialitePath = connectionProperties.getProperty( "spatialite_path" );
+    }
+
+    @Override
+    public void open() throws IOException {
+        super.open();
+        try {
+            getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
+//        this.libspatialitePath = libspatialitePath;
+        } catch ( SQLException ex ) {
+            throw new IOException( ex );
+        }
     }
 
     @Override

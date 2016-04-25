@@ -20,6 +20,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.sqlite.SQLiteConfig;
 
 /**
@@ -31,7 +33,17 @@ public class SqliteNodeSearcher implements NodeSearcher {
     private final StringDatabase database;
 
     public SqliteNodeSearcher( Properties properties ) throws IOException {
-        this.database = new StringDatabase( properties );
+        try {
+            this.database = new StringDatabase( properties );
+        } catch ( SQLException ex ) {
+            throw new IOException( ex );
+        }
+        SQLiteConfig config = new SQLiteConfig();
+        config.enableLoadExtension( true );
+        for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
+            properties.put( entry.getKey(), entry.getValue() );
+        }
+//        this.libspatialitePath = libspatialitePath;
     }
 
     @Override
@@ -41,9 +53,9 @@ public class SqliteNodeSearcher implements NodeSearcher {
         final String keyDistanceFromStart = "distance_from_start";
         final String keyDistanceToEnd = "distance_to_end";
         try {
-            ResultSet rs = database.read( "SELECT n.id FROM nodes_view n WHERE ST_Equals("
+            ResultSet rs = database.read( "SELECT n.id FROM nodes n JOIN nodes_data d ON n.data_id = d.id WHERE ST_Equals("
                     + "ST_SnapToGrid(" + pointString + ", 0.000001),"
-                    + "ST_SnapToGrid(n.geom, 0.000001)"
+                    + "ST_SnapToGrid(d.geom, 0.000001)"
                     + ")" );
             boolean isCrossroad = false;
             while ( rs.next() ) { // for all nodes found
@@ -52,15 +64,26 @@ public class SqliteNodeSearcher implements NodeSearcher {
                 distanceMap.put( Node.Id.createId( id ), distanceFactory.createZeroDistance() );
             }
             if ( !isCrossroad ) {
-                rs = database.read(
-                        "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH ) + ", ST_Length(ST_LineSubstring(e.geom, 0, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point))), true) AS " + keyDistanceFromStart + ", ST_Length(ST_LineSubstring(e.geom, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point)),1), true) AS " + keyDistanceToEnd + " "
-                        + "FROM edges_view e "
+                System.out.println( "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH ) + ", ST_Length(ST_LineSubstring(e.geom, 0, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point))), true) AS " + keyDistanceFromStart + ", ST_Length(ST_LineSubstring(e.geom, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point)),1), true) AS " + keyDistanceToEnd + " "
+                        + "FROM edges e "
                         + "JOIN ( "
-                        + "	SELECT e.data_id, x.point "
-                        + "        FROM edges_view e "
+                        + "	SELECT ed.id, x.point "
+                        + "        FROM edges_data ed "
                         + "        JOIN (select " + pointString + " AS point) AS x ON true "
                         // + "        WHERE ST_DWithin(x.point, e.geom, 300) "
-                        + "        ORDER BY e.geom <-> x.point "
+                        + "        ORDER BY ed.geom <-> x.point "
+                        + "        LIMIT 1 "
+                        + ") AS e2 "
+                        + "ON e.data_id = e2.data_id" );
+                rs = database.read(
+                        "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH ) + ", ST_Length(ST_LineSubstring(e.geom, 0, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point))), true) AS " + keyDistanceFromStart + ", ST_Length(ST_LineSubstring(e.geom, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point)),1), true) AS " + keyDistanceToEnd + " "
+                        + "FROM edges e "
+                        + "JOIN ( "
+                        + "	SELECT ed.id, x.point "
+                        + "        FROM edges_data ed "
+                        + "        JOIN (select " + pointString + " AS point) AS x ON true "
+                        // + "        WHERE ST_DWithin(x.point, e.geom, 300) "
+                        + "        ORDER BY ed.geom <-> x.point "
                         + "        LIMIT 1 "
                         + ") AS e2 "
                         + "ON e.data_id = e2.data_id" );
@@ -87,18 +110,31 @@ public class SqliteNodeSearcher implements NodeSearcher {
 
     private static class StringDatabase extends AbstractEmbeddedDatabase<ResultSet, String> {
 
-        public StringDatabase( Properties connectionProperties ) {
+        private final String spatialitePath;
+
+        public StringDatabase( Properties connectionProperties ) throws SQLException {
             super( connectionProperties );
             SQLiteConfig config = new SQLiteConfig();
             config.enableLoadExtension( true );
             for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
                 connectionProperties.put( entry.getKey(), entry.getValue() );
             }
+            this.spatialitePath = connectionProperties.getProperty( "spatialite_path" );
+        }
+
+        @Override
+        public void open() throws IOException {
+            super.open();
+            try {
+                getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
+            } catch ( SQLException ex ) {
+                throw new IOException( ex );
+            }
         }
 
         @Override
         protected ResultSet checkedRead( String in ) throws SQLException {
-            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+            return getStatement().executeQuery( in );
         }
 
         @Override

@@ -55,7 +55,14 @@ public class GeometryUtils {
     }
 
     public static Coordinates toCoordinatesFromWktPoint( String point ) {
-        point = point.substring( "POINT(".length(), point.length() - ")".length() );
+        try {
+            point = point.substring( "POINT(".length(), point.length() - ")".length() );
+        } catch ( StringIndexOutOfBoundsException ex ) {
+            System.out.println( "point = '" + point + "'" );
+            System.out.println( "substring(" + "POINT(".length() + "," + ( point.length() - ")".length() ) );
+
+            throw ex;
+        }
         String[] lonlat = point.split( " " );
         return new Coordinates(
                 Double.parseDouble( lonlat[1] ),

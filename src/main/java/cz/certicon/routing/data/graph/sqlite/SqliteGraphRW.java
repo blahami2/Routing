@@ -13,17 +13,23 @@ import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.data.graph.GraphWriter;
 import cz.certicon.routing.model.basic.Pair;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
+import cz.certicon.routing.utils.GeometryUtils;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.sqlite.SQLiteConfig;
 
 /**
  *
@@ -31,11 +37,28 @@ import java.util.Properties;
  */
 public class SqliteGraphRW extends AbstractEmbeddedDatabase<Graph, Pair<GraphEntityFactory, DistanceFactory>> implements GraphReader, GraphWriter {
 
+    private final String spatialitePath;
 //    private final String libspatialitePath;
 
-    public SqliteGraphRW( Properties connectionProperties ) {
+    public SqliteGraphRW( Properties connectionProperties ) throws IOException {
         super( connectionProperties );
+        SQLiteConfig config = new SQLiteConfig();
+        config.enableLoadExtension( true );
+        for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
+            connectionProperties.put( entry.getKey(), entry.getValue() );
+        }
+        this.spatialitePath = connectionProperties.getProperty( "spatialite_path" );
+    }
+
+    @Override
+    public void open() throws IOException {
+        super.open();
+        try {
+            getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
 //        this.libspatialitePath = libspatialitePath;
+        } catch ( SQLException ex ) {
+            throw new IOException( ex );
+        }
     }
 
     @Override
@@ -45,19 +68,19 @@ public class SqliteGraphRW extends AbstractEmbeddedDatabase<Graph, Pair<GraphEnt
         DistanceFactory distanceFactory = in.b;
         Graph graph = graphEntityFactory.createGraph();
         ResultSet rs;
-        rs = getStatement().executeQuery( "SELECT n.id, d.geom, d.osm_id "
+        rs = getStatement().executeQuery( "SELECT n.id AS id, ST_AsText(d.geom) AS geom, d.osm_id AS osm_id "
                 + "FROM nodes n "
                 + "JOIN nodes_data d ON n.data_id = d.id;" );
         int idColumnIdx = rs.findColumn( "id" );
         int pointColumnIdx = rs.findColumn( "geom" );
         int osmIdColumnIdx = rs.findColumn( "osm_id" );
         while ( rs.next() ) {
-            String content = rs.getString( pointColumnIdx );
-            content = content.substring( "POINT(".length(), content.length() - ")".length() );
-            String[] lonlat = content.split( " " );
+//            System.out.println( rs.getLong( "id" ) );
+//            System.out.println( "osm = " + rs.getLong( "osm_id" ) );
+//            System.out.println( rs.getString( pointColumnIdx ) );
+            Coordinates coords = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( pointColumnIdx ) );
             Node node = graphEntityFactory.createNode( Node.Id.createId( rs.getLong( idColumnIdx ) ),
-                    Double.parseDouble( lonlat[1] ),
-                    Double.parseDouble( lonlat[0] )
+                    coords.getLatitude(), coords.getLongitude()
             );
             node.setOsmId( rs.getLong( osmIdColumnIdx ) );
             graph.addNode( node );
