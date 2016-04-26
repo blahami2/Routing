@@ -78,6 +78,9 @@ public class GeometryUtils {
         List<Coordinates> coordinates = new ArrayList<>();
         String content = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
         for ( String cord : content.split( "," ) ) {
+            while ( cord.startsWith( " " ) ) {
+                cord = cord.substring( 1 );
+            }
             Coordinates coord = new Coordinates(
                     Double.parseDouble( cord.split( " " )[1] ),
                     Double.parseDouble( cord.split( " " )[0] )
