@@ -30,6 +30,8 @@ import org.sqlite.SQLiteConfig;
  */
 public class SqliteNodeSearcher implements NodeSearcher {
 
+    private static final double DISTANCE_INIT = 0.001;
+    private static final double DISTANCE_MULTIPLIER = 10;
     private final StringDatabase database;
 
     public SqliteNodeSearcher( Properties properties ) throws IOException {
@@ -53,7 +55,16 @@ public class SqliteNodeSearcher implements NodeSearcher {
         final String keyDistanceFromStart = "distance_from_start";
         final String keyDistanceToEnd = "distance_to_end";
         try {
-            ResultSet rs = database.read( "SELECT n.id FROM nodes n JOIN nodes_data d ON n.data_id = d.id WHERE ST_Equals("
+            ResultSet rs = database.read( "SELECT n.id "
+                    + "FROM nodes n "
+                    + "JOIN (SELECT * FROM nodes_data d "
+                    + "        WHERE d.ROWID IN( "
+                    + "            SELECT ROWID FROM SpatialIndex "
+                    + "            WHERE f_table_name = 'nodes_data' "
+                    + "            AND search_frame = BuildCircleMbr(" + coordinates.getLongitude() + ", " + coordinates.getLatitude() + " , " + DISTANCE_INIT + "  ,4326)"
+                    + "        )  ) AS d "
+                    + "ON n.data_id = d.id "
+                    + "WHERE ST_Equals("
                     + "ST_SnapToGrid(" + pointString + ", 0.000001),"
                     + "ST_SnapToGrid(d.geom, 0.000001)"
                     + ")" );
@@ -64,42 +75,50 @@ public class SqliteNodeSearcher implements NodeSearcher {
                 distanceMap.put( Node.Id.createId( id ), distanceFactory.createZeroDistance() );
             }
             if ( !isCrossroad ) {
-                System.out.println( "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH ) + ", ST_Length(ST_LineSubstring(e.geom, 0, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point))), true) AS " + keyDistanceFromStart + ", ST_Length(ST_LineSubstring(e.geom, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point)),1), true) AS " + keyDistanceToEnd + " "
-                        + "FROM edges e "
-                        + "JOIN ( "
-                        + "	SELECT ed.id, x.point "
-                        + "        FROM edges_data ed "
-                        + "        JOIN (select " + pointString + " AS point) AS x ON true "
-                        // + "        WHERE ST_DWithin(x.point, e.geom, 300) "
-                        + "        ORDER BY ed.geom <-> x.point "
-                        + "        LIMIT 1 "
-                        + ") AS e2 "
-                        + "ON e.data_id = e2.data_id" );
-                rs = database.read(
-                        "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.SPEED, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH ) + ", ST_Length(ST_LineSubstring(e.geom, 0, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point))), true) AS " + keyDistanceFromStart + ", ST_Length(ST_LineSubstring(e.geom, ST_LineLocatePoint(e.geom, ST_ClosestPoint(e.geom, e2.point)),1), true) AS " + keyDistanceToEnd + " "
-                        + "FROM edges e "
-                        + "JOIN ( "
-                        + "	SELECT ed.id, x.point "
-                        + "        FROM edges_data ed "
-                        + "        JOIN (select " + pointString + " AS point) AS x ON true "
-                        // + "        WHERE ST_DWithin(x.point, e.geom, 300) "
-                        + "        ORDER BY ed.geom <-> x.point "
-                        + "        LIMIT 1 "
-                        + ") AS e2 "
-                        + "ON e.data_id = e2.data_id" );
-                while ( rs.next() ) {
-                    EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
-                    EdgeData edgeData = new SimpleEdgeData( edgeResultHelper.getSpeed(), edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
-                    Node.Id nodeId;
-                    double length;
-                    if ( searchFor.equals( SearchFor.SOURCE ) ) {
-                        nodeId = Node.Id.createId( edgeResultHelper.getTargetId() );
-                        length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceToEnd ) : rs.getDouble( keyDistanceFromStart );
-                    } else {
-                        nodeId = Node.Id.createId( edgeResultHelper.getSourceId() );
-                        length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceFromStart ) : rs.getDouble( keyDistanceToEnd );
+                boolean found = false;
+                double distance = DISTANCE_INIT;
+                while ( !found ) {
+                    rs = database.read(
+                            "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH )
+                            + ", speed_fw, speed_bw "
+                            + ", ST_Length(ST_Line_Substring(e2.geom, 0, ST_Line_Locate_Point(e2.geom, e2.point)), 1) AS " + keyDistanceFromStart
+                            + ", ST_Length(ST_Line_Substring(e2.geom, ST_Line_Locate_Point(e2.geom, e2.point),1), 1) AS " + keyDistanceToEnd + " "
+                            + "FROM edges e "
+                            + "JOIN ( "
+                            + "	SELECT ed.*, x.point "
+                            + "        FROM edges_data ed "
+                            + "        JOIN (select " + pointString + " AS point) AS x ON 1 = 1 "
+                            + "        WHERE ed.ROWID IN( "
+                            + "            SELECT ROWID FROM SpatialIndex "
+                            + "            WHERE f_table_name = 'edges_data' "
+                            + "            AND search_frame = BuildCircleMbr(" + coordinates.getLongitude() + ", " + coordinates.getLatitude() + " , " + distance + "  ,4326)"
+                            + "        )  "
+                            + "        ORDER BY Distance( ed.geom, x.point) "
+                            + "        LIMIT 1 "
+                            + ") AS e2 "
+                            + "ON e.data_id = e2.id" );
+                    while ( rs.next() ) {
+                        found = true;
+                        EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
+                        int speed;
+                        if ( edgeResultHelper.getIsForward() ) {
+                            speed = rs.getInt( "speed_fw" );
+                        } else {
+                            speed = rs.getInt( "speed_bw" );
+                        }
+                        EdgeData edgeData = new SimpleEdgeData( speed, edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
+                        Node.Id nodeId;
+                        double length;
+                        if ( searchFor.equals( SearchFor.SOURCE ) ) {
+                            nodeId = Node.Id.createId( edgeResultHelper.getTargetId() );
+                            length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceToEnd ) : rs.getDouble( keyDistanceFromStart );
+                        } else {
+                            nodeId = Node.Id.createId( edgeResultHelper.getSourceId() );
+                            length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceFromStart ) : rs.getDouble( keyDistanceToEnd );
+                        }
+                        distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
                     }
-                    distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
+                    distance *= DISTANCE_MULTIPLIER;
                 }
             }
         } catch ( SQLException ex ) {
