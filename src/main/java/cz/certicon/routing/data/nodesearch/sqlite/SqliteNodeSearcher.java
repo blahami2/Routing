@@ -11,6 +11,7 @@ import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
@@ -49,11 +50,12 @@ public class SqliteNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Map<Node.Id, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchFor ) throws IOException {
+    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchFor ) throws IOException {
         Map<Node.Id, Distance> distanceMap = new HashMap<>();
         final String pointString = "ST_GeomFromText('POINT(" + coordinates.getLongitude() + " " + coordinates.getLatitude() + ")',4326)";
         final String keyDistanceFromStart = "distance_from_start";
         final String keyDistanceToEnd = "distance_to_end";
+        long dataId = -1;
         try {
             ResultSet rs = database.read( "SELECT n.id "
                     + "FROM nodes n "
@@ -79,7 +81,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
                 double distance = DISTANCE_INIT;
                 while ( !found ) {
                     rs = database.read(
-                            "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH )
+                            "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.DATA_ID, EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH )
                             + ", speed_fw, speed_bw "
                             + ", ST_Length(ST_Line_Substring(e2.geom, 0, ST_Line_Locate_Point(e2.geom, e2.point)), 1) AS " + keyDistanceFromStart
                             + ", ST_Length(ST_Line_Substring(e2.geom, ST_Line_Locate_Point(e2.geom, e2.point),1), 1) AS " + keyDistanceToEnd + " "
@@ -100,6 +102,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
                     while ( rs.next() ) {
                         found = true;
                         EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
+                        dataId = edgeResultHelper.getDataId();
                         int speed;
                         if ( edgeResultHelper.getIsForward() ) {
                             speed = rs.getInt( "speed_fw" );
@@ -124,7 +127,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
         } catch ( SQLException ex ) {
             throw new IOException( ex );
         }
-        return distanceMap;
+        return new Pair<>( distanceMap, dataId );
     }
 
     private static class StringDatabase extends AbstractEmbeddedDatabase<ResultSet, String> {

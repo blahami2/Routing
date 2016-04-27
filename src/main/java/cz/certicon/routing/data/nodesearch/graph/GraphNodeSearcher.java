@@ -9,6 +9,7 @@ import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
@@ -39,7 +40,7 @@ public class GraphNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Map<Node.Id, Distance> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
+    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
         List<Edge> closestEdges = new ArrayList<>();
         Coordinates closestCoords = null;
         double distance = Double.MAX_VALUE;
@@ -58,13 +59,15 @@ public class GraphNodeSearcher implements NodeSearcher {
                 closestEdges.clear();
                 closestEdges.add( edge );
                 closestCoords = currentCoords;
-            } else if ( DoubleComparator.isEqualTo( currentMin, distance, EPS ) ) {
+            } else if ( closestEdges.size() > 0 && closestEdges.get( 0 ).getDataId() == edge.getDataId() ) {
                 closestEdges.add( edge );
             }
         }
         if ( !closestEdges.isEmpty() ) {
             Map<Node.Id, Distance> distanceMap = new HashMap<>();
+            long dataId = -1;
             for ( Edge edge : closestEdges ) {
+                dataId = edge.getDataId();
                 EdgeData edgeData = new SimpleEdgeData( edge.getSpeed(), edge.getAttributes().isPaid(), edge.getAttributes().getLength() );
                 Coordinates start = edge.getCoordinates().get( 0 );
                 Coordinates end = edge.getCoordinates().get( edge.getCoordinates().size() - 1 );
@@ -90,7 +93,7 @@ public class GraphNodeSearcher implements NodeSearcher {
                 }
                 distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
             }
-            return distanceMap;
+            return new Pair<>( distanceMap, dataId );
         } else {
             return null;
         }
