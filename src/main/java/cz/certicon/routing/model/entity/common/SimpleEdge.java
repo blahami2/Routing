@@ -11,7 +11,9 @@ import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -202,7 +204,13 @@ public abstract class SimpleEdge implements Edge {
     @Override
     public List<Coordinates> getCoordinates() {
         if ( coordinates != null ) {
-            return coordinates;
+            if ( getSourceNode().getCoordinates().equals( coordinates.get( 0 ) ) ) {
+                return new ArrayList<>( coordinates );
+            } else {
+                List<Coordinates> c = new ArrayList<>( coordinates );
+                Collections.reverse( c );
+                return c;
+            }
         }
         List<Coordinates> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
 //        int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
