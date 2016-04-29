@@ -51,6 +51,9 @@ public abstract class SimplePath implements Path {
     private Coordinates origSource = null;
     private Coordinates origTarget = null;
 
+    private Edge sourceEdge = null;
+    private Edge targetEdge = null;
+
     public SimplePath( Graph graph, Node node, boolean isFirst ) {
         this.graph = graph;
         this.edges = new LinkedList<>();
@@ -257,8 +260,8 @@ public abstract class SimplePath implements Path {
         }
 
         Set<Edge> edgeSet = new HashSet<>( getEdges() );
-        Edge sourceEdge = null;
-        Edge targetEdge = null;
+        sourceEdge = null;
+        targetEdge = null;
         if ( origSource != null && sourceDataId != -1 ) {
             sourceEdge = getCorrectEdge( sourceDataId, getSourceNode() );
             edgeSet.add( sourceEdge );
@@ -333,5 +336,35 @@ public abstract class SimplePath implements Path {
             }
         }
         return length;
+    }
+
+    @Override
+    public void clear() {
+        if ( sourceEdge != null ) {
+            sourceEdge.setCoordinates( null );
+        }
+        if ( targetEdge != null ) {
+            targetEdge.setCoordinates( null );
+        }
+        for ( Edge e : this ) {
+            e.setCoordinates( null );
+        }
+        distFromStart = 0;
+        distToEnd = 0;
+
+        speedFromStart = 1;
+        speedToEnd = 1;
+
+        coordsFromStart.clear();
+        coordsToEnd.clear();
+
+        sourceDataId = -1;
+        targetDataId = -1;
+
+        origSource = null;
+        origTarget = null;
+
+        sourceEdge = null;
+        targetEdge = null;
     }
 }

@@ -118,4 +118,6 @@ public interface Path extends Iterable<Edge> {
     public void setTargetOrigin( Coordinates origTarget, Long edgeDataId );
 
     public void loadCoordinates( CoordinateReader cr ) throws IOException;
+    
+    public void clear();
 }

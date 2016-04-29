@@ -90,10 +90,10 @@ public class CoordinateUtils {
 //        System.out.println( "calcualting distance:" );
 //        System.out.println( a );
 //        System.out.println( b );
-//        double aLatRad = toRadians( a.getLatitude() );
-//        double aLonRad = toRadians( a.getLongitude() );
-//        double bLatRad = toRadians( b.getLatitude() );
-//        double bLonRad = toRadians( b.getLongitude() );
+        double aLatRad = toRadians( a.getLatitude() );
+        double aLonRad = toRadians( a.getLongitude() );
+        double bLatRad = toRadians( b.getLatitude() );
+        double bLonRad = toRadians( b.getLongitude() );
         double result;
         // Pythagoras distance
 //        double varX = ( aLatRad - bLatRad ) * cos( ( aLonRad + bLonRad ) / 2 );
@@ -101,22 +101,21 @@ public class CoordinateUtils {
 //        result = sqrt( varX * varX + varY * varY ) * EARTH_RADIUS;
 //        System.out.println( "Pythagoras: " + result );
         // Haversine formula
-//        double deltaLatRad = toRadians( a.getLatitude() - b.getLatitude() );
-//        double deltaLonRad = toRadians( a.getLongitude() - b.getLongitude() );
-//        double varA = sin( deltaLatRad / 2 ) * sin( deltaLatRad / 2 ) + cos( aLatRad ) * cos( bLatRad ) * sin( deltaLonRad / 2 ) * sin( deltaLonRad / 2 );
-//        double varC = 2 * atan2( sqrt( varA ), sqrt( 1 - varA ) );
-//        result = EARTH_RADIUS * varC;
+        double deltaLatRad = toRadians( a.getLatitude() - b.getLatitude() );
+        double deltaLonRad = toRadians( a.getLongitude() - b.getLongitude() );
+        double varA = sin( deltaLatRad / 2 ) * sin( deltaLatRad / 2 ) + cos( aLatRad ) * cos( bLatRad ) * sin( deltaLonRad / 2 ) * sin( deltaLonRad / 2 );
+        double varC = 2 * atan2( sqrt( varA ), sqrt( 1 - varA ) );
+        result = EARTH_RADIUS * varC;
 
         // JTS
-        GeodeticCalculator geodeticCalculator = new GeodeticCalculator( COORDINATE_REFERENCE_SYSTEM );
-        try {
-            geodeticCalculator.setStartingPosition( JTS.toDirectPosition( new Coordinate( a.getLongitude(), a.getLatitude() ), COORDINATE_REFERENCE_SYSTEM ) );
-            geodeticCalculator.setDestinationPosition( JTS.toDirectPosition( new Coordinate( b.getLongitude(), b.getLatitude() ), COORDINATE_REFERENCE_SYSTEM ) );
-        } catch ( TransformException ex ) {
-            throw new RuntimeException( ex );
-        }
-
-        result = geodeticCalculator.getOrthodromicDistance();
+//        GeodeticCalculator geodeticCalculator = new GeodeticCalculator( COORDINATE_REFERENCE_SYSTEM );
+//        try {
+//            geodeticCalculator.setStartingPosition( JTS.toDirectPosition( new Coordinate( a.getLongitude(), a.getLatitude() ), COORDINATE_REFERENCE_SYSTEM ) );
+//            geodeticCalculator.setDestinationPosition( JTS.toDirectPosition( new Coordinate( b.getLongitude(), b.getLatitude() ), COORDINATE_REFERENCE_SYSTEM ) );
+//        } catch ( TransformException ex ) {
+//            throw new RuntimeException( ex );
+//        }
+//        result = geodeticCalculator.getOrthodromicDistance();
 
         return result;
     }
