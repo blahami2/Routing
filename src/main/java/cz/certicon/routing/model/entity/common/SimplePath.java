@@ -6,16 +6,23 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import cz.certicon.routing.utils.CoordinateUtils;
+import cz.certicon.routing.utils.GraphUtils;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A basic implementation of {@link Path}
@@ -28,6 +35,21 @@ public abstract class SimplePath implements Path {
     private final Graph graph;
     private Node sourceNode = null;
     private Node targetNode = null;
+
+    private double distFromStart = 0;
+    private double distToEnd = 0;
+
+    private int speedFromStart = 1;
+    private int speedToEnd = 1;
+
+    private final List<Coordinates> coordsFromStart = new ArrayList<>();
+    private final List<Coordinates> coordsToEnd = new ArrayList<>();
+
+    private long sourceDataId = -1;
+    private long targetDataId = -1;
+
+    private Coordinates origSource = null;
+    private Coordinates origTarget = null;
 
     public SimplePath( Graph graph, Node node, boolean isFirst ) {
         this.graph = graph;
@@ -75,6 +97,7 @@ public abstract class SimplePath implements Path {
     public List<Coordinates> getCoordinates() {
         Coordinates currentNode = sourceNode.getCoordinates();
         List<Coordinates> coordinates = new LinkedList<>();
+        coordinates.addAll( coordsFromStart );
         for ( Edge edge : this ) {
             List<Coordinates> edgeCoordinates = edge.getCoordinates();
             if ( currentNode.equals( edge.getCoordinates().get( 0 ) ) ) {
@@ -89,6 +112,7 @@ public abstract class SimplePath implements Path {
                 }
             }
         }
+        coordinates.addAll( coordsToEnd );
         return coordinates;
     }
 
@@ -131,6 +155,8 @@ public abstract class SimplePath implements Path {
         for ( Edge edge : edges ) {
             sum += edge.getAttributes().getLength();
         }
+        sum += distFromStart;
+        sum += distToEnd;
         return sum;
     }
 
@@ -145,6 +171,8 @@ public abstract class SimplePath implements Path {
             time += 3600 * length / speed;
             source = edge.getOtherNode( source );
         }
+        time += 3600 * distFromStart / speedFromStart;
+        time += 3600 * distToEnd / speedToEnd;
         return time;
     }
 
@@ -208,5 +236,102 @@ public abstract class SimplePath implements Path {
     @Override
     public String toString() {
         return "SimplePath{" + "distance=" + getDistance() + ", " + "edges=" + edges + '}';
+    }
+
+    @Override
+    public void setSourceOrigin( Coordinates origSource, Long edgeDataId ) {
+        this.origSource = origSource;
+        this.sourceDataId = edgeDataId;
+    }
+
+    @Override
+    public void setTargetOrigin( Coordinates origTarget, Long edgeDataId ) {
+        this.origTarget = origTarget;
+        this.targetDataId = edgeDataId;
+    }
+
+    @Override
+    public void loadCoordinates( CoordinateReader cr ) throws IOException {
+        if ( origSource == null || origTarget == null || sourceDataId == -1 || targetDataId == -1 ) {
+            return;
+        }
+
+        Set<Edge> edgeSet = new HashSet<>( getEdges() );
+        Edge sourceEdge = null;
+        Edge targetEdge = null;
+        if ( origSource != null && sourceDataId != -1 ) {
+            sourceEdge = getCorrectEdge( sourceDataId, getSourceNode() );
+            edgeSet.add( sourceEdge );
+        }
+
+        if ( origTarget != null && targetDataId != -1 ) {
+            targetEdge = getCorrectEdge( targetDataId, getTargetNode() );
+            edgeSet.add( targetEdge );
+        }
+
+        cr.open();
+        Map<Edge, List<Coordinates>> coordinateMap = cr.read( edgeSet );
+        cr.close();
+        GraphUtils.fillWithCoordinates( getEdges(), coordinateMap );
+
+        if ( sourceEdge != null ) {
+            sourceEdge.setCoordinates( coordinateMap.get( sourceEdge ) );
+            distFromStart = getAdditionalLength( coordsFromStart, sourceEdge, true, origSource );
+            speedFromStart = sourceEdge.getSpeed();
+        }
+
+        if ( targetEdge != null ) {
+            targetEdge.setCoordinates( coordinateMap.get( targetEdge ) );
+            distToEnd = getAdditionalLength( coordsToEnd, targetEdge, false, origTarget );
+            speedToEnd = targetEdge.getSpeed();
+        }
+    }
+
+    private Edge getCorrectEdge( long edgeDataId, Node node ) {
+        Edge correctEdge = null;
+        Set<Edge> edgesOf = getGraph().getEdgesOf( node );
+        for ( Edge edge : edgesOf ) {
+            if ( edge.getDataId() == edgeDataId ) {
+                correctEdge = edge;
+                break;
+            }
+        }
+        if ( correctEdge == null ) {
+            throw new IllegalStateException( "Invalid source data id: " + sourceDataId );
+        }
+        return correctEdge;
+    }
+
+    private double getAdditionalLength( List<Coordinates> outCoordinates, Edge edge, boolean from, Coordinates orig ) {
+
+        double min = Double.MAX_VALUE;
+        int minIndex = 0;
+        List<Coordinates> edgeCoordinates = edge.getCoordinates();
+        for ( int i = 0; i < edgeCoordinates.size(); i++ ) {
+            Coordinates coordinate = edgeCoordinates.get( i );
+            double dist = CoordinateUtils.calculateDistance( coordinate, orig );
+            if ( dist < min ) {
+                min = dist;
+                minIndex = i;
+            }
+        }
+        double length = 0;
+        int start;
+        int end;
+        if ( from ) {
+            start = minIndex;
+            end = edgeCoordinates.size();
+        } else {
+            start = 0;
+            end = minIndex + 1;
+        }
+        for ( int i = start; i < end; i++ ) {
+            Coordinates coordinate = edgeCoordinates.get( i );
+            outCoordinates.add( coordinate );
+            if ( i > start ) {
+                length += CoordinateUtils.calculateDistance( edgeCoordinates.get( i - 1 ), coordinate ) / 1000;
+            }
+        }
+        return length;
     }
 }

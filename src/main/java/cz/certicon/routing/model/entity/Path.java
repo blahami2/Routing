@@ -6,7 +6,10 @@
 package cz.certicon.routing.model.entity;
 
 import cz.certicon.routing.application.algorithm.Distance;
+import cz.certicon.routing.data.coordinates.CoordinateReader;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The root interface for representation of path (as a sequence of edges)
@@ -73,9 +76,10 @@ public interface Path extends Iterable<Edge> {
      * @return double length in meters
      */
     public double getLength();
-    
+
     /**
      * Getter for the overall time of this path (estimated)
+     *
      * @return double time in seconds
      */
     public double getTime();
@@ -102,10 +106,16 @@ public interface Path extends Iterable<Edge> {
      * @return integer amount of edges
      */
     public int size();
-    
+
     public List<Edge> getEdges();
-    
+
     public List<Node> getNodes();
-    
+
     public List<Coordinates> getCoordinates();
+
+    public void setSourceOrigin( Coordinates origSource, Long edgeDataId );
+
+    public void setTargetOrigin( Coordinates origTarget, Long edgeDataId );
+
+    public void loadCoordinates( CoordinateReader cr ) throws IOException;
 }
