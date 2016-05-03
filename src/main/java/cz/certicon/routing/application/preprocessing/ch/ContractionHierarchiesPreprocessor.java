@@ -59,7 +59,7 @@ public class ContractionHierarchiesPreprocessor {
         while ( !priorityQueue.isEmpty() ) {
             Node min = priorityQueue.extractMin();
             // shortcuts
-
+            shortcuts( routingAlgorithm, graph, graphEntityFactory, distanceFactory, min );
             // Neighbours only heuristic + Spatial diversity heuristic
             for ( Edge edge : graph.getEdgesOf( min ) ) {
                 Node neighbour = edge.getOtherNode( min );
@@ -87,7 +87,6 @@ public class ContractionHierarchiesPreprocessor {
             }
         }
         subgraph.removeNode( node );
-        routingAlgorithm.setGraph( subgraph );
         int numOfShortcuts = 0;
         for ( Map.Entry<Pair<Node, Node>, Distance> entry : fromToDistanceMap.entrySet() ) {
             Path route = routingAlgorithm.route( entry.getKey().a.getId(), entry.getKey().b.getId() );
@@ -100,10 +99,9 @@ public class ContractionHierarchiesPreprocessor {
     }
 
     private Set<Edge> shortcuts( DijkstraRoutingAlgorithm routingAlgorithm, Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, Node node ) {
-        Graph subgraph = GraphUtils.subgraph( graph, graphEntityFactory, node, DISTANCE );
-        routingAlgorithm.setGraph( subgraph );
+        routingAlgorithm.setGraph( graph );
         Map<Pair<Pair<Node, Edge>, Pair<Node, Edge>>, Distance> fromToDistanceMap = new HashMap<>();
-        Set<Edge> edgesOf = subgraph.getEdgesOf( node );
+        Set<Edge> edgesOf = graph.getEdgesOf( node );
         for ( Edge edge : edgesOf ) {
             Node neighbourA = edge.getOtherNode( node );
             for ( Edge edge1 : edgesOf ) {
@@ -114,8 +112,7 @@ public class ContractionHierarchiesPreprocessor {
                 }
             }
         }
-        subgraph.removeNode( node );
-        routingAlgorithm.setGraph( subgraph );
+        graph.removeNode( node );
         Set<Edge> shortcuts = new HashSet<>();
         for ( Map.Entry<Pair<Pair<Node, Edge>, Pair<Node, Edge>>, Distance> entry : fromToDistanceMap.entrySet() ) {
             Node from = entry.getKey().a.a;
@@ -132,7 +129,7 @@ public class ContractionHierarchiesPreprocessor {
                     toEdge.setLabel( toEdge.getId().toString() );
                 }
                 edge.setLabel( fromEdge.getLabel() + "," + toEdge.getLabel() + "," );
-                subgraph.addEdge( edge );
+                graph.addEdge( edge );
             }
         }
         return shortcuts;
