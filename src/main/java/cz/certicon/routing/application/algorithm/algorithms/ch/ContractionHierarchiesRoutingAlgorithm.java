@@ -44,7 +44,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
     }
 
     @Override
-    public Path route( Coordinates from, Coordinates to ) {
+    public Path route( Node.Id from, Node.Id to ) {
         throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
     }
 

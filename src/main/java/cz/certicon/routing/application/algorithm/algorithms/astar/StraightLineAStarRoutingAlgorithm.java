@@ -35,7 +35,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
     }
 
     @Override
-    public Path route( Coordinates from, Coordinates to ) {
+    public Path route( Node.Id from, Node.Id to ) {
         // clear the data structure
         nodeDataStructure.clear();
 //        Node nodeEqToFrom = from;
@@ -44,10 +44,10 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
         Map<Node.Id, Distance> targetNodeMap = new HashMap<>();
         for ( Node node : getGraph().getNodes() ) {
             node.setPredecessorEdge( null );
-            if ( node.getCoordinates().equals( from ) ) {
+            if ( node.getId().equals( from ) ) {
                 node.setDistance( getDistanceFactory().createZeroDistance() );
                 nodeDataStructure.add( node, 0 );
-            } else if ( node.getCoordinates().equals( to ) ) {
+            } else if ( node.getId().equals( to ) ) {
                 node.setDistance( getDistanceFactory().createInfiniteDistance() );
                 targetNodeMap.put( node.getId(), getDistanceFactory().createZeroDistance() );
             } else { // set distance to infinity

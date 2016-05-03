@@ -109,7 +109,8 @@ public abstract class SimpleNode implements Node {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 43 * hash + Objects.hashCode( this.coordinates );
+        hash = 59 * hash + Objects.hashCode( this.coordinates );
+        hash = 59 * hash + Objects.hashCode( this.id );
         return hash;
     }
 

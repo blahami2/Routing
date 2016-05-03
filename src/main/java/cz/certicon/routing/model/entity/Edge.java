@@ -181,6 +181,9 @@ public interface Edge {
         private final long id;
 
         private Id( long id ) {
+            if(id > counter){
+                counter = id + 1;
+            }
             this.id = id;
         }
 

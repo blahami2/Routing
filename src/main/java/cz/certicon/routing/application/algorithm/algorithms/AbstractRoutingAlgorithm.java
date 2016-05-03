@@ -19,9 +19,9 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
  */
 public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
 
-    private final Graph graph;
-    private final GraphEntityFactory entityAbstractFactory;
-    private final DistanceFactory distanceFactory;
+    private Graph graph;
+    private GraphEntityFactory entityAbstractFactory;
+    private DistanceFactory distanceFactory;
     private RoutingConfiguration routingConfiguration;
 
     /**
@@ -74,4 +74,15 @@ public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
         this.routingConfiguration = routingConfiguration;
     }
 
+    public void setGraph( Graph graph ) {
+        this.graph = graph;
+    }
+
+    public void setEntityAbstractFactory( GraphEntityFactory entityAbstractFactory ) {
+        this.entityAbstractFactory = entityAbstractFactory;
+    }
+
+    public void setDistanceFactory( DistanceFactory distanceFactory ) {
+        this.distanceFactory = distanceFactory;
+    }
 }

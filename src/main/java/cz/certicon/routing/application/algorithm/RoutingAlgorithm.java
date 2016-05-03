@@ -26,7 +26,7 @@ public interface RoutingAlgorithm {
      * @param to target point
      * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the two points.
      */
-    public Path route( Coordinates from, Coordinates to );
+    public Path route( Node.Id from, Node.Id to );
     
     /**
      * Find shortest path between a set of starting points and a target point
