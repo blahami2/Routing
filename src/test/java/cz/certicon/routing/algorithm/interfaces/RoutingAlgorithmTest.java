@@ -81,12 +81,12 @@ public class RoutingAlgorithmTest {
     public void testRoute() throws Exception {
         RoutingAlgorithm instance = routingAlgorithmFactory.createRoutingAlgorithm();
         System.out.println( "route - " + instance.getClass().getSimpleName() );
-        Coordinates a = new Coordinates( 50.1001831, 14.3856114 );
+//        Coordinates a = new Coordinates( 50.1001831, 14.3856114 );
 //        Node b = graphFactory.createNode( Node.Id.generateId(), 50.1002725, 14.3872906 );
 //        Node c = graphFactory.createNode( Node.Id.generateId(), 50.1018347, 14.3857995 );
 //        Node d = graphFactory.createNode( Node.Id.generateId(), 50.1017039, 14.3871028 );
 //        Node e = graphFactory.createNode( Node.Id.generateId(), 50.1002828, 14.3878056 );
-        Coordinates f = new Coordinates( 50.1016489, 14.3876339 );
+//        Coordinates f = new Coordinates( 50.1016489, 14.3876339 );
         Path expResult;
 
 //        Graph g = graphFactory.createGraph();
@@ -100,7 +100,7 @@ public class RoutingAlgorithmTest {
 //                .addEdge( ac )
 //                .addEdge( cd )
 //                .addEdge( df );
-        Path result = instance.route( a, f );
+        Path result = instance.route( Node.Id.createId( 1 ), Node.Id.createId( 6 ) );
 //        System.out.println( "expected: " + expResult );
 //        System.out.println( "result: " + result );
         assertEquals( "((a b), (b e), (e f))", toString( result ) );
@@ -129,12 +129,12 @@ public class RoutingAlgorithmTest {
         DirectedNeighborListGraphEntityFactory entityFactory = new DirectedNeighborListGraphEntityFactory();
         LengthDistanceFactory distanceFactory = new LengthDistanceFactory();
         Graph graph = entityFactory.createGraph();
-        Node a = entityFactory.createNode( Node.Id.generateId(), 50.1001831, 14.3856114 );
-        Node b = entityFactory.createNode( Node.Id.generateId(), 50.1002725, 14.3872906 );
-        Node c = entityFactory.createNode( Node.Id.generateId(), 50.1018347, 14.3857995 );
-        Node d = entityFactory.createNode( Node.Id.generateId(), 50.1017039, 14.3871028 );
-        Node e = entityFactory.createNode( Node.Id.generateId(), 50.1002828, 14.3878056 );
-        Node f = entityFactory.createNode( Node.Id.generateId(), 50.1016489, 14.3876339 );
+        Node a = entityFactory.createNode( Node.Id.createId( 1 ), 50.1001831, 14.3856114 );
+        Node b = entityFactory.createNode( Node.Id.createId( 2 ), 50.1002725, 14.3872906 );
+        Node c = entityFactory.createNode( Node.Id.createId( 3 ), 50.1018347, 14.3857995 );
+        Node d = entityFactory.createNode( Node.Id.createId( 4 ), 50.1017039, 14.3871028 );
+        Node e = entityFactory.createNode( Node.Id.createId( 5 ), 50.1002828, 14.3878056 );
+        Node f = entityFactory.createNode( Node.Id.createId( 6 ), 50.1016489, 14.3876339 );
         a.setLabel( "a" );
         b.setLabel( "b" );
         c.setLabel( "c" );
@@ -172,8 +172,9 @@ public class RoutingAlgorithmTest {
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
         EdgeData edgeData = new SimpleEdgeData( 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( edgeData.getLength() ).build();
-        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) )
-                .setAttributes( edgeAttributes );
+        Edge e = entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
+        e.setAttributes( edgeAttributes );
+        return e;
     }
 
     @Parameterized.Parameters

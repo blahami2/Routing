@@ -12,14 +12,19 @@ import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.algorithms.dijkstra.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.model.basic.Pair;
+import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
+import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
+import cz.certicon.routing.model.entity.Shortcut;
+import cz.certicon.routing.model.entity.common.SimpleShortcut;
 import cz.certicon.routing.utils.GraphUtils;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,15 +56,12 @@ public class ContractionHierarchiesPreprocessor {
             priorityQueue.add( node, numberOfShortcuts - degree );
             contractedNeighboursCountMap.put( node, 0 );
         }
-        for ( Edge edge : graph.getEdges() ) {
-            edge.setLabel( "" );
-        }
         int rank = 1;
         Map<Node, Integer> rankMap = new HashMap<>();
         while ( !priorityQueue.isEmpty() ) {
             Node min = priorityQueue.extractMin();
             // shortcuts
-            shortcuts( routingAlgorithm, graph, graphEntityFactory, distanceFactory, min );
+            contraction( routingAlgorithm, graph, graphEntityFactory, distanceFactory, min );
             // Neighbours only heuristic + Spatial diversity heuristic
             for ( Edge edge : graph.getEdgesOf( min ) ) {
                 Node neighbour = edge.getOtherNode( min );
@@ -82,7 +84,7 @@ public class ContractionHierarchiesPreprocessor {
             for ( Edge edge1 : edgesOf ) {
                 Node neighbourB = edge1.getOtherNode( node );
                 if ( !neighbourA.equals( neighbourB ) ) {
-                    fromToDistanceMap.put( new Pair<>( neighbourA, neighbourB ), routingAlgorithm.route( neighbourA.getId(), neighbourB.getId() ).getDistance() );
+                    fromToDistanceMap.put( new Pair<>( neighbourA, neighbourB ), edge.getDistance().add( edge1.getDistance() ) );
                 }
             }
         }
@@ -98,7 +100,7 @@ public class ContractionHierarchiesPreprocessor {
         return numOfShortcuts;
     }
 
-    private Set<Edge> shortcuts( DijkstraRoutingAlgorithm routingAlgorithm, Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, Node node ) {
+    private Set<Edge> contraction( DijkstraRoutingAlgorithm routingAlgorithm, Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, Node node ) {
         routingAlgorithm.setGraph( graph );
         Map<Pair<Pair<Node, Edge>, Pair<Node, Edge>>, Distance> fromToDistanceMap = new HashMap<>();
         Set<Edge> edgesOf = graph.getEdgesOf( node );
@@ -107,8 +109,7 @@ public class ContractionHierarchiesPreprocessor {
             for ( Edge edge1 : edgesOf ) {
                 Node neighbourB = edge1.getOtherNode( node );
                 if ( !neighbourA.equals( neighbourB ) ) {
-                    fromToDistanceMap.put( new Pair<>( new Pair<>( neighbourA, edge ), new Pair<>( neighbourB, edge1 ) ),
-                            routingAlgorithm.route( neighbourA.getId(), neighbourB.getId() ).getDistance() );
+                    fromToDistanceMap.put( new Pair<>( new Pair<>( neighbourA, edge ), new Pair<>( neighbourB, edge1 ) ), edge.getDistance().add( edge1.getDistance() ) );
                 }
             }
         }
@@ -119,17 +120,10 @@ public class ContractionHierarchiesPreprocessor {
             Node to = entry.getKey().b.a;
             Path route = routingAlgorithm.route( from.getId(), to.getId() );
             if ( route != null && route.getDistance().isGreaterThan( entry.getValue() ) ) {
-                Edge edge = graphEntityFactory.createEdge( Edge.Id.generateId(), from, to, entry.getValue() );
                 Edge fromEdge = entry.getKey().a.b;
-                if ( fromEdge.getLabel().isEmpty() ) {
-                    fromEdge.setLabel( fromEdge.getId().toString() );
-                }
                 Edge toEdge = entry.getKey().b.b;
-                if ( toEdge.getLabel().isEmpty() ) {
-                    toEdge.setLabel( toEdge.getId().toString() );
-                }
-                edge.setLabel( fromEdge.getLabel() + "," + toEdge.getLabel() + "," );
-                graph.addEdge( edge );
+                Shortcut shortcut  = new SimpleShortcut(Edge.Id.generateId(), fromEdge, toEdge );
+                graph.addEdge( shortcut );
             }
         }
         return shortcuts;

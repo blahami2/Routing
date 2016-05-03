@@ -58,9 +58,8 @@ public interface Edge {
      * Setter for attributes
      *
      * @param attributes an instance of {@link EdgeAttributes}
-     * @return this instance
      */
-    public Edge setAttributes( EdgeAttributes attributes );
+    public void setAttributes( EdgeAttributes attributes );
 
     /**
      * Getter for label represented by an instance of {@link String}
@@ -73,17 +72,15 @@ public interface Edge {
      * Setter for label
      *
      * @param label string
-     * @return this instance
      */
-    public Edge setLabel( String label );
+    public void setLabel( String label );
 
     /**
      * Setter for distance
      *
      * @param newDistance instance of {@link Distance}
-     * @return this instance
      */
-    public Edge setDistance( Distance newDistance );
+    public void setDistance( Distance newDistance );
 
     /**
      * Getter for coordinates of the path
@@ -96,9 +93,8 @@ public interface Edge {
      * Setter for coordinates of the path
      *
      * @param coordinates list of coordinates representing the path
-     * @return this instance
      */
-    public Edge setCoordinates( List<Coordinates> coordinates );
+    public void setCoordinates( List<Coordinates> coordinates );
 
     /**
      * Getter for the source point of this edge

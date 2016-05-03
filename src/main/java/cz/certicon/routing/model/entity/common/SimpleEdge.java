@@ -96,9 +96,8 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public Edge setAttributes( EdgeAttributes attributes ) {
+    public void setAttributes( EdgeAttributes attributes ) {
         this.attributes = attributes;
-        return this;
     }
 
     @Override
@@ -107,9 +106,8 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public Edge setLabel( String label ) {
+    public void setLabel( String label ) {
         this.label = label;
-        return this;
     }
 
     @Override
@@ -118,9 +116,8 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public Edge setDistance( Distance distance ) {
+    public void setDistance( Distance distance ) {
         this.distance = distance;
-        return this;
     }
 
     @Override
@@ -219,9 +216,8 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public Edge setCoordinates( List<Coordinates> coordinates ) {
+    public void setCoordinates( List<Coordinates> coordinates ) {
         this.coordinates = coordinates;
-        return this;
     }
 
     private String generateLabel( Node sourceNode, Node targetNode ) {

@@ -10,14 +10,15 @@ import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.algorithms.AbstractRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
-import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
-import cz.certicon.routing.utils.GraphUtils;
+import cz.certicon.routing.model.entity.Shortcut;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +46,11 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
 
     @Override
     public Path route( Node.Id from, Node.Id to ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        Map<Node.Id, Distance> fromMap = new HashMap<>();
+        fromMap.put( from, getDistanceFactory().createZeroDistance() );
+        Map<Node.Id, Distance> toMap = new HashMap<>();
+        toMap.put( to, getDistanceFactory().createZeroDistance() );
+        return route( fromMap, toMap );
     }
 
     @Override
@@ -137,8 +142,39 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
         if ( minNodeId == null ) {
             return null;
         } else {
-            // build path
+            List<Edge> startEdges = new ArrayList<>();
+            Node currentNode = getGraph().getNode( minNodeId );
+            Node firstNode = null;
+            while ( fromPredecessorMap.get( currentNode.getId() ) != null ) {
+                startEdges.add( fromPredecessorMap.get( currentNode.getId() ) );
+                currentNode = getGraph().getOtherNodeOf( fromPredecessorMap.get( currentNode.getId() ), currentNode );
+                firstNode = currentNode;
+            }
+            List<Edge> endEdges = new ArrayList<>();
+            currentNode = getGraph().getNode( minNodeId );
+            while ( toPredecessorMap.get( currentNode.getId() ) != null ) {
+                endEdges.add( toPredecessorMap.get( currentNode.getId() ) );
+                currentNode = getGraph().getOtherNodeOf( toPredecessorMap.get( currentNode.getId() ), currentNode );
+            }
+            Path path = getEntityAbstractFactory().createPathWithSource( getGraph(), firstNode );
+            List<Edge> pathEdges = new ArrayList<>();
+            for ( int i = startEdges.size() - 1; i >= 0; i-- ) {
+                addEdges( pathEdges, startEdges.get( i ) );
+            }
+            for ( int i = 0; i < endEdges.size(); i++ ) {
+                addEdges( pathEdges, endEdges.get( i ) );
+            }
+            return path;
         }
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void addEdges( List<Edge> edges, Edge edge ) {
+        if ( edge instanceof Shortcut ) {
+            Shortcut shortcut = (Shortcut) edge;
+            addEdges( edges, shortcut.getSourceEdge() );
+            addEdges( edges, shortcut.getTargetEdge() );
+        } else {
+            edges.add( edge );
+        }
     }
 }

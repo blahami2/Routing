@@ -319,8 +319,9 @@ public class GraphTest {
     private static Edge createEdge( GraphEntityFactory entityFactory, DistanceFactory distanceFactory, Node sourceNode, Node targetNode ) {
         EdgeData edgeData = new SimpleEdgeData( 50, false, CoordinateUtils.calculateDistance( sourceNode.getCoordinates(), targetNode.getCoordinates() ) );
         EdgeAttributes edgeAttributes = SimpleEdgeAttributes.builder().setLength( edgeData.getLength() ).build();
-        return entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) )
-                .setAttributes( edgeAttributes );
+        Edge e = entityFactory.createEdge( Edge.Id.generateId(), sourceNode, targetNode, distanceFactory.createFromEdgeData( edgeData ) );
+        e.setAttributes( edgeAttributes );
+        return e;
     }
 
     private static Node findNode( Graph g, double latitude, double longitude ) {
