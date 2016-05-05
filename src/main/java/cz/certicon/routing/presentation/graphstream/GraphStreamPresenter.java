@@ -28,6 +28,7 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Camera;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
+import org.graphstream.ui.view.util.DefaultMouseManager;
 
 /**
  * An implementation of {@link GraphPresenter} using a GraphStream library.
@@ -128,7 +129,10 @@ public class GraphStreamPresenter implements GraphPresenter {
         Viewer viewer = displayGraph.display( false );
         View view = viewer.getDefaultView();
 
-        viewer.getDefaultView().addMouseWheelListener( new ZoomListener( view.getCamera() ) );
+        ZoomListener zoomListener = new ZoomListener( view.getCamera() );
+        viewer.getDefaultView().addMouseWheelListener( zoomListener);
+        viewer.getDefaultView().addMouseMotionListener( zoomListener );
+        
     }
 
     private Color nextColor() {
@@ -147,22 +151,31 @@ public class GraphStreamPresenter implements GraphPresenter {
 
         private final Camera camera;
         private double zoom = 1.0;
-        private int x;
-        private int y;
+        private int x = -1;
+        private int y = -1;
 
         public ZoomListener( Camera camera ) {
             this.camera = camera;
             Point3 viewCenter = camera.getViewCenter();
             Point3 centerInPx = camera.transformGuToPx( viewCenter.x, viewCenter.y, viewCenter.z );
             System.out.println( centerInPx );
-            this.x = centerInPx.x;
-            
+            this.x =(int) centerInPx.x;
+            this.y =(int) centerInPx.y;
+            System.out.println( centerInPx );
+            System.out.println( camera.getViewCenter() );
         }
 
         @Override
         public void mouseWheelMoved( MouseWheelEvent e ) {
+            if(x == -1 || y == -1){
+                return;
+            }
 //            System.out.println( "event: " + e.getPreciseWheelRotation() );
-            camera.setViewCenter( x, y, 0 );
+//System.out.println( "center= " + camera.getViewCenter() );
+//            System.out.println( "trans center = " + camera.transformGuToPx( camera.getViewCenter().x,camera.getViewCenter().y, camera.getViewCenter().z) );
+            Point3 point = camera.transformPxToGu( x, y);
+//            System.out.println( point );
+            camera.setViewCenter( point.x, point.y, 0 );
             if ( e.getPreciseWheelRotation() < 0 ) {
                 zoom *= MULTIPLIER;
             } else {
@@ -175,6 +188,7 @@ public class GraphStreamPresenter implements GraphPresenter {
                 zoom = BOTTOM_LIMIT;
             }
             camera.setViewPercent( zoom );
+            
 //            System.out.println( "zooming to: " + zoom );
         }
 
@@ -186,6 +200,10 @@ public class GraphStreamPresenter implements GraphPresenter {
         public void mouseMoved( MouseEvent e ) {
             x = e.getX();
             y = e.getY();
+//            System.out.println( "x = " + x + ", y = " + y );
+            
+            Point3 point = camera.transformPxToGu( x, y);
+//            System.out.println( point );
         }
 
     }
