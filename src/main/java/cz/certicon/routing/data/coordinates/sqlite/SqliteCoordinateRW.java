@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.coordinates.sqlite;
 
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
+import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
 import cz.certicon.routing.model.entity.Coordinates;
@@ -26,29 +27,10 @@ import org.sqlite.SQLiteConfig;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SqliteCoordinateRW extends AbstractEmbeddedDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
-
-    private final String spatialitePath;
+public class SqliteCoordinateRW extends AbstractSqliteDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
 
     public SqliteCoordinateRW( Properties connectionProperties ) {
         super( connectionProperties );
-        SQLiteConfig config = new SQLiteConfig();
-        config.enableLoadExtension( true );
-        for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
-            connectionProperties.put( entry.getKey(), entry.getValue() );
-        }
-        this.spatialitePath = connectionProperties.getProperty( "spatialite_path" );
-    }
-
-    @Override
-    public void open() throws IOException {
-        super.open();
-        try {
-            getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
-//        this.libspatialitePath = libspatialitePath;
-        } catch ( SQLException ex ) {
-            throw new IOException( ex );
-        }
     }
 
     @Override
