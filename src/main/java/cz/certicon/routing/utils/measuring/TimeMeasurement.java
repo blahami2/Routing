@@ -13,7 +13,7 @@ package cz.certicon.routing.utils.measuring;
  */
 public class TimeMeasurement {
 
-    private TimeUnits timeUnits = TimeUnits.NANOSECONDS;
+    private TimeUnits timeUnits = TimeUnits.MILLISECONDS;
     private long start;
     private long time;
 
@@ -51,5 +51,11 @@ public class TimeMeasurement {
      */
     public long getCurrentTimeElapsed() {
         return timeUnits.fromNano( ( System.nanoTime() - start ) );
+    }
+    
+    public long restart(){
+        long a = stop();
+        start();
+        return a;
     }
 }
