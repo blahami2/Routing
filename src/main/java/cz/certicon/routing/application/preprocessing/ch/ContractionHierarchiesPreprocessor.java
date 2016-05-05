@@ -82,6 +82,9 @@ public class ContractionHierarchiesPreprocessor {
         int counter = 0;
         if ( progressListener != null ) {
             interval = (int) ( nodes.size() / ( progressListener.getNumOfUpdates() * INIT_NODE_RANKING ) );
+            if(interval <= 0){
+                interval = 1;
+            }
         }
 
         for ( Node node : nodes ) {
@@ -102,6 +105,9 @@ public class ContractionHierarchiesPreprocessor {
         if ( progressListener != null ) {
             interval = (int) Math.ceil( priorityQueue.size() / ( progressListener.getNumOfUpdates() * ( 1.0 - INIT_NODE_RANKING ) ) );
             counter = 0;
+            if(interval <= 0){
+                interval = 1;
+            }
         }
 
         Set<Edge> removedEdges = new HashSet<>();
@@ -115,6 +121,8 @@ public class ContractionHierarchiesPreprocessor {
             // Neighbours only heuristic + Spatial diversity heuristic
             for ( Edge edge : graph.getEdgesOf( min ) ) {
                 Node neighbour = edge.getOtherNode( min );
+//                System.out.println( "neighbour = " + neighbour );
+//                System.out.println( "count = " +contractedNeighboursCountMap.get( neighbour ) );
                 int count = 1 + contractedNeighboursCountMap.get( neighbour );
                 int numberOfShortcuts = numberOfShortcuts( routingAlgorithm, graph, graphEntityFactory, distanceFactory, neighbour );
                 if ( priorityQueue.contains( neighbour ) ) {
