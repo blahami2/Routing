@@ -13,12 +13,20 @@ import cz.certicon.routing.utils.GeometryUtils;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.geom.Point3;
+import org.graphstream.ui.swingViewer.ViewPanel;
+import org.graphstream.ui.view.Camera;
+import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 /**
@@ -74,7 +82,6 @@ public class GraphStreamPresenter implements GraphPresenter {
         Point min = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( minLat, minLon ) );
         Point max = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( maxLat, maxLon ) );
 
-
         for ( cz.certicon.routing.model.entity.Node node : graph.getNodes() ) {
             List<cz.certicon.routing.model.entity.Node> nodeList = nodeMap.get( node.getCoordinates() );
             if ( nodeList == null ) {
@@ -109,7 +116,7 @@ public class GraphStreamPresenter implements GraphPresenter {
                     n.setAttribute( "xy", p.x + xDiff, p.y + yDiff );
                     n.addAttribute( "ui.style", fillColor );
                     if ( displayNodes ) {
-                        n.setAttribute( "ui.label", Integer.toString( nodeList.get( i ).getCoordinates().hashCode() ) );
+                        n.setAttribute( "ui.label", nodeList.get( i ).getLabel() );
                     }
                     degree += step;
                 }
@@ -118,8 +125,10 @@ public class GraphStreamPresenter implements GraphPresenter {
         for ( Edge edge : graph.getEdges() ) {
             org.graphstream.graph.Edge addEdge = displayGraph.addEdge( edge.getId().toString(), edge.getSourceNode().getId().toString(), edge.getTargetNode().getId().toString(), true );
         }
-        Viewer viewer = displayGraph.display();
-        viewer.disableAutoLayout();
+        Viewer viewer = displayGraph.display( false );
+        View view = viewer.getDefaultView();
+
+        viewer.getDefaultView().addMouseWheelListener( new ZoomListener( view.getCamera() ) );
     }
 
     private Color nextColor() {
@@ -128,5 +137,56 @@ public class GraphStreamPresenter implements GraphPresenter {
 
     private String toCssRgb( Color color ) {
         return "rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")";
+    }
+
+    private static class ZoomListener implements MouseWheelListener, MouseMotionListener {
+
+        private static final double MULTIPLIER = 0.7;
+        private static final double TOP_LIMIT = 1.0;
+        private static final double BOTTOM_LIMIT = 0.001;
+
+        private final Camera camera;
+        private double zoom = 1.0;
+        private int x;
+        private int y;
+
+        public ZoomListener( Camera camera ) {
+            this.camera = camera;
+            Point3 viewCenter = camera.getViewCenter();
+            Point3 centerInPx = camera.transformGuToPx( viewCenter.x, viewCenter.y, viewCenter.z );
+            System.out.println( centerInPx );
+            this.x = centerInPx.x;
+            
+        }
+
+        @Override
+        public void mouseWheelMoved( MouseWheelEvent e ) {
+//            System.out.println( "event: " + e.getPreciseWheelRotation() );
+            camera.setViewCenter( x, y, 0 );
+            if ( e.getPreciseWheelRotation() < 0 ) {
+                zoom *= MULTIPLIER;
+            } else {
+                zoom /= MULTIPLIER;
+            }
+            if ( zoom > TOP_LIMIT ) {
+                zoom = TOP_LIMIT;
+            }
+            if ( zoom < BOTTOM_LIMIT ) {
+                zoom = BOTTOM_LIMIT;
+            }
+            camera.setViewPercent( zoom );
+//            System.out.println( "zooming to: " + zoom );
+        }
+
+        @Override
+        public void mouseDragged( MouseEvent e ) {
+        }
+
+        @Override
+        public void mouseMoved( MouseEvent e ) {
+            x = e.getX();
+            y = e.getY();
+        }
+
     }
 }

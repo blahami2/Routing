@@ -68,7 +68,7 @@ public class JxMapViewerFrame implements PathPresenter {
         Node source = path.getSourceNode();
         Node currentNode = source;
         StringBuilder sb = new StringBuilder();
-        addWaypoint( path.getSourceNode(), "SOURCE = " + path.getSourceNode().getDistance() );
+//        addWaypoint( path.getSourceNode(), "SOURCE = " + path.getSourceNode().getDistance() );
 //        for ( Edge edge : path ) {
 //            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
 //            addWaypoint( edge, edge.getLabel() + "\nfrom: " + edge.getSourceNode() + "\nto: " + edge.getTargetNode() );
@@ -99,7 +99,10 @@ public class JxMapViewerFrame implements PathPresenter {
         if ( path.size() > 1 ) {
             System.out.println( "path size = " + path.size() );
         }
-        addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );
+        for ( Node node : path.getNodes() ) {
+            addWaypoint( node.getCoordinates(), node.getLabel() );
+        }
+//        addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );
 
         fitGeoPosition.addAll( track );
         RoutePainter routePainter = new RoutePainter( track );
@@ -166,6 +169,11 @@ public class JxMapViewerFrame implements PathPresenter {
         Node source = path.getSourceNode();
         Node currentNode = source;
         StringBuilder sb = new StringBuilder();
+
+        for ( Node node : path.getNodes() ) {
+            addWaypoint( node.getCoordinates(), node.getLabel() );
+        }
+
         addWaypoint( path.getSourceNode(), "SOURCE = " + path.getSourceNode().getDistance() );
 //        for ( Edge edge : path ) {
 //            sb.insert( 0, currentNode.getCoordinates() + ", " + currentNode.getDistance() + "\n" );
@@ -210,6 +218,7 @@ public class JxMapViewerFrame implements PathPresenter {
         for ( Coordinates coordinate : path.getCoordinates() ) {
             track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
         }
+
         addWaypoint( path.getTargetNode(), "TARGET = " + path.getTargetNode().getDistance() + "\n" + sb.toString() );
 
         RoutePainter routePainter = new RoutePainter( track );
