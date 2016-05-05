@@ -8,7 +8,7 @@ package cz.certicon.routing.application.algorithm;
 /**
  * The root interface for various data structures used by algorithms.
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface NodeDataStructure<T> {
 
@@ -36,7 +36,7 @@ public interface NodeDataStructure<T> {
 
     /**
      * Notifies the structure about distance change (invoking so called
-     * decrease-key operation). Add the given node if not present already.
+     * decrease-key operation).
      *
      * @param node node to change
      * @param value value to be associated with the node
@@ -54,10 +54,13 @@ public interface NodeDataStructure<T> {
      * @return boolean value
      */
     public boolean isEmpty();
-    
+
     /**
      * Returns amount of nodes left in the structure.
+     *
      * @return integer value
      */
     public int size();
+
+    public boolean contains( T node );
 }

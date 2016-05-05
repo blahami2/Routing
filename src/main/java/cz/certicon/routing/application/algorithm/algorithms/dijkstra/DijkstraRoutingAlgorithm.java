@@ -16,9 +16,15 @@ import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacci
 import cz.certicon.routing.model.entity.Coordinates;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import cz.certicon.routing.presentation.GraphPresenter;
+import cz.certicon.routing.presentation.graphstream.GraphStreamPresenter;
 import cz.certicon.routing.utils.GraphUtils;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Basic routing algorithm implementation using the optimal Dijkstra.
@@ -62,55 +68,36 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
         this.nodeDataStructure = nodeDataStructure;
     }
 
-    @Override
-    public Path route( Node.Id from, Node.Id to ) {
-        // clear the data structure
-        nodeDataStructure.clear();
-//        Node nodeEqToFrom = from;
-//        Node nodeEqToTo = to;
-        // foreach node in G
-        Map<Node.Id, Distance> targetNodeMap = new HashMap<>();
-        for ( Node node : getGraph().getNodes() ) {
-            node.setPredecessorEdge( null );
-            if ( node.getId().equals( from ) ) {
-                node.setDistance( getDistanceFactory().createZeroDistance() );
-                nodeDataStructure.add( node, 0 );
-            } else if ( node.getId().equals( to ) ) {
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-                targetNodeMap.put( node.getId(), getDistanceFactory().createZeroDistance() );
-            } else { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( targetNodeMap );
-    }
-
+//    static int cnt = 1000;
+    
     @Override
     public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
+//        GraphPresenter gp = new GraphStreamPresenter();
+//        gp.displayGraph( getGraph() );
+//        try {
+//            Thread.sleep(cnt);
+//            cnt*=10;
+//        } catch ( InterruptedException ex ) {
+//            Logger.getLogger( DijkstraRoutingAlgorithm.class.getName() ).log( Level.SEVERE, null, ex );
+//        }
+
         // clear the data structure
         nodeDataStructure.clear();
-//        Node nodeEqToFrom = from;
-//        Node nodeEqToTo = to;
-        // foreach node in G
-        for ( Node node : getGraph().getNodes() ) {
-            node.setPredecessorEdge( null );
-            if ( from.containsKey( node.getId() ) ) {
-                Distance nodeDistance = from.get( node.getId() );
-                node.setDistance( nodeDistance );
-                nodeDataStructure.add( node, nodeDistance.getEvaluableValue() );
-            } else { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( to );
-    }
+        Set<Node> closed = new HashSet<>();
 
-    private Path route( Map<Node.Id, Distance> to ) {
+        for ( Map.Entry<Node.Id, Distance> entry : from.entrySet() ) {
+            Node n = getGraph().getNode( entry.getKey() );
+            n.setDistance( entry.getValue() );
+            n.setPredecessorEdge( null );
+            nodeDataStructure.add( n, entry.getValue().getEvaluableValue() );
+        }
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+//            System.out.println( "extracted: " + currentNode );
+            closed.add( currentNode );
             if ( endCondition.isFinished( getGraph(), to, currentNode ) ) {
                 // build path from predecessors and return
                 return endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
@@ -121,19 +108,32 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                     continue;
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
+                if ( closed.contains( endNode ) ) {
+                    continue;
+                }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance;
                 if ( to.containsKey( currentNode.getId() ) ) {
                     tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getId() ) );
                 } else {
+//                    try {
                     tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+//                    } catch ( NullPointerException ex ) {
+//                        System.out.println( "current node = " + currentNode );
+//                        System.out.println( "current edge = " + edge );
+//                        throw ex;
+//                    }
                 }
                 // replace is lower than actual
-                if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
+                if ( !nodeDataStructure.contains( endNode ) || tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
 //                    System.out.println( "is lower" );
                     endNode.setDistance( tmpNodeDistance );
                     endNode.setPredecessorEdge( edge );
-                    nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    if ( !nodeDataStructure.contains( endNode ) ) {
+                        nodeDataStructure.add( endNode, tmpNodeDistance.getEvaluableValue() );
+                    } else {
+                        nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    }
                 }
             }
         }

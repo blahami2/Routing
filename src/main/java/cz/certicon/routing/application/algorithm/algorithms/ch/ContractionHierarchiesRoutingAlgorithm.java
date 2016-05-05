@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
-    private final Map<Node.Id, Integer> nodeRankMap;
+    private Map<Node.Id, Integer> nodeRankMap;
     private final Map<Node.Id, Distance> fromDistanceMap;
     private final Map<Node.Id, Edge> fromPredecessorMap;
     private final Map<Node.Id, Distance> toDistanceMap;
@@ -42,6 +42,14 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
         this.toDistanceMap = new HashMap<>();
         this.toPredecessorMap = new HashMap<>();
         this.nodeDataStructure = new JgraphtFibonacciDataStructure();
+    }
+
+    public Map<Node.Id, Integer> getNodeRankMap() {
+        return nodeRankMap;
+    }
+
+    public void setNodeRankMap( Map<Node.Id, Integer> nodeRankMap ) {
+        this.nodeRankMap = nodeRankMap;
     }
 
     @Override
@@ -67,6 +75,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
             int sourceRank = nodeRankMap.get( currentNode.getId() );
+            Distance currentDistance = fromDistanceMap.get( currentNode.getId() );
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
                 if ( !getRoutingConfiguration().getEdgeValidator().validate( edge ) ) {
@@ -81,12 +90,17 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                     continue;
                 }
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance = currentDistance.add( edge.getDistance() );
                 // replace is lower than actual
-                if ( tmpNodeDistance.isLowerThan( fromDistanceMap.get( endNode.getId() ) ) ) {
+                Distance dist = fromDistanceMap.get( endNode.getId() );
+                if ( dist == null || tmpNodeDistance.isLowerThan( dist ) ) {
                     fromDistanceMap.put( endNode.getId(), tmpNodeDistance );
                     fromPredecessorMap.put( endNode.getId(), edge );
-                    nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    if ( !nodeDataStructure.contains( endNode ) ) {
+                        nodeDataStructure.add( endNode, tmpNodeDistance.getEvaluableValue() );
+                    } else {
+                        nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    }
                 }
             }
         }
@@ -102,7 +116,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+//            System.out.println( "extracted: " + currentNode.getId() + ", " + toDistanceMap.get( currentNode.getId() ) );
             int sourceRank = nodeRankMap.get( currentNode.getId() );
+            Distance currentDistance = toDistanceMap.get( currentNode.getId() );
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
                 if ( !getRoutingConfiguration().getEdgeValidator().validate( edge ) ) {
@@ -117,12 +133,17 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                     continue;
                 }
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
+                Distance tmpNodeDistance = currentDistance.add( edge.getDistance() );
                 // replace is lower than actual
-                if ( tmpNodeDistance.isLowerThan( toDistanceMap.get( endNode.getId() ) ) ) {
+                Distance dist = toDistanceMap.get( endNode.getId() );
+                if ( dist == null || tmpNodeDistance.isLowerThan( dist ) ) {
                     toDistanceMap.put( endNode.getId(), tmpNodeDistance );
                     toPredecessorMap.put( endNode.getId(), edge );
-                    nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    if ( !nodeDataStructure.contains( endNode ) ) {
+                        nodeDataStructure.add( endNode, tmpNodeDistance.getEvaluableValue() );
+                    } else {
+                        nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
+                    }
                 }
             }
         }
@@ -139,6 +160,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
             }
         }
+//        System.out.println( "min node = " + minNodeId  + ", " + minDistance);
         if ( minNodeId == null ) {
             return null;
         } else {
@@ -147,6 +169,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             Node firstNode = null;
             while ( fromPredecessorMap.get( currentNode.getId() ) != null ) {
                 startEdges.add( fromPredecessorMap.get( currentNode.getId() ) );
+//                System.out.println( "adding: " + fromPredecessorMap.get( currentNode.getId() ).getId() );
                 currentNode = getGraph().getOtherNodeOf( fromPredecessorMap.get( currentNode.getId() ), currentNode );
                 firstNode = currentNode;
             }
@@ -154,6 +177,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             currentNode = getGraph().getNode( minNodeId );
             while ( toPredecessorMap.get( currentNode.getId() ) != null ) {
                 endEdges.add( toPredecessorMap.get( currentNode.getId() ) );
+//                System.out.println( "adding: " + toPredecessorMap.get( currentNode.getId() ).getId() );
                 currentNode = getGraph().getOtherNodeOf( toPredecessorMap.get( currentNode.getId() ), currentNode );
             }
             Path path = getEntityAbstractFactory().createPathWithSource( getGraph(), firstNode );
@@ -163,6 +187,12 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             }
             for ( int i = 0; i < endEdges.size(); i++ ) {
                 addEdges( pathEdges, endEdges.get( i ) );
+            }
+            for ( Edge pathEdge : pathEdges ) {
+                if ( pathEdge instanceof Shortcut ) {
+                    throw new AssertionError( "Cannot happen" );
+                }
+                path.addEdge( pathEdge );
             }
             return path;
         }

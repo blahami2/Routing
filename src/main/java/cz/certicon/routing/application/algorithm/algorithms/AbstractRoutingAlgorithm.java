@@ -5,12 +5,17 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms;
 
+import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.RoutingConfiguration;
 import cz.certicon.routing.application.algorithm.basic.SimpleRoutingConfiguration;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
+import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.model.entity.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base abstract class for routing algorithms.
@@ -84,5 +89,14 @@ public abstract class AbstractRoutingAlgorithm implements RoutingAlgorithm {
 
     public void setDistanceFactory( DistanceFactory distanceFactory ) {
         this.distanceFactory = distanceFactory;
+    }
+
+    @Override
+    public Path route( Node.Id from, Node.Id to ) {
+        Map<Node.Id, Distance> fromMap = new HashMap<>();
+        fromMap.put( from, getDistanceFactory().createZeroDistance() );
+        Map<Node.Id, Distance> toMap = new HashMap<>();
+        toMap.put( to, getDistanceFactory().createZeroDistance() );
+        return route( fromMap, toMap );
     }
 }

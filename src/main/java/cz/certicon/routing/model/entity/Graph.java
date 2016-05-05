@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface Graph {
+public interface Graph extends Cloneable {
 
     /**
      * Adds node to the graph
@@ -28,9 +28,9 @@ public interface Graph {
      * Removes node from the graph. Also removes all connected edges.
      *
      * @param node an instance of {@link Node} to be removed
-     * @return this instance
+     * @return {@link Set} of adjacent edges
      */
-    public Graph removeNode( Node node );
+    public Set<Edge> removeNode( Node node );
 
     /**
      * Adds edge to the graph
@@ -154,4 +154,6 @@ public interface Graph {
     public Node getNode( Node.Id id );
 
     public Edge getEdge( Edge.Id id );
+
+    public Graph softCopy();
 }

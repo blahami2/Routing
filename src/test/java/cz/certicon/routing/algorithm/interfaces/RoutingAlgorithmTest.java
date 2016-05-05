@@ -39,7 +39,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import cz.certicon.routing.application.algorithm.DistanceEvaluator;
+import cz.certicon.routing.application.algorithm.algorithms.ch.ContractionHierarchiesRoutingAlgorithm;
+import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Shortcut;
+import cz.certicon.routing.presentation.GraphPresenter;
+import cz.certicon.routing.presentation.graphstream.GraphStreamPresenter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -202,6 +210,36 @@ public class RoutingAlgorithmTest {
                             new DirectedNeighborListGraphEntityFactory(),
                             new LengthDistanceFactory()
                     );
+                }
+
+            } },
+                new Object[]{
+                    new RoutingAlgorithmFactory() {
+                @Override
+                public RoutingAlgorithm createRoutingAlgorithm() {
+                    ContractionHierarchiesPreprocessor preprocessor = new ContractionHierarchiesPreprocessor();
+                    GraphEntityFactory ef = new DirectedNeighborListGraphEntityFactory();
+                    DistanceFactory df = new LengthDistanceFactory();
+                    Graph g = input.softCopy();
+                    Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessed = preprocessor.preprocess( g, ef, df );
+                    for ( Shortcut shortcut : preprocessed.b) {
+                        g.addEdge( shortcut );
+                    }
+                    
+//                    GraphPresenter gp = new GraphStreamPresenter();
+//                    gp.displayGraph( g);
+//                    try {
+//                        Thread.sleep(100000);
+//                    } catch ( InterruptedException ex ) {
+//                        Logger.getLogger( RoutingAlgorithmTest.class.getName() ).log( Level.SEVERE, null, ex );
+//                    }
+                    ContractionHierarchiesRoutingAlgorithm algorithm = new ContractionHierarchiesRoutingAlgorithm(
+                            input, 
+                            ef, 
+                            df, 
+                            preprocessed.a 
+                    );
+                    return algorithm;
                 }
 
             } }

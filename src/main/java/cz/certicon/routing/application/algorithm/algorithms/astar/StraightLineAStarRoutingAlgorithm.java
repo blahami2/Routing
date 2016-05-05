@@ -11,7 +11,9 @@ import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacci
 import cz.certicon.routing.model.entity.*;
 import cz.certicon.routing.utils.GraphUtils;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A* implementation of the routing algorithm, based on the node-flight-distance
@@ -34,56 +36,28 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
         this.nodeDataStructure = nodeDataStructure;
     }
 
-    @Override
-    public Path route( Node.Id from, Node.Id to ) {
-        // clear the data structure
-        nodeDataStructure.clear();
-//        Node nodeEqToFrom = from;
-//        Node nodeEqToTo = to;
-        // foreach node in G
-        Map<Node.Id, Distance> targetNodeMap = new HashMap<>();
-        for ( Node node : getGraph().getNodes() ) {
-            node.setPredecessorEdge( null );
-            if ( node.getId().equals( from ) ) {
-                node.setDistance( getDistanceFactory().createZeroDistance() );
-                nodeDataStructure.add( node, 0 );
-            } else if ( node.getId().equals( to ) ) {
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-                targetNodeMap.put( node.getId(), getDistanceFactory().createZeroDistance() );
-            } else { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( targetNodeMap );
-    }
-
-    @Override
     public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
         // clear the data structure
         nodeDataStructure.clear();
+        Set<Node> closed = new HashSet<>();
 //        Node nodeEqToFrom = from;
 //        Node nodeEqToTo = to;
         // foreach node in G
-        for ( Node node : getGraph().getNodes() ) {
-            node.setPredecessorEdge( null );
-            if ( from.containsKey( node.getId() ) ) {
-                Distance nodeDistance = from.get( node.getId() );
-                node.setDistance( nodeDistance );
-                nodeDataStructure.add( node, calculateDistance( getDistanceFactory(), node, to ).getEvaluableValue() );
-            } else { // set distance to infinity
-                node.setDistance( getDistanceFactory().createInfiniteDistance() );
-            }
-        }
-        return route( to );
-    }
 
-    private Path route( Map<Node.Id, Distance> to ) {
+        for ( Map.Entry<Node.Id, Distance> entry : from.entrySet() ) {
+            Node n = getGraph().getNode( entry.getKey() );
+            n.setDistance( entry.getValue() );
+            n.setPredecessorEdge( null );
+            nodeDataStructure.add( n, calculateDistance( getDistanceFactory(), n, to ).getEvaluableValue() );
+        }
+
         distanceMap.clear();
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+            closed.add( currentNode );
             if ( to.containsKey( currentNode.getId() ) ) {
                 // build path from predecessors and return
                 return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
@@ -94,6 +68,9 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                     continue;
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
+                if ( closed.contains( endNode ) ) {
+                    continue;
+                }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance;
                 if ( to.containsKey( currentNode.getId() ) ) {
@@ -102,10 +79,17 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                     tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 }
                 // replace is lower than actual
-                if ( tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
+
+                if ( !nodeDataStructure.contains( endNode ) || tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
+//                    System.out.println( "is lower" );
                     endNode.setDistance( tmpNodeDistance );
                     endNode.setPredecessorEdge( edge );
-                    nodeDataStructure.notifyDataChange( endNode, calculateDistance( getDistanceFactory(), endNode, to ).getEvaluableValue() );
+                    Distance calculatedDistance = calculateDistance( getDistanceFactory(), endNode, to );
+                    if ( !nodeDataStructure.contains( endNode ) ) {
+                        nodeDataStructure.add( endNode, calculatedDistance.getEvaluableValue() );
+                    } else {
+                        nodeDataStructure.notifyDataChange( endNode, calculatedDistance.getEvaluableValue() );
+                    }
                 }
             }
         }

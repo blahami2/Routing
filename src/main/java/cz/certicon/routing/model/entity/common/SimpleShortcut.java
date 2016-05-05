@@ -13,6 +13,7 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Shortcut;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -28,8 +29,8 @@ public class SimpleShortcut implements Shortcut {
         this.id = id;
         this.sourceEdge = sourceEdge;
         this.targetEdge = targetEdge;
-        if ( sourceEdge.getTargetNode().equals( targetEdge.getSourceNode() ) ) {
-            throw new IllegalArgumentException( "Connecting node is not equal for both edges: " + sourceEdge.getId() + ", " + targetEdge.getId() );
+        if ( !sourceEdge.getTargetNode().equals( targetEdge.getSourceNode() ) ) {
+            throw new IllegalArgumentException( "Connecting node is not equal for both edges: '" + sourceEdge + "', '" + targetEdge + "'" );
         }
     }
 
@@ -50,7 +51,7 @@ public class SimpleShortcut implements Shortcut {
 
     @Override
     public long getOsmId() {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        return -1;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class SimpleShortcut implements Shortcut {
 
     @Override
     public long getDataId() {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        return -1;
     }
 
     @Override
@@ -156,5 +157,43 @@ public class SimpleShortcut implements Shortcut {
     public Edge createCopyWithNewId( Id id ) {
         throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public String toString() {
+        return "SimpleShortcut{" + "id=" + id + ", sourceEdge=" + sourceEdge + ", targetEdge=" + targetEdge + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + Objects.hashCode( this.id );
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final SimpleShortcut other = (SimpleShortcut) obj;
+        if ( !Objects.equals( this.id, other.id ) ) {
+            return false;
+        }
+        if ( !Objects.equals( this.sourceEdge, other.sourceEdge ) ) {
+            return false;
+        }
+        if ( !Objects.equals( this.targetEdge, other.targetEdge ) ) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
 }

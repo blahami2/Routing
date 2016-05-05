@@ -46,6 +46,7 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
     @Override
     public void remove( T node ) {
         FibonacciHeapNode<T> n = nodeMap.get( node );
+        nodeMap.remove( node );
         fibonacciHeap.delete( n );
     }
 
@@ -54,11 +55,13 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
 //        System.out.println( "Changing " + node + " to value " + value );
         FibonacciHeapNode<T> n = nodeMap.get( node );
         if ( n == null ) {
-            n = new FibonacciHeapNode<>( node );
-            nodeMap.put( node, n );
-            fibonacciHeap.insert( n, value );
-        } else {
+            throw new IllegalArgumentException( "Unknown node: " + node );
+        }
+        if ( value < n.getKey() ) {
             fibonacciHeap.decreaseKey( n, value );
+        } else if ( value > n.getKey() ) {
+            remove( node );
+            add( node, value );
         }
     }
 
@@ -76,6 +79,11 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
     @Override
     public int size() {
         return fibonacciHeap.size();
+    }
+
+    @Override
+    public boolean contains( T node ) {
+        return nodeMap.containsKey( node );
     }
 
 }

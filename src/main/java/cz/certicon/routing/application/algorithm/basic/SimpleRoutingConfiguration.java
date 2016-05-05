@@ -21,7 +21,8 @@ public class SimpleRoutingConfiguration implements RoutingConfiguration {
     private DistanceEvaluator distanceEvaluator = new DistanceEvaluator() {
         @Override
         public Distance evaluate( Node sourceNode, Edge edgeFromSourceToTarget, Node targetNode ) {
-            return sourceNode.getDistance().add( edgeFromSourceToTarget.getDistance() );
+            return sourceNode.getDistance().add( 
+                    edgeFromSourceToTarget.getDistance() );
         }
 
         @Override

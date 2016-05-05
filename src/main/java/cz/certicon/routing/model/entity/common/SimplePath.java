@@ -62,7 +62,7 @@ public abstract class SimplePath implements Path {
 
     @Override
     public Path addEdge( Edge e ) {
-        edges.add( e );
+        addEdgeAsLast( e );
         return this;
     }
 
@@ -300,7 +300,7 @@ public abstract class SimplePath implements Path {
             }
         }
         if ( correctEdge == null ) {
-            throw new IllegalStateException( "Invalid source data id: " + sourceDataId );
+            throw new IllegalStateException( "Invalid source data id: " + edgeDataId + " for node: " + node.getId() );
         }
         return correctEdge;
     }

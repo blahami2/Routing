@@ -47,12 +47,14 @@ class DirectedNeighborListGraph implements DirectedGraph {
     }
 
     @Override
-    public Graph removeNode( Node node ) {
+    public Set<Edge> removeNode( Node node ) {
         nodes.remove( node.getId() );
-        for ( Edge edge : getEdgesOf( node ) ) {
+        Set<Edge> adjacentEdges = getEdgesOf( node );
+        for ( Edge edge : adjacentEdges ) {
             edges.remove( edge.getId() );
+            safeType( edge.getOtherNode( node ) ).removeEdge( edge );
         }
-        return this;
+        return adjacentEdges;
     }
 
     @Override
@@ -96,12 +98,12 @@ class DirectedNeighborListGraph implements DirectedGraph {
 
     @Override
     public Node getSourceNodeOf( Edge edge ) {
-        return safeType( edge ).getSourceNode();
+        return edge.getSourceNode();
     }
 
     @Override
     public Node getTargetNodeOf( Edge edge ) {
-        return safeType( edge ).getTargetNode();
+        return edge.getTargetNode();
     }
 
     @Override
@@ -124,7 +126,7 @@ class DirectedNeighborListGraph implements DirectedGraph {
     public Set<Edge> getIncomingEdgesOf( Node node ) {
         Set<Edge> edgeSet = new HashSet<>();
         for ( Edge edge : edges.values() ) {
-            if ( safeType( edge ).getTargetNode().equals( node ) ) {
+            if ( edge.getTargetNode().equals( node ) ) {
                 edgeSet.add( edge );
             }
         }
@@ -167,6 +169,18 @@ class DirectedNeighborListGraph implements DirectedGraph {
     @Override
     public Edge getEdge( Edge.Id id ) {
         return edges.get( id );
+    }
+
+    @Override
+    public Graph softCopy() {
+        Graph g = new DirectedNeighborListGraph();
+        for ( Node node : getNodes()) {
+            g.addNode( node );
+        }
+        for ( Edge edge : getEdges()) {
+            g.addEdge( edge );
+        }
+        return g;
     }
 
 }

@@ -75,6 +75,11 @@ public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
     public int size() {
         return nodes.size();
     }
+
+    @Override
+    public boolean contains( T node ) {
+        return nodes.contains( node );
+    }
     
     private static class NodeContainer<T> {
         public final T node;

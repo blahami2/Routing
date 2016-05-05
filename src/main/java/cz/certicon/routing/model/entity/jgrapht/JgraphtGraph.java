@@ -9,6 +9,7 @@ import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import java.util.Set;
+import org.jgrapht.graph.Multigraph;
 
 /**
  * An implementation of {@link Graph} adapting
@@ -31,9 +32,10 @@ class JgraphtGraph implements Graph {
     }
 
     @Override
-    public Graph removeNode( Node node ) {
+    public Set<Edge> removeNode( Node node ) {
+        Set<Edge> adjacentEdges = innerGraph.edgesOf( node );
         innerGraph.removeVertex( node );
-        return this;
+        return adjacentEdges;
     }
 
     @Override
@@ -131,6 +133,11 @@ class JgraphtGraph implements Graph {
             }
         }
         return null;
+    }
+
+    @Override
+    public Graph softCopy() {
+        return new JgraphtGraph( (Multigraph<Node, Edge>) innerGraph.clone());
     }
 
 }

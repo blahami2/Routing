@@ -10,6 +10,7 @@ import cz.certicon.routing.model.entity.DirectedGraph;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
 import java.util.Set;
+import org.jgrapht.graph.DirectedMultigraph;
 
 /**
  * An implementation of {@link DirectedGraph} adapting
@@ -33,9 +34,10 @@ class DirectedJgraphtGraph implements DirectedGraph {
     }
 
     @Override
-    public Graph removeNode( Node node ) {
+    public Set<Edge> removeNode( Node node ) {
+        Set<Edge> adjacentEdges = innerGraph.edgesOf( node );
         innerGraph.removeVertex( node );
-        return this;
+        return adjacentEdges;
     }
 
     @Override
@@ -151,5 +153,10 @@ class DirectedJgraphtGraph implements DirectedGraph {
             }
         }
         return null;
+    }
+
+    @Override
+    public Graph softCopy() {
+        return new DirectedJgraphtGraph( (DirectedMultigraph<Node, Edge>) innerGraph.clone() );
     }
 }

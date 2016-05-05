@@ -45,12 +45,14 @@ public class NeighborListGraph implements Graph {
     }
 
     @Override
-    public Graph removeNode( Node node ) {
+    public Set<Edge> removeNode( Node node ) {
         nodes.remove( node.getId() );
-        for ( Edge edge : getEdgesOf( node ) ) {
+        Set<Edge> adjacentEdges = getEdgesOf( node );
+        for ( Edge edge : adjacentEdges ) {
             edges.remove( edge.getId() );
+            safeType( edge.getOtherNode( node ) ).removeEdge( edge );
         }
-        return this;
+        return adjacentEdges;
     }
 
     @Override
@@ -162,5 +164,17 @@ public class NeighborListGraph implements Graph {
     @Override
     public Edge getEdge( Edge.Id id ) {
         return edges.get( id );
+    }
+
+    @Override
+    public Graph softCopy() {
+        Graph g = new DirectedNeighborListGraph();
+        for ( Node node : getNodes() ) {
+            g.addNode( node );
+        }
+        for ( Edge edge : getEdges() ) {
+            g.addEdge( edge );
+        }
+        return g;
     }
 }
