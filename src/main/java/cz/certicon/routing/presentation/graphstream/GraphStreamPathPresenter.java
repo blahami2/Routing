@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 /**
@@ -114,8 +115,8 @@ public class GraphStreamPathPresenter implements PathPresenter {
         }
 //        System.out.println( "min: " + minLat + ", " + minLon );
 //        System.out.println( "max: " + maxLat + ", " + maxLon );
-        Point min = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinates( minLat, minLon ) );
-        Point max = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinates( maxLat, maxLon ) );
+        Point min = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( minLat, minLon ) );
+        Point max = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( maxLat, maxLon ) );
 
         for ( cz.certicon.routing.model.entity.Node node : subgraph.getNodes() ) {
             List<cz.certicon.routing.model.entity.Node> nodeList = nodeMap.get( node.getCoordinates() );
@@ -138,7 +139,7 @@ public class GraphStreamPathPresenter implements PathPresenter {
                 n.setAttribute( "xy", p.x, p.y );
                 n.addAttribute( "ui.style", fillColor );
                 if ( displayNodes ) {
-                    n.setAttribute( "ui.label", Integer.toString( nodeList.get( 0 ).getCoordinates().hashCode() ) );
+                    n.setAttribute( "ui.label", nodeList.get( 0 ).getLabel() );
                 }
             } else {
                 int step = 360 / nodeList.size();
@@ -151,7 +152,7 @@ public class GraphStreamPathPresenter implements PathPresenter {
                     n.setAttribute( "xy", p.x + xDiff, p.y + yDiff );
                     n.addAttribute( "ui.style", fillColor );
                     if ( displayNodes ) {
-                        n.setAttribute( "ui.label", Integer.toString( nodeList.get( i ).getCoordinates().hashCode() ) );
+                        n.setAttribute( "ui.label", nodeList.get( i ).getLabel() );
                     }
                     degree += step;
                 }
@@ -167,8 +168,12 @@ public class GraphStreamPathPresenter implements PathPresenter {
                 addEdge.setAttribute( "ui.class", "route" );
             }
         }
-        Viewer viewer = displayGraph.display();
-        viewer.disableAutoLayout();
+        Viewer viewer = displayGraph.display( false );
+        View view = viewer.getDefaultView();
+
+        ZoomListener zoomListener = new ZoomListener( view.getCamera() );
+        viewer.getDefaultView().addMouseWheelListener( zoomListener );
+        viewer.getDefaultView().addMouseMotionListener( zoomListener );
         return this;
     }
 

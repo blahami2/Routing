@@ -104,7 +104,7 @@ public class GraphStreamPresenter implements GraphPresenter {
                 n.setAttribute( "xy", p.x, p.y );
                 n.addAttribute( "ui.style", fillColor );
                 if ( displayNodes ) {
-                    n.setAttribute( "ui.label", Integer.toString( nodeList.get( 0 ).getCoordinates().hashCode() ) );
+                        n.setAttribute( "ui.label", nodeList.get( 0 ).getLabel() );
                 }
             } else {
                 int step = 360 / nodeList.size();
@@ -141,70 +141,5 @@ public class GraphStreamPresenter implements GraphPresenter {
 
     private String toCssRgb( Color color ) {
         return "rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")";
-    }
-
-    private static class ZoomListener implements MouseWheelListener, MouseMotionListener {
-
-        private static final double MULTIPLIER = 0.7;
-        private static final double TOP_LIMIT = 1.0;
-        private static final double BOTTOM_LIMIT = 0.001;
-
-        private final Camera camera;
-        private double zoom = 1.0;
-        private int x = -1;
-        private int y = -1;
-
-        public ZoomListener( Camera camera ) {
-            this.camera = camera;
-            Point3 viewCenter = camera.getViewCenter();
-            Point3 centerInPx = camera.transformGuToPx( viewCenter.x, viewCenter.y, viewCenter.z );
-            System.out.println( centerInPx );
-            this.x =(int) centerInPx.x;
-            this.y =(int) centerInPx.y;
-            System.out.println( centerInPx );
-            System.out.println( camera.getViewCenter() );
-        }
-
-        @Override
-        public void mouseWheelMoved( MouseWheelEvent e ) {
-            if(x == -1 || y == -1){
-                return;
-            }
-//            System.out.println( "event: " + e.getPreciseWheelRotation() );
-//System.out.println( "center= " + camera.getViewCenter() );
-//            System.out.println( "trans center = " + camera.transformGuToPx( camera.getViewCenter().x,camera.getViewCenter().y, camera.getViewCenter().z) );
-            Point3 point = camera.transformPxToGu( x, y);
-//            System.out.println( point );
-            camera.setViewCenter( point.x, point.y, 0 );
-            if ( e.getPreciseWheelRotation() < 0 ) {
-                zoom *= MULTIPLIER;
-            } else {
-                zoom /= MULTIPLIER;
-            }
-            if ( zoom > TOP_LIMIT ) {
-                zoom = TOP_LIMIT;
-            }
-            if ( zoom < BOTTOM_LIMIT ) {
-                zoom = BOTTOM_LIMIT;
-            }
-            camera.setViewPercent( zoom );
-            
-//            System.out.println( "zooming to: " + zoom );
-        }
-
-        @Override
-        public void mouseDragged( MouseEvent e ) {
-        }
-
-        @Override
-        public void mouseMoved( MouseEvent e ) {
-            x = e.getX();
-            y = e.getY();
-//            System.out.println( "x = " + x + ", y = " + y );
-            
-            Point3 point = camera.transformPxToGu( x, y);
-//            System.out.println( point );
-        }
-
     }
 }
