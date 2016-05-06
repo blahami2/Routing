@@ -97,7 +97,7 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
             Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new ContractionHierarchiesPreprocessor.ProgressListener() {
                 @Override
                 public void onProgressUpdate( double done ) {
-                    System.out.println( String.format( "%.1f%%", done ) );
+                    System.out.println( String.format( "%.1f%%", done * 100 ) );
                 }
             } );
             System.out.println( "Preprocessing done in " + time.restart() + " ms! Importing into database..." );
