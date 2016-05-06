@@ -17,10 +17,12 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
+import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static cz.certicon.routing.GlobalOptions.*;
 
 /**
  *
@@ -64,9 +66,30 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
 
     @Override
     public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
+        /* DEBUG VARS */
         TimeMeasurement time = new TimeMeasurement();
-        System.out.println( "Routing..." );
-        time.start();
+        TimeMeasurement accTime = new TimeMeasurement();
+        accTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        TimeMeasurement edgeTime = new TimeMeasurement();
+        edgeTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        TimeMeasurement vEdgeTime = new TimeMeasurement();
+        vEdgeTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        int visitedNodes = 0;
+        int edgesCount = 0;
+        int edgesVisited = 0;
+        long extractMinTime = 0;
+        long nodeRankAccessTime = 0;
+        long distanceAccessTime = 0;
+        long edgeProcessingTime = 0;
+        long visitedEdgeProcessingTime = 0;
+        long executionTime = 0;
+        int edgesOpposite = 0;
+        int edgesLower = 0;
+        if ( DEBUG_TIME ) {
+            time.setTimeUnits( TimeUnits.NANOSECONDS );
+            System.out.println( "Routing..." );
+            time.start();
+        }
 
         // FROM dijkstra
         nodeDataStructure.clear();
@@ -77,25 +100,59 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             nodeDataStructure.add( getGraph().getNode( entry.getKey() ), entry.getValue().getEvaluableValue() );
 //            System.out.println( entry.getKey() + " => " + entry.getValue().getEvaluableValue() );
         }
-//        System.out.println( "DIJKSTRA FROM" );
+        if ( DEBUG_CORRECTNESS ) {
+            System.out.println( "FROM" );
+        }
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
+            if ( DEBUG_TIME ) {
+                accTime.start();
+            }
             Node currentNode = nodeDataStructure.extractMin();
+            if ( DEBUG_TIME ) {
+                extractMinTime += accTime.restart();
+                visitedNodes++;
+            }
 //            System.out.println( "current node = " + currentNode.getId() + ", distance = " + fromDistanceMap.get( currentNode.getId() )+ ", rank = " + nodeRankMap.get( currentNode.getId()) );
             int sourceRank = nodeRankMap.get( currentNode.getId() );
+            if ( DEBUG_TIME ) {
+                nodeRankAccessTime += accTime.restart();
+            }
             Distance currentDistance = fromDistanceMap.get( currentNode.getId() );
+            if ( DEBUG_CORRECTNESS ) {
+                System.out.println( "current node = " + currentNode.getId().getValue() + ", " + currentDistance.getEvaluableValue() );
+            }
+            if ( DEBUG_TIME ) {
+                distanceAccessTime += accTime.restart();
+                edgeTime.clear();
+            }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
+                if ( DEBUG_TIME ) {
+                    edgeProcessingTime += edgeTime.stop();
+                    edgeTime.start();
+                    vEdgeTime.start();
+                    edgesCount++;
+                }
                 if ( !getRoutingConfiguration().getEdgeValidator().validate( edge ) ) {
                     continue;
                 }
                 if ( !edge.getSourceNode().equals( currentNode ) ) {
+                    if ( DEBUG_TIME ) {
+                        edgesOpposite++;
+                    }
                     continue;
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 int endRank = nodeRankMap.get( endNode.getId() );
                 if ( endRank <= sourceRank ) {
+                    if ( DEBUG_TIME ) {
+                        edgesLower++;
+                    }
                     continue;
+                }
+                if ( DEBUG_TIME ) {
+                    edgesVisited++;
                 }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = currentDistance.add( edge.getDistance() );
@@ -111,10 +168,15 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                         nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
                     }
                 }
+                if ( DEBUG_TIME ) {
+                    visitedEdgeProcessingTime += vEdgeTime.stop();
+                }
             }
         }
-        System.out.println( "From dijkstra done in " + time.stop() + " ms" );
-        time.start();
+        if ( DEBUG_TIME ) {
+            System.out.println( "From dijkstra done in " + time.getTimeString() );
+            executionTime += time.restart();
+        }
 
         // TO dijkstra
         nodeDataStructure.clear();
@@ -124,25 +186,56 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             toDistanceMap.put( entry.getKey(), entry.getValue() );
             nodeDataStructure.add( getGraph().getNode( entry.getKey() ), entry.getValue().getEvaluableValue() );
         }
-//        System.out.println( "DIJKSTRA TO" );
+        if ( DEBUG_CORRECTNESS ) {
+            System.out.println( "TO" );
+        }
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             Node currentNode = nodeDataStructure.extractMin();
+            if ( DEBUG_TIME ) {
+                extractMinTime += accTime.restart();
+                visitedNodes++;
+            }
 //            System.out.println( "current node = " + currentNode.getId() + ", distance = " + toDistanceMap.get( currentNode.getId() ) + ", rank = " + nodeRankMap.get( currentNode.getId()) );
 //            System.out.println( "extracted: " + currentNode.getId() + ", " + toDistanceMap.get( currentNode.getId() ) );
             int sourceRank = nodeRankMap.get( currentNode.getId() );
+            if ( DEBUG_TIME ) {
+                nodeRankAccessTime += accTime.restart();
+            }
             Distance currentDistance = toDistanceMap.get( currentNode.getId() );
+            if ( DEBUG_CORRECTNESS ) {
+                System.out.println( "current node = " + currentNode.getId().getValue() + ", " + currentDistance.getEvaluableValue() );
+            }
+            if ( DEBUG_TIME ) {
+                distanceAccessTime += accTime.restart();
+                edgeTime.clear();
+            }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
+                if ( DEBUG_TIME ) {
+                    edgeProcessingTime += edgeTime.stop();
+                    edgeTime.start();
+                    vEdgeTime.start();
+                    edgesCount++;
+                }
                 if ( !getRoutingConfiguration().getEdgeValidator().validate( edge ) ) {
                     continue;
                 }
                 if ( !edge.getTargetNode().equals( currentNode ) ) {
+                    if ( DEBUG_TIME ) {
+                        edgesOpposite++;
+                    }
                     continue;
+                }
+                if ( DEBUG_TIME ) {
+                    edgesVisited++;
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 int endRank = nodeRankMap.get( endNode.getId() );
                 if ( endRank <= sourceRank ) {
+                    if ( DEBUG_TIME ) {
+                        edgesLower++;
+                    }
                     continue;
                 }
                 // calculate it's distance S + path from S to T
@@ -158,11 +251,43 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                         nodeDataStructure.notifyDataChange( endNode, tmpNodeDistance.getEvaluableValue() );
                     }
                 }
+                if ( DEBUG_TIME ) {
+                    visitedEdgeProcessingTime += vEdgeTime.stop();
+                }
             }
         }
-        System.out.println( "To dijkstra done in " + time.stop() + " ms" );
-        time.start();
+        if ( DEBUG_TIME ) {
+            System.out.println( "To dijkstra done in " + time.getTimeString() );
+            executionTime += time.restart();
+        }
 
+        if ( DEBUG_TIME ) {
+            System.out.println( "visited nodes: " + visitedNodes );
+            System.out.println( "time per node: " + ( executionTime / visitedNodes ) );
+            System.out.println( "extract min time: " + extractMinTime );
+            System.out.println( "extract min time per node: " + ( extractMinTime / visitedNodes ) );
+            System.out.println( "node rank access time: " + nodeRankAccessTime );
+            System.out.println( "node rank access time per node: " + ( nodeRankAccessTime / visitedNodes ) );
+            System.out.println( "distance access time: " + distanceAccessTime );
+            System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
+            System.out.println( "edges: " + edgesCount );
+            System.out.println( "visited edges: " + edgesVisited );
+            System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
+            System.out.println( "opposite edges: " + edgesOpposite );
+            System.out.println( "opposite edges ratio: " + ( 100 * edgesOpposite / (double) edgesCount ) + "%" );
+            System.out.println( "lower edges: " + edgesLower );
+            System.out.println( "lower edges ratio: " + ( 100 * edgesLower / (double) edgesCount ) + "%" );
+            System.out.println( "edge time: " + ( edgeProcessingTime ) );
+            System.out.println( "edge time per edge: " + ( edgeProcessingTime / edgesCount ) );
+            System.out.println( "edge visiting time: " + ( visitedEdgeProcessingTime ) );
+            System.out.println( "edge visiting time per edge: " + ( visitedEdgeProcessingTime / edgesVisited ) );
+            System.out.println( "edge not visited time: " + ( edgeProcessingTime - visitedEdgeProcessingTime ) );
+            System.out.println( "edge not visited time per edge: " + ( ( edgeProcessingTime - visitedEdgeProcessingTime ) / ( edgesCount - edgesVisited ) ) );
+
+            time.start();
+        }
+
+        long pathBuildingTime = 0;
         // find SP
         Distance minDistance = getDistanceFactory().createInfiniteDistance();
         Node.Id minNodeId = null;
@@ -175,11 +300,17 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
             }
         }
+        if ( DEBUG_CORRECTNESS ) {
+            System.out.println( "min node = " + getGraph().getNode( minNodeId ) );
+        }
+        if ( DEBUG_TIME ) {
+            System.out.println( "Min node found in " + time.getTimeString() );
+        }
 //        System.out.println( "min node = " + minNodeId  + ", " + minDistance);
         if ( minNodeId == null ) {
             return null;
         } else {
-
+            time.start();
 //            System.out.println( "FROM" );
 //            for ( Map.Entry<Node.Id, Distance> entry : fromDistanceMap.entrySet() ) {
 //                System.out.println( "" + entry.getKey() + " => " + entry.getValue() );
@@ -198,8 +329,10 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 currentNode = getGraph().getOtherNodeOf( fromPredecessorMap.get( currentNode.getId() ), currentNode );
                 firstNode = currentNode;
             }
-            System.out.println( "#1: " + time.stop() + " ms" );
-        time.start();
+            if ( DEBUG_TIME ) {
+                System.out.println( "#1: " + time.getTimeString() );
+                pathBuildingTime += time.restart();
+            }
             List<Edge> endEdges = new ArrayList<>();
             currentNode = getGraph().getNode( minNodeId );
             while ( toPredecessorMap.get( currentNode.getId() ) != null ) {
@@ -207,7 +340,10 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
 //                System.out.println( "adding: " + toPredecessorMap.get( currentNode.getId() ).getId() );
                 currentNode = getGraph().getOtherNodeOf( toPredecessorMap.get( currentNode.getId() ), currentNode );
             }
-            System.out.println( "#2: " + time.restart() + " ms" );
+            if ( DEBUG_TIME ) {
+                System.out.println( "#2: " + time.getTimeString() );
+                pathBuildingTime += time.restart();
+            }
             Path path = getEntityAbstractFactory().createPathWithSource( getGraph(), firstNode );
 //            System.out.println( "first node = " + firstNode );
             List<Edge> pathEdges = new ArrayList<>();
@@ -223,8 +359,11 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
                 path.addEdge( pathEdge );
             }
-            System.out.println( "#3: " + time.restart() + " ms" );
-            System.out.println( "Path construction done in " + time.restart() + " ms" );
+            if ( DEBUG_TIME ) {
+                System.out.println( "#3: " + time.getTimeString() );
+                pathBuildingTime += time.restart();
+                System.out.println( "Path construction done in " + pathBuildingTime + " ns" );
+            }
             return path;
         }
     }
