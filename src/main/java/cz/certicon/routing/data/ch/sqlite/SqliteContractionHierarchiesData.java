@@ -46,22 +46,47 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
     @Override
     protected Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType> checkedRead( Trinity<Graph, GraphEntityFactory, DistanceType> in ) throws SQLException {
         Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType> result;
-        if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name=`shortcuts`" ).next()
-                && getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name=`ranks`" ).next() ) {
+        if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next()
+                && getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next() ) {
             Map<Node.Id, Integer> rankMap = new HashMap<>();
+            Map<Edge.Id, Shortcut> shortcutMap = new HashMap<>();
             List<Shortcut> shortcuts = new ArrayList<>();
 
-            ResultSet rs = getStatement().executeQuery( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + DistanceType.toInt( in.c ) );
-            while ( rs.next() ) {
-                shortcuts.add( new SimpleShortcut(
-                        Edge.Id.createId( rs.getLong( "id" ) ),
-                        in.a.getEdge( Edge.Id.createId( rs.getLong( "edge_source" ) ) ),
-                        in.a.getEdge( Edge.Id.createId( rs.getLong( "edge_target" ) ) ) ) );
+            ResultSet rs;
+            rs = getStatement().executeQuery( "SELECT MIN(id) AS min FROM shortcuts WHERE distanceType=" + DistanceType.toInt( in.c ) );
+            long minId = 0;
+            if ( rs.next() ) {
+                minId = rs.getLong( "min" );
             }
+            rs = getStatement().executeQuery( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + DistanceType.toInt( in.c ) );
+            while ( rs.next() ) {
+                Edge.Id sid = Edge.Id.createId( rs.getLong( "edge_source" ) );
+                Edge.Id tid = Edge.Id.createId( rs.getLong( "edge_target" ) );
+                Edge sourceEdge;
+                Edge targetEdge;
+                if ( sid.getValue() < minId ) {
+                    sourceEdge = in.a.getEdge( sid );
+                } else {
+                    sourceEdge = shortcutMap.get( sid );
+                }
+                if ( tid.getValue() < minId ) {
+                    targetEdge = in.a.getEdge( tid );
+                } else {
+                    targetEdge = shortcutMap.get( tid );
+                }
+                Shortcut shortcut = new SimpleShortcut(
+                        Edge.Id.createId( rs.getLong( "id" ) ),
+                        sourceEdge,
+                        targetEdge );
+                shortcutMap.put( shortcut.getId(), shortcut );
+                shortcuts.add( shortcut );
+            }
+//            System.out.println( "shortcuts" + shortcuts );
             rs = getStatement().executeQuery( "SELECT node_id, rank FROM ranks WHERE distanceType=" + DistanceType.toInt( in.c ) );
             while ( rs.next() ) {
                 rankMap.put( Node.Id.createId( rs.getLong( "node_id" ) ), rs.getInt( "rank" ) );
             }
+//            System.out.println( "rankMap" + rankMap );
 
             result = new Trinity<>( rankMap, shortcuts, in.c );
         } else {
@@ -69,7 +94,12 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
             System.out.println( "Preprocessed data not found, preprocessing..." );
             time.start();
             ContractionHierarchiesPreprocessor preprocessor = new ContractionHierarchiesPreprocessor();
-            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory() );
+            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new ContractionHierarchiesPreprocessor.ProgressListener() {
+                @Override
+                public void onProgressUpdate( double done ) {
+                    System.out.println( String.format( "%.1f%%", done ) );
+                }
+            } );
             System.out.println( "Preprocessing done in " + time.restart() + " ms! Importing into database..." );
             result = new Trinity<>( preprocessedData.a, preprocessedData.b, in.c );
             checkedWrite( result );
@@ -81,8 +111,15 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
 
     @Override
     protected void checkedWrite( Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType> in ) throws SQLException {
+//        System.out.println( "rank count: " + in.a.size() );
         getConnection().setAutoCommit( false ); //transaction block start
-        getStatement().execute( "DROP TABLE IF EXISTS shortcut;" );
+
+        getStatement().execute( "DROP INDEX IF EXISTS `idx_id_shortcuts`" );
+        getStatement().execute( "DROP INDEX IF EXISTS `idx_dist_shortcuts`" );
+        getStatement().execute( "DROP INDEX IF EXISTS `idx_id_ranks`" );
+        getStatement().execute( "DROP INDEX IF EXISTS `idx_dist_ranks`" );
+
+        getStatement().execute( "DROP TABLE IF EXISTS shortcuts;" );
         getStatement().execute( "CREATE TABLE shortcuts ("
                 + "id INTEGER NOT NULL PRIMARY KEY,"
                 + "edge_source INTEGER,"
@@ -99,6 +136,7 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
             shortcutStatement.setLong( idx++, shortcut.getSourceEdge().getId().getValue() );
             shortcutStatement.setLong( idx++, shortcut.getTargetEdge().getId().getValue() );
             shortcutStatement.setInt( idx++, distanceType );
+            shortcutStatement.addBatch();
             if ( i++ % BATCH_SIZE == 0 ) {
                 shortcutStatement.executeBatch();
             }
@@ -117,6 +155,7 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
             rankStatement.setLong( idx++, entry.getKey().getValue() );
             rankStatement.setInt( idx++, entry.getValue() );
             rankStatement.setInt( idx++, distanceType );
+            rankStatement.addBatch();
             if ( i++ % BATCH_SIZE == 0 ) {
                 rankStatement.executeBatch();
             }
@@ -124,9 +163,9 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
         rankStatement.executeBatch();
 
         getStatement().execute( "CREATE UNIQUE INDEX `idx_id_shortcuts` ON `shortcuts` (`id` ASC)" );
-        getStatement().execute( "CREATE UNIQUE INDEX `idx_dist_shortcuts` ON `shortcuts` (`distanceType` ASC)" );
-        getStatement().execute( "CREATE UNIQUE INDEX `idx_id_ranks` ON `ranks` (`id` ASC)" );
-        getStatement().execute( "CREATE UNIQUE INDEX `idx_dist_ranks` ON `ranks` (`distanceType` ASC)" );
+        getStatement().execute( "CREATE INDEX `idx_dist_shortcuts` ON `shortcuts` (`distanceType` ASC)" );
+        getStatement().execute( "CREATE UNIQUE INDEX `idx_id_ranks` ON `ranks` (`node_id` ASC)" );
+        getStatement().execute( "CREATE INDEX `idx_dist_ranks` ON `ranks` (`distanceType` ASC)" );
 
         getConnection().commit();
         getConnection().setAutoCommit( true );
