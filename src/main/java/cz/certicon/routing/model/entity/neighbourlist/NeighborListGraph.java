@@ -87,12 +87,12 @@ public class NeighborListGraph implements Graph {
 
     @Override
     public Node getSourceNodeOf( Edge edge ) {
-        return safeType( edge ).getSourceNode();
+        return edge.getSourceNode();
     }
 
     @Override
     public Node getTargetNodeOf( Edge edge ) {
-        return safeType( edge ).getTargetNode();
+        return edge.getTargetNode();
     }
 
     @Override
