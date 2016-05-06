@@ -11,12 +11,14 @@ package cz.certicon.routing.utils.measuring;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum TimeUnits {
-    NANOSECONDS( 1 ), MICROSECONDS( NANOSECONDS.getDivisor() * 1000 ), MILLISECONDS( MICROSECONDS.getDivisor() * 1000 ), SECONDS( MILLISECONDS.getDivisor() * 1000 ), MINUTES( SECONDS.getDivisor() * 60 ), HOURS( MINUTES.getDivisor() * 60 ), DAYS( HOURS.getDivisor() * 24 );
+    NANOSECONDS( 1, "ns" ), MICROSECONDS( NANOSECONDS.getDivisor() * 1000, "mcs" ), MILLISECONDS( MICROSECONDS.getDivisor() * 1000, "ms" ), SECONDS( MILLISECONDS.getDivisor() * 1000, "s" ), MINUTES( SECONDS.getDivisor() * 60, "min" ), HOURS( MINUTES.getDivisor() * 60, "h" ), DAYS( HOURS.getDivisor() * 24, "days" );
 
     private final long nanoDivisor;
+    private final String unit;
 
-    private TimeUnits( long nanoDivisor ) {
+    private TimeUnits( long nanoDivisor, String unit ) {
         this.nanoDivisor = nanoDivisor;
+        this.unit = unit;
     }
 
     private long getDivisor() {
@@ -25,5 +27,9 @@ public enum TimeUnits {
 
     public long fromNano( long nanoseconds ) {
         return nanoseconds / nanoDivisor;
+    }
+    
+    public String getUnit(){
+        return unit;
     }
 }
