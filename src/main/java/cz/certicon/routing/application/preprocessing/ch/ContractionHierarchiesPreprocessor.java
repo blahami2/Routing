@@ -82,7 +82,7 @@ public class ContractionHierarchiesPreprocessor {
         int counter = 0;
         if ( progressListener != null ) {
             interval = (int) ( nodes.size() / ( progressListener.getNumOfUpdates() * INIT_NODE_RANKING ) );
-            if(interval <= 0){
+            if ( interval <= 0 ) {
                 interval = 1;
             }
         }
@@ -105,7 +105,7 @@ public class ContractionHierarchiesPreprocessor {
         if ( progressListener != null ) {
             interval = (int) Math.ceil( priorityQueue.size() / ( progressListener.getNumOfUpdates() * ( 1.0 - INIT_NODE_RANKING ) ) );
             counter = 0;
-            if(interval <= 0){
+            if ( interval <= 0 ) {
                 interval = 1;
             }
         }
@@ -184,7 +184,7 @@ public class ContractionHierarchiesPreprocessor {
                             Pair<Node, Node> pair = new Pair<>( neighbourA, neighbourB );
                             Distance dist = fromToDistanceMap.get( pair );
                             Distance newDist = edge.getDistance().add( edge1.getDistance() );
-                            if ( dist == null || dist.isLowerOrEqualTo( newDist ) ) {
+                            if ( dist == null || dist.isGreaterThan( newDist ) ) {
                                 fromToDistanceMap.put( pair, newDist );
 //                                System.out.println( "putting (via " + node.getId() + "): " + neighbourA.getId() + " to " + neighbourB.getId() + " dist: " + newDist.getEvaluableValue() );
                             }
@@ -234,7 +234,7 @@ public class ContractionHierarchiesPreprocessor {
                             Pair<Node, Node> pair = new Pair<>( neighbourA, neighbourB );
                             Trinity<Edge, Edge, Distance> get = fromToDistanceMap.get( pair );
                             Distance newDist = edge.getDistance().add( edge1.getDistance() );
-                            if ( get == null || get.c.isLowerOrEqualTo( newDist ) ) {
+                            if ( get == null || get.c.isGreaterThan( newDist ) ) {
                                 fromToDistanceMap.put( pair, new Trinity<>( edge, edge1, newDist ) );
                             }
                         }
