@@ -5,9 +5,10 @@
  */
 package cz.certicon.routing.data.ch.sqlite;
 
+import cz.certicon.routing.model.utility.progress.SimpleProgressListener;
 import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
+import cz.certicon.routing.application.preprocessing.ch.OptimizedContractionHierarchiesPreprocessor;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.data.ch.ContractionHierarchiesData;
 import cz.certicon.routing.data.ch.DistanceType;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
@@ -18,7 +19,6 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.model.entity.common.SimpleShortcut;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,18 +27,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import cz.certicon.routing.data.ch.ContractionHierarchiesDataRW;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType>, Trinity<Graph, GraphEntityFactory, DistanceType>> implements ContractionHierarchiesData {
+public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType>, Trinity<Graph, GraphEntityFactory, DistanceType>> implements ContractionHierarchiesDataRW {
 
     private static final int BATCH_SIZE = 200;
+    
+    private ContractionHierarchiesPreprocessor preprocessor = new OptimizedContractionHierarchiesPreprocessor();
 
-    public SqliteContractionHierarchiesData( Properties connectionProperties ) {
+    public SqliteContractionHierarchiesDataRW( Properties connectionProperties ) {
         super( connectionProperties );
     }
 //SELECT name FROM sqlite_master WHERE type='table' AND name='table_name';
@@ -93,8 +94,7 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
             TimeMeasurement time = new TimeMeasurement();
             System.out.println( "Preprocessed data not found, preprocessing..." );
             time.start();
-            ContractionHierarchiesPreprocessor preprocessor = new ContractionHierarchiesPreprocessor();
-            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new ContractionHierarchiesPreprocessor.ProgressListener() {
+            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess(in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener() {
                 @Override
                 public void onProgressUpdate( double done ) {
                     System.out.println( String.format( "%.1f%%", done * 100 ) );
@@ -169,6 +169,11 @@ public class SqliteContractionHierarchiesData extends AbstractSqliteDatabase<Tri
 
         getConnection().commit();
         getConnection().setAutoCommit( true );
+    }
+
+    @Override
+    public void setPreprocessor( ContractionHierarchiesPreprocessor preprocessor ) {
+        this.preprocessor = preprocessor;
     }
 
 }
