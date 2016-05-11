@@ -145,7 +145,6 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
             dijkstraPriorityQueues[i] = new JgraphtFibonacciDataStructure<>();
         }
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool( THREADS );
         ExecutorService executor = Executors.newFixedThreadPool( THREADS );
         List<Shortcut> shortcuts = new ArrayList<>();
         NodeDataStructure<Integer> priorityQueue = new JgraphtFibonacciDataStructure<>();
@@ -157,7 +156,6 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
 //
         progressListener.init( nodeCount / THREADS, INIT_NODE_RANKING );
         int bulkSize = 1 + nodeCount / THREADS;
-        List<Callable<IntegerArray>> callables = new ArrayList<>();
         List<Future<IntegerArray>> futures = new ArrayList<>();
         for ( int i = 0; i < THREADS; i++ ) {
             int from = i * bulkSize;
@@ -246,7 +244,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                 neighboursBuildingTime += time.restart();
             }
 
-            if ( neighbours.size() >= THREADS ) {
+//            if ( neighbours.size() >= THREADS ) {
                 int[] neighboursArray = new int[neighbours.size()];
                 int cnt = 0;
                 for ( int neighbour : neighbours ) {
@@ -278,23 +276,23 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                         return null;
                     }
                 }
-            } else {
-                for ( int neighbour : neighbours ) {
-                    if ( priorityQueue.contains( neighbour ) ) {
-                        if ( GlobalOptions.DEBUG_TIME ) {
-                            timeInner.start();
-                        }
-                        int numOfShortcuts = calculateShortcuts( shortcuts, neighbour, dijkstraPriorityQueue, nodeDistanceArray );
-                        if ( GlobalOptions.DEBUG_TIME ) {
-                            neighbourCalculateShortcutTime += timeInner.stop();
-                            neighbourCounter++;
-                        }
-                        contractedNeighboursCount[neighbour] += 1;
-//                    System.out.println( "changing: " + origNodes[neighbour].getId().getValue() + " to value: " + ( contractedNeighboursCount[neighbour] + numOfShortcuts - ( incomingEdgesArray[neighbour].size() + outgoingEdgesArray[neighbour].size() ) ) );
-                        priorityQueue.notifyDataChange( neighbour, contractedNeighboursCount[neighbour] + numOfShortcuts - ( incomingEdgesArray[neighbour].size() + outgoingEdgesArray[neighbour].size() ) );
-                    }
-                }
-            }
+//            } else {
+//                for ( int neighbour : neighbours ) {
+//                    if ( priorityQueue.contains( neighbour ) ) {
+//                        if ( GlobalOptions.DEBUG_TIME ) {
+//                            timeInner.start();
+//                        }
+//                        int numOfShortcuts = calculateShortcuts( shortcuts, neighbour, dijkstraPriorityQueue, nodeDistanceArray );
+//                        if ( GlobalOptions.DEBUG_TIME ) {
+//                            neighbourCalculateShortcutTime += timeInner.stop();
+//                            neighbourCounter++;
+//                        }
+//                        contractedNeighboursCount[neighbour] += 1;
+////                    System.out.println( "changing: " + origNodes[neighbour].getId().getValue() + " to value: " + ( contractedNeighboursCount[neighbour] + numOfShortcuts - ( incomingEdgesArray[neighbour].size() + outgoingEdgesArray[neighbour].size() ) ) );
+//                        priorityQueue.notifyDataChange( neighbour, contractedNeighboursCount[neighbour] + numOfShortcuts - ( incomingEdgesArray[neighbour].size() + outgoingEdgesArray[neighbour].size() ) );
+//                    }
+//                }
+//            }
             if ( GlobalOptions.DEBUG_TIME ) {
                 neighboursProcessTime += time.restart();
             }
@@ -303,6 +301,8 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
         }
 
         if ( GlobalOptions.DEBUG_TIME ) {
+            nodeCount = (nodeCount > 0) ? nodeCount : 1;
+            neighbourCounter = (neighbourCounter > 0) ? neighbourCounter : 1;
             System.out.println( "extract time per node: " + ( extractTime / nodeCount ) );
             System.out.println( "contract time per node: " + ( contractTime / nodeCount ) );
             System.out.println( "neighbours collecting time per node: " + ( neighboursBuildingTime / nodeCount ) );
