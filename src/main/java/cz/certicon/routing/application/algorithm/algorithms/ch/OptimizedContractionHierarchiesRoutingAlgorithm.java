@@ -48,10 +48,13 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
     private final int[] predecessorPrototype;
     private final NodeDataStructure<Integer> nodeDataStructure;
 
-    public OptimizedContractionHierarchiesRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, Map<Node.Id, Integer> nodeRankMap ) {
+    public OptimizedContractionHierarchiesRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, List<Shortcut> shortcuts, Map<Node.Id, Integer> nodeRankMap ) {
         super( graph, entityAbstractFactory, distanceFactory );
+        for ( Shortcut shortcut : shortcuts ) {
+            graph.addEdge( shortcut );
+        }
         int nodeCount = graph.getNodes().size();
-        int edgeCount = graph.getEdges().size();
+        int edgeCount = graph.getEdges().size() + shortcuts.size();
         this.nodePositionMap = new HashMap<>();
         this.edgePositionMap = new HashMap<>();
         this.origNodes = new Node[nodeCount];
@@ -98,14 +101,30 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             }
             counter++;
         }
+        for ( Shortcut shortcut : shortcuts ) {
+            graph.removeEdge( shortcut );
+        }
         this.nodeDataStructure = new JgraphtFibonacciDataStructure<>();
     }
 
     @Override
     public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
+
+        /* DEBUG VARS */
         TimeMeasurement time = new TimeMeasurement();
-        time.setTimeUnits( TimeUnits.NANOSECONDS );
+        TimeMeasurement accTime = new TimeMeasurement();
+        accTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        TimeMeasurement edgeTime = new TimeMeasurement();
+        edgeTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        TimeMeasurement vEdgeTime = new TimeMeasurement();
+        vEdgeTime.setTimeUnits( TimeUnits.NANOSECONDS );
+        int visitedNodes = 0;
+        int edgesCount = 0;
+        int edgesVisited = 0;
+        long distanceAccessTime = 0;
         if ( DEBUG_TIME ) {
+            time.setTimeUnits( TimeUnits.NANOSECONDS );
+            System.out.println( "Routing..." );
             time.start();
         }
 
@@ -131,6 +150,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             int currentNode = nodeDataStructure.extractMin();
+            if ( DEBUG_TIME ) {
+                visitedNodes++;
+            }
             fromVisitedNodes.add( currentNode );
             int sourceRank = rankArray[currentNode];
             double currentDistance = fromDistanceArray[currentNode];
@@ -139,9 +161,15 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             }
             // foreach neighbour T of node S
             for ( int i = 0; i < outgoingEdgesArray[currentNode].length; i++ ) {
+                if ( DEBUG_TIME ) {
+                    edgesCount++;
+                }
                 int edge = outgoingEdgesArray[currentNode][i];
                 int otherNode = edgeTargetArray[edge];
                 if ( rankArray[otherNode] > sourceRank ) {
+                    if ( DEBUG_TIME ) {
+                        edgesVisited++;
+                    }
                     double otherNodeDistance = fromDistanceArray[otherNode];
                     double distance = currentDistance + edgeLengthArray[edge];
                     if ( distance < otherNodeDistance ) {
@@ -183,6 +211,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
             int currentNode = nodeDataStructure.extractMin();
+            if ( DEBUG_TIME ) {
+                visitedNodes++;
+            }
             toVisitedNodes.add( currentNode );
             int sourceRank = rankArray[currentNode];
             double currentDistance = toDistanceArray[currentNode];
@@ -191,9 +222,15 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             }
             // foreach neighbour T of node S
             for ( int i = 0; i < incomingEdgesArray[currentNode].length; i++ ) {
+                if ( DEBUG_TIME ) {
+                    edgesCount++;
+                }
                 int edge = incomingEdgesArray[currentNode][i];
                 int otherNode = edgeSourceArray[edge];
                 if ( rankArray[otherNode] > sourceRank ) {
+                    if ( DEBUG_TIME ) {
+                        edgesVisited++;
+                    }
                     double otherNodeDistance = toDistanceArray[otherNode];
                     double distance = currentDistance + edgeLengthArray[edge];
                     if ( distance < otherNodeDistance ) {
@@ -269,6 +306,18 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
                 System.out.println( "Path built in " + time.getTimeString() );
                 time.start();
             }
+
+            if ( DEBUG_TIME ) {
+                System.out.println( "visited nodes: " + visitedNodes );
+                System.out.println( "time per node: " + ( time.stop() / visitedNodes ) );
+                System.out.println( "distance access time: " + distanceAccessTime );
+                System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
+                System.out.println( "edges: " + edgesCount );
+                System.out.println( "visited edges: " + edgesVisited );
+                System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
+                time.start();
+            }
+
             return path;
         } else {
             return null;

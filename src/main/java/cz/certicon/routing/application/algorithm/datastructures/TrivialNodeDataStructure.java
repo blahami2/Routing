@@ -80,8 +80,37 @@ public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
     public boolean contains( T node ) {
         return nodes.contains( node );
     }
-    
+
+    @Override
+    public T peek() {
+        if ( nodes.isEmpty() ) {
+            throw new IllegalStateException( "NodeStructure is empty." );
+        }
+        NodeContainer<T> min = nodes.get( 0 );
+        for ( NodeContainer<T> node : nodes ) {
+            if ( node.value < min.value ) {
+                min = node;
+            }
+        }
+        return min.node;
+    }
+
+    @Override
+    public double minValue() {
+        if ( nodes.isEmpty() ) {
+            throw new IllegalStateException( "NodeStructure is empty." );
+        }
+        NodeContainer<T> min = nodes.get( 0 );
+        for ( NodeContainer<T> node : nodes ) {
+            if ( node.value < min.value ) {
+                min = node;
+            }
+        }
+        return min.value;
+    }
+
     private static class NodeContainer<T> {
+
         public final T node;
         public double value;
 

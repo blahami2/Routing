@@ -55,9 +55,8 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
 //        System.out.println( "Changing " + node + " to value " + value );
         FibonacciHeapNode<T> n = nodeMap.get( node );
         if ( n == null ) {
-            throw new IllegalArgumentException( "Unknown node: " + node );
-        }
-        if ( value < n.getKey() ) {
+            add( node, value );
+        } else if ( value < n.getKey() ) {
             fibonacciHeap.decreaseKey( n, value );
         } else if ( value > n.getKey() ) {
             remove( node );
@@ -84,6 +83,24 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
     @Override
     public boolean contains( T node ) {
         return nodeMap.containsKey( node );
+    }
+
+    @Override
+    public T peek() {
+        if ( !fibonacciHeap.isEmpty() ) {
+            return fibonacciHeap.min().getData();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public double minValue() {
+        if ( !fibonacciHeap.isEmpty() ) {
+            return fibonacciHeap.min().getKey();
+        } else {
+            return Double.MAX_VALUE;
+        }
     }
 
 }

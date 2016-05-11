@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms.dijkstra;
 
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -21,7 +22,6 @@ import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import static cz.certicon.routing.GlobalOptions.DEBUG_TIME;
 
 /**
  * Basic routing algorithm implementation using the optimal Dijkstra.
@@ -29,6 +29,8 @@ import static cz.certicon.routing.GlobalOptions.DEBUG_TIME;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
+    
+    private static final boolean DEBUG_TIME = GlobalOptions.DEBUG_TIME;
 
     private NodeDataStructure<Node> nodeDataStructure;
     private EndCondition endCondition;

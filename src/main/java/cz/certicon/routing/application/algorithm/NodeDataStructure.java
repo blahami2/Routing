@@ -63,4 +63,8 @@ public interface NodeDataStructure<T> {
     public int size();
 
     public boolean contains( T node );
+    
+    public T peek();
+    
+    public double minValue();
 }
