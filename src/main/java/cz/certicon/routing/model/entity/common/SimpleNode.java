@@ -32,7 +32,8 @@ public abstract class SimpleNode implements Node {
         this.id = id;
         this.distance = null;
         this.predecessorEdge = null;
-        this.label = generateLabel( charCounter++ );
+//        this.label = generateLabel( charCounter++ );
+        this.label = Long.toString( id.getValue() );
     }
 
     public SimpleNode( Id id, double latitude, double longitude ) {
@@ -40,7 +41,8 @@ public abstract class SimpleNode implements Node {
         this.id = id;
         this.distance = null;
         this.predecessorEdge = null;
-        this.label = generateLabel( charCounter++ );
+//        this.label = generateLabel( charCounter++ );
+        this.label = Long.toString( id.getValue() );
     }
 
     @Override
@@ -137,7 +139,7 @@ public abstract class SimpleNode implements Node {
 
     @Override
     public String toString() {
-        return "SimpleNode{" + "id=" + id+ ", coordinates=" + coordinates + ", distance=" + distance  + ", hasPredecessor=" + ( getPredecessorEdge() != null ) + '}';
+        return "SimpleNode{" + "id=" + id + ", coordinates=" + coordinates + ", distance=" + distance + ", hasPredecessor=" + ( getPredecessorEdge() != null ) + '}';
     }
 
     private String generateLabel( int counter ) {
