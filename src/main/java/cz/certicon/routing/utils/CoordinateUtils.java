@@ -14,14 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import static java.lang.Math.*;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.GeodeticCalculator;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  * Utilities for coordinates
@@ -32,15 +24,15 @@ public class CoordinateUtils {
 
     private static final double EARTH_RADIUS = 6371000;
 
-    private static final CoordinateReferenceSystem COORDINATE_REFERENCE_SYSTEM;
+//    private static final CoordinateReferenceSystem COORDINATE_REFERENCE_SYSTEM;
 
-    static {
+//    static {
             //        try {
-            COORDINATE_REFERENCE_SYSTEM = org.geotools.referencing.crs.DefaultGeographicCRS.WGS84;
+//            COORDINATE_REFERENCE_SYSTEM = org.geotools.referencing.crs.DefaultGeographicCRS.WGS84;
 //        } catch ( FactoryException ex ) {
 //            throw new IllegalStateException( ex );
 //        }
-    }
+//    }
 
     /**
      * Calculates the geographical midpoint of the given coordinates.
