@@ -10,6 +10,6 @@ package cz.certicon.routing;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class GlobalOptions {
-    public static boolean DEBUG_TIME = true;
+    public static boolean DEBUG_TIME = false;
     public static boolean DEBUG_CORRECTNESS = false;
 }

@@ -262,6 +262,12 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
         }
 
         if ( DEBUG_TIME ) {
+            if(edgesCount <= 0){
+                edgesCount = 1;
+            }
+            if(edgesVisited <= 0){
+                edgesVisited = 1;
+            }
             System.out.println( "visited nodes: " + visitedNodes );
             System.out.println( "time per node: " + ( executionTime / visitedNodes ) );
             System.out.println( "extract min time: " + extractMinTime );
