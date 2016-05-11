@@ -1,3 +1,4 @@
 # autogen.sh-generated files
 target
 nbproject
+*.log
