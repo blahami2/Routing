@@ -36,7 +36,7 @@ import cz.certicon.routing.data.ch.ContractionHierarchiesDataRW;
 public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType>, Trinity<Graph, GraphEntityFactory, DistanceType>> implements ContractionHierarchiesDataRW {
 
     private static final int BATCH_SIZE = 200;
-    
+
     private ContractionHierarchiesPreprocessor preprocessor = new OptimizedContractionHierarchiesPreprocessor();
 
     public SqliteContractionHierarchiesDataRW( Properties connectionProperties ) {
@@ -48,7 +48,8 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
     protected Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType> checkedRead( Trinity<Graph, GraphEntityFactory, DistanceType> in ) throws SQLException {
         Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType> result;
         if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next()
-                && getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next() ) {
+                && getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next()
+                && getStatement().executeQuery( "SELECT distanceType FROM ranks WHERE distanceType=" + DistanceType.toInt( in.c ) + " LIMIT 1" ).next() ) {
             Map<Node.Id, Integer> rankMap = new HashMap<>();
             Map<Edge.Id, Shortcut> shortcutMap = new HashMap<>();
             List<Shortcut> shortcuts = new ArrayList<>();
@@ -94,7 +95,7 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
             TimeMeasurement time = new TimeMeasurement();
             System.out.println( "Preprocessed data not found, preprocessing..." );
             time.start();
-            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess(in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener() {
+            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener() {
                 @Override
                 public void onProgressUpdate( double done ) {
                     System.out.println( String.format( "%.1f%%", done * 100 ) );
@@ -119,14 +120,16 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
         getStatement().execute( "DROP INDEX IF EXISTS `idx_id_ranks`" );
         getStatement().execute( "DROP INDEX IF EXISTS `idx_dist_ranks`" );
 
-        getStatement().execute( "DROP TABLE IF EXISTS shortcuts;" );
-        getStatement().execute( "CREATE TABLE shortcuts ("
-                + "id INTEGER NOT NULL PRIMARY KEY,"
-                + "edge_source INTEGER,"
-                + "edge_target INTEGER,"
-                + "distanceType INTEGER"
-                + ")" );
         int distanceType = DistanceType.toInt( in.c );
+        if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
+            getStatement().execute( "DELETE FROM shortcuts WHERE distanceType=" + distanceType );
+            getStatement().execute( "CREATE TABLE shortcuts ("
+                    + "id INTEGER NOT NULL PRIMARY KEY,"
+                    + "edge_source INTEGER,"
+                    + "edge_target INTEGER,"
+                    + "distanceType INTEGER"
+                    + ")" );
+        }
         PreparedStatement shortcutStatement = getConnection().prepareStatement( "INSERT INTO shortcuts (id, edge_source, edge_target, distanceType) VALUES (?, ?, ?, ?)" );
 
         int i = 1;
@@ -142,12 +145,14 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
             }
         }
         shortcutStatement.executeBatch();
-        getStatement().execute( "DROP TABLE IF EXISTS ranks;" );
-        getStatement().execute( "CREATE TABLE ranks ("
-                + "node_id INTEGER NOT NULL PRIMARY KEY,"
-                + "rank INTEGER,"
-                + "distanceType INTEGER"
-                + ")" );
+        if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next() ) {
+            getStatement().execute( "DELETE FROM ranks WHERE distanceType=" + distanceType );
+            getStatement().execute( "CREATE TABLE ranks ("
+                    + "node_id INTEGER NOT NULL PRIMARY KEY,"
+                    + "rank INTEGER,"
+                    + "distanceType INTEGER"
+                    + ")" );
+        }
         PreparedStatement rankStatement = getConnection().prepareStatement( "INSERT INTO ranks (node_id, rank, distanceType) VALUES (?, ?, ?)" );
         i = 1;
         for ( Map.Entry<Node.Id, Integer> entry : in.a.entrySet() ) {
