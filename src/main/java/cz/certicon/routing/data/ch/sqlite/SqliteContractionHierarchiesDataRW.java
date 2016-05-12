@@ -95,12 +95,19 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
             TimeMeasurement time = new TimeMeasurement();
             System.out.println( "Preprocessed data not found, preprocessing..." );
             time.start();
+            long startId = 0;
+            if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
+                ResultSet rs = getStatement().executeQuery( "SELECT max(id) AS startId FROM shortcuts" );
+                if ( rs.next() ) {
+                    startId = rs.getLong( "startId" );
+                }// else the table is empty and then leave it to zero
+            }
             Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener() {
                 @Override
                 public void onProgressUpdate( double done ) {
                     System.out.println( String.format( "%.1f%%", done * 100 ) );
                 }
-            } );
+            }, startId );
             System.out.println( "Preprocessing done in " + time.restart() + " ms! Importing into database..." );
             result = new Trinity<>( preprocessedData.a, preprocessedData.b, in.c );
             checkedWrite( result );
@@ -123,6 +130,7 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
         int distanceType = DistanceType.toInt( in.c );
         if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
             getStatement().execute( "DELETE FROM shortcuts WHERE distanceType=" + distanceType );
+        } else {
             getStatement().execute( "CREATE TABLE shortcuts ("
                     + "id INTEGER NOT NULL PRIMARY KEY,"
                     + "edge_source INTEGER,"
@@ -147,8 +155,9 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
         shortcutStatement.executeBatch();
         if ( getStatement().executeQuery( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next() ) {
             getStatement().execute( "DELETE FROM ranks WHERE distanceType=" + distanceType );
+        } else {
             getStatement().execute( "CREATE TABLE ranks ("
-                    + "node_id INTEGER NOT NULL PRIMARY KEY,"
+                    + "node_id INTEGER NOT NULL,"
                     + "rank INTEGER,"
                     + "distanceType INTEGER"
                     + ")" );
@@ -167,9 +176,9 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
         }
         rankStatement.executeBatch();
 
-        getStatement().execute( "CREATE UNIQUE INDEX `idx_id_shortcuts` ON `shortcuts` (`id` ASC)" );
+        getStatement().execute( "CREATE INDEX `idx_id_shortcuts` ON `shortcuts` (`id` ASC)" );
         getStatement().execute( "CREATE INDEX `idx_dist_shortcuts` ON `shortcuts` (`distanceType` ASC)" );
-        getStatement().execute( "CREATE UNIQUE INDEX `idx_id_ranks` ON `ranks` (`node_id` ASC)" );
+        getStatement().execute( "CREATE INDEX `idx_id_ranks` ON `ranks` (`node_id` ASC)" );
         getStatement().execute( "CREATE INDEX `idx_dist_ranks` ON `ranks` (`distanceType` ASC)" );
 
         getConnection().commit();

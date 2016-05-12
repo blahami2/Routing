@@ -57,7 +57,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
         final String keyDistanceToEnd = "distance_to_end";
         long dataId = -1;
         try {
-            ResultSet rs = database.read( "SELECT n.id "
+            ResultSet rs = database.read( "SELECT n.id AS id "
                     + "FROM nodes n "
                     + "JOIN (SELECT * FROM nodes_data d "
                     + "        WHERE d.ROWID IN( "
