@@ -255,7 +255,7 @@ public abstract class SimplePath implements Path {
 
     @Override
     public void loadCoordinates( CoordinateReader cr ) throws IOException {
-        if ( origSource == null || origTarget == null || sourceDataId == -1 || targetDataId == -1 ) {
+        if ( origSource == null || origTarget == null ) {
             throw new IllegalStateException( "use setSourceOrigin and setTargetOrigin methods first!" );
         }
 
