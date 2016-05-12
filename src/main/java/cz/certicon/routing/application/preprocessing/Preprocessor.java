@@ -39,9 +39,10 @@ public interface Preprocessor<PreprocessedData> {
      * @param distanceFactory an instance of {@link DistanceFactory} related
      * with the given graph
      * @param progressListener listener for progress update
+     * @param minimalShortcutId minimal shortcut ID to be set for new shortcuts =&gt; current max + 1
      * @return an instance of {@link PreprocessedData}
      */
-    public PreprocessedData preprocess( Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, ProgressListener progressListener );
+    public PreprocessedData preprocess( Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, ProgressListener progressListener, long minimalShortcutId );
 
     
 }

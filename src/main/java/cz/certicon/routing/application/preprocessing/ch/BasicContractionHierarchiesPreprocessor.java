@@ -44,32 +44,11 @@ public class BasicContractionHierarchiesPreprocessor implements ContractionHiera
     private static final int DISTANCE = 5;
     private static final double INIT_NODE_RANKING = 0.2;
 
-    /**
-     * Returns ranked nodes by importance ordering
-     *
-     * @param graphInput an instance of {@link Graph} to calculate on
-     * @param graphEntityFactory an instance of {@link GraphEntityFactory}
-     * related with the given graph
-     * @param distanceFactory an instance of {@link DistanceFactory} related
-     * with the given graph
-     * @return an instance of {@link HashMap} with {@link Integer} ranks
-     */
     public Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocess( Graph graphInput, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) {
-        return preprocess( graphInput, graphEntityFactory, distanceFactory, new EmptyProgressListener() );
+        return preprocess( graphInput, graphEntityFactory, distanceFactory, new EmptyProgressListener(), 0 );
     }
 
-    /**
-     * Returns ranked nodes by importance ordering
-     *
-     * @param graph an instance of {@link Graph} to calculate on
-     * @param graphEntityFactory an instance of {@link GraphEntityFactory}
-     * related with the given graph
-     * @param distanceFactory an instance of {@link DistanceFactory} related
-     * with the given graph
-     * @param progressListener listener for progress update
-     * @return an instance of {@link HashMap} with {@link Integer} ranks
-     */
-    public Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocess( Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, ProgressListener progressListener ) {
+    public Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocess( Graph graph, GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory, ProgressListener progressListener, long startId ) {
 //        System.out.println( "**** EDGES ****" );
 //        for ( Edge edge : graph.getEdges() ) {
 //            System.out.println( edge );
@@ -131,7 +110,7 @@ public class BasicContractionHierarchiesPreprocessor implements ContractionHiera
             }
 //            System.out.println( "contracting = " + min.getId() );
             // shortcuts
-            shortcuts.addAll( contractNode( routingAlgorithm, graph, min, removedEdges, removedNodes ) );
+            shortcuts.addAll( contractNode( routingAlgorithm, graph, min, removedEdges, removedNodes, startId ) );
             if ( GlobalOptions.DEBUG_TIME ) {
                 contractTime += time.restart();
             }
@@ -269,7 +248,7 @@ public class BasicContractionHierarchiesPreprocessor implements ContractionHiera
         return numOfShortcuts;
     }
 
-    private Set<Shortcut> contractNode( DijkstraRoutingAlgorithm routingAlgorithm, Graph graph, Node node, Set<Edge> removedEdges, Set<Node> removedNodes ) {
+    private Set<Shortcut> contractNode( DijkstraRoutingAlgorithm routingAlgorithm, Graph graph, Node node, Set<Edge> removedEdges, Set<Node> removedNodes, long startId ) {
 //        System.out.println( "CONTRACTING: " + node.getId() );
         routingAlgorithm.setGraph( graph );
         Map<Pair<Node, Node>, Trinity<Edge, Edge, Distance>> fromToDistanceMap = new HashMap<>();
@@ -303,7 +282,7 @@ public class BasicContractionHierarchiesPreprocessor implements ContractionHiera
             if ( route == null || route.getDistance().isGreaterThan( entry.getValue().c ) ) {
                 Edge fromEdge = entry.getValue().a;
                 Edge toEdge = entry.getValue().b;
-                Shortcut shortcut = new SimpleShortcut( Edge.Id.generateId(), fromEdge, toEdge );
+                Shortcut shortcut = new SimpleShortcut( Edge.Id.createId(Edge.Id.generateId().getValue() + startId), fromEdge, toEdge );
 //                System.out.println( "shortcut: " + entry.getKey().a.getId() + " to " + entry.getKey().b.getId() + " via " + node.getId() + ", " + entry.getValue().c.getEvaluableValue() + " < " + ( ( route != null ) ? route.getDistance().getEvaluableValue() : "inf" ) );
 
                 if ( GlobalOptions.DEBUG_CORRECTNESS ) {
@@ -312,11 +291,9 @@ public class BasicContractionHierarchiesPreprocessor implements ContractionHiera
                 shortcuts.add( shortcut );
                 graph.addEdge( shortcut );
             } else //                System.out.println( "route: " + entry.getKey().a.getId() + " to " + entry.getKey().b.getId() + " via " + node.getId() + ", " + route.getDistance().getEvaluableValue() + " < " + entry.getValue().c.getEvaluableValue() );
-            {
-                if ( GlobalOptions.DEBUG_CORRECTNESS ) {
+             if ( GlobalOptions.DEBUG_CORRECTNESS ) {
                     Log.dln( getClass().getSimpleName(), "route: " + entry.getKey().a.getId() + " to " + entry.getKey().b.getId() + " via " + node.getId() + ", " + route.getDistance().getEvaluableValue() + " <= " + entry.getValue().c.getEvaluableValue() );
                 }
-            }
         }
         return shortcuts;
     }
