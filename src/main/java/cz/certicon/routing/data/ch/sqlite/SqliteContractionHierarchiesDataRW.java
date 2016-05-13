@@ -102,7 +102,7 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
                     startId = rs.getLong( "startId" );
                 }// else the table is empty and then leave it to zero
             }
-            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener() {
+            Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData = preprocessor.preprocess( in.a, in.b, in.c.getDistanceFactory(), new SimpleProgressListener( 1000 ) {
                 @Override
                 public void onProgressUpdate( double done ) {
                     System.out.println( String.format( "%.1f%%", done * 100 ) );

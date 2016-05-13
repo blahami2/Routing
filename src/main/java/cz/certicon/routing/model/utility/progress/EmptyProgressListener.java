@@ -18,7 +18,8 @@ public class EmptyProgressListener implements ProgressListener {
     }
 
     @Override
-    public void nextStep() {
+    public boolean nextStep() {
+        return false;
     }
 
     @Override

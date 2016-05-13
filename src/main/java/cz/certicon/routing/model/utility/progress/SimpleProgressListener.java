@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.utility.progress;
 
 import cz.certicon.routing.model.utility.ProgressListener;
+import cz.certicon.routing.utils.DoubleComparator;
 
 /**
  *
@@ -13,12 +14,23 @@ import cz.certicon.routing.model.utility.ProgressListener;
  */
 public abstract class SimpleProgressListener implements ProgressListener {
 
+    private static final double PRECISION = 10E-9;
+
     private int numOfUpdates = 100;
-    private int counter = 0;
-    private int interval = 1;
+    private long counter = 0;
+    private int size = 1;
+    private double calculationRatio = 0.0;
 
     private double last = 0.0;
     private double add = 0.0;
+    private double step = 1.0;
+
+    public SimpleProgressListener() {
+    }
+
+    public SimpleProgressListener( int numberOfUpdates ) {
+        this.numOfUpdates = numberOfUpdates;
+    }
 
     @Override
     public int getNumOfUpdates() {
@@ -31,18 +43,28 @@ public abstract class SimpleProgressListener implements ProgressListener {
     }
 
     @Override
-    public void nextStep() {
-        if ( ++counter % interval == 0 ) {
-            last = counter / (double) interval / numOfUpdates;
-            onProgressUpdate( add + last );
+    public boolean nextStep() {
+        double current = (double) ++counter / size;
+        if ( DoubleComparator.isLowerOrEqualTo( last + step, current, PRECISION ) ) {
+            last = current;
+            onProgressUpdate( add + ( last * calculationRatio ) );
+            return true;
         }
+        if ( counter == size ) {
+            onProgressUpdate( add + calculationRatio );
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void init( int size, double calculationRatio ) {
-        add = last;
+    final public void init( int size, double calculationRatio ) {
+        add += this.calculationRatio;
+        this.calculationRatio = calculationRatio;
+        this.size = size;
+        step = 1 / ( numOfUpdates * calculationRatio );
         counter = 0;
-        interval = ProgressListener.Calculator.calculateInterval( size, this.numOfUpdates, calculationRatio );
+        last = 0;
     }
 
 }
