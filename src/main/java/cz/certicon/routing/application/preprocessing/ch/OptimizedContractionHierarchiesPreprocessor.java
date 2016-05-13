@@ -154,7 +154,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
         int[] nodePredecessorArray = new int[origNodes.length];
         System.arraycopy( predecessorPrototype, 0, nodePredecessorArray, 0, predecessorPrototype.length );
 //
-        progressListener.init( nodeCount / THREADS, INIT_NODE_RANKING );
+        progressListener.init( nodeCount, INIT_NODE_RANKING );
         int bulkSize = 1 + nodeCount / THREADS;
         List<Future<IntegerArray>> futures = new ArrayList<>();
         for ( int i = 0; i < THREADS; i++ ) {
@@ -172,12 +172,12 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                     if ( GlobalOptions.DEBUG_CORRECTNESS ) {
                         Log.dln( getClass().getSimpleName(), "inserting: " + origNodes[from + j].getId().getValue() + " with value: " + ( res.array[j] ) );
                     }
+                    progressListener.nextStep();
                 }
             } catch ( InterruptedException | ExecutionException ex ) {
                 Logger.getLogger( OptimizedContractionHierarchiesPreprocessor.class.getName() ).log( Level.SEVERE, null, ex );
                 return null;
             }
-            progressListener.nextStep();
         }
 
 //        for ( int i = 0; i < nodeCount; i++ ) {
@@ -297,7 +297,9 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                 neighboursProcessTime += time.restart();
             }
             nodeRankMap.put( origNodes[currentNode].getId(), rank++ );
-            progressListener.nextStep();
+            if ( progressListener.nextStep() ) {
+                Log.dln( getClass().getSimpleName(), "done: " + ( nodeCount - priorityQueue.size() ) + " out of " + nodeCount + " = " + ( 100 * ( nodeCount - priorityQueue.size() ) / nodeCount ) + "%" );
+            }
         }
 
         if ( GlobalOptions.DEBUG_TIME ) {
