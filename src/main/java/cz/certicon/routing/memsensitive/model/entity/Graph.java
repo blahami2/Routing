@@ -11,9 +11,9 @@ package cz.certicon.routing.memsensitive.model.entity;
  */
 public interface Graph {
 
-    public void setEdgeOrigId( int edge, int id );
+    public void setEdgeOrigId( int edge, long id );
 
-    public void setNodeOrigId( int node, int id );
+    public void setNodeOrigId( int node, long id );
 
     public void setSource( int edge, int source );
 
@@ -39,12 +39,12 @@ public interface Graph {
 
     public double getLength( int edge );
 
-    public int getEdgeOrigId( int edge );
+    public long getEdgeOrigId( int edge );
 
-    public int getNodeOrigId( int node );
+    public long getNodeOrigId( int node );
 
     /* temporary solution - delete after having sequence already in the database */
-    public int getNodeByOrigId( int nodeId );
+    public int getNodeByOrigId( long nodeId );
 
-    public int getEdgeByOrigId( int nodeId );
+    public int getEdgeByOrigId( long edgeId );
 }

@@ -23,14 +23,14 @@ public class NeighbourlistGraph implements Graph {
     private final int[][] outgoingEdges;
     private final int[] nodePredecessorsPrototype;
     private final double[] nodeDistancesPrototype;
-    private final int[] nodeOrigIds;
-    private final int[] edgeOrigIds;
+    private final long[] nodeOrigIds;
+    private final long[] edgeOrigIds;
 
     private static final double DISTANCE_DEFAULT = Double.MAX_VALUE;
     private static final int PREDECESSOR_DEFAULT = -1;
 
-    private final Map<Integer, Integer> fromOrigNodesMap;
-    private final Map<Integer, Integer> fromOrigEdgesMap;
+    private final Map<Long, Integer> fromOrigNodesMap;
+    private final Map<Long, Integer> fromOrigEdgesMap;
 
     public NeighbourlistGraph( int nodeCount, int edgeCount ) {
         this.edgeSources = new int[edgeCount];
@@ -40,8 +40,8 @@ public class NeighbourlistGraph implements Graph {
         this.nodeDistancesPrototype = new double[nodeCount];
         this.incomingEdges = new int[nodeCount][];
         this.outgoingEdges = new int[nodeCount][];
-        this.nodeOrigIds = new int[nodeCount];
-        this.edgeOrigIds = new int[edgeCount];
+        this.nodeOrigIds = new long[nodeCount];
+        this.edgeOrigIds = new long[edgeCount];
         this.fromOrigEdgesMap = new HashMap<>();
         this.fromOrigNodesMap = new HashMap<>();
         EffectiveUtils.fillArray( nodePredecessorsPrototype, PREDECESSOR_DEFAULT );
@@ -109,35 +109,35 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public int getEdgeOrigId( int edge ) {
+    public long getEdgeOrigId( int edge ) {
         return edgeOrigIds[edge];
     }
 
     @Override
-    public int getNodeOrigId( int node ) {
+    public long getNodeOrigId( int node ) {
         return nodeOrigIds[node];
     }
 
     @Override
-    public void setEdgeOrigId( int edge, int id ) {
+    public void setEdgeOrigId( int edge, long id ) {
         edgeOrigIds[edge] = id;
         fromOrigEdgesMap.put( id, edge );
     }
 
     @Override
-    public void setNodeOrigId( int node, int id ) {
+    public void setNodeOrigId( int node, long id ) {
         nodeOrigIds[node] = id;
         fromOrigNodesMap.put( id, node );
     }
 
     @Override
-    public int getNodeByOrigId( int nodeId ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+    public int getNodeByOrigId( long nodeId ) {
+        return fromOrigNodesMap.get( nodeId );
     }
 
     @Override
-    public int getEdgeByOrigId( int nodeId ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+    public int getEdgeByOrigId( long edgeId ) {
+        return fromOrigEdgesMap.get( edgeId );
     }
 
 }
