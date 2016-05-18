@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.data.graph.sqlite;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
@@ -25,6 +27,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.sqlite.SQLiteConfig;
 
 /**

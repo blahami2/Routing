@@ -30,6 +30,7 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
 
     @Override
     protected Graph checkedRead( DistanceType in ) throws SQLException {
+
         ResultSet rs;
         rs = getStatement().executeQuery( "SELECT COUNT(*) AS nodeCount FROM nodes" );
         if ( !rs.next() ) {
@@ -41,6 +42,7 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
             throw new SQLException( "Could not read edge count" );
         }
         int edgeCount = rs.getInt( "edgeCount" );
+
         Graph graph = new NeighbourlistGraph( nodeCount, edgeCount );
         rs = getStatement().executeQuery( "SELECT n.id AS id "
                 + "FROM nodes n;" );
@@ -61,8 +63,8 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
         int speedFwColumnIndex = rs.findColumn( "speed_fw" );
         int speedBwColumnIndex = rs.findColumn( "speed_bw" );
         int edgeCounter = 0;
-        Map<Integer, List<Integer>> outgoingEdgesMap = new HashMap<>();
-        Map<Integer, List<Integer>> incomingEdgesMap = new HashMap<>();
+        Map<Long, List<Integer>> outgoingEdgesMap = new HashMap<>();
+        Map<Long, List<Integer>> incomingEdgesMap = new HashMap<>();
         while ( rs.next() ) {
             int idx = rs.getInt( idColumnIdx );
             graph.setEdgeOrigId( edgeCounter, idx );
@@ -78,20 +80,20 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
 
             edgeCounter++;
         }
-        for ( Map.Entry<Integer, List<Integer>> entry : outgoingEdgesMap.entrySet() ) {
-            int origNodeId = entry.getKey();
+        for ( Map.Entry<Long, List<Integer>> entry : outgoingEdgesMap.entrySet() ) {
+            long origNodeId = entry.getKey();
             int[] outgoingEdgesArray = toArray( entry.getValue() );
             graph.setOutgoingEdges( graph.getNodeByOrigId( origNodeId ), outgoingEdgesArray );
         }
-        for ( Map.Entry<Integer, List<Integer>> entry : incomingEdgesMap.entrySet() ) {
-            int origNodeId = entry.getKey();
+        for ( Map.Entry<Long, List<Integer>> entry : incomingEdgesMap.entrySet() ) {
+            long origNodeId = entry.getKey();
             int[] incomingEdgesArray = toArray( entry.getValue() );
             graph.setIncomingEdges( graph.getNodeByOrigId( origNodeId ), incomingEdgesArray );
         }
         return graph;
     }
 
-    private List<Integer> getEdgeList( Map<Integer, List<Integer>> map, int node ) {
+    private List<Integer> getEdgeList( Map<Long, List<Integer>> map, long node ) {
         List<Integer> list = map.get( node );
         if ( list == null ) {
             list = new ArrayList<>();
