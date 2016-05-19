@@ -8,7 +8,9 @@ package cz.certicon.routing.memsensitive.model.entity.neighbourlist;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.utils.EffectiveUtils;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
@@ -138,6 +140,76 @@ public class NeighbourlistGraph implements Graph {
     @Override
     public int getEdgeByOrigId( long edgeId ) {
         return fromOrigEdgesMap.get( edgeId );
+    }
+
+    @Override
+    public int getNodeCount() {
+        return nodeOrigIds.length;
+    }
+
+    @Override
+    public int getEdgeCount() {
+        return edgeOrigIds.length;
+    }
+
+    @Override
+    public int getOtherNode( int edge, int node ) {
+        int target = edgeTargets[edge];
+        if ( target == node ) {
+            return edgeSources[edge];
+        }
+        return target;
+    }
+
+    @Override
+    public Iterator<Integer> getIncomingEdgesIterator( int node ) {
+        return new IncomingIterator( node );
+    }
+
+    @Override
+    public Iterator<Integer> getOutgoingEdgesIterator( int node ) {
+        return new OutgoingIterator( node );
+    }
+
+    private class IncomingIterator implements Iterator<Integer> {
+
+        private final int node;
+        private int position = -1;
+
+        public IncomingIterator( int node ) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() { // ... position + 1 < lastTwoway[node] // create a helper array of last position of the twoway node so that it does not have to go through the whole array when determining, whether a valid edge follows
+            return position + 1 < incomingEdges[node].length;
+        }
+
+        @Override
+        public Integer next() {
+            return incomingEdges[node][++position];
+        }
+
+    }
+
+    private class OutgoingIterator implements Iterator<Integer> {
+
+        private final int node;
+        private int position = -1;
+
+        public OutgoingIterator( int node ) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() { // see above, analogically
+            return position + 1 < outgoingEdges[node].length;
+        }
+
+        @Override
+        public Integer next() {
+            return outgoingEdges[node][++position];
+        }
     }
 
 }

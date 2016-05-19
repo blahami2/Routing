@@ -8,13 +8,8 @@ package cz.certicon.routing.model.entity;
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
- * @param <T>
  */
-public interface NodeSetBuilder<T> {
+public interface CoordinateSetBuilderFactory<T> {
 
-    public void addNode( long nodeId, long edgeId, double length, double speed );
-
-    public void addCrossroad( long nodeId );
-
-    public T build();
+    public CoordinateSetBuilder<T> createCoordinateSetBuilder();
 }

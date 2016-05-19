@@ -5,17 +5,19 @@
  */
 package cz.certicon.routing.model.entity.ch;
 
+import cz.certicon.routing.model.basic.Pair;
+import cz.certicon.routing.model.basic.Trinity;
+import java.util.Iterator;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface ChDataBuilder<T> {
+public interface ChDataExtractor<T> {
 
-    public void setRank( long nodeId, int rank );
+    public Iterator<Pair<Long, Integer>> getRankIterator();
 
-    public void addShortcut( long shortcutId, long sourceEdgeId, long targetEdgeId );
+    public Iterator<Trinity<Long, Long, Long>> getShortcutIterator();
 
     public int getDistanceTypeIntValue();
-
-    public T build();
 }

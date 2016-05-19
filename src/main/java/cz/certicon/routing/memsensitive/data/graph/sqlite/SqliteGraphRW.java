@@ -10,6 +10,9 @@ import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.data.graph.GraphRW;
 import cz.certicon.routing.memsensitive.model.entity.neighbourlist.NeighbourlistGraph;
+import cz.certicon.routing.utils.CollectionUtils;
+import static cz.certicon.routing.utils.CollectionUtils.getList;
+import static cz.certicon.routing.utils.CollectionUtils.toIntArray;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -71,8 +74,8 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
             int source = rs.getInt( sourceColumnIndex );
             int target = rs.getInt( targetColumnIndex );
 
-            getEdgeList( outgoingEdgesMap, source ).add( edgeCounter );
-            getEdgeList( incomingEdgesMap, target ).add( edgeCounter );
+            getList( outgoingEdgesMap, Long.valueOf( source ) ).add( edgeCounter );
+            getList( incomingEdgesMap, Long.valueOf( target ) ).add( edgeCounter );
 
             double length = rs.getDouble( lengthColumnIndex );
             double speed = rs.getDouble( ( rs.getBoolean( forwardColumnIndex ) ) ? speedFwColumnIndex : speedBwColumnIndex );
@@ -82,32 +85,15 @@ public class SqliteGraphRW extends AbstractSqliteDatabase<Graph, DistanceType> i
         }
         for ( Map.Entry<Long, List<Integer>> entry : outgoingEdgesMap.entrySet() ) {
             long origNodeId = entry.getKey();
-            int[] outgoingEdgesArray = toArray( entry.getValue() );
+            int[] outgoingEdgesArray = toIntArray( entry.getValue() );
             graph.setOutgoingEdges( graph.getNodeByOrigId( origNodeId ), outgoingEdgesArray );
         }
         for ( Map.Entry<Long, List<Integer>> entry : incomingEdgesMap.entrySet() ) {
             long origNodeId = entry.getKey();
-            int[] incomingEdgesArray = toArray( entry.getValue() );
+            int[] incomingEdgesArray = toIntArray( entry.getValue() );
             graph.setIncomingEdges( graph.getNodeByOrigId( origNodeId ), incomingEdgesArray );
         }
         return graph;
-    }
-
-    private List<Integer> getEdgeList( Map<Long, List<Integer>> map, long node ) {
-        List<Integer> list = map.get( node );
-        if ( list == null ) {
-            list = new ArrayList<>();
-            map.put( node, list );
-        }
-        return list;
-    }
-
-    private int[] toArray( List<Integer> list ) {
-        int[] array = new int[list.size()];
-        for ( int i = 0; i < list.size(); i++ ) {
-            array[i] = list.get( i );
-        }
-        return array;
     }
 
     @Override

@@ -3,18 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.model.entity;
+package cz.certicon.routing.memsensitive.algorithm;
+
+import java.util.Map;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
- * @param <T>
  */
-public interface NodeSetBuilder<T> {
+public interface RoutingAlgorithm {
 
-    public void addNode( long nodeId, long edgeId, double length, double speed );
-
-    public void addCrossroad( long nodeId );
-
-    public T build();
+    public <T> T route( RouteBuilder<T> routeBuilder, Map<Integer, Double> from, Map<Integer, Double> to );
 }

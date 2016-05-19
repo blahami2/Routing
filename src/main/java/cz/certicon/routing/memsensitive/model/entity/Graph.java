@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import java.util.Iterator;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
@@ -37,6 +39,8 @@ public interface Graph {
 
     public int getTarget( int edge );
 
+    public int getOtherNode( int edge, int node );
+
     public double getLength( int edge );
 
     public long getEdgeOrigId( int edge );
@@ -47,4 +51,12 @@ public interface Graph {
     public int getNodeByOrigId( long nodeId );
 
     public int getEdgeByOrigId( long edgeId );
+
+    public int getNodeCount();
+
+    public int getEdgeCount();
+    
+    public Iterator<Integer> getIncomingEdgesIterator(int node);
+    
+    public Iterator<Integer> getOutgoingEdgesIterator(int node);
 }
