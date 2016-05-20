@@ -89,6 +89,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
     @Override
     public <T> void write( ChDataFactory<T> chDataFactory, T entity ) throws IOException {
         try {
+            db.open();
             ChDataExtractor<T> chDataExtractor = chDataFactory.createChDataExtractor( entity );
             db.setAutoCommit( false ); //transaction block start
 
@@ -157,6 +158,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
 
             db.commit();
             db.setAutoCommit( true );
+            db.close();
         } catch ( SQLException ex ) {
             Logger.getLogger( SqliteContractionHierarchiesRW.class.getName() ).log( Level.SEVERE, null, ex );
         }

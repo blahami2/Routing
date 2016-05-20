@@ -31,6 +31,8 @@ public interface Graph {
 
     public void resetNodeDistanceArray( double[] nodeDistances );
 
+    public void resetNodeClosedArray( boolean[] nodeClosed );
+
     public int[] getIncomingEdges( int node );
 
     public int[] getOutgoingEdges( int node );
@@ -55,8 +57,10 @@ public interface Graph {
     public int getNodeCount();
 
     public int getEdgeCount();
-    
-    public Iterator<Integer> getIncomingEdgesIterator(int node);
-    
-    public Iterator<Integer> getOutgoingEdgesIterator(int node);
+
+    public Iterator<Integer> getIncomingEdgesIterator( int node );
+
+    public Iterator<Integer> getOutgoingEdgesIterator( int node );
+
+    public boolean isValidPredecessor( int predecessor );
 }

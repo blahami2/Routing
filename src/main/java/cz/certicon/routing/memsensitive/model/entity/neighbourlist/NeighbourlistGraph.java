@@ -25,10 +25,12 @@ public class NeighbourlistGraph implements Graph {
     private final int[][] outgoingEdges;
     private final int[] nodePredecessorsPrototype;
     private final double[] nodeDistancesPrototype;
+    private final boolean[] nodeClosedPrototype;
     private final long[] nodeOrigIds;
     private final long[] edgeOrigIds;
 
     private static final double DISTANCE_DEFAULT = Double.MAX_VALUE;
+    private static final boolean CLOSED_DEFAULT = false;
     private static final int PREDECESSOR_DEFAULT = -1;
 
     private final Map<Long, Integer> fromOrigNodesMap;
@@ -40,6 +42,7 @@ public class NeighbourlistGraph implements Graph {
         this.edgeLengths = new double[edgeCount];
         this.nodePredecessorsPrototype = new int[nodeCount];
         this.nodeDistancesPrototype = new double[nodeCount];
+        this.nodeClosedPrototype = new boolean[nodeCount];
         this.incomingEdges = new int[nodeCount][];
         this.outgoingEdges = new int[nodeCount][];
         this.nodeOrigIds = new long[nodeCount];
@@ -48,6 +51,7 @@ public class NeighbourlistGraph implements Graph {
         this.fromOrigNodesMap = new HashMap<>();
         EffectiveUtils.fillArray( nodePredecessorsPrototype, PREDECESSOR_DEFAULT );
         EffectiveUtils.fillArray( nodeDistancesPrototype, DISTANCE_DEFAULT );
+        EffectiveUtils.fillArray( nodeClosedPrototype, CLOSED_DEFAULT );
     }
 
     @Override
@@ -83,6 +87,11 @@ public class NeighbourlistGraph implements Graph {
     @Override
     public void resetNodeDistanceArray( double[] nodeDistances ) {
         System.arraycopy( nodeDistancesPrototype, 0, nodeDistances, 0, nodeDistances.length );
+    }
+
+    @Override
+    public void resetNodeClosedArray( boolean[] nodeClosed ) {
+        System.arraycopy( nodeClosedPrototype, 0, nodeClosed, 0, nodeClosed.length );
     }
 
     @Override
@@ -154,6 +163,7 @@ public class NeighbourlistGraph implements Graph {
 
     @Override
     public int getOtherNode( int edge, int node ) {
+//        System.out.println( "#getOtherNode: edge = " + edge+ ", node = " + node + ", source = " + edgeSources[edge] + ", target = " + edgeTargets[edge] );
         int target = edgeTargets[edge];
         if ( target == node ) {
             return edgeSources[edge];
@@ -169,6 +179,11 @@ public class NeighbourlistGraph implements Graph {
     @Override
     public Iterator<Integer> getOutgoingEdgesIterator( int node ) {
         return new OutgoingIterator( node );
+    }
+
+    @Override
+    public boolean isValidPredecessor( int predecessor ) {
+        return predecessor != PREDECESSOR_DEFAULT;
     }
 
     private class IncomingIterator implements Iterator<Integer> {

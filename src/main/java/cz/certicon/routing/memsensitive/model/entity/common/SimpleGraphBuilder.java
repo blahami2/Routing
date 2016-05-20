@@ -10,6 +10,7 @@ import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.neighbourlist.NeighbourlistGraph;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,46 +23,58 @@ public class SimpleGraphBuilder implements GraphBuilder<Graph> {
 
     private final Graph graph;
     private final DistanceType distanceType;
-    private final Map<Long, List<Integer>> outgoingEdgesMap = new HashMap<>();
-    private final Map<Long, List<Integer>> incomingEdgesMap = new HashMap<>();
+    private final Map<Integer, List<Integer>> outgoingEdgesMap = new HashMap<>();
+    private final Map<Integer, List<Integer>> incomingEdgesMap = new HashMap<>();
     private int nodeCounter = 0;
     private int edgeCounter = 0;
 
     public SimpleGraphBuilder( int nodeCount, int edgeCount, DistanceType distanceType ) {
         this.graph = new NeighbourlistGraph( nodeCount, edgeCount );
         this.distanceType = distanceType;
+        for ( int i = 0; i < nodeCount; i++ ) {
+            getEdgeList( incomingEdgesMap, i );
+            getEdgeList( outgoingEdgesMap, i );
+        }
     }
 
     @Override
     public void addNode( long id, long dataId, long osmId, double latitude, double longitude ) {
+//        System.out.println( "adding node: " + id + ", idx = " + nodeCounter );
         graph.setNodeOrigId( nodeCounter++, id );
     }
 
     @Override
     public void addEdge( long id, long dataId, long osmId, long sourceId, long targetId, double length, double speed, boolean isPaid ) {
+//        System.out.println( "adding edge: " + id + ", idx = " + edgeCounter + ", source = " + sourceId + ", target = " + targetId );
         graph.setEdgeOrigId( edgeCounter, id );
-        getEdgeList( outgoingEdgesMap, sourceId ).add( edgeCounter );
-        getEdgeList( incomingEdgesMap, targetId ).add( edgeCounter );
+        int source = graph.getNodeByOrigId( sourceId );
+        int target = graph.getNodeByOrigId( targetId );
+        getEdgeList( outgoingEdgesMap, source ).add( edgeCounter );
+        getEdgeList( incomingEdgesMap, target ).add( edgeCounter );
         graph.setLength( edgeCounter, distanceType.calculateDistance( length, speed ) );
+        graph.setSource( edgeCounter, source );
+        graph.setTarget( edgeCounter, target );
         edgeCounter++;
     }
 
     @Override
     public Graph build() {
-        for ( Map.Entry<Long, List<Integer>> entry : outgoingEdgesMap.entrySet() ) {
-            long origNodeId = entry.getKey();
+        for ( Map.Entry<Integer, List<Integer>> entry : outgoingEdgesMap.entrySet() ) {
+            int nodeId = entry.getKey();
             int[] outgoingEdgesArray = toArray( entry.getValue() );
-            graph.setOutgoingEdges( graph.getNodeByOrigId( origNodeId ), outgoingEdgesArray );
+            graph.setOutgoingEdges( nodeId, outgoingEdgesArray );
+//            System.out.println( "outgoing edges for: " + nodeId + " = " + Arrays.toString( outgoingEdgesArray ) );
         }
-        for ( Map.Entry<Long, List<Integer>> entry : incomingEdgesMap.entrySet() ) {
-            long origNodeId = entry.getKey();
+        for ( Map.Entry<Integer, List<Integer>> entry : incomingEdgesMap.entrySet() ) {
+            int nodeId = entry.getKey();
             int[] incomingEdgesArray = toArray( entry.getValue() );
-            graph.setIncomingEdges( graph.getNodeByOrigId( origNodeId ), incomingEdgesArray );
+            graph.setIncomingEdges( nodeId, incomingEdgesArray );
+//            System.out.println( "incoming edges for: " + nodeId + " = " + Arrays.toString( incomingEdgesArray ) );
         }
         return graph;
     }
 
-    private List<Integer> getEdgeList( Map<Long, List<Integer>> map, long node ) {
+    private List<Integer> getEdgeList( Map<Integer, List<Integer>> map, int node ) {
         List<Integer> list = map.get( node );
         if ( list == null ) {
             list = new ArrayList<>();

@@ -36,4 +36,8 @@ public class StringSqliteReader {
         return database.read( sql );
     }
 
+    public void close() throws IOException {
+        database.close();
+    }
+
 }

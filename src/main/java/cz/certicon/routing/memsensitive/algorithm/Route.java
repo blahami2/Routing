@@ -5,19 +5,20 @@
  */
 package cz.certicon.routing.memsensitive.algorithm;
 
+import cz.certicon.routing.model.basic.Pair;
+import cz.certicon.routing.model.entity.Coordinates;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface RouteBuilder<R,G> {
+public interface Route {
 
-    public void setSourceNode( long nodeId );
+    public Iterator<Pair<Long, Boolean>> getEdgeIterator();
 
-    public void setTargetNode( long nodeId );
+    public long getTarget();
 
-    public void addEdgeAsFirst( G graph, long edgeId );
-
-    public void addEdgeAsLast( G graph, long edgeId );
-
-    public R build();
+    public long getSource();
 }

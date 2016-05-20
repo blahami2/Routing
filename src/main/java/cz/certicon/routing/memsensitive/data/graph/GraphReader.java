@@ -5,14 +5,15 @@
  */
 package cz.certicon.routing.memsensitive.data.graph;
 
-import cz.certicon.routing.data.Reader;
-import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
+import cz.certicon.routing.model.entity.GraphBuilderFactory;
+import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphRW extends Reader<DistanceType, Graph> {
-    
+public interface GraphReader {
+
+    public <T> T readGraph( GraphBuilderFactory<T> GraphBuilderFactory, DistanceType distanceType ) throws IOException;
 }

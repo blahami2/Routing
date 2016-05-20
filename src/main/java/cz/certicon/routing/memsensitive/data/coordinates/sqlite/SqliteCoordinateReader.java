@@ -64,6 +64,7 @@ public class SqliteCoordinateReader implements CoordinateReader {
                 throw new IOException( ex );
             }
         }
+        reader.close();
         return coordinateSetBuilder.build();
     }
 

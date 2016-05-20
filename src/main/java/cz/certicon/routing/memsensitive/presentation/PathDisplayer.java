@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.memsensitive.algorithm;
+package cz.certicon.routing.memsensitive.presentation;
 
-import java.util.Map;
+import cz.certicon.routing.memsensitive.model.entity.Path;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface RoutingAlgorithm<G> {
+public interface PathDisplayer {
 
-    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Double> from, Map<Integer, Double> to );
+    public void displayPath( Path path );
 }
