@@ -3,20 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.utils.measuring;
+package cz.certicon.routing.model.basic;
 
 /**
- * Enumerate containing available time units.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public enum TimeUnits {
-    NANOSECONDS( 1, "ns" ), MICROSECONDS( NANOSECONDS.getDivisor() * 1000, "mcs" ), MILLISECONDS( MICROSECONDS.getDivisor() * 1000, "ms" ), SECONDS( MILLISECONDS.getDivisor() * 1000, "s" ), MINUTES( SECONDS.getDivisor() * 60, "min" ), HOURS( MINUTES.getDivisor() * 60, "h" ), DAYS( HOURS.getDivisor() * 24, "days" );
+public enum LengthUnits {
+    NANOMETERS( 1, "nm" ), MICROMETERS( NANOMETERS.getDivisor() * 1000, "mcm" ), MILLIMERERS( MICROMETERS.getDivisor() * 1000, "mm" ), METERS( MILLIMERERS.getDivisor() * 1000, "m" ), KILOMETERS( METERS.getDivisor() * 1000, "km" );
 
     private final long nanoDivisor;
     private final String unit;
 
-    private TimeUnits( long nanoDivisor, String unit ) {
+    private LengthUnits( long nanoDivisor, String unit ) {
         this.nanoDivisor = nanoDivisor;
         this.unit = unit;
     }
@@ -28,8 +27,12 @@ public enum TimeUnits {
     public long fromNano( long nanoseconds ) {
         return nanoseconds / nanoDivisor;
     }
-    
-    public String getUnit(){
+
+    public long toNano( long length ) {
+        return length * nanoDivisor;
+    }
+
+    public String getUnit() {
         return unit;
     }
 }

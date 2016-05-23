@@ -20,7 +20,7 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
-import cz.certicon.routing.utils.measuring.TimeUnits;
+import cz.certicon.routing.model.basic.TimeUnits;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

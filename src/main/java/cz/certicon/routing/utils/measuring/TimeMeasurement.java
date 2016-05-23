@@ -5,6 +5,9 @@
  */
 package cz.certicon.routing.utils.measuring;
 
+import cz.certicon.routing.model.basic.Time;
+import cz.certicon.routing.model.basic.TimeUnits;
+
 /**
  * Time measurement class. Uses {@link TimeUnits} to determine the time unit.
  * Default is NANOSECONDS.
@@ -48,6 +51,10 @@ public class TimeMeasurement {
             return 0;
         }
         return timeUnits.fromNano( time );
+    }
+
+    public Time getTime() {
+        return new Time( TimeUnits.NANOSECONDS, time );
     }
 
     /**

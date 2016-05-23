@@ -26,7 +26,7 @@ import cz.certicon.routing.model.utility.progress.EmptyProgressListener;
 import cz.certicon.routing.utils.DoubleComparator;
 import cz.certicon.routing.utils.debug.Log;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
-import cz.certicon.routing.utils.measuring.TimeUnits;
+import cz.certicon.routing.model.basic.TimeUnits;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

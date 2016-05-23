@@ -20,7 +20,7 @@ import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
-import cz.certicon.routing.utils.measuring.TimeUnits;
+import cz.certicon.routing.model.basic.TimeUnits;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
