@@ -49,8 +49,11 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
     private final int[] predecessorPrototype;
     private final NodeDataStructure<Integer>[] nodeDataStructure;
 
-    public OptimizedContractionHierarchiesRoutingAlgorithmWithUB( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, Map<Node.Id, Integer> nodeRankMap ) {
+    public OptimizedContractionHierarchiesRoutingAlgorithmWithUB( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, List<Shortcut> shortcuts, Map<Node.Id, Integer> nodeRankMap ) {
         super( graph, entityAbstractFactory, distanceFactory );
+        for ( Shortcut shortcut : shortcuts ) {
+            graph.addEdge( shortcut );
+        }
         int nodeCount = graph.getNodes().size();
         int edgeCount = graph.getEdges().size();
         this.nodePositionMap = new HashMap<>();
@@ -102,6 +105,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
         this.nodeDataStructure = new JgraphtFibonacciDataStructure[2];
         this.nodeDataStructure[0] = new JgraphtFibonacciDataStructure<>();
         this.nodeDataStructure[1] = new JgraphtFibonacciDataStructure<>();
+        for ( Shortcut shortcut : shortcuts ) {
+            graph.removeEdge( shortcut );
+        }
     }
 
     @Override

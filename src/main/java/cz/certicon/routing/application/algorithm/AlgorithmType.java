@@ -10,5 +10,5 @@ package cz.certicon.routing.application.algorithm;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum AlgorithmType {
-    DIJKSTRA, ASTAR, CONTRACTION_HIERARCHIES;
+    DIJKSTRA, ASTAR, CONTRACTION_HIERARCHIES, CONTRACTION_HIERARCHIES_OPTIMIZED, CONTRACTION_HIERARCHIES_OPTIMIZED_UB;
 }
