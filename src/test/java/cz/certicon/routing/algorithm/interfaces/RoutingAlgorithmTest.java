@@ -43,7 +43,7 @@ import cz.certicon.routing.application.algorithm.algorithms.ch.ContractionHierar
 import cz.certicon.routing.application.algorithm.algorithms.ch.OptimizedContractionHierarchiesRoutingAlgorithm;
 import cz.certicon.routing.application.preprocessing.ch.BasicContractionHierarchiesPreprocessor;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.presentation.GraphPresenter;
 import cz.certicon.routing.presentation.graphstream.GraphStreamPresenter;

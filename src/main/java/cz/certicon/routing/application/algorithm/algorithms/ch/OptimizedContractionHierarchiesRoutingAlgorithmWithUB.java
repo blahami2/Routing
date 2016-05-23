@@ -18,6 +18,7 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Shortcut;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
     private final int[] predecessorPrototype;
     private final NodeDataStructure<Integer>[] nodeDataStructure;
 
-    public OptimizedContractionHierarchiesRoutingAlgorithmWithUB(Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, Map<Node.Id, Integer> nodeRankMap) {
-        super(graph, entityAbstractFactory, distanceFactory);
+    public OptimizedContractionHierarchiesRoutingAlgorithmWithUB( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory, Map<Node.Id, Integer> nodeRankMap ) {
+        super( graph, entityAbstractFactory, distanceFactory );
         int nodeCount = graph.getNodes().size();
         int edgeCount = graph.getEdges().size();
         this.nodePositionMap = new HashMap<>();
@@ -65,36 +66,36 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
         this.distancePrototype = new double[nodeCount];
         this.predecessorPrototype = new int[nodeCount];
         int counter = 0;
-        for (Node node : graph.getNodes()) {
-            nodePositionMap.put(node.getId(), counter);
+        for ( Node node : graph.getNodes() ) {
+            nodePositionMap.put( node.getId(), counter );
             origNodes[counter] = node;
-            rankArray[counter] = nodeRankMap.get(node.getId());
+            rankArray[counter] = nodeRankMap.get( node.getId() );
             distancePrototype[counter] = Double.MAX_VALUE;
             predecessorPrototype[counter] = -1;
             counter++;
         }
         counter = 0;
-        for (Edge edge : graph.getEdges()) {
-            edgePositionMap.put(edge.getId(), counter);
+        for ( Edge edge : graph.getEdges() ) {
+            edgePositionMap.put( edge.getId(), counter );
             origEdges[counter] = edge;
             edgeLengthArray[counter] = edge.getDistance().getEvaluableValue();
-            edgeSourceArray[counter] = nodePositionMap.get(edge.getSourceNode().getId());
-            edgeTargetArray[counter] = nodePositionMap.get(edge.getTargetNode().getId());
+            edgeSourceArray[counter] = nodePositionMap.get( edge.getSourceNode().getId() );
+            edgeTargetArray[counter] = nodePositionMap.get( edge.getTargetNode().getId() );
             counter++;
         }
         counter = 0;
-        for (Node node : graph.getNodes()) {
-            Set<Edge> incomingEdgesOf = graph.getIncomingEdgesOf(node);
+        for ( Node node : graph.getNodes() ) {
+            Set<Edge> incomingEdgesOf = graph.getIncomingEdgesOf( node );
             int i = 0;
             incomingEdgesArray[counter] = new int[incomingEdgesOf.size()];
-            for (Edge edge : incomingEdgesOf) {
-                incomingEdgesArray[counter][i++] = edgePositionMap.get(edge.getId());
+            for ( Edge edge : incomingEdgesOf ) {
+                incomingEdgesArray[counter][i++] = edgePositionMap.get( edge.getId() );
             }
-            Set<Edge> outgoingEdgesOf = graph.getOutgoingEdgesOf(node);
+            Set<Edge> outgoingEdgesOf = graph.getOutgoingEdgesOf( node );
             i = 0;
             outgoingEdgesArray[counter] = new int[outgoingEdgesOf.size()];
-            for (Edge edge : outgoingEdgesOf) {
-                outgoingEdgesArray[counter][i++] = edgePositionMap.get(edge.getId());
+            for ( Edge edge : outgoingEdgesOf ) {
+                outgoingEdgesArray[counter][i++] = edgePositionMap.get( edge.getId() );
             }
             counter++;
         }
@@ -104,157 +105,172 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
     }
 
     @Override
-    public Path route(Map<Node.Id, Distance> from, Map<Node.Id, Distance> to) {
+    public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
         TimeMeasurement time = new TimeMeasurement();
-        time.setTimeUnits(TimeUnits.NANOSECONDS);
-        if (DEBUG_TIME) {
+        time.setTimeUnits( TimeUnits.NANOSECONDS );
+        if ( DEBUG_TIME ) {
             time.start();
+        }
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
 
         List<Integer> fromVisitedNodes = new ArrayList<>();
         List<Integer> toVisitedNodes = new ArrayList<>();
         double[] fromDistanceArray = new double[origNodes.length];
         double[] toDistanceArray = new double[origNodes.length];
-        System.arraycopy(distancePrototype, 0, fromDistanceArray, 0, distancePrototype.length);
-        System.arraycopy(distancePrototype, 0, toDistanceArray, 0, distancePrototype.length);
+        System.arraycopy( distancePrototype, 0, fromDistanceArray, 0, distancePrototype.length );
+        System.arraycopy( distancePrototype, 0, toDistanceArray, 0, distancePrototype.length );
         int[] fromPredecessorArray = new int[origNodes.length];
         int[] toPredecessorArray = new int[origNodes.length];
-        System.arraycopy(predecessorPrototype, 0, fromPredecessorArray, 0, predecessorPrototype.length);
-        System.arraycopy(predecessorPrototype, 0, toPredecessorArray, 0, predecessorPrototype.length);
+        System.arraycopy( predecessorPrototype, 0, fromPredecessorArray, 0, predecessorPrototype.length );
+        System.arraycopy( predecessorPrototype, 0, toPredecessorArray, 0, predecessorPrototype.length );
         nodeDataStructure[0].clear();
         nodeDataStructure[1].clear();
-        for (Map.Entry<Node.Id, Distance> entry : from.entrySet()) {
-            int idx = nodePositionMap.get(entry.getKey());
+        for ( Map.Entry<Node.Id, Distance> entry : from.entrySet() ) {
+            int idx = nodePositionMap.get( entry.getKey() );
             double value = entry.getValue().getEvaluableValue();
             fromDistanceArray[idx] = value;
-            nodeDataStructure[0].add(idx, value);
+            nodeDataStructure[0].add( idx, value );
         }
-        for (Map.Entry<Node.Id, Distance> entry : to.entrySet()) {
-            int idx = nodePositionMap.get(entry.getKey());
+        for ( Map.Entry<Node.Id, Distance> entry : to.entrySet() ) {
+            int idx = nodePositionMap.get( entry.getKey() );
             double value = entry.getValue().getEvaluableValue();
             toDistanceArray[idx] = value;
-            nodeDataStructure[1].add(idx, value);
+            nodeDataStructure[1].add( idx, value );
         }
 
-        if (DEBUG_TIME) {
-            System.out.println("Data prepared in " + time.getTimeString());
+        if ( DEBUG_TIME ) {
+            System.out.println( "Data prepared in " + time.getTimeString() );
             time.start();
         }
-        if (DEBUG_CORRECTNESS) {
-            System.out.println("FROM");
+        if ( DEBUG_CORRECTNESS ) {
+            System.out.println( "FROM" );
         }
         boolean fromRun = true; //false = to run
         double UB = Double.MAX_VALUE;
-        while (!nodeDataStructure[0].isEmpty() || !nodeDataStructure[1].isEmpty()) {
-            if(nodeDataStructure[0].isEmpty()) fromRun = false;
-            if(nodeDataStructure[1].isEmpty()) fromRun = true;
-            
-            if (fromRun) {
+        while ( !nodeDataStructure[0].isEmpty() || !nodeDataStructure[1].isEmpty() ) {
+            if ( nodeDataStructure[0].isEmpty() ) {
+                fromRun = false;
+            }
+            if ( nodeDataStructure[1].isEmpty() ) {
+                fromRun = true;
+            }
+
+            if ( fromRun ) {
                 // extract node S with the minimal distance
                 int currentNode = nodeDataStructure[0].extractMin();
-                fromVisitedNodes.add(currentNode);
+                fromVisitedNodes.add( currentNode );
                 int sourceRank = rankArray[currentNode];
                 double currentDistance = fromDistanceArray[currentNode];
-                if (DEBUG_CORRECTNESS) {
-                    System.out.println("current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance);
+                if ( DEBUG_CORRECTNESS ) {
+                    System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
                 // foreach neighbour T of node S
-                for (int i = 0; i < outgoingEdgesArray[currentNode].length; i++) {
+                for ( int i = 0; i < outgoingEdgesArray[currentNode].length; i++ ) {
                     int edge = outgoingEdgesArray[currentNode][i];
                     int otherNode = edgeTargetArray[edge];
-                    if (rankArray[otherNode] > sourceRank) {
+                    if ( rankArray[otherNode] > sourceRank ) {
                         double otherNodeDistance = fromDistanceArray[otherNode];
                         double distance = currentDistance + edgeLengthArray[edge];
-                        if (distance < otherNodeDistance) {
+                        if ( distance < otherNodeDistance ) {
                             fromDistanceArray[otherNode] = distance;
                             fromPredecessorArray[otherNode] = edge;
-                            if (!nodeDataStructure[0].contains(otherNode)) {
-                                nodeDataStructure[0].add(otherNode, distance);
+                            if ( !nodeDataStructure[0].contains( otherNode ) ) {
+                                nodeDataStructure[0].add( otherNode, distance );
                             } else {
-                                nodeDataStructure[0].notifyDataChange(otherNode, distance);
+                                nodeDataStructure[0].notifyDataChange( otherNode, distance );
                             }
                         }
                     }
                 }
-                
+
                 fromRun = false;
-                if(toVisitedNodes.contains(currentNode)) {
+                if ( toVisitedNodes.contains( currentNode ) ) {
                     double dist = fromDistanceArray[currentNode] + toDistanceArray[currentNode];
-                    if (dist < UB) {
+                    if ( dist < UB ) {
                         UB = dist;
-                    }                
+                    }
                 }
             } else {
                 // extract node S with the minimal distance
                 int currentNode = nodeDataStructure[1].extractMin();
-                toVisitedNodes.add(currentNode);
+                toVisitedNodes.add( currentNode );
                 int sourceRank = rankArray[currentNode];
                 double currentDistance = toDistanceArray[currentNode];
-                if (DEBUG_CORRECTNESS) {
-                    System.out.println("current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance);
+                if ( DEBUG_CORRECTNESS ) {
+                    System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
                 // foreach neighbour T of node S
-                for (int i = 0; i < incomingEdgesArray[currentNode].length; i++) {
+                for ( int i = 0; i < incomingEdgesArray[currentNode].length; i++ ) {
                     int edge = incomingEdgesArray[currentNode][i];
                     int otherNode = edgeSourceArray[edge];
-                    if (rankArray[otherNode] > sourceRank) {
+                    if ( rankArray[otherNode] > sourceRank ) {
                         double otherNodeDistance = toDistanceArray[otherNode];
                         double distance = currentDistance + edgeLengthArray[edge];
-                        if (distance < otherNodeDistance) {
+                        if ( distance < otherNodeDistance ) {
                             toDistanceArray[otherNode] = distance;
                             toPredecessorArray[otherNode] = edge;
-                            if (!nodeDataStructure[1].contains(otherNode)) {
-                                nodeDataStructure[1].add(otherNode, distance);
+                            if ( !nodeDataStructure[1].contains( otherNode ) ) {
+                                nodeDataStructure[1].add( otherNode, distance );
                             } else {
-                                nodeDataStructure[1].notifyDataChange(otherNode, distance);
+                                nodeDataStructure[1].notifyDataChange( otherNode, distance );
                             }
                         }
                     }
                 }
-                
+
                 fromRun = true;
-                if(fromVisitedNodes.contains(currentNode)) {
+                if ( fromVisitedNodes.contains( currentNode ) ) {
                     double dist = fromDistanceArray[currentNode] + toDistanceArray[currentNode];
-                    if (dist < UB) {
+                    if ( dist < UB ) {
                         UB = dist;
-                    }                
+                    }
                 }
             }
-            
-            if(fromDistanceArray[nodeDataStructure[0].peek()] + toDistanceArray[nodeDataStructure[1].peek()] >= UB) break;
+
+            if ( fromDistanceArray[nodeDataStructure[0].peek()] + toDistanceArray[nodeDataStructure[1].peek()] >= UB ) {
+                break;
+            }
         }
 
-        if (DEBUG_TIME) {
-            System.out.println("Dijkstra done in " + time.getTimeString());
+        if ( DEBUG_TIME ) {
+            System.out.println( "Dijkstra done in " + time.getTimeString() );
             time.start();
         }
 
         double minDistance = Double.MAX_VALUE;
         int minNode = -1;
-        for (Integer fromVisitedNode : fromVisitedNodes) {
+        for ( Integer fromVisitedNode : fromVisitedNodes ) {
             double dist = fromDistanceArray[fromVisitedNode] + toDistanceArray[fromVisitedNode];
-            if (0 <= dist && dist < minDistance) {
+            if ( 0 <= dist && dist < minDistance ) {
                 minDistance = dist;
                 minNode = fromVisitedNode;
             }
         }
-        
-        System.out.println("Min distance = " + minDistance);
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+        }
 
-        if (DEBUG_TIME) {
-            System.out.println("Min node found in " + time.getTimeString());
+        System.out.println( "Min distance = " + minDistance );
+
+        if ( DEBUG_TIME ) {
+            System.out.println( "Min node found in " + time.getTimeString() );
             time.start();
         }
-        if (DEBUG_CORRECTNESS) {
-            System.out.println("min node = " + origNodes[minNode]);
+        if ( DEBUG_CORRECTNESS ) {
+            System.out.println( "min node = " + origNodes[minNode] );
         }
-        if (minNode != -1) {
+        if ( minNode != -1 ) {
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            }
             List<Edge> startEdges = new ArrayList<>();
             int currentNode = minNode;
             int firstNode = currentNode;
             int edge = fromPredecessorArray[currentNode];
-            while (edge != -1) {
-                startEdges.add(origEdges[edge]);
+            while ( edge != -1 ) {
+                startEdges.add( origEdges[edge] );
                 currentNode = edgeSourceArray[edge];
                 firstNode = currentNode;
                 edge = fromPredecessorArray[currentNode];
@@ -262,28 +278,31 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
             List<Edge> endEdges = new ArrayList<>();
             currentNode = minNode;
             edge = toPredecessorArray[currentNode];
-            while (edge != -1) {
-                endEdges.add(origEdges[edge]);
+            while ( edge != -1 ) {
+                endEdges.add( origEdges[edge] );
                 currentNode = edgeTargetArray[edge];
                 edge = toPredecessorArray[currentNode];
             }
-            Path path = getEntityAbstractFactory().createPathWithSource(getGraph(), origNodes[firstNode]);
+            Path path = getEntityAbstractFactory().createPathWithSource( getGraph(), origNodes[firstNode] );
             List<Edge> pathEdges = new ArrayList<>();
-            for (int i = startEdges.size() - 1; i >= 0; i--) {
-                addEdges(pathEdges, startEdges.get(i));
+            for ( int i = startEdges.size() - 1; i >= 0; i-- ) {
+                addEdges( pathEdges, startEdges.get( i ) );
             }
-            for (int i = 0; i < endEdges.size(); i++) {
-                addEdges(pathEdges, endEdges.get(i));
+            for ( int i = 0; i < endEdges.size(); i++ ) {
+                addEdges( pathEdges, endEdges.get( i ) );
             }
-            for (Edge pathEdge : pathEdges) {
-                if (pathEdge instanceof Shortcut) {
-                    throw new AssertionError("Cannot happen");
+            for ( Edge pathEdge : pathEdges ) {
+                if ( pathEdge instanceof Shortcut ) {
+                    throw new AssertionError( "Cannot happen" );
                 }
-                path.addEdge(pathEdge);
+                path.addEdge( pathEdge );
             }
 
-            if (DEBUG_TIME) {
-                System.out.println("Path built in " + time.getTimeString());
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
+            }
+            if ( DEBUG_TIME ) {
+                System.out.println( "Path built in " + time.getTimeString() );
                 time.start();
             }
             return path;
@@ -292,13 +311,13 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
         }
     }
 
-    private void addEdges(List<Edge> edges, Edge edge) {
-        if (edge instanceof Shortcut) {
+    private void addEdges( List<Edge> edges, Edge edge ) {
+        if ( edge instanceof Shortcut ) {
             Shortcut shortcut = (Shortcut) edge;
-            addEdges(edges, shortcut.getSourceEdge());
-            addEdges(edges, shortcut.getTargetEdge());
+            addEdges( edges, shortcut.getSourceEdge() );
+            addEdges( edges, shortcut.getTargetEdge() );
         } else {
-            edges.add(edge);
+            edges.add( edge );
         }
     }
 

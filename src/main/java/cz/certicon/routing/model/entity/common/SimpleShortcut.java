@@ -6,7 +6,7 @@
 package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
@@ -110,14 +110,14 @@ public class SimpleShortcut implements Shortcut {
     }
 
     @Override
-    public List<Coordinates> getCoordinates() {
-        List<Coordinates> coords = new ArrayList<>( sourceEdge.getCoordinates() );
+    public List<Coordinate> getCoordinates() {
+        List<Coordinate> coords = new ArrayList<>( sourceEdge.getCoordinates() );
         coords.addAll( targetEdge.getCoordinates() );
         return coords;
     }
 
     @Override
-    public void setCoordinates( List<Coordinates> coordinates ) {
+    public void setCoordinates( List<Coordinate> coordinates ) {
     }
 
     @Override

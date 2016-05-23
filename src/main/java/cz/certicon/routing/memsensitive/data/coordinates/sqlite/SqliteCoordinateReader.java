@@ -9,7 +9,7 @@ import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.data.coordinates.CoordinateReader;
 import cz.certicon.routing.model.entity.CoordinateSetBuilder;
 import cz.certicon.routing.model.entity.CoordinateSetBuilderFactory;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.utility.iterator.LongIterator;
 import cz.certicon.routing.utils.GeometryUtils;
@@ -57,7 +57,7 @@ public class SqliteCoordinateReader implements CoordinateReader {
                 int linestringColumnIdx = rs.findColumn( "linestring" );
                 while ( rs.next() ) {
                     long id = rs.getLong( idColumnIdx );
-                    List<Coordinates> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringColumnIdx ) );
+                    List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringColumnIdx ) );
                     coordinateSetBuilder.addCoordinates( id, coordinates );
                 }
             } catch ( SQLException ex ) {

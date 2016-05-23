@@ -28,7 +28,7 @@ import org.openstreetmap.osmosis.osmbinary.file.BlockOutputStream;
 import static cz.certicon.routing.data.graph.xml.Tag.*;
 import cz.certicon.routing.model.basic.Quaternion;
 import cz.certicon.routing.model.basic.Trinity;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.logging.Level;
@@ -508,7 +508,7 @@ public class OsmPbfDataMinimizer implements MapDataMinimizer {
         protected void parseNode( long id, double latitude, double longitude ) {
             for ( SmallWay way : wayMap.values() ) {
                 if ( way.coordinateMap.containsKey( id ) ) {
-                    way.addCoordinate(id, new Coordinates( latitude, longitude ) );
+                    way.addCoordinate(id, new Coordinate( latitude, longitude ) );
                 }
             }
         }

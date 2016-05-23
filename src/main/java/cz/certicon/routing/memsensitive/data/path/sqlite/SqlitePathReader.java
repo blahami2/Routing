@@ -11,7 +11,7 @@ import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.data.path.PathReader;
 import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.utils.GeometryUtils;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -85,7 +85,7 @@ public class SqlitePathReader implements PathReader {
                     boolean dbForward = rs.getBoolean( forwardIdx );
                     boolean mapForward = forwardMap.get( id );
                     boolean isForward = ( dbForward && mapForward ) || ( !dbForward && !mapForward );
-                    List<Coordinates> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
+                    List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
                     double length = rs.getDouble( lengthIdx );
                     int speed = rs.getInt( isForward ? speedFwIdx : speedBwIdx );
                     pathBuilder.addEdge( graph, id, isForward, coordinates, length, length / speed );

@@ -6,6 +6,7 @@
 package cz.certicon.routing.application.algorithm.algorithms.dijkstra;
 
 import cz.certicon.routing.GlobalOptions;
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -17,6 +18,7 @@ import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacci
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.utils.GraphUtils;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.HashSet;
@@ -29,7 +31,7 @@ import java.util.Set;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
-    
+
     private static final boolean DEBUG_TIME = GlobalOptions.DEBUG_TIME;
 
     private NodeDataStructure<Node> nodeDataStructure;
@@ -93,6 +95,9 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             System.out.println( "Routing..." );
             time.start();
         }
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
+        }
 //        GraphPresenter gp = new GraphStreamPresenter();
 //        gp.displayGraph( getGraph() );
 //        try {
@@ -126,6 +131,10 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //            System.out.println( "extracted: " + currentNode );
             closed.add( currentNode );
             if ( endCondition.isFinished( getGraph(), to, currentNode ) ) {
+
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+                }
                 if ( DEBUG_TIME ) {
                     System.out.println( "Dijkstra done in " + time.getTimeString() );
                     long fromExecutionTime = time.stop();
@@ -140,6 +149,13 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                     time.start();
                 }
                 // build path from predecessors and return
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+                }
+                Path result = endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
+                }
                 return endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
             }
             // foreach neighbour T of node S

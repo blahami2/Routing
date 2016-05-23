@@ -6,7 +6,7 @@
 package cz.certicon.routing.memsensitive.algorithm;
 
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.util.Iterator;
 import java.util.List;
 

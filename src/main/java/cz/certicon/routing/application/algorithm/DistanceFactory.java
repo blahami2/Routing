@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import java.util.List;
@@ -60,9 +60,9 @@ public interface DistanceFactory {
      * Creates an instance using approximate distance calculation from the two
      * given nodes.
      *
-     * @param a the first {@link Coordinates}
-     * @param b the second {@link Coordinates}
+     * @param a the first {@link Coordinate}
+     * @param b the second {@link Coordinate}
      * @return an instance of {@link Distance}
      */
-    public Distance createApproximateFromCoordinates( Coordinates a, Coordinates b );
+    public Distance createApproximateFromCoordinates( Coordinate a, Coordinate b );
 }

@@ -8,7 +8,7 @@ package cz.certicon.routing.application.algorithm.data.number;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.utils.CoordinateUtils;
 
 /**
@@ -39,7 +39,7 @@ public class LengthDistanceFactory implements DistanceFactory {
     }
 
     @Override
-    public Distance createApproximateFromCoordinates( Coordinates a, Coordinates b ) {
+    public Distance createApproximateFromCoordinates( Coordinate a, Coordinate b ) {
         return new DoubleDistance( CoordinateUtils.calculateDistance( a, b ) / 1000 );
     }
 

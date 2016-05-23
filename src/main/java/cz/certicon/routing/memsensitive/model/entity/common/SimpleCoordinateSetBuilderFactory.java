@@ -7,7 +7,7 @@ package cz.certicon.routing.memsensitive.model.entity.common;
 
 import cz.certicon.routing.model.entity.CoordinateSetBuilder;
 import cz.certicon.routing.model.entity.CoordinateSetBuilderFactory;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +15,10 @@ import java.util.Map;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleCoordinateSetBuilderFactory implements CoordinateSetBuilderFactory<Map<Long,List<Coordinates>>>{
+public class SimpleCoordinateSetBuilderFactory implements CoordinateSetBuilderFactory<Map<Long,List<Coordinate>>>{
 
     @Override
-    public CoordinateSetBuilder<Map<Long, List<Coordinates>>> createCoordinateSetBuilder() {
+    public CoordinateSetBuilder<Map<Long, List<Coordinate>>> createCoordinateSetBuilder() {
         return new SimpleCoordinateSetBuilder();
     }
     

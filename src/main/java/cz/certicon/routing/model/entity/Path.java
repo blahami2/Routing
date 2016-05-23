@@ -111,11 +111,11 @@ public interface Path extends Iterable<Edge> {
 
     public List<Node> getNodes();
 
-    public List<Coordinates> getCoordinates();
+    public List<Coordinate> getCoordinates();
 
-    public void setSourceOrigin( Coordinates origSource, Long edgeDataId );
+    public void setSourceOrigin( Coordinate origSource, Long edgeDataId );
 
-    public void setTargetOrigin( Coordinates origTarget, Long edgeDataId );
+    public void setTargetOrigin( Coordinate origTarget, Long edgeDataId );
 
     public void loadCoordinates( CoordinateReader cr ) throws IOException;
     

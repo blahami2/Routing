@@ -7,13 +7,14 @@ package cz.certicon.routing.data.graph.sqlite;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.data.graph.GraphWriter;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
@@ -21,6 +22,7 @@ import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.GeometryUtils;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,7 +80,7 @@ public class SqliteGraphRW extends AbstractEmbeddedDatabase<Graph, Pair<GraphEnt
 //            System.out.println( rs.getLong( "id" ) );
 //            System.out.println( "osm = " + rs.getLong( "osm_id" ) );
 //            System.out.println( rs.getString( pointColumnIdx ) );
-            Coordinates coords = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( pointColumnIdx ) );
+            Coordinate coords = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( pointColumnIdx ) );
             Node node = graphEntityFactory.createNode( Node.Id.createId( rs.getLong( idColumnIdx ) ),
                     coords.getLatitude(), coords.getLongitude()
             );

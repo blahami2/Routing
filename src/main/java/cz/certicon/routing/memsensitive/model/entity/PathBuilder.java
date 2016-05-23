@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.util.List;
 
 /**
@@ -14,9 +14,9 @@ import java.util.List;
  */
 public interface PathBuilder<T, G> {
 
-    public void addEdge( G graph, long edgeId, boolean isForward, List<Coordinates> coordinates, double length, double time );
+    public void addEdge( G graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time );
 
-    public void addCoordinates( Coordinates coordinates );
+    public void addCoordinates( Coordinate coordinates );
 
     public void addLength( double length );
 

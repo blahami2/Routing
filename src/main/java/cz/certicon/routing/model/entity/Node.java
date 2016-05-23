@@ -41,9 +41,9 @@ public interface Node {
     /**
      * Getter for the coordinates of this node
      *
-     * @return an instance of {@link Coordinates}
+     * @return an instance of {@link Coordinate}
      */
-    public Coordinates getCoordinates();
+    public Coordinate getCoordinates();
 
     /**
      * Getter for the label of this node

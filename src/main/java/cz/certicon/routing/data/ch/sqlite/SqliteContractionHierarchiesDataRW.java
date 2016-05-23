@@ -5,11 +5,12 @@
  */
 package cz.certicon.routing.data.ch.sqlite;
 
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.model.utility.progress.SimpleProgressListener;
 import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.application.preprocessing.ch.OptimizedContractionHierarchiesPreprocessor;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.data.ch.DistanceType;
+import cz.certicon.routing.data.DistanceType;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.Edge;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import cz.certicon.routing.data.ch.ContractionHierarchiesDataRW;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 
 /**
  *
@@ -113,7 +115,6 @@ public class SqliteContractionHierarchiesDataRW extends AbstractSqliteDatabase<T
             checkedWrite( result );
             System.out.println( "Inserting done in " + time.stop() + " ms!" );
         }
-
         return result;
     }
 

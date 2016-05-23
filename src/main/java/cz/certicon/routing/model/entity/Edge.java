@@ -87,14 +87,14 @@ public interface Edge {
      *
      * @return path coordinates
      */
-    public List<Coordinates> getCoordinates();
+    public List<Coordinate> getCoordinates();
 
     /**
      * Setter for coordinates of the path
      *
      * @param coordinates list of coordinates representing the path
      */
-    public void setCoordinates( List<Coordinates> coordinates );
+    public void setCoordinates( List<Coordinate> coordinates );
 
     /**
      * Getter for the source point of this edge

@@ -6,7 +6,7 @@
 package cz.certicon.routing.utils;
 
 import cz.certicon.routing.model.entity.CartesianCoords;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class GeometryUtils {
         return new Point( scaledX, scaledY );
     }
 
-    public static Coordinates toCoordinatesFromWktPoint( String point ) {
+    public static Coordinate toCoordinatesFromWktPoint( String point ) {
         try {
             point = point.substring( "POINT(".length(), point.length() - ")".length() );
         } catch ( StringIndexOutOfBoundsException ex ) {
@@ -64,24 +64,24 @@ public class GeometryUtils {
             throw ex;
         }
         String[] lonlat = point.split( " " );
-        return new Coordinates(
+        return new Coordinate(
                 Double.parseDouble( lonlat[1] ),
                 Double.parseDouble( lonlat[0] )
         );
     }
 
-    public static String toWktFromCoordinates( Coordinates coordinates ) {
+    public static String toWktFromCoordinates( Coordinate coordinates ) {
         return "POINT(" + coordinates.getLongitude() + " " + coordinates.getLatitude() + ")";
     }
 
-    public static List<Coordinates> toCoordinatesFromWktLinestring( String linestring ) {
-        List<Coordinates> coordinates = new ArrayList<>();
+    public static List<Coordinate> toCoordinatesFromWktLinestring( String linestring ) {
+        List<Coordinate> coordinates = new ArrayList<>();
         String content = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
         for ( String cord : content.split( "," ) ) {
             while ( cord.startsWith( " " ) ) {
                 cord = cord.substring( 1 );
             }
-            Coordinates coord = new Coordinates(
+            Coordinate coord = new Coordinate(
                     Double.parseDouble( cord.split( " " )[1] ),
                     Double.parseDouble( cord.split( " " )[0] )
             );
@@ -90,10 +90,10 @@ public class GeometryUtils {
         return coordinates;
     }
 
-    public static String toWktFromCoordinates( List<Coordinates> coordinates ) {
+    public static String toWktFromCoordinates( List<Coordinate> coordinates ) {
         StringBuilder sb = new StringBuilder();
         sb.append( "LINESTRING(" );
-        for ( Coordinates coordinate : coordinates ) {
+        for ( Coordinate coordinate : coordinates ) {
             sb.append( coordinate.getLongitude() ).append( " " ).append( coordinate.getLatitude() ).append( "," );
         }
         sb.delete( sb.length() - 1, sb.length() );

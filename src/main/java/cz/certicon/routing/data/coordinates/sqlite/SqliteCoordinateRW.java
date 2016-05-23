@@ -5,13 +5,15 @@
  */
 package cz.certicon.routing.data.coordinates.sqlite;
 
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.utils.GeometryUtils;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,16 +29,16 @@ import org.sqlite.SQLiteConfig;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SqliteCoordinateRW extends AbstractSqliteDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
+public class SqliteCoordinateRW extends AbstractSqliteDatabase<Map<Edge, List<Coordinate>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
 
     public SqliteCoordinateRW( Properties connectionProperties ) {
         super( connectionProperties );
     }
 
     @Override
-    protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> edges ) throws SQLException {
-        Map<Long, List<Coordinates>> dataCoordinatesMap = new HashMap<>();
-        Map<Edge, List<Coordinates>> coordinateMap = new HashMap<>();
+    protected Map<Edge, List<Coordinate>> checkedRead( Set<Edge> edges ) throws SQLException {
+        Map<Long, List<Coordinate>> dataCoordinatesMap = new HashMap<>();
+        Map<Edge, List<Coordinate>> coordinateMap = new HashMap<>();
         Map<Long, Edge> edgeMap = new HashMap<>();
         for ( Edge edge : edges ) {
             edgeMap.put( edge.getDataId(), edge );
@@ -61,7 +63,7 @@ public class SqliteCoordinateRW extends AbstractSqliteDatabase<Map<Edge, List<Co
         while ( rs.next() ) {
             Long key = rs.getLong( idColumnIdx );
             if ( !dataCoordinatesMap.containsKey( key ) ) {
-                List<Coordinates> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringColumnIdx ) );
+                List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringColumnIdx ) );
                 dataCoordinatesMap.put( key, coordinates );
             }
         }
@@ -72,7 +74,7 @@ public class SqliteCoordinateRW extends AbstractSqliteDatabase<Map<Edge, List<Co
     }
 
     @Override
-    protected void checkedWrite( Map<Edge, List<Coordinates>> in ) throws SQLException {
+    protected void checkedWrite( Map<Edge, List<Coordinate>> in ) throws SQLException {
         throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
     }
 

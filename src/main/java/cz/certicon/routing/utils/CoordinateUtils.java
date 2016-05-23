@@ -5,9 +5,8 @@
  */
 package cz.certicon.routing.utils;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import cz.certicon.routing.model.entity.CartesianCoords;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.LinkedList;
@@ -41,9 +40,9 @@ public class CoordinateUtils {
      * calculation
      * @return geographical midpoint
      */
-    public static Coordinates calculateGeographicMidpoint( List<Coordinates> coordinates ) {
+    public static Coordinate calculateGeographicMidpoint( List<Coordinate> coordinates ) {
         List<CartesianCoords> ccoords = new LinkedList<>();
-        for ( Coordinates coordinate : coordinates ) {
+        for ( Coordinate coordinate : coordinates ) {
             double lat = toRadians( coordinate.getLatitude() );
             double lon = toRadians( coordinate.getLongitude() );
             ccoords.add( new CartesianCoords(
@@ -68,17 +67,17 @@ public class CoordinateUtils {
         double lon = atan2( mid.getY(), mid.getX() );
         double hyp = sqrt( mid.getX() * mid.getX() + mid.getY() * mid.getY() );
         double lat = atan2( mid.getZ(), hyp );
-        return new Coordinates( toDegrees( lat ), toDegrees( lon ) );
+        return new Coordinate( toDegrees( lat ), toDegrees( lon ) );
     }
 
     /**
      * Calculates the geographical distance between two points
      *
-     * @param a first point in {@link Coordinates}
-     * @param b second point in {@link Coordinates}
+     * @param a first point in {@link Coordinate}
+     * @param b second point in {@link Coordinate}
      * @return calculated distance in meters
      */
-    public static double calculateDistance( Coordinates a, Coordinates b ) {
+    public static double calculateDistance( Coordinate a, Coordinate b ) {
 //        System.out.println( "calcualting distance:" );
 //        System.out.println( a );
 //        System.out.println( b );
@@ -115,13 +114,13 @@ public class CoordinateUtils {
     /**
      * Divides path between two points into list of coordinates.
      *
-     * @param start starting point in {@link Coordinates}
-     * @param end target point in {@link Coordinates}
+     * @param start starting point in {@link Coordinate}
+     * @param end target point in {@link Coordinate}
      * @param count amount of required points in the path
-     * @return list of {@link Coordinates} for the given path
+     * @return list of {@link Coordinate} for the given path
      */
-    public static List<Coordinates> divideCoordinates( Coordinates start, Coordinates end, int count ) {
-        List<Coordinates> coords = new LinkedList<>();
+    public static List<Coordinate> divideCoordinates( Coordinate start, Coordinate end, int count ) {
+        List<Coordinate> coords = new LinkedList<>();
         double aLat = start.getLatitude();
         double aLon = start.getLongitude();
         double bLat = end.getLatitude();
@@ -129,7 +128,7 @@ public class CoordinateUtils {
         for ( int i = 0; i < count; i++ ) {
             double avgLat = ( ( count - 1 - i ) * aLat + ( i ) * bLat ) / ( count - 1 );
             double avgLon = ( ( count - 1 - i ) * aLon + ( i ) * bLon ) / ( count - 1 );
-            coords.add( new Coordinates( avgLat, avgLon ) );
+            coords.add(new Coordinate( avgLat, avgLon ) );
         }
         return coords;
     }
@@ -137,10 +136,10 @@ public class CoordinateUtils {
     /**
      * Converts coordinates in WGS84 format into Cartesian coordinates
      *
-     * @param coords {@link Coordinates} in WGS84
+     * @param coords {@link Coordinate} in WGS84
      * @return {@link CartesianCoords} representation of the given coordinates
      */
-    public static CartesianCoords toCartesianFromWGS84( Coordinates coords ) {
+    public static CartesianCoords toCartesianFromWGS84( Coordinate coords ) {
         return new CartesianCoords(
                 EARTH_RADIUS * Math.cos( coords.getLatitude() ) * Math.cos( coords.getLongitude() ),
                 EARTH_RADIUS * Math.cos( coords.getLatitude() ) * Math.sin( coords.getLongitude() ),
@@ -153,11 +152,11 @@ public class CoordinateUtils {
      *
      * @param container an instance of {@link Dimension} for the point to fit in
      * (scaled)
-     * @param coords {@link Coordinates} in WGS84
+     * @param coords {@link Coordinate} in WGS84
      * @return scaled {@link Point} for the given container based on the given
      * coordinates
      */
-    public static Point toPointFromWGS84( Dimension container, Coordinates coords ) {
+    public static Point toPointFromWGS84( Dimension container, Coordinate coords ) {
 //        int x = (int) ( ( container.width / 360.0 ) * ( 180 + coords.getLatitude() ) );
 //        int y = (int) ( ( container.height / 180.0 ) * ( 90 - coords.getLongitude() ) );
         int x = (int) ( ( container.width / 360.0 ) * ( coords.getLongitude() ) );
@@ -165,23 +164,23 @@ public class CoordinateUtils {
         return new Point( x, y );
     }
 
-    public static Coordinates jtsToCoordinates( Coordinate coordinate ) {
-        return new Coordinates( coordinate.y, coordinate.x );
+    public static Coordinate jtsToCoordinates( com.vividsolutions.jts.geom.Coordinate coordinate ) {
+        return new Coordinate( coordinate.y, coordinate.x );
     }
 
-    public static Coordinate coordinatesToJts( Coordinates coordinates ) {
+    public static Coordinate coordinatesToJts( Coordinate coordinates ) {
         return new Coordinate( coordinates.getLongitude(), coordinates.getLatitude() );
     }
 
-    public static List<Coordinates> jtsToCoordinates( Coordinate[] coordinates ) {
-        List<Coordinates> coords = new ArrayList<>();
-        for ( Coordinate c : coordinates ) {
+    public static List<Coordinate> jtsToCoordinates( com.vividsolutions.jts.geom.Coordinate[] coordinates ) {
+        List<Coordinate> coords = new ArrayList<>();
+        for ( com.vividsolutions.jts.geom.Coordinate c : coordinates ) {
             coords.add( jtsToCoordinates( c ) );
         }
         return coords;
     }
 
-    public static Coordinate[] coordinatesToJts( List<Coordinates> coordinates ) {
+    public static Coordinate[] coordinatesToJts( List<Coordinate> coordinates ) {
         Coordinate[] coords = new Coordinate[coordinates.size()];
         for ( int i = 0; i < coordinates.size(); i++ ) {
             coords[i] = coordinatesToJts( coordinates.get( i ) );

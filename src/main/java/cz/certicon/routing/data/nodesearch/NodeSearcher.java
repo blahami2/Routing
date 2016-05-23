@@ -8,7 +8,7 @@ package cz.certicon.routing.data.nodesearch;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public interface NodeSearcher {
      * easily be determined, and a data id of the edge (is -1 when the closest point is a crossroad)
      * @throws java.io.IOException thrown when an error occurs while searching
      */
-    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchfor ) throws IOException;
+    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinate coordinates, DistanceFactory distanceFactory, SearchFor searchfor ) throws IOException;
 
     public static enum SearchFor {
         SOURCE, TARGET;

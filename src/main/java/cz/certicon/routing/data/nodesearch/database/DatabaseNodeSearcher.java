@@ -12,7 +12,7 @@ import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
@@ -37,7 +37,7 @@ public class DatabaseNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
+    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinate coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
         database.setDistanceFactory( distanceFactory );
         database.open();
         Pair<Map<Node.Id, Distance>, Long> read = database.read( coordinates );
@@ -45,7 +45,7 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         return read;
     }
 
-    private static class NodeSearchDB extends AbstractServerDatabase<Pair<Map<Node.Id, Distance>, Long>, Coordinates> {
+    private static class NodeSearchDB extends AbstractServerDatabase<Pair<Map<Node.Id, Distance>, Long>, Coordinate> {
 
         private DistanceFactory distanceFactory;
 
@@ -58,7 +58,7 @@ public class DatabaseNodeSearcher implements NodeSearcher {
         }
 
         @Override
-        protected Pair<Map<Node.Id, Distance>, Long> checkedRead( Coordinates in ) throws SQLException {
+        protected Pair<Map<Node.Id, Distance>, Long> checkedRead( Coordinate in ) throws SQLException {
             Map<Node.Id, Distance> map = new HashMap<>();
             ResultSet rs;
 //            rs = getStatement().executeQuery( "SELECT * FROM nodes_view n WHERE ST_Equals(n.geom, ST_GeomFromText('POINT(" + in.getLongitude() + " " + in.getLatitude() + ")',4326));" );

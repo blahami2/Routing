@@ -8,7 +8,7 @@ package cz.certicon.routing.data.coordinates.osm2po;
 import cz.certicon.routing.data.basic.database.AbstractServerDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.data.coordinates.CoordinateWriter;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,21 +28,21 @@ import org.postgis.Point;
  * @deprecated As of 1.1, osm2po is not supported anymore
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class Osm2poCoordinateRW extends AbstractServerDatabase<Map<Edge, List<Coordinates>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
+public class Osm2poCoordinateRW extends AbstractServerDatabase<Map<Edge, List<Coordinate>>, Set<Edge>> implements CoordinateReader, CoordinateWriter {
 
     public Osm2poCoordinateRW( Properties connectionProperties ) {
         super( connectionProperties );
     }
 
     @Override
-    protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> in ) throws SQLException {
-        Map<Edge, List<Coordinates>> edgeMap = new HashMap<>();
+    protected Map<Edge, List<Coordinate>> checkedRead( Set<Edge> in ) throws SQLException {
+        Map<Edge, List<Coordinate>> edgeMap = new HashMap<>();
         PreparedStatement ps = getConnection().prepareStatement( "SELECT geom_way AS geom FROM prg_2po_4pgr WHERE (id = ?);" );
         for ( Edge edge : in ) {
             ps.setLong( 1, edge.getId().getValue() );
 //            System.out.println( ps.toString() );
             ResultSet r = ps.executeQuery();
-            List<Coordinates> coordinates = new ArrayList<>();
+            List<Coordinate> coordinates = new ArrayList<>();
             while ( r.next() ) {
                 PGgeometry g = r.getObject( "geom", PGgeometry.class );
                 for(int i = 0; i < g.getGeometry().numPoints(); i++){
@@ -52,7 +52,7 @@ public class Osm2poCoordinateRW extends AbstractServerDatabase<Map<Edge, List<Co
 //                    System.out.println( "z = " + point.z );
                     double lon = point.x;
                     double lat = point.y;
-                    coordinates.add(new Coordinates( lat, lon ) );
+                    coordinates.add(new Coordinate( lat, lon ) );
                 }
 //                String coordString = r.getString( "geom" );
 //                System.out.println( coordString );
@@ -73,7 +73,7 @@ public class Osm2poCoordinateRW extends AbstractServerDatabase<Map<Edge, List<Co
     }
 
     @Override
-    protected void checkedWrite( Map<Edge, List<Coordinates>> in ) throws SQLException {
+    protected void checkedWrite( Map<Edge, List<Coordinate>> in ) throws SQLException {
         throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
     }
 }

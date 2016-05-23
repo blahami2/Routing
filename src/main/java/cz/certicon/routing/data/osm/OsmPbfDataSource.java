@@ -24,7 +24,7 @@ import org.openstreetmap.osmosis.osmbinary.Osmformat;
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 import cz.certicon.routing.data.MapDataSource;
 import cz.certicon.routing.data.Restriction;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.common.SimpleEdgeData;
 import cz.certicon.routing.utils.DoubleComparator;
@@ -302,10 +302,10 @@ public class OsmPbfDataSource implements MapDataSource {
 //                    System.out.println( "distance b = " + b.getDistance() );
 //                    System.out.println( "distance new = " + newEdge.getDistance() );
 //                    newEdge.setLabel( nodeA.getLabel() + ":" + nodeB.getLabel() );
-                    List<Coordinates> coords = new ArrayList<>();
+                    List<Coordinate> coords = new ArrayList<>();
                     // connect coordinates
-                    List<Coordinates> aCoords = a.getCoordinates();
-                    List<Coordinates> bCoords = b.getCoordinates();
+                    List<Coordinate> aCoords = a.getCoordinates();
+                    List<Coordinate> bCoords = b.getCoordinates();
                     if ( node.equals( a.getSourceNode() ) ) {
                         for ( int i = aCoords.size() - 1; i >= 0; i-- ) {
                             coords.add( aCoords.get( i ) );

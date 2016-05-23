@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
@@ -93,7 +93,7 @@ public class JxMapViewerFrame implements PathPresenter {
 //                currentNode = edge.getSourceNode();
 //            }
 //        }
-        for ( Coordinates coordinate : path.getCoordinates() ) {
+        for ( Coordinate coordinate : path.getCoordinates() ) {
             track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
         }
         if ( path.size() > 1 ) {
@@ -215,7 +215,7 @@ public class JxMapViewerFrame implements PathPresenter {
 //                }
 //            }
 //        }
-        for ( Coordinates coordinate : path.getCoordinates() ) {
+        for ( Coordinate coordinate : path.getCoordinates() ) {
             track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
         }
 
@@ -254,13 +254,13 @@ public class JxMapViewerFrame implements PathPresenter {
 
     private void addWaypoint( Edge edge, String text ) {
         if ( displayEdgeText ) {
-            Coordinates midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
+            Coordinate midpoint = CoordinateUtils.calculateGeographicMidpoint( Arrays.asList( edge.getSourceNode().getCoordinates(), edge.getTargetNode().getCoordinates() ) );
             waypoints.add( new LabelWaypoint( text, new GeoPosition( midpoint.getLatitude(), midpoint.getLongitude() ) ) );
         }
     }
 
     @Override
-    public PathPresenter addWaypoint( Coordinates coordinate, String text ) {
+    public PathPresenter addWaypoint( Coordinate coordinate, String text ) {
         waypoints.add( new LabelWaypoint( text, new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) ) );
         return this;
     }

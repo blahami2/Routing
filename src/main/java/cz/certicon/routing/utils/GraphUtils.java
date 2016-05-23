@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.utils;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphEntityFactory;
@@ -54,10 +54,10 @@ public class GraphUtils {
      * {@link CoordinateReader}
      *
      * @param edges list of {@link Edge}s
-     * @param coordinateMap map of {@link Edge}s and their {@link Coordinates}s
+     * @param coordinateMap map of {@link Edge}s and their {@link Coordinate}s
      * @return given list of edges with the filled coordinates (geometry)
      */
-    public static List<Edge> fillWithCoordinates( List<Edge> edges, Map<Edge, List<Coordinates>> coordinateMap ) {
+    public static List<Edge> fillWithCoordinates( List<Edge> edges, Map<Edge, List<Coordinate>> coordinateMap ) {
         for ( Edge edge : edges ) {
             edge.setCoordinates( coordinateMap.get( edge ) );
         }
@@ -128,11 +128,11 @@ public class GraphUtils {
      *
      * @param graph base {@link Graph}
      * @param graphEntityFactory graph-related {@link GraphEntityFactory}
-     * @param centerNode {@link Coordinates} in the center of the subgraph
+     * @param centerNode {@link Coordinate} in the center of the subgraph
      * @param distance rank of the farthest node
      * @return subgraph as an instance of {@link Graph}
      */
-    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Coordinates centerNode, int distance ) {
+    public static Graph subgraph( Graph graph, GraphEntityFactory graphEntityFactory, Coordinate centerNode, int distance ) {
         Set<Node> nodeSet = new HashSet<>();
         for ( Node node : graph.getNodes() ) {
             if ( node.getCoordinates().equals( centerNode ) ) {

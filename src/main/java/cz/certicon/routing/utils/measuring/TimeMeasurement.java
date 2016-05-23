@@ -73,6 +73,10 @@ public class TimeMeasurement {
     }
 
     public String getTimeString() {
+        return getTimeElapsed() + " " + timeUnits.getUnit();
+    }
+
+    public String getCurrentTimeString() {
         return getCurrentTimeElapsed() + " " + timeUnits.getUnit();
     }
 }

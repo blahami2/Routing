@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import java.util.Map;

@@ -9,7 +9,7 @@ import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.Path;
 import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class SimplePathBuilder implements PathBuilder<Path, Graph> {
 
-    private final ArrayList<Coordinates> coordinates = new ArrayList<>();
+    private final ArrayList<Coordinate> coordinates = new ArrayList<>();
     private double time = 0;
     private double length = 0;
 
@@ -28,7 +28,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     }
 
     @Override
-    public void addEdge( Graph graph, long edgeId, boolean isForward, List<Coordinates> edgeCoordinates, double length, double time ) {
+    public void addEdge( Graph graph, long edgeId, boolean isForward, List<Coordinate> edgeCoordinates, double length, double time ) {
         if ( !isForward ) {
             Collections.reverse( edgeCoordinates );
         }
@@ -38,7 +38,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     }
 
     @Override
-    public void addCoordinates( Coordinates coords ) {
+    public void addCoordinates( Coordinate coords ) {
         this.coordinates.add( coords );
     }
 

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface CoordinateSetBuilder<T> {
 
-    public void addCoordinates( long edgeId, List<Coordinates> coordinates );
+    public void addCoordinates( long edgeId, List<Coordinate> coordinates );
 
     public T build();
 }

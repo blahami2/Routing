@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.data.ch;
 
+import cz.certicon.routing.data.DistanceType;
 import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.data.Reader;
 import cz.certicon.routing.data.Writer;

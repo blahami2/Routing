@@ -6,11 +6,13 @@
 package cz.certicon.routing.application.algorithm.algorithms.astar;
 
 import static cz.certicon.routing.GlobalOptions.DEBUG_TIME;
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.*;
 import cz.certicon.routing.application.algorithm.algorithms.AbstractRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.model.entity.*;
 import cz.certicon.routing.utils.GraphUtils;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.HashMap;
@@ -40,7 +42,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
     }
 
     public Path route( Map<Node.Id, Distance> from, Map<Node.Id, Distance> to ) {
-        
+
         /* DEBUG VARS */
         TimeMeasurement time = new TimeMeasurement();
         TimeMeasurement accTime = new TimeMeasurement();
@@ -64,8 +66,11 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             System.out.println( "Routing..." );
             time.start();
         }
-        
-        
+
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
+        }
+
         // clear the data structure
         nodeDataStructure.clear();
         Set<Node> closed = new HashSet<>();
@@ -94,7 +99,10 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             }
             closed.add( currentNode );
             if ( to.containsKey( currentNode.getId() ) ) {
-                
+
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+                }
                 if ( DEBUG_TIME ) {
                     System.out.println( "A* done in " + time.getTimeString() );
                     long fromExecutionTime = time.stop();
@@ -108,12 +116,19 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                     System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
                     time.start();
                 }
-                
+
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+                }
                 // build path from predecessors and return
+                Path createPath = GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
+                }
                 return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
             }
             // foreach neighbour T of node S
-            for ( Edge edge : getGraph().getEdgesOf(currentNode ) ) {
+            for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
                 if ( DEBUG_TIME ) {
                     edgesCount++;
                 }

@@ -7,7 +7,7 @@ package cz.certicon.routing.memsensitive.presentation.jxmapviewer;
 
 import cz.certicon.routing.memsensitive.model.entity.Path;
 import cz.certicon.routing.memsensitive.presentation.PathDisplayer;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.presentation.PathPresenter;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.ArrayList;
@@ -62,14 +62,14 @@ public class JxMapViewerFrame implements PathDisplayer {
 
         fitGeoPosition.clear();
         if ( path.getCoordinates().size() > 0 ) {
-            Coordinates source = path.getCoordinates().get( 0 );
-            Coordinates target = path.getCoordinates().get( path.getCoordinates().size() - 1 );
+            Coordinate source = path.getCoordinates().get( 0 );
+            Coordinate target = path.getCoordinates().get( path.getCoordinates().size() - 1 );
             fitGeoPosition.add( new GeoPosition( source.getLatitude(), source.getLongitude() ) );
             fitGeoPosition.add( new GeoPosition( target.getLatitude(), target.getLongitude() ) );
             mapViewer.zoomToBestFit( fitGeoPosition, 0.7 );
 
             List<GeoPosition> track = new ArrayList<>();
-            for ( Coordinates coordinate : path.getCoordinates() ) {
+            for ( Coordinate coordinate : path.getCoordinates() ) {
                 track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
             }
             RoutePainter routePainter = new RoutePainter( track );

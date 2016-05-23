@@ -8,7 +8,7 @@ package cz.certicon.routing.data.coordinates.xml;
 import cz.certicon.routing.data.DataSource;
 import cz.certicon.routing.data.basic.xml.AbstractXmlReader;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,14 +32,14 @@ import cz.certicon.routing.model.basic.Pair;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, List<Coordinates>>> implements CoordinateReader {
+public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, List<Coordinate>>> implements CoordinateReader {
 
     public XmlCoordinateReader( DataSource source ) {
         super( source );
     }
 
-    private Map<Edge, List<Coordinates>> convert( Set<Edge> edges, Map<Edge.Id, List<Coordinates>> coords ) {
-        Map<Edge, List<Coordinates>> map = new HashMap<>();
+    private Map<Edge, List<Coordinate>> convert( Set<Edge> edges, Map<Edge.Id, List<Coordinate>> coords ) {
+        Map<Edge, List<Coordinate>> map = new HashMap<>();
         for ( Edge edge : edges ) {
             map.put( edge, coords.get( edge.getId() ) );
         }
@@ -47,8 +47,8 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
     }
 
     @Override
-    protected Map<Edge, List<Coordinates>> checkedRead( Set<Edge> edges ) throws IOException {
-        Map<Edge, List<Coordinates>> coordinateMap = new HashMap<>();
+    protected Map<Edge, List<Coordinate>> checkedRead( Set<Edge> edges ) throws IOException {
+        Map<Edge, List<Coordinate>> coordinateMap = new HashMap<>();
         Map<Long, Edge> edgeMap = new HashMap<>();
         int counter = 0;
         for ( Edge edge : edges ) {
@@ -62,7 +62,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
             edgeHandler = new EdgeHandler( edgeMap );
             saxParser.parse( getDataSource().getInputStream(), edgeHandler );
             close();
-            Map<Long, List<Coordinates>> dataCoordinatesMap = edgeHandler.getDataCoordinatesMap();
+            Map<Long, List<Coordinate>> dataCoordinatesMap = edgeHandler.getDataCoordinatesMap();
             for ( Edge edge : edges ) {
                 coordinateMap.put( edge, dataCoordinatesMap.get( edge.getDataId() ) );
             }
@@ -75,9 +75,9 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
     private static class EdgeHandler extends DefaultHandler {
 
         private final Map<Long, Edge> edgeMap;
-        private final Map<Long, List<Coordinates>> dataCoordinatesMap;
+        private final Map<Long, List<Coordinate>> dataCoordinatesMap;
         private Long collecting = null;
-        private List<Coordinates> coordList = null;
+        private List<Coordinate> coordList = null;
 
         public EdgeHandler( Map<Long, Edge> edgeMap ) {
             this.edgeMap = edgeMap;
@@ -98,7 +98,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
                 if ( collecting != null ) {
                     double latitude = Double.parseDouble( attributes.getValue( LATITUDE.shortLowerName() ) );
                     double longitude = Double.parseDouble( attributes.getValue( LONGITUDE.shortLowerName() ) );
-                    coordList.add( new Coordinates( latitude, longitude ) );
+                    coordList.add(new Coordinate( latitude, longitude ) );
                 }
             }
         }
@@ -115,7 +115,7 @@ public class XmlCoordinateReader extends AbstractXmlReader<Set<Edge>, Map<Edge, 
             }
         }
 
-        public Map<Long, List<Coordinates>> getDataCoordinatesMap() {
+        public Map<Long, List<Coordinate>> getDataCoordinatesMap() {
             return dataCoordinatesMap;
         }
     }

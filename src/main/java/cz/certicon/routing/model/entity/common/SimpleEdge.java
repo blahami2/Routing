@@ -7,7 +7,7 @@ package cz.certicon.routing.model.entity.common;
 
 import cz.certicon.routing.application.algorithm.data.number.LengthDistanceFactory;
 import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.EdgeAttributes;
 import cz.certicon.routing.model.entity.Node;
@@ -34,7 +34,7 @@ public abstract class SimpleEdge implements Edge {
     private int speed;
     private Distance distance;
     private String label;
-    private List<Coordinates> coordinates;
+    private List<Coordinate> coordinates;
     private EdgeAttributes attributes;
 
     public SimpleEdge( Edge.Id id, Node sourceNode, Node targetNode ) {
@@ -199,24 +199,24 @@ public abstract class SimpleEdge implements Edge {
     }
 
     @Override
-    public List<Coordinates> getCoordinates() {
+    public List<Coordinate> getCoordinates() {
         if ( coordinates != null ) {
             if ( getSourceNode().getCoordinates().equals( coordinates.get( 0 ) ) ) {
                 return new ArrayList<>( coordinates );
             } else {
-                List<Coordinates> c = new ArrayList<>( coordinates );
+                List<Coordinate> c = new ArrayList<>( coordinates );
                 Collections.reverse( c );
                 return c;
             }
         }
-        List<Coordinates> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
+        List<Coordinate> coords = Arrays.asList( getSourceNode().getCoordinates(), getTargetNode().getCoordinates() );
 //        int count = (int) ( Math.ceil( CoordinateUtils.calculateDistance( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates() ) / GRANULARITY_DIVISOR ) + 0.1 );
 //        List<Coordinates> coords = CoordinateUtils.divideCoordinates( graph.getSourceNodeOf( this ).getCoordinates(), graph.getTargetNodeOf( this ).getCoordinates(), count );
         return coords;
     }
 
     @Override
-    public void setCoordinates( List<Coordinates> coordinates ) {
+    public void setCoordinates( List<Coordinate> coordinates ) {
         this.coordinates = coordinates;
     }
 

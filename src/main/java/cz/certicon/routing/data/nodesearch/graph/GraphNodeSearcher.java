@@ -10,7 +10,7 @@ import cz.certicon.routing.application.algorithm.DistanceFactory;
 import cz.certicon.routing.application.algorithm.EdgeData;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -40,14 +40,14 @@ public class GraphNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
+    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinate coordinates, DistanceFactory distanceFactory, NodeSearcher.SearchFor searchFor ) throws IOException {
         List<Edge> closestEdges = new ArrayList<>();
-        Coordinates closestCoords = null;
+        Coordinate closestCoords = null;
         double distance = Double.MAX_VALUE;
         for ( Edge edge : graph.getEdges() ) {
             double currentMin = Double.MAX_VALUE;
-            Coordinates currentCoords = null;
-            for ( Coordinates coordinate : edge.getCoordinates() ) {
+            Coordinate currentCoords = null;
+            for ( Coordinate coordinate : edge.getCoordinates() ) {
                 double tmp = CoordinateUtils.calculateDistance( coordinate, coordinates );
                 if ( DoubleComparator.isLowerThan( tmp, currentMin, EPS ) ) {
                     currentMin = tmp;
@@ -69,12 +69,12 @@ public class GraphNodeSearcher implements NodeSearcher {
             for ( Edge edge : closestEdges ) {
                 dataId = edge.getDataId();
                 EdgeData edgeData = new SimpleEdgeData( edge.getSpeed(), edge.getAttributes().isPaid(), edge.getAttributes().getLength() );
-                Coordinates start = edge.getCoordinates().get( 0 );
-                Coordinates end = edge.getCoordinates().get( edge.getCoordinates().size() - 1 );
+                Coordinate start = edge.getCoordinates().get( 0 );
+                Coordinate end = edge.getCoordinates().get( edge.getCoordinates().size() - 1 );
                 double lengthFromStart = 0;
                 double lengthToEnd = 0;
                 double tmpLength = 0;
-                for ( Coordinates coordinate : edge.getCoordinates() ) {
+                for ( Coordinate coordinate : edge.getCoordinates() ) {
                     tmpLength += CoordinateUtils.calculateDistance( start, coordinate );
                     if ( coordinate.equals( closestCoords ) ) {
                         lengthFromStart = tmpLength;

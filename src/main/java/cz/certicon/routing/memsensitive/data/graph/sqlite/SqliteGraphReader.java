@@ -8,7 +8,7 @@ package cz.certicon.routing.memsensitive.data.graph.sqlite;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.data.graph.GraphReader;
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import cz.certicon.routing.model.entity.GraphBuilderFactory;
 import cz.certicon.routing.utils.GeometryUtils;
@@ -57,7 +57,7 @@ public class SqliteGraphReader implements GraphReader {
                 long id = rs.getLong( idIdx );
                 long osmId = rs.getLong( osmIdx );
                 long dataId = rs.getLong( dataIdx );
-                Coordinates coords = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( pointIdx ) );
+                Coordinate coords = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( pointIdx ) );
                 graphBuilder.addNode( id, dataId, osmId, coords.getLatitude(), coords.getLongitude() );
             }
             rs = reader.read( "SELECT e.id, e.data_id, e.is_forward, e.source_id, e.target_id, d.osm_id, d.length, d.speed_fw, d.speed_bw, d.is_paid "

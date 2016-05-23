@@ -18,6 +18,7 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
 import cz.certicon.routing.model.entity.Node;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Shortcut;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.utils.measuring.TimeUnits;
 import java.util.ArrayList;
@@ -126,6 +127,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             time.setTimeUnits( TimeUnits.NANOSECONDS );
             System.out.println( "Routing..." );
             time.start();
+        }
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
 
         List<Integer> fromVisitedNodes = new ArrayList<>();
@@ -261,6 +265,10 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             }
         }
 
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+        }
+
         if ( DEBUG_TIME ) {
             System.out.println( "Min node found in " + time.getTimeString() );
             time.start();
@@ -269,6 +277,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             System.out.println( "min node = " + origNodes[minNode] );
         }
         if ( minNode != -1 ) {
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            }
             List<Edge> startEdges = new ArrayList<>();
             int currentNode = minNode;
             int firstNode = currentNode;
@@ -300,6 +311,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
                     throw new AssertionError( "Cannot happen" );
                 }
                 path.addEdge( pathEdge );
+            }
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
             }
 
             if ( DEBUG_TIME ) {

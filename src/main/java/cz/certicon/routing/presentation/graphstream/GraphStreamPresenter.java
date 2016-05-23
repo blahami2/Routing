@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.presentation.graphstream;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.Edge;
 import cz.certicon.routing.presentation.GraphPresenter;
 import cz.certicon.routing.utils.CoordinateUtils;
@@ -55,8 +55,8 @@ public class GraphStreamPresenter implements GraphPresenter {
     @Override
     public void displayGraph( cz.certicon.routing.model.entity.Graph graph ) {
         int counter = 0;
-        Map<Coordinates, Integer> idMap = new HashMap<>();
-        Map<Coordinates, List<cz.certicon.routing.model.entity.Node>> nodeMap = new HashMap<>();
+        Map<Coordinate, Integer> idMap = new HashMap<>();
+        Map<Coordinate, List<cz.certicon.routing.model.entity.Node>> nodeMap = new HashMap<>();
         Graph displayGraph = new org.graphstream.graph.implementations.MultiGraph( "graph-id" );
         displayGraph.addAttribute( "ui.stylesheet", "edge {"
                 //+ "shape: line;"
@@ -72,7 +72,7 @@ public class GraphStreamPresenter implements GraphPresenter {
         double maxLat = Double.MIN_VALUE;
         double maxLon = Double.MIN_VALUE;
         for ( cz.certicon.routing.model.entity.Node node : graph.getNodes() ) {
-            Coordinates c = node.getCoordinates();
+            Coordinate c = node.getCoordinates();
             minLat = ( c.getLatitude() < minLat ) ? c.getLatitude() : minLat;
             minLon = ( c.getLongitude() < minLon ) ? c.getLongitude() : minLon;
             maxLat = ( c.getLatitude() > maxLat ) ? c.getLatitude() : maxLat;
@@ -80,8 +80,8 @@ public class GraphStreamPresenter implements GraphPresenter {
         }
 //        System.out.println( "min: " + minLat + ", " + minLon );
 //        System.out.println( "max: " + maxLat + ", " + maxLon );
-        Point min = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( minLat, minLon ) );
-        Point max = CoordinateUtils.toPointFromWGS84( scaleDimension, new Coordinates( maxLat, maxLon ) );
+        Point min = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinate( minLat, minLon ) );
+        Point max = CoordinateUtils.toPointFromWGS84(scaleDimension, new Coordinate( maxLat, maxLon ) );
 
         for ( cz.certicon.routing.model.entity.Node node : graph.getNodes() ) {
             List<cz.certicon.routing.model.entity.Node> nodeList = nodeMap.get( node.getCoordinates() );

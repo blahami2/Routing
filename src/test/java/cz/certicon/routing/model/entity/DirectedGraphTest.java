@@ -324,7 +324,7 @@ public class DirectedGraphTest {
     }
 
     private static Node findNode( Graph g, double latitude, double longitude ) {
-        Coordinates c = new Coordinates( latitude, longitude );
+        Coordinate c = new Coordinate( latitude, longitude );
         for ( Node n : g.getNodes() ) {
             if ( n.getCoordinates().equals( c ) ) {
                 return n;

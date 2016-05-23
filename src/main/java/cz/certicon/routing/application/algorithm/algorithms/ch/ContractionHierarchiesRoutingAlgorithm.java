@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import static cz.certicon.routing.GlobalOptions.*;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 
 /**
  *
@@ -89,6 +90,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             time.setTimeUnits( TimeUnits.NANOSECONDS );
             System.out.println( "Routing..." );
             time.start();
+        }
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
 
         // FROM dijkstra
@@ -256,16 +260,17 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
             }
         }
+
         if ( DEBUG_TIME ) {
             System.out.println( "To dijkstra done in " + time.getTimeString() );
             executionTime += time.restart();
         }
 
         if ( DEBUG_TIME ) {
-            if(edgesCount <= 0){
+            if ( edgesCount <= 0 ) {
                 edgesCount = 1;
             }
-            if(edgesVisited <= 0){
+            if ( edgesVisited <= 0 ) {
                 edgesVisited = 1;
             }
             System.out.println( "visited nodes: " + visitedNodes );
@@ -306,6 +311,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
             }
         }
+        if ( MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+        }
         if ( DEBUG_CORRECTNESS ) {
             System.out.println( "min node = " + getGraph().getNode( minNodeId ) );
         }
@@ -316,6 +324,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
         if ( minNodeId == null ) {
             return null;
         } else {
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            }
             time.start();
 //            System.out.println( "FROM" );
 //            for ( Map.Entry<Node.Id, Distance> entry : fromDistanceMap.entrySet() ) {
@@ -369,6 +380,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 System.out.println( "#3: " + time.getTimeString() );
                 pathBuildingTime += time.restart();
                 System.out.println( "Path construction done in " + pathBuildingTime + " ns" );
+            }
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
             }
             return path;
         }
