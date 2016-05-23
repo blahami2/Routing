@@ -88,7 +88,7 @@ public class SqlitePathReader implements PathReader {
                     List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
                     double length = rs.getDouble( lengthIdx );
                     int speed = rs.getInt( isForward ? speedFwIdx : speedBwIdx );
-                    pathBuilder.addEdge( graph, id, isForward, coordinates, length, length / speed );
+                    pathBuilder.addEdge( graph, id, isForward, coordinates, length, 3.6 * length / speed );
                 }
                 reader.execute( "DELETE FROM path" );
                 reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );

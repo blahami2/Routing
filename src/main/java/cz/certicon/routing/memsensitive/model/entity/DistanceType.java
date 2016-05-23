@@ -13,7 +13,7 @@ public enum DistanceType {
     TIME {
         @Override
         public double calculateDistance( double length, double speed ) {
-            return length / speed;
+            return 3.6 * length / speed;
         }
     }, LENGTH {
         @Override

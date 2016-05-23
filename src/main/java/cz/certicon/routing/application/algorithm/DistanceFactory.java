@@ -51,10 +51,10 @@ public interface DistanceFactory {
      * Creates an instance based on the edge data (attributes) and an actual length
      *
      * @param edgeData edge data (for calculation data)
-     * @param lengthInKilometers length in km
+     * @param length length in m
      * @return an instance of {@link Distance}
      */
-    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double lengthInKilometers );
+    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double length );
 
     /**
      * Creates an instance using approximate distance calculation from the two

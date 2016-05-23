@@ -44,8 +44,8 @@ public class LengthDistanceFactory implements DistanceFactory {
     }
 
     @Override
-    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double lengthInKilometers ) {
-        return new DoubleDistance( lengthInKilometers );
+    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double length ) {
+        return new DoubleDistance( length );
     }
 
 }

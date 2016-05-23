@@ -91,7 +91,7 @@ public class GraphNodeSearcher implements NodeSearcher {
                     nodeId = edge.getSourceNode().getId();
                     length = ( edge.getSourceNode().getCoordinates().equals( start ) ) ? lengthFromStart : lengthToEnd;
                 }
-                distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length / 1000 ) );
+                distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length ) );
             }
             return new Pair<>( distanceMap, dataId );
         } else {

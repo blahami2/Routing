@@ -102,7 +102,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
                             nodeId = edgeResultHelper.getSourceId();
                             length = rs.getDouble( edgeResultHelper.getIsForward() ? keyDistanceFromStart : keyDistanceToEnd );
                         }
-                        nodeSetBuilder.addNode( nodeId, edgeResultHelper.getId(), length / 1000, rs.getInt( edgeResultHelper.getIsForward() ? "speed_fw" : "speed_bw" ) );
+                        nodeSetBuilder.addNode( nodeId, edgeResultHelper.getId(), length, rs.getInt( edgeResultHelper.getIsForward() ? "speed_fw" : "speed_bw" ) );
                     }
                     distance *= DISTANCE_MULTIPLIER;
                 }

@@ -29,17 +29,17 @@ public class TimeDistanceFactory implements DistanceFactory {
 
     @Override
     public Distance createFromEdgeData( EdgeData edgeData ) {
-        return new DoubleDistance( edgeData.getLength() / edgeData.getSpeed() );
+        return new DoubleDistance( 3.6 * edgeData.getLength() / 1000 / edgeData.getSpeed() );
     }
 
     @Override
-    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double lengthInKilometers ) {
-        return new DoubleDistance( lengthInKilometers / edgeData.getSpeed() );
+    public Distance createFromEdgeDataAndLength( EdgeData edgeData, double length ) {
+        return new DoubleDistance( 3.6 * length / edgeData.getSpeed() );
     }
 
     @Override
     public Distance createApproximateFromCoordinates( Coordinate a, Coordinate b ) {
-        return new DoubleDistance( CoordinateUtils.calculateDistance( a, b ) / ( 130 * 1000 ) );
+        return new DoubleDistance( 3.6 * CoordinateUtils.calculateDistance( a, b ) / ( 130 /* WTF is this number??? Answer: it is maximal speed - 130 kmph*/ ) );
     }
 
 }
