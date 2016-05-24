@@ -92,7 +92,7 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             time.start();
         }
         if ( MEASURE_TIME ) {
-            TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
 
         // FROM dijkstra
