@@ -86,6 +86,8 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
         }
 
         distanceMap.clear();
+        Node finalNode = null;
+        Distance finalDistance = getDistanceFactory().createInfiniteDistance();
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
@@ -93,40 +95,23 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             Node currentNode = nodeDataStructure.extractMin();
             if ( DEBUG_TIME ) {
                 accTime.start();
-                Distance dist = currentNode.getDistance();
+            }
+            Distance dist = currentNode.getDistance();
+            if ( DEBUG_TIME ) {
                 distanceAccessTime += accTime.stop();
                 visitedNodes++;
             }
-            closed.add( currentNode );
-            if ( to.containsKey( currentNode.getId() ) ) {
-
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
-                }
-                if ( DEBUG_TIME ) {
-                    System.out.println( "A* done in " + time.getTimeString() );
-                    long fromExecutionTime = time.stop();
-
-                    System.out.println( "visited nodes: " + visitedNodes );
-                    System.out.println( "time per node: " + ( time.stop() / visitedNodes ) );
-                    System.out.println( "distance access time: " + distanceAccessTime );
-                    System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
-                    System.out.println( "edges: " + edgesCount );
-                    System.out.println( "visited edges: " + edgesVisited );
-                    System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
-                    time.start();
-                }
-
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
-                }
-                // build path from predecessors and return
-                Path createPath = GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
-                }
-                return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), currentNode );
+            if ( dist.isGreaterThan( finalDistance ) ) {
+                break;
             }
+            if ( to.containsKey( currentNode.getId() ) ) {
+                Distance wholeDistance = dist.add( to.get( currentNode.getId() ) );
+                if ( wholeDistance.isLowerThan( finalDistance ) ) {
+                    finalNode = currentNode;
+                    finalDistance = wholeDistance;
+                }
+            }
+            closed.add( currentNode );
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
                 if ( DEBUG_TIME ) {
@@ -146,12 +131,7 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                     edgesVisited++;
                 }
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance;
-                if ( to.containsKey( currentNode.getId() ) ) {
-                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getId() ) );
-                } else {
-                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
-                }
+                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
 
                 if ( !nodeDataStructure.contains( endNode ) || tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
@@ -166,6 +146,36 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                     }
                 }
             }
+        }
+
+        if ( finalNode != null ) {
+
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+            }
+            if ( DEBUG_TIME ) {
+                System.out.println( "A* done in " + time.getTimeString() );
+                long fromExecutionTime = time.stop();
+
+                System.out.println( "visited nodes: " + visitedNodes );
+                System.out.println( "time per node: " + ( time.stop() / visitedNodes ) );
+                System.out.println( "distance access time: " + distanceAccessTime );
+                System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
+                System.out.println( "edges: " + edgesCount );
+                System.out.println( "visited edges: " + edgesVisited );
+                System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
+                time.start();
+            }
+
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            }
+            // build path from predecessors and return
+            Path createPath = GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), finalNode );
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
+            }
+            return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), finalNode );
         }
         return null;
     }

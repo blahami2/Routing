@@ -35,23 +35,10 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
     private static final boolean DEBUG_TIME = GlobalOptions.DEBUG_TIME;
 
     private NodeDataStructure<Node> nodeDataStructure;
-    private EndCondition endCondition;
 
     public DijkstraRoutingAlgorithm( Graph graph, GraphEntityFactory entityAbstractFactory, DistanceFactory distanceFactory ) {
         super( graph, entityAbstractFactory, distanceFactory );
         this.nodeDataStructure = new JgraphtFibonacciDataStructure();
-        this.endCondition = new EndCondition() {
-
-            @Override
-            public boolean isFinished( Graph graph, Map<Node.Id, Distance> targetSet, Node currentNode ) {
-                return targetSet.containsKey( currentNode.getId() );
-            }
-
-            @Override
-            public Path getResult( Graph graph, GraphEntityFactory graphEntityFactory, Node targetNode ) {
-                return GraphUtils.createPath( graph, graphEntityFactory, targetNode );
-            }
-        };
 //        System.out.println( "============ DIJKSTRA =============" );
 //        for ( Node node : graph.getNodes() ) {
 //            System.out.println( "node: " + node.getLabel() );
@@ -59,10 +46,6 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 //        for ( Edge edge : graph.getEdges() ) {
 //            System.out.println( "edge: " + edge.getLabel() );
 //        }
-    }
-
-    public void setEndCondition( EndCondition endCondition ) {
-        this.endCondition = endCondition;
     }
 
     public void setNodeDataStructure( NodeDataStructure nodeDataStructure ) {
@@ -117,6 +100,8 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             n.setPredecessorEdge( null );
             nodeDataStructure.add( n, entry.getValue().getEvaluableValue() );
         }
+        Node finalNode = null;
+        Distance finalDistance = getDistanceFactory().createInfiniteDistance();
         // set source node distance to zero
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
@@ -124,40 +109,24 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             Node currentNode = nodeDataStructure.extractMin();
             if ( DEBUG_TIME ) {
                 accTime.start();
-                Distance dist = currentNode.getDistance();
+            }
+            Distance dist = currentNode.getDistance();
+            if ( DEBUG_TIME ) {
                 distanceAccessTime += accTime.stop();
                 visitedNodes++;
             }
+            if ( dist.isGreaterThan( finalDistance ) ) {
+                break;
+            }
+            if ( to.containsKey( currentNode.getId() ) ) {
+                Distance wholeDistance = dist.add( to.get( currentNode.getId() ) );
+                if ( wholeDistance.isLowerThan( finalDistance ) ) {
+                    finalNode = currentNode;
+                    finalDistance = wholeDistance;
+                }
+            }
 //            System.out.println( "extracted: " + currentNode );
             closed.add( currentNode );
-            if ( endCondition.isFinished( getGraph(), to, currentNode ) ) {
-
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
-                }
-                if ( DEBUG_TIME ) {
-                    System.out.println( "Dijkstra done in " + time.getTimeString() );
-                    long fromExecutionTime = time.stop();
-
-                    System.out.println( "visited nodes: " + visitedNodes );
-                    System.out.println( "time per node: " + ( time.stop() / visitedNodes ) );
-                    System.out.println( "distance access time: " + distanceAccessTime );
-                    System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
-                    System.out.println( "edges: " + edgesCount );
-                    System.out.println( "visited edges: " + edgesVisited );
-                    System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
-                    time.start();
-                }
-                // build path from predecessors and return
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
-                }
-                Path result = endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
-                if ( MEASURE_TIME ) {
-                    TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
-                }
-                return endCondition.getResult( getGraph(), getEntityAbstractFactory(), currentNode );
-            }
             // foreach neighbour T of node S
             for ( Edge edge : getGraph().getEdgesOf( currentNode ) ) {
                 if ( DEBUG_TIME ) {
@@ -177,18 +146,7 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                     edgesVisited++;
                 }
                 // calculate it's distance S + path from S to T
-                Distance tmpNodeDistance;
-                if ( to.containsKey( currentNode.getId() ) ) {
-                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode, to.get( currentNode.getId() ) );
-                } else {
-//                    try {
-                    tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
-//                    } catch ( NullPointerException ex ) {
-//                        System.out.println( "current node = " + currentNode );
-//                        System.out.println( "current edge = " + edge );
-//                        throw ex;
-//                    }
-                }
+                Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );
                 // replace is lower than actual
                 if ( !nodeDataStructure.contains( endNode ) || tmpNodeDistance.isLowerThan( endNode.getDistance() ) ) {
 //                    System.out.println( "is lower" );
@@ -201,6 +159,35 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                     }
                 }
             }
+        }
+
+        if ( finalNode != null ) {
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
+            }
+            if ( DEBUG_TIME ) {
+                System.out.println( "Dijkstra done in " + time.getTimeString() );
+                long fromExecutionTime = time.stop();
+
+                System.out.println( "visited nodes: " + visitedNodes );
+                System.out.println( "time per node: " + ( time.stop() / visitedNodes ) );
+                System.out.println( "distance access time: " + distanceAccessTime );
+                System.out.println( "distance access time per node: " + ( distanceAccessTime / visitedNodes ) );
+                System.out.println( "edges: " + edgesCount );
+                System.out.println( "visited edges: " + edgesVisited );
+                System.out.println( "visited edges ratio: " + ( 100 * edgesVisited / (double) edgesCount ) + "%" );
+                time.start();
+            }
+            // build path from predecessors and return
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+            }
+            // build path from predecessors and return
+            Path createPath = GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), finalNode );
+            if ( MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
+            }
+            return GraphUtils.createPath( getGraph(), getEntityAbstractFactory(), finalNode );
         }
         return null;
     }
