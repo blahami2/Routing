@@ -13,4 +13,5 @@ public class GlobalOptions {
     public static boolean DEBUG_TIME = false;
     public static boolean DEBUG_CORRECTNESS = false;
     public static boolean MEASURE_TIME = false;
+    public static boolean MEASURE_STATS = false;
 }

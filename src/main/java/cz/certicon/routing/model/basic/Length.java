@@ -31,6 +31,10 @@ public class Length {
         return lengthUnits.fromNano( nanometers );
     }
 
+    public long getLength(LengthUnits lengthUnits) {
+        return lengthUnits.fromNano( nanometers );
+    }
+
     public String getUnit() {
         return lengthUnits.getUnit();
     }

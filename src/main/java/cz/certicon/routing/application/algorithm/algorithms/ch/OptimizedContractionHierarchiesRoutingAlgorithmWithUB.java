@@ -21,6 +21,7 @@ import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.model.basic.TimeUnits;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -117,6 +118,10 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
         if ( DEBUG_TIME ) {
             time.start();
         }
+        if ( MEASURE_STATS ) {
+            StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
+            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
+        }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
@@ -172,11 +177,17 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                 if ( DEBUG_CORRECTNESS ) {
                     System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+                }
                 // foreach neighbour T of node S
                 for ( int i = 0; i < outgoingEdgesArray[currentNode].length; i++ ) {
                     int edge = outgoingEdgesArray[currentNode][i];
                     int otherNode = edgeTargetArray[edge];
                     if ( rankArray[otherNode] > sourceRank ) {
+                        if ( MEASURE_STATS ) {
+                            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+                        }
                         double otherNodeDistance = fromDistanceArray[otherNode];
                         double distance = currentDistance + edgeLengthArray[edge];
                         if ( distance < otherNodeDistance ) {
@@ -207,6 +218,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                 if ( DEBUG_CORRECTNESS ) {
                     System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+                }
                 // foreach neighbour T of node S
                 for ( int i = 0; i < incomingEdgesArray[currentNode].length; i++ ) {
                     int edge = incomingEdgesArray[currentNode][i];
@@ -215,6 +229,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                         double otherNodeDistance = toDistanceArray[otherNode];
                         double distance = currentDistance + edgeLengthArray[edge];
                         if ( distance < otherNodeDistance ) {
+                            if ( MEASURE_STATS ) {
+                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+                            }
                             toDistanceArray[otherNode] = distance;
                             toPredecessorArray[otherNode] = edge;
                             if ( !nodeDataStructure[1].contains( otherNode ) ) {

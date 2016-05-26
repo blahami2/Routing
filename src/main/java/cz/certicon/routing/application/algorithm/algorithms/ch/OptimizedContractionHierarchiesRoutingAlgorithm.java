@@ -21,6 +21,7 @@ import cz.certicon.routing.model.entity.Shortcut;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.model.basic.TimeUnits;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -128,6 +129,10 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             System.out.println( "Routing..." );
             time.start();
         }
+        if ( MEASURE_STATS ) {
+            StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
+            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
+        }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
@@ -157,6 +162,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             if ( DEBUG_TIME ) {
                 visitedNodes++;
             }
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+            }
             fromVisitedNodes.add( currentNode );
             int sourceRank = rankArray[currentNode];
             double currentDistance = fromDistanceArray[currentNode];
@@ -173,6 +181,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
                 if ( rankArray[otherNode] > sourceRank ) {
                     if ( DEBUG_TIME ) {
                         edgesVisited++;
+                    }
+                    if ( MEASURE_STATS ) {
+                        StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
                     double otherNodeDistance = fromDistanceArray[otherNode];
                     double distance = currentDistance + edgeLengthArray[edge];
@@ -218,6 +229,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
             if ( DEBUG_TIME ) {
                 visitedNodes++;
             }
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+            }
             toVisitedNodes.add( currentNode );
             int sourceRank = rankArray[currentNode];
             double currentDistance = toDistanceArray[currentNode];
@@ -234,6 +248,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithm extends AbstractRou
                 if ( rankArray[otherNode] > sourceRank ) {
                     if ( DEBUG_TIME ) {
                         edgesVisited++;
+                    }
+                    if ( MEASURE_STATS ) {
+                        StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
                     double otherNodeDistance = toDistanceArray[otherNode];
                     double distance = currentDistance + edgeLengthArray[edge];

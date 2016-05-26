@@ -6,7 +6,7 @@
 package cz.certicon.routing.application.algorithm.algorithms.dijkstra;
 
 import cz.certicon.routing.GlobalOptions;
-import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
+import static cz.certicon.routing.GlobalOptions.*;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Node;
@@ -21,6 +21,7 @@ import cz.certicon.routing.utils.GraphUtils;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.model.basic.TimeUnits;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -78,6 +79,10 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
             System.out.println( "Routing..." );
             time.start();
         }
+        if ( MEASURE_STATS ) {
+            StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
+            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
+        }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
@@ -111,6 +116,9 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 accTime.start();
             }
             Distance dist = currentNode.getDistance();
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+            }
             if ( DEBUG_TIME ) {
                 distanceAccessTime += accTime.stop();
                 visitedNodes++;
@@ -144,6 +152,9 @@ public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
                 }
                 if ( DEBUG_TIME ) {
                     edgesVisited++;
+                }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );

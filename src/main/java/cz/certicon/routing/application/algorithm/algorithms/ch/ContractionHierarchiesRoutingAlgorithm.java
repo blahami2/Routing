@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import static cz.certicon.routing.GlobalOptions.*;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 
 /**
@@ -91,6 +92,10 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             System.out.println( "Routing..." );
             time.start();
         }
+        if ( MEASURE_STATS ) {
+            StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
+            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
+        }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
@@ -116,6 +121,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
             if ( DEBUG_TIME ) {
                 extractMinTime += accTime.restart();
                 visitedNodes++;
+            }
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
             }
 //            System.out.println( "current node = " + currentNode.getId() + ", distance = " + fromDistanceMap.get( currentNode.getId() )+ ", rank = " + nodeRankMap.get( currentNode.getId()) );
             int sourceRank = nodeRankMap.get( currentNode.getId() );
@@ -157,6 +165,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
                 if ( DEBUG_TIME ) {
                     edgesVisited++;
+                }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = currentDistance.add( edge.getDistance() );
@@ -200,6 +211,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 extractMinTime += accTime.restart();
                 visitedNodes++;
             }
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+            }
 //            System.out.println( "current node = " + currentNode.getId() + ", distance = " + toDistanceMap.get( currentNode.getId() ) + ", rank = " + nodeRankMap.get( currentNode.getId()) );
 //            System.out.println( "extracted: " + currentNode.getId() + ", " + toDistanceMap.get( currentNode.getId() ) );
             int sourceRank = nodeRankMap.get( currentNode.getId() );
@@ -233,6 +247,9 @@ public class ContractionHierarchiesRoutingAlgorithm extends AbstractRoutingAlgor
                 }
                 if ( DEBUG_TIME ) {
                     edgesVisited++;
+                }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
                 Node endNode = getGraph().getOtherNodeOf( edge, currentNode );
                 int endRank = nodeRankMap.get( endNode.getId() );

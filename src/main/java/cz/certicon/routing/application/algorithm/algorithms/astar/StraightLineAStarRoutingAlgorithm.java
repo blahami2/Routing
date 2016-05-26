@@ -5,8 +5,7 @@
  */
 package cz.certicon.routing.application.algorithm.algorithms.astar;
 
-import static cz.certicon.routing.GlobalOptions.DEBUG_TIME;
-import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
+import static cz.certicon.routing.GlobalOptions.*;
 import cz.certicon.routing.application.algorithm.*;
 import cz.certicon.routing.application.algorithm.algorithms.AbstractRoutingAlgorithm;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
@@ -15,6 +14,7 @@ import cz.certicon.routing.utils.GraphUtils;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import cz.certicon.routing.model.basic.TimeUnits;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -67,6 +67,10 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
             time.start();
         }
 
+        if ( MEASURE_STATS ) {
+            StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
+            StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
+        }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
@@ -101,6 +105,9 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                 distanceAccessTime += accTime.stop();
                 visitedNodes++;
             }
+            if ( MEASURE_STATS ) {
+                StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
+            }
             if ( dist.isGreaterThan( finalDistance ) ) {
                 break;
             }
@@ -129,6 +136,9 @@ public class StraightLineAStarRoutingAlgorithm extends AbstractRoutingAlgorithm 
                 }
                 if ( DEBUG_TIME ) {
                     edgesVisited++;
+                }
+                if ( MEASURE_STATS ) {
+                    StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
                 // calculate it's distance S + path from S to T
                 Distance tmpNodeDistance = getRoutingConfiguration().getDistanceEvaluator().evaluate( currentNode, edge, endNode );

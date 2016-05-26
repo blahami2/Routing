@@ -33,6 +33,10 @@ public class Time {
         return timeUnits.fromNano( nanoseconds );
     }
 
+    public long getTime( TimeUnits timeUnits ) {
+        return timeUnits.fromNano( nanoseconds );
+    }
+
     public String getUnit() {
         return timeUnits.getUnit();
     }
@@ -78,6 +82,5 @@ public class Time {
         }
         return true;
     }
-    
-    
+
 }
