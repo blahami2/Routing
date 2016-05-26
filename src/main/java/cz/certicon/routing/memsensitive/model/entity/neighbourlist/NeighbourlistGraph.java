@@ -182,6 +182,16 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
+    public boolean containsEdge( long edgeOrigId ) {
+        return fromOrigEdgesMap.containsKey( edgeOrigId );
+    }
+
+    @Override
+    public boolean containsNode( long nodeOrigId ) {
+        return fromOrigNodesMap.containsKey( nodeOrigId );
+    }
+
+    @Override
     public boolean isValidPredecessor( int predecessor ) {
         return predecessor != PREDECESSOR_DEFAULT;
     }

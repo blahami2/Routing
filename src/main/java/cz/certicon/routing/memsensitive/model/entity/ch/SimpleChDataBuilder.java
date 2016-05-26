@@ -25,6 +25,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
 
     private int[] ranks;
     private Map<Long, Pair<Long, Long>> shortcuts;
+    private long minId = Long.MAX_VALUE;
+    private long maxId = -1;
 
     public SimpleChDataBuilder( Graph graph, DistanceType distanceType ) {
         this.graph = graph;
@@ -62,6 +64,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
 
         Map<Integer, List<Integer>> nodeOutgoing = new HashMap<>();
         Map<Integer, List<Integer>> nodeIncoming = new HashMap<>();
+        Map<Long, Integer> shortcutIdMap = new HashMap<>();
         int counter = 0;
         for ( long shortcutId : shortcuts.keySet() ) {
             int source = getSource( shortcutId );
@@ -70,14 +73,33 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
             targets[counter] = target;
             getList( nodeOutgoing, source ).add( counter );
             getList( nodeIncoming, target ).add( counter );
+            shortcutIdMap.put( shortcutId, counter );
             counter++;
+        }
+        for ( Long shortcutId : shortcuts.keySet() ) {
+            Pair<Long, Long> p = shortcuts.get( shortcutId );
+            if ( graph.containsEdge( p.a ) ) {
+                int edge = graph.getEdgeByOrigId( p.a );
+                startEdges[counter] = edge;
+            } else {
+                int shortcut = shortcutIdMap.get( p.a );
+                startEdges[counter] = shortcut + graph.getEdgeCount();
+            }
+            if ( graph.containsEdge( p.b ) ) {
+                int edge = graph.getEdgeByOrigId( p.a );
+                endEdges[counter] = edge;
+            } else {
+                int shortcut = shortcutIdMap.get( p.b );
+                endEdges[counter] = shortcut + graph.getEdgeCount();
+            }
+
         }
         for ( Map.Entry<Integer, List<Integer>> entry : nodeOutgoing.entrySet() ) {
             int node = entry.getKey();
             List<Integer> outgoing = entry.getValue();
             outgoingShortcuts[node] = toIntArray( outgoing );
         }
-        for ( Map.Entry<Integer, List<Integer>> entry : nodeIncoming.entrySet()) {
+        for ( Map.Entry<Integer, List<Integer>> entry : nodeIncoming.entrySet() ) {
             int node = entry.getKey();
             List<Integer> incoming = entry.getValue();
             incomingShortcuts[node] = toIntArray( incoming );

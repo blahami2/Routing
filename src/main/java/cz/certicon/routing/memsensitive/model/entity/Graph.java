@@ -62,5 +62,9 @@ public interface Graph {
 
     public Iterator<Integer> getOutgoingEdgesIterator( int node );
 
+    public boolean containsEdge( long edgeOrigId );
+
+    public boolean containsNode( long nodeOrigId );
+
     public boolean isValidPredecessor( int predecessor );
 }

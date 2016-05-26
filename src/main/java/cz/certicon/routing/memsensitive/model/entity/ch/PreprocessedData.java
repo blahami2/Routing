@@ -5,6 +5,9 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
+import cz.certicon.routing.memsensitive.model.entity.Graph;
+import java.util.Iterator;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
@@ -74,29 +77,65 @@ public class PreprocessedData {
         return ranks;
     }
 
+    public int getRank( int rank ) {
+        return ranks[rank];
+    }
+
     public int[][] getIncomingShortcuts() {
         return incomingShortcuts;
+    }
+
+    public int[] getIncomingShortcuts( int node ) {
+        return incomingShortcuts[node];
     }
 
     public int[][] getOutgoingShortcuts() {
         return outgoingShortcuts;
     }
 
+    public int[] getOutgoingShortcuts( int node ) {
+        return outgoingShortcuts[node];
+    }
+
     public int[] getSources() {
         return sources;
+    }
+
+    public int getSource( int shortcut ) {
+        return sources[shortcut];
     }
 
     public int[] getTargets() {
         return targets;
     }
 
-    public int[] getStartEdges() {
-        return startEdges;
+    public int getTarget( int shortcut ) {
+        return targets[shortcut];
     }
 
-    public int[] getEndEdges() {
-        return endEdges;
+//    public int getStartEdge( int shortcut ) {
+//        return startEdges[shortcut];
+//    }
+//
+//    public int getEndEdge( int shortcut ) {
+//        return endEdges[shortcut];
+//    }
+
+    public double getLength( int shortcut, Graph graph ) {
+        int start = startEdges[shortcut];
+        int end = endEdges[shortcut];
+        double length = 0;
+        if ( start >= graph.getEdgeCount() ) {
+            length += getLength( start - graph.getEdgeCount(), graph );
+        } else {
+            length += graph.getLength( start );
+        }
+        if ( end >= graph.getEdgeCount() ) {
+            length += getLength( end - graph.getEdgeCount(), graph );
+        } else {
+            length += graph.getLength( end );
+        }
+        return length;
     }
-    
-    
+
 }
