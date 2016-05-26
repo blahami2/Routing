@@ -121,10 +121,10 @@ public class PreprocessedData {
 //        return endEdges[shortcut];
 //    }
 
-    public double getLength( int shortcut, Graph graph ) {
+    public float getLength( int shortcut, Graph graph ) {
         int start = startEdges[shortcut];
         int end = endEdges[shortcut];
-        double length = 0;
+        float length = 0;
         if ( start >= graph.getEdgeCount() ) {
             length += getLength( start - graph.getEdgeCount(), graph );
         } else {

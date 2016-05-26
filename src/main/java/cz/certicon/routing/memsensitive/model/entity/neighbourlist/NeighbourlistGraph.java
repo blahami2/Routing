@@ -10,7 +10,6 @@ import cz.certicon.routing.utils.EffectiveUtils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,16 +19,18 @@ public class NeighbourlistGraph implements Graph {
 
     private final int edgeSources[];
     private final int edgeTargets[];
-    private final double edgeLengths[];
+    private final float edgeLengths[];
     private final int[][] incomingEdges;
     private final int[][] outgoingEdges;
     private final int[] nodePredecessorsPrototype;
-    private final double[] nodeDistancesPrototype;
+    private final float[] nodeDistancesPrototype;
+    private final float[] nodeLatitudes;
+    private final float[] nodeLongitudes;
     private final boolean[] nodeClosedPrototype;
     private final long[] nodeOrigIds;
     private final long[] edgeOrigIds;
 
-    private static final double DISTANCE_DEFAULT = Double.MAX_VALUE;
+    private static final float DISTANCE_DEFAULT = Float.MAX_VALUE;
     private static final boolean CLOSED_DEFAULT = false;
     private static final int PREDECESSOR_DEFAULT = -1;
 
@@ -39,9 +40,11 @@ public class NeighbourlistGraph implements Graph {
     public NeighbourlistGraph( int nodeCount, int edgeCount ) {
         this.edgeSources = new int[edgeCount];
         this.edgeTargets = new int[edgeCount];
-        this.edgeLengths = new double[edgeCount];
+        this.edgeLengths = new float[edgeCount];
         this.nodePredecessorsPrototype = new int[nodeCount];
-        this.nodeDistancesPrototype = new double[nodeCount];
+        this.nodeDistancesPrototype = new float[nodeCount];
+        this.nodeLatitudes = new float[nodeCount];
+        this.nodeLongitudes = new float[nodeCount];
         this.nodeClosedPrototype = new boolean[nodeCount];
         this.incomingEdges = new int[nodeCount][];
         this.outgoingEdges = new int[nodeCount][];
@@ -65,7 +68,7 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public void setLength( int edge, double length ) {
+    public void setLength( int edge, float length ) {
         edgeLengths[edge] = length;
     }
 
@@ -85,7 +88,7 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public void resetNodeDistanceArray( double[] nodeDistances ) {
+    public void resetNodeDistanceArray( float[] nodeDistances ) {
         System.arraycopy( nodeDistancesPrototype, 0, nodeDistances, 0, nodeDistances.length );
     }
 
@@ -115,7 +118,7 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public double getLength( int edge ) {
+    public float getLength( int edge ) {
         return edgeLengths[edge];
     }
 
@@ -194,6 +197,22 @@ public class NeighbourlistGraph implements Graph {
     @Override
     public boolean isValidPredecessor( int predecessor ) {
         return predecessor != PREDECESSOR_DEFAULT;
+    }
+
+    @Override
+    public void setCoordinate( int node, float latitude, float longitude ) {
+        nodeLatitudes[node] = latitude;
+        nodeLongitudes[node] = longitude;
+    }
+
+    @Override
+    public float getLatitude( int node ) {
+        return nodeLatitudes[node];
+    }
+
+    @Override
+    public float getLongitude( int node ) {
+        return nodeLongitudes[node];
     }
 
     private class IncomingIterator implements Iterator<Integer> {

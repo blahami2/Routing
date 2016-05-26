@@ -21,15 +21,17 @@ public interface Graph {
 
     public void setTarget( int edge, int target );
 
-    public void setLength( int edge, double length );
+    public void setLength( int edge, float length );
 
     public void setIncomingEdges( int node, int[] incomingEdges );
 
     public void setOutgoingEdges( int node, int[] outgoingEdges );
 
+    public void setCoordinate( int node, float latitude, float longitude );
+
     public void resetNodePredecessorArray( int[] nodePredecessors );
 
-    public void resetNodeDistanceArray( double[] nodeDistances );
+    public void resetNodeDistanceArray( float[] nodeDistances );
 
     public void resetNodeClosedArray( boolean[] nodeClosed );
 
@@ -43,7 +45,7 @@ public interface Graph {
 
     public int getOtherNode( int edge, int node );
 
-    public double getLength( int edge );
+    public float getLength( int edge );
 
     public long getEdgeOrigId( int edge );
 
@@ -53,6 +55,10 @@ public interface Graph {
     public int getNodeByOrigId( long nodeId );
 
     public int getEdgeByOrigId( long edgeId );
+
+    public float getLatitude( int node );
+
+    public float getLongitude( int node );
 
     public int getNodeCount();
 

@@ -21,11 +21,11 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
 
     private final Graph graph;
     private final int[] nodeFromPredecessorArray;
-    private final double[] nodeFromDistanceArray;
+    private final float[] nodeFromDistanceArray;
     private final boolean[] nodeFromClosedArray;
     private final NodeDataStructure<Integer> nodeFromDataStructure;
     private final int[] nodeToPredecessorArray;
-    private final double[] nodeToDistanceArray;
+    private final float[] nodeToDistanceArray;
     private final boolean[] nodeToClosedArray;
     private final NodeDataStructure<Integer> nodeToDataStructure;
     private final PreprocessedData preprocessedData;
@@ -33,18 +33,18 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
     public ContractionHierarchiesRoutingAlgorithm( Graph graph, PreprocessedData preprocessedData ) {
         this.graph = graph;
         this.nodeFromPredecessorArray = new int[graph.getNodeCount()];
-        this.nodeFromDistanceArray = new double[graph.getNodeCount()];
+        this.nodeFromDistanceArray = new float[graph.getNodeCount()];
         this.nodeFromClosedArray = new boolean[graph.getNodeCount()];
         this.nodeFromDataStructure = new JgraphtFibonacciDataStructure();
         this.nodeToPredecessorArray = new int[graph.getNodeCount()];
-        this.nodeToDistanceArray = new double[graph.getNodeCount()];
+        this.nodeToDistanceArray = new float[graph.getNodeCount()];
         this.nodeToClosedArray = new boolean[graph.getNodeCount()];
         this.nodeToDataStructure = new JgraphtFibonacciDataStructure();
         this.preprocessedData = preprocessedData;
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Double> from, Map<Integer, Double> to ) {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) {
         graph.resetNodeDistanceArray( nodeFromDistanceArray );
         graph.resetNodePredecessorArray( nodeFromPredecessorArray );
         graph.resetNodeClosedArray( nodeFromClosedArray );
@@ -54,15 +54,15 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         graph.resetNodeClosedArray( nodeToClosedArray );
         nodeToDataStructure.clear();
 
-        for ( Map.Entry<Integer, Double> entry : from.entrySet() ) {
+        for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
             int node = entry.getKey();
-            double distance = entry.getValue();
+            float distance = entry.getValue();
             nodeFromDistanceArray[node] = distance;
             nodeFromDataStructure.add( node, distance );
         }
-        for ( Map.Entry<Integer, Double> entry : to.entrySet() ) {
+        for ( Map.Entry<Integer, Float> entry : to.entrySet() ) {
             int node = entry.getKey();
-            double distance = entry.getValue();
+            float distance = entry.getValue();
             nodeToDistanceArray[node] = distance;
             nodeToDataStructure.add( node, distance );
         }
@@ -73,14 +73,14 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 int currentNode = nodeFromDataStructure.extractMin();
                 nodeFromClosedArray[currentNode] = true;
                 int sourceRank = preprocessedData.getRank( currentNode );
-                double currentDistance = nodeFromDistanceArray[currentNode];
+                float currentDistance = nodeFromDistanceArray[currentNode];
 
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
                     nodeFromDataStructure.clear();
                 } else {
                     if ( nodeToClosedArray[currentNode] ) {
-                        double nodeDistance = currentDistance + nodeToDistanceArray[currentNode];
+                        float nodeDistance = currentDistance + nodeToDistanceArray[currentNode];
                         if ( nodeDistance < finalDistance ) {
                             finalDistance = nodeDistance;
                             finalNode = currentNode;
@@ -91,8 +91,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         int edge = graph.getOutgoingEdges( currentNode )[i];
                         int otherNode = graph.getOtherNode( edge, currentNode );
                         if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            double otherNodeDistance = nodeFromDistanceArray[otherNode];
-                            double distance = currentDistance + graph.getLength( edge );
+                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
+                            float distance = currentDistance + graph.getLength( edge );
                             if ( distance < otherNodeDistance ) {
                                 nodeFromDistanceArray[otherNode] = distance;
                                 nodeFromPredecessorArray[otherNode] = edge;
@@ -104,8 +104,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         int shortcut = preprocessedData.getOutgoingShortcuts( currentNode )[i];
                         int otherNode = preprocessedData.getTarget( shortcut );
                         if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            double otherNodeDistance = nodeFromDistanceArray[otherNode];
-                            double distance = currentDistance + preprocessedData.getLength( shortcut, graph );
+                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
+                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
                             if ( distance < otherNodeDistance ) {
                                 nodeFromDistanceArray[otherNode] = distance;
                                 nodeFromPredecessorArray[otherNode] = shortcut;
@@ -119,14 +119,14 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 int currentNode = nodeToDataStructure.extractMin();
                 nodeToClosedArray[currentNode] = true;
                 int sourceRank = preprocessedData.getRank( currentNode );
-                double currentDistance = nodeFromDistanceArray[currentNode];
+                float currentDistance = nodeFromDistanceArray[currentNode];
 
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
                     nodeFromDataStructure.clear();
                 } else {
                     if ( nodeFromClosedArray[currentNode] ) {
-                        double nodeDistance = currentDistance + nodeFromDistanceArray[currentNode];
+                        float nodeDistance = currentDistance + nodeFromDistanceArray[currentNode];
                         if ( nodeDistance < finalDistance ) {
                             finalDistance = nodeDistance;
                             finalNode = currentNode;
@@ -136,8 +136,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         int edge = graph.getIncomingEdges( currentNode )[i];
                         int otherNode = graph.getOtherNode( edge, currentNode );
                         if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            double otherNodeDistance = nodeToDistanceArray[otherNode];
-                            double distance = currentDistance + graph.getLength( edge );
+                            float otherNodeDistance = nodeToDistanceArray[otherNode];
+                            float distance = currentDistance + graph.getLength( edge );
                             if ( distance < otherNodeDistance ) {
                                 nodeToDistanceArray[otherNode] = distance;
                                 nodeToPredecessorArray[otherNode] = edge;
@@ -149,8 +149,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         int shortcut = preprocessedData.getIncomingShortcuts( currentNode )[i];
                         int otherNode = preprocessedData.getSource( shortcut );
                         if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            double otherNodeDistance = nodeToDistanceArray[otherNode];
-                            double distance = currentDistance + preprocessedData.getLength( shortcut, graph );
+                            float otherNodeDistance = nodeToDistanceArray[otherNode];
+                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
                             if ( distance < otherNodeDistance ) {
                                 nodeToDistanceArray[otherNode] = distance;
                                 nodeToPredecessorArray[otherNode] = shortcut;

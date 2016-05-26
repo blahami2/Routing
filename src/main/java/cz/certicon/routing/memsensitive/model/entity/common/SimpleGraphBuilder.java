@@ -10,7 +10,6 @@ import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.neighbourlist.NeighbourlistGraph;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class SimpleGraphBuilder implements GraphBuilder<Graph> {
         int target = graph.getNodeByOrigId( targetId );
         getEdgeList( outgoingEdgesMap, source ).add( edgeCounter );
         getEdgeList( incomingEdgesMap, target ).add( edgeCounter );
-        graph.setLength( edgeCounter, distanceType.calculateDistance( length, speed ) );
+        graph.setLength( edgeCounter, (float) distanceType.calculateDistance( length, speed ) );
         graph.setSource( edgeCounter, source );
         graph.setTarget( edgeCounter, target );
         edgeCounter++;

@@ -22,28 +22,28 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 
     private final Graph graph;
     private final int[] nodePredecessorArray;
-    private final double[] nodeDistanceArray;
+    private final float[] nodeDistanceArray;
     private final boolean[] nodeClosedArray;
     private final NodeDataStructure<Integer> nodeDataStructure;
 
     public DijkstraRoutingAlgorithm( Graph graph ) {
         this.graph = graph;
         this.nodePredecessorArray = new int[graph.getNodeCount()];
-        this.nodeDistanceArray = new double[graph.getNodeCount()];
+        this.nodeDistanceArray = new float[graph.getNodeCount()];
         this.nodeClosedArray = new boolean[graph.getNodeCount()];
         this.nodeDataStructure = new JgraphtFibonacciDataStructure();
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Double> from, Map<Integer, Double> to ) {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) {
         graph.resetNodeDistanceArray( nodeDistanceArray );
         graph.resetNodePredecessorArray( nodePredecessorArray );
         graph.resetNodeClosedArray( nodeClosedArray );
         nodeDataStructure.clear();
 
-        for ( Map.Entry<Integer, Double> entry : from.entrySet() ) {
+        for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
             int node = entry.getKey();
-            double distance = entry.getValue();
+            float distance =  entry.getValue();
             nodeDistanceArray[node] = distance;
             nodeDataStructure.add( node, distance );
 //            System.out.println( "adding: " + node + " with distance: " + distance );
@@ -52,7 +52,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         double finalDistance = Double.MAX_VALUE;
         while ( !nodeDataStructure.isEmpty() ) {
             int node = nodeDataStructure.extractMin();
-            double distance = nodeDistanceArray[node];
+            float distance = nodeDistanceArray[node];
             nodeClosedArray[node] = true;
 //            System.out.println( "Extracted: " + node + " with distance: " + distance );
             if ( finalDistance < distance ) {
@@ -72,8 +72,8 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 int target = graph.getOtherNode( edge, node );
 //                System.out.println( "edge = " + edge + ", target = " + target );
                 if ( !nodeClosedArray[target] ) {
-                    double targetDistance = nodeDistanceArray[target];
-                    double alternativeDistance = distance + graph.getLength( edge );
+                    float targetDistance = nodeDistanceArray[target];
+                    float alternativeDistance = distance + graph.getLength( edge );
                     if ( alternativeDistance < targetDistance ) {
                         nodeDistanceArray[target] = alternativeDistance;
                         nodePredecessorArray[target] = edge;
