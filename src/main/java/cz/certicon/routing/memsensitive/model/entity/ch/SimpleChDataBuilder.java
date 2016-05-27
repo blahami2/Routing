@@ -80,17 +80,17 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
             Pair<Long, Long> p = shortcuts.get( shortcutId );
             if ( graph.containsEdge( p.a ) ) {
                 int edge = graph.getEdgeByOrigId( p.a );
-                startEdges[counter] = edge;
+                startEdges[shortcutIdMap.get( shortcutId )] = edge;
             } else {
                 int shortcut = shortcutIdMap.get( p.a );
-                startEdges[counter] = shortcut + graph.getEdgeCount();
+                startEdges[shortcutIdMap.get( shortcutId )] = shortcut + graph.getEdgeCount();
             }
             if ( graph.containsEdge( p.b ) ) {
-                int edge = graph.getEdgeByOrigId( p.a );
-                endEdges[counter] = edge;
+                int edge = graph.getEdgeByOrigId( p.b );
+                endEdges[shortcutIdMap.get( shortcutId )] = edge;
             } else {
                 int shortcut = shortcutIdMap.get( p.b );
-                endEdges[counter] = shortcut + graph.getEdgeCount();
+                endEdges[shortcutIdMap.get( shortcutId )] = shortcut + graph.getEdgeCount();
             }
 
         }
@@ -103,6 +103,16 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
             int node = entry.getKey();
             List<Integer> incoming = entry.getValue();
             incomingShortcuts[node] = toIntArray( incoming );
+        }
+        for ( int i = 0; i < incomingShortcuts.length; i++ ) {
+            if ( incomingShortcuts[i] == null ) {
+                incomingShortcuts[i] = new int[0];
+            }
+        }
+        for ( int i = 0; i < outgoingShortcuts.length; i++ ) {
+            if ( outgoingShortcuts[i] == null ) {
+                outgoingShortcuts[i] = new int[0];
+            }
         }
         return new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges );
     }

@@ -94,13 +94,13 @@ public class SqliteNodeSearcher implements NodeSearcher {
                         found = true;
                         EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
                         long nodeId;
-                        double length;
+                        float length;
                         if ( searchfor.equals( SearchFor.SOURCE ) ) {
                             nodeId = edgeResultHelper.getTargetId();
-                            length = rs.getDouble( edgeResultHelper.getIsForward() ? keyDistanceToEnd : keyDistanceFromStart );
+                            length = rs.getFloat( edgeResultHelper.getIsForward() ? keyDistanceToEnd : keyDistanceFromStart );
                         } else {
                             nodeId = edgeResultHelper.getSourceId();
-                            length = rs.getDouble( edgeResultHelper.getIsForward() ? keyDistanceFromStart : keyDistanceToEnd );
+                            length = rs.getFloat( edgeResultHelper.getIsForward() ? keyDistanceFromStart : keyDistanceToEnd );
                         }
                         nodeSetBuilder.addNode( nodeId, edgeResultHelper.getId(), length, rs.getInt( edgeResultHelper.getIsForward() ? "speed_fw" : "speed_bw" ) );
                     }

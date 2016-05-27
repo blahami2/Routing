@@ -113,13 +113,13 @@ public class PreprocessedData {
         return targets[shortcut];
     }
 
-//    public int getStartEdge( int shortcut ) {
-//        return startEdges[shortcut];
-//    }
-//
-//    public int getEndEdge( int shortcut ) {
-//        return endEdges[shortcut];
-//    }
+    public int getStartEdge( int shortcut ) {
+        return startEdges[shortcut];
+    }
+
+    public int getEndEdge( int shortcut ) {
+        return endEdges[shortcut];
+    }
 
     public float getLength( int shortcut, Graph graph ) {
         int start = startEdges[shortcut];

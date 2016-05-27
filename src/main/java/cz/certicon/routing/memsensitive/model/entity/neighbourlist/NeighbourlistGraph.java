@@ -7,6 +7,8 @@ package cz.certicon.routing.memsensitive.model.entity.neighbourlist;
 
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.utils.EffectiveUtils;
+import cz.certicon.routing.utils.efficient.BitArray;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class NeighbourlistGraph implements Graph {
     private final float[] nodeDistancesPrototype;
     private final float[] nodeLatitudes;
     private final float[] nodeLongitudes;
-    private final boolean[] nodeClosedPrototype;
+//    private final boolean[] nodeClosedPrototype;
     private final long[] nodeOrigIds;
     private final long[] edgeOrigIds;
 
@@ -45,7 +47,7 @@ public class NeighbourlistGraph implements Graph {
         this.nodeDistancesPrototype = new float[nodeCount];
         this.nodeLatitudes = new float[nodeCount];
         this.nodeLongitudes = new float[nodeCount];
-        this.nodeClosedPrototype = new boolean[nodeCount];
+//        this.nodeClosedPrototype = new boolean[nodeCount];
         this.incomingEdges = new int[nodeCount][];
         this.outgoingEdges = new int[nodeCount][];
         this.nodeOrigIds = new long[nodeCount];
@@ -54,7 +56,7 @@ public class NeighbourlistGraph implements Graph {
         this.fromOrigNodesMap = new HashMap<>();
         EffectiveUtils.fillArray( nodePredecessorsPrototype, PREDECESSOR_DEFAULT );
         EffectiveUtils.fillArray( nodeDistancesPrototype, DISTANCE_DEFAULT );
-        EffectiveUtils.fillArray( nodeClosedPrototype, CLOSED_DEFAULT );
+//        EffectiveUtils.fillArray( nodeClosedPrototype, CLOSED_DEFAULT );
     }
 
     @Override
@@ -93,8 +95,8 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public void resetNodeClosedArray( boolean[] nodeClosed ) {
-        System.arraycopy( nodeClosedPrototype, 0, nodeClosed, 0, nodeClosed.length );
+    public void resetNodeClosedArray( BitArray nodeClosed ) {
+        nodeClosed.clear();
     }
 
     @Override

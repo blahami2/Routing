@@ -17,18 +17,24 @@ import java.util.LinkedList;
  */
 public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
 
-    private long source = -1;
-    private long target = -1;
-    private LinkedList<Pair<Long, Boolean>> edges = new LinkedList<>();
+    private long source;
+    private long target;
+    private LinkedList<Pair<Long, Boolean>> edges;
 
-    @Override
-    public void setSourceNode( long nodeId ) {
-        source = nodeId;
+    public SimpleRouteBuilder() {
+        clear();
     }
 
     @Override
-    public void setTargetNode( long nodeId ) {
+    public void setSourceNode( Graph graph, long nodeId ) {
+        source = nodeId;
         target = nodeId;
+    }
+
+    @Override
+    public void setTargetNode( Graph graph,  long nodeId ) {
+        target = nodeId;
+        source = nodeId;
     }
 
     @Override
@@ -36,7 +42,7 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
         int edge = graph.getEdgeByOrigId( edgeId );
         long sourceNode = graph.getNodeOrigId( graph.getSource( edge ) );
         long targetNode = graph.getNodeOrigId( graph.getTarget( edge ) );
-        if ( edges.isEmpty() ) {
+        if ( edges.isEmpty() && source == -1 && target == -1 ) {
             edges.add( new Pair<>( edgeId, true ) );
             source = sourceNode;
             target = targetNode;
@@ -59,11 +65,11 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
         int edge = graph.getEdgeByOrigId( edgeId );
         long sourceNode = graph.getNodeOrigId( graph.getSource( edge ) );
         long targetNode = graph.getNodeOrigId( graph.getTarget( edge ) );
-        if ( edges.isEmpty() ) {
+        if ( edges.isEmpty() && source == -1 && target == -1 ) {
             edges.add( new Pair<>( edgeId, true ) );
             source = sourceNode;
             target = targetNode;
-        } else if ( target == sourceNode) {
+        } else if ( target == sourceNode ) {
             edges.addLast( new Pair<>( edgeId, true ) );
             target = targetNode;
         } else if ( target == targetNode ) {
@@ -80,6 +86,13 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
     @Override
     public Route build() {
         return new SimpleRoute( edges, source, target );
+    }
+
+    @Override
+    public final void clear() {
+        source = -1;
+        target = -1;
+        edges = new LinkedList<>();
     }
 
 }

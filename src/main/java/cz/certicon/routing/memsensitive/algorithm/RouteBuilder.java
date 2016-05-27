@@ -11,13 +11,15 @@ package cz.certicon.routing.memsensitive.algorithm;
  */
 public interface RouteBuilder<R,G> {
 
-    public void setSourceNode( long nodeId );
+    public void setSourceNode( G graph, long nodeId );
 
-    public void setTargetNode( long nodeId );
+    public void setTargetNode( G graph, long nodeId );
 
     public void addEdgeAsFirst( G graph, long edgeId );
 
     public void addEdgeAsLast( G graph, long edgeId );
+    
+    public void clear();
 
     public R build();
 }

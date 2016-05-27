@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import cz.certicon.routing.utils.efficient.BitArray;
 import java.util.Iterator;
 
 /**
@@ -33,7 +34,7 @@ public interface Graph {
 
     public void resetNodeDistanceArray( float[] nodeDistances );
 
-    public void resetNodeClosedArray( boolean[] nodeClosed );
+    public void resetNodeClosedArray( BitArray nodeClosed );
 
     public int[] getIncomingEdges( int node );
 

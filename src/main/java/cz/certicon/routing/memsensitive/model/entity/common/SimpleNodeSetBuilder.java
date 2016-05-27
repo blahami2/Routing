@@ -15,11 +15,11 @@ import java.util.Map;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleNodeSetBuilder implements NodeSetBuilder<Map<Integer, Double>> {
+public class SimpleNodeSetBuilder implements NodeSetBuilder<Map<Integer, Float>> {
 
     private final DistanceType distanceType;
     private final Graph graph;
-    private final Map<Integer, Double> nodeDistanceMap;
+    private final Map<Integer, Float> nodeDistanceMap;
 
     public SimpleNodeSetBuilder( Graph graph, DistanceType distanceType ) {
         this.distanceType = distanceType;
@@ -28,18 +28,18 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<Map<Integer, Double>
     }
 
     @Override
-    public void addNode( long nodeId, long edgeId, double length, double speed ) {
-        double dist = distanceType.calculateDistance( length, speed );
+    public void addNode( long nodeId, long edgeId, float length, float speed ) {
+        float dist = (float) distanceType.calculateDistance( length, speed );
         nodeDistanceMap.put( graph.getNodeByOrigId( nodeId ), dist );
     }
 
     @Override
     public void addCrossroad( long nodeId ) {
-        nodeDistanceMap.put( graph.getNodeByOrigId( nodeId ), 0.0 );
+        nodeDistanceMap.put( graph.getNodeByOrigId( nodeId ), 0.0F );
     }
 
     @Override
-    public Map<Integer, Double> build() {
+    public Map<Integer, Float> build() {
         return nodeDistanceMap;
     }
 

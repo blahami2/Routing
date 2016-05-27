@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<Map<Integer, Double>> {
+public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<Map<Integer, Float>> {
 
     private final DistanceType distanceType;
     private final Graph graph;
@@ -26,7 +26,7 @@ public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<Map<In
     }
 
     @Override
-    public NodeSetBuilder<Map<Integer, Double>> createNodeSetBuilder() {
+    public NodeSetBuilder<Map<Integer, Float>> createNodeSetBuilder() {
         return new SimpleNodeSetBuilder( graph, distanceType );
     }
 

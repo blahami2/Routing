@@ -12,7 +12,7 @@ package cz.certicon.routing.model.entity;
  */
 public interface NodeSetBuilder<T> {
 
-    public void addNode( long nodeId, long edgeId, double length, double speed );
+    public void addNode( long nodeId, long edgeId, float length, float speed );
 
     public void addCrossroad( long nodeId );
 

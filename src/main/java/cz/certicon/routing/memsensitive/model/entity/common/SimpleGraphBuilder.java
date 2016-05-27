@@ -70,6 +70,16 @@ public class SimpleGraphBuilder implements GraphBuilder<Graph> {
             graph.setIncomingEdges( nodeId, incomingEdgesArray );
 //            System.out.println( "incoming edges for: " + nodeId + " = " + Arrays.toString( incomingEdgesArray ) );
         }
+        for ( int i = 0; i < nodeCounter; i++ ) {
+            if ( graph.getIncomingEdges( i ) == null ) {
+                graph.setIncomingEdges( i, new int[0] );
+            }
+        }
+        for ( int i = 0; i < nodeCounter; i++ ) {
+            if ( graph.getOutgoingEdges( i ) == null ) {
+                graph.setOutgoingEdges( i, new int[0] );
+            }
+        }
         return graph;
     }
 

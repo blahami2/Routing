@@ -55,6 +55,10 @@ public class EffectiveUtils {
         System.arraycopy( source, 0, target, 0, target.length );
     }
 
+    public static void copyArray( long[] source, long[] target ) {
+        System.arraycopy( source, 0, target, 0, target.length );
+    }
+
     public static void copyArray( double[] source, double[] target ) {
         System.arraycopy( source, 0, target, 0, target.length );
     }
