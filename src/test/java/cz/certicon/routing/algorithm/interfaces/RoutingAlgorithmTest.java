@@ -6,6 +6,7 @@
 package cz.certicon.routing.algorithm.interfaces;
 
 import com.sun.javafx.scene.NodeHelper;
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.application.algorithm.Distance;
 import cz.certicon.routing.application.algorithm.AlgorithmConfiguration;
 import cz.certicon.routing.application.algorithm.DistanceFactory;
@@ -189,6 +190,7 @@ public class RoutingAlgorithmTest {
     @Parameterized.Parameters
     public static Iterable<Object[]> instancesToTest() {
         final Graph input = createGraph();
+        GlobalOptions.DEBUG_CORRECTNESS = true;
 
         return Arrays.asList( new Object[]{
             new RoutingAlgorithmFactory() {

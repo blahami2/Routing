@@ -33,6 +33,7 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
 
     @Override
     public void setTargetNode( Graph graph,  long nodeId ) {
+//        System.out.println( "target node = " + nodeId );
         target = nodeId;
         source = nodeId;
     }

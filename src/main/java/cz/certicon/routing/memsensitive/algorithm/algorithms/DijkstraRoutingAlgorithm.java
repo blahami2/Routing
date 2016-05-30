@@ -16,8 +16,7 @@ import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
 import cz.certicon.routing.utils.measuring.TimeLogger;
-import java.util.Arrays;
-import java.util.Iterator;
+import gnu.trove.iterator.TIntIterator;
 import java.util.Map;
 
 /**
@@ -50,9 +49,9 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
+        graph.resetNodeClosedArray( nodeClosedArray );
         graph.resetNodeDistanceArray( nodeDistanceArray );
         graph.resetNodePredecessorArray( nodePredecessorArray );
-        graph.resetNodeClosedArray( nodeClosedArray );
         nodeDataStructure.clear();
 
         for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
@@ -79,13 +78,13 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 //                System.out.println( "found end node: " + node );
                 double nodeDistance = distance + to.get( node );
                 if ( nodeDistance < finalDistance ) {
-                    System.out.println( nodeDistance + " < " + finalDistance );
+//                    System.out.println( nodeDistance + " < " + finalDistance );
                     finalNode = node;
                     finalDistance = nodeDistance;
                 }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
-            Iterator<Integer> it = graph.getOutgoingEdgesIterator( node );
+            TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
                 int target = graph.getOtherNode( edge, node );

@@ -6,7 +6,8 @@
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
 import cz.certicon.routing.memsensitive.model.entity.Graph;
-import java.util.Iterator;
+import gnu.trove.iterator.TIntIterator;
+import java.util.Arrays;
 
 /**
  *
@@ -101,8 +102,19 @@ public class PreprocessedData {
         return sources;
     }
 
+    public int getShortcutCount() {
+        return sources.length;
+    }
+
     public int getSource( int shortcut ) {
         return sources[shortcut];
+    }
+
+    public int getSource( int edge, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return graph.getSource( edge );
+        }
+        return sources[edge - graph.getEdgeCount()];
     }
 
     public int[] getTargets() {
@@ -111,6 +123,13 @@ public class PreprocessedData {
 
     public int getTarget( int shortcut ) {
         return targets[shortcut];
+    }
+
+    public int getTarget( int edge, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return graph.getTarget( edge );
+        }
+        return targets[edge - graph.getEdgeCount()];
     }
 
     public int getStartEdge( int shortcut ) {
@@ -136,6 +155,150 @@ public class PreprocessedData {
             length += graph.getLength( end );
         }
         return length;
+    }
+
+    public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {
+        return new IncomingIterator( graph, node );
+    }
+
+    public TIntIterator getOutgoingEdgesIterator( int node, Graph graph ) {
+        return new OutgoingIterator( graph, node );
+    }
+
+    private class IncomingIterator implements TIntIterator {
+
+        private final int node;
+        private final Graph graph;
+        private int position = -1;
+
+        public IncomingIterator( Graph graph, int node ) {
+            this.node = node;
+            this.graph = graph;
+        }
+
+        @Override
+        public boolean hasNext() { // ... see note at NeighbourListGraph
+            return position + 1 < graph.getIncomingEdges( node ).length + incomingShortcuts[node].length;
+        }
+
+        @Override
+        public int next() {
+            if ( position + 1 < graph.getIncomingEdges( node ).length ) {
+                return graph.getIncomingEdges( node )[++position];
+            } else {
+                return incomingShortcuts[node][++position - graph.getIncomingEdges( node ).length];
+            }
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        }
+
+    }
+
+    private class OutgoingIterator implements TIntIterator {
+
+        private final int node;
+        private int position = -1;
+        private final Graph graph;
+
+        public OutgoingIterator( Graph graph, int node ) {
+            this.node = node;
+            this.graph = graph;
+        }
+
+        @Override
+        public boolean hasNext() { // see above, analogically
+            return position + 1 < graph.getOutgoingEdges( node ).length + outgoingShortcuts[node].length;
+        }
+
+        @Override
+        public int next() {
+            if ( position + 1 < graph.getOutgoingEdges( node ).length ) {
+                return graph.getOutgoingEdges( node )[++position];
+            } else {
+                return outgoingShortcuts[node][++position - graph.getOutgoingEdges( node ).length];
+            }
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Arrays.hashCode( this.ranks );
+        hash = 53 * hash + Arrays.deepHashCode( this.incomingShortcuts );
+        hash = 53 * hash + Arrays.deepHashCode( this.outgoingShortcuts );
+        hash = 53 * hash + Arrays.hashCode( this.sources );
+        hash = 53 * hash + Arrays.hashCode( this.targets );
+        hash = 53 * hash + Arrays.hashCode( this.startEdges );
+        hash = 53 * hash + Arrays.hashCode( this.endEdges );
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) {
+            return true;
+        }
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final PreprocessedData other = (PreprocessedData) obj;
+        if ( !Arrays.equals( this.ranks, other.ranks ) ) {
+            return false;
+        }
+        if ( !Arrays.deepEquals( this.incomingShortcuts, other.incomingShortcuts ) ) {
+            return false;
+        }
+        if ( !Arrays.deepEquals( this.outgoingShortcuts, other.outgoingShortcuts ) ) {
+            return false;
+        }
+        if ( !Arrays.equals( this.sources, other.sources ) ) {
+            return false;
+        }
+        if ( !Arrays.equals( this.targets, other.targets ) ) {
+            return false;
+        }
+        if ( !Arrays.equals( this.startEdges, other.startEdges ) ) {
+            return false;
+        }
+        if ( !Arrays.equals( this.endEdges, other.endEdges ) ) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder isb = new StringBuilder();
+        isb.append( "[" );
+        for ( int[] i : incomingShortcuts ) {
+            isb.append( Arrays.toString( i ) ).append( "," );
+        }
+        isb.append( "]" );
+        StringBuilder osb = new StringBuilder();
+        osb.append( "[" );
+        for ( int[] i : outgoingShortcuts ) {
+            osb.append( Arrays.toString( i ) ).append( "," );
+        }
+        osb.append( "]" );
+        return "PreprocessedData{"
+                + "ranks=" + Arrays.toString( ranks )
+                + ", incomingShortcuts=" + isb.toString()
+                + ", outgoingShortcuts=" + osb.toString()
+                + ", sources=" + Arrays.toString( sources )
+                + ", targets=" + Arrays.toString( targets )
+                + ", startEdges=" + Arrays.toString( startEdges )
+                + ", endEdges=" + Arrays.toString( endEdges ) + '}';
     }
 
 }

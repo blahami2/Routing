@@ -6,6 +6,7 @@
 package cz.certicon.routing.memsensitive.model.entity;
 
 import cz.certicon.routing.utils.efficient.BitArray;
+import gnu.trove.iterator.TIntIterator;
 import java.util.Iterator;
 
 /**
@@ -65,9 +66,9 @@ public interface Graph {
 
     public int getEdgeCount();
 
-    public Iterator<Integer> getIncomingEdgesIterator( int node );
+    public TIntIterator getIncomingEdgesIterator( int node );
 
-    public Iterator<Integer> getOutgoingEdgesIterator( int node );
+    public TIntIterator getOutgoingEdgesIterator( int node );
 
     public boolean containsEdge( long edgeOrigId );
 

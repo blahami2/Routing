@@ -10,10 +10,13 @@ import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.memsensitive.model.entity.ch.SimpleChDataBuilder;
 import cz.certicon.routing.memsensitive.model.entity.common.SimpleGraphBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
+import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,9 +32,9 @@ import static org.junit.Assert.*;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DijkstraRoutingAlgorithmTest {
+public class ContractionHierarchiesRoutingAlgorithmTest {
 
-    public DijkstraRoutingAlgorithmTest() {
+    public ContractionHierarchiesRoutingAlgorithmTest() {
     }
 
     @BeforeClass
@@ -50,45 +53,8 @@ public class DijkstraRoutingAlgorithmTest {
     public void tearDown() {
     }
 
-    /*        Node a = entityFactory.createNode( Node.Id.createId( 1 ), 50.1001831, 14.3856114 );
-        Node b = entityFactory.createNode( Node.Id.createId( 2 ), 50.1002725, 14.3872906 );
-        Node c = entityFactory.createNode( Node.Id.createId( 3 ), 50.1018347, 14.3857995 );
-        Node d = entityFactory.createNode( Node.Id.createId( 4 ), 50.1017039, 14.3871028 );
-        Node e = entityFactory.createNode( Node.Id.createId( 5 ), 50.1002828, 14.3878056 );
-        Node f = entityFactory.createNode( Node.Id.createId( 6 ), 50.1016489, 14.3876339 );
-        a.setLabel( "a" );
-        b.setLabel( "b" );
-        c.setLabel( "c" );
-        d.setLabel( "d" );
-        e.setLabel( "e" );
-        f.setLabel( "f" );
-        Edge ab = createEdge( entityFactory, distanceFactory, a, b );
-        Edge ba = createEdge( entityFactory, distanceFactory, b, a );
-        Edge ac = createEdge( entityFactory, distanceFactory, a, c );
-        Edge ca = createEdge( entityFactory, distanceFactory, c, a );
-        Edge db = createEdge( entityFactory, distanceFactory, d, b );
-        Edge cd = createEdge( entityFactory, distanceFactory, c, d );
-        Edge dc = createEdge( entityFactory, distanceFactory, d, c );
-        Edge be = createEdge( entityFactory, distanceFactory, b, e );
-        Edge eb = createEdge( entityFactory, distanceFactory, e, b );
-        Edge df = createEdge( entityFactory, distanceFactory, d, f );
-        Edge fd = createEdge( entityFactory, distanceFactory, f, d );
-        Edge ef = createEdge( entityFactory, distanceFactory, e, f );
-        graph.addNode( a ).addNode( b ).addNode( c ).addNode( d ).addNode( e ).addNode( f );
-        graph.addEdge( ab )
-                .addEdge( ba )
-                .addEdge( ac )
-                .addEdge( ca )
-                .addEdge( db )
-                .addEdge( cd )
-                .addEdge( dc )
-                .addEdge( be )
-                .addEdge( eb )
-                .addEdge( df )
-                .addEdge( fd )
-                .addEdge( ef );*/
     /**
-     * Test of route method, of class DijkstraRoutingAlgorithm.
+     * Test of route method, of class ContractionHierarchiesRoutingAlgorithm.
      */
     @Test
     public void testRoute() {
@@ -122,7 +88,20 @@ public class DijkstraRoutingAlgorithmTest {
         for ( int i = 0; i < graph.getEdgeCount(); i++ ) {
             System.out.println( "length[" + i + "]: " + graph.getLength( i ) );
         }
-        DijkstraRoutingAlgorithm instance = new DijkstraRoutingAlgorithm( graph );
+        SimpleChDataBuilder pdBuilder = new SimpleChDataBuilder( graph, DistanceType.LENGTH );
+        pdBuilder.setRank( 1, 1 );
+        pdBuilder.setRank( 2, 2 );
+        pdBuilder.setRank( 3, 6 );
+        pdBuilder.setRank( 4, 4 );
+        pdBuilder.setRank( 5, 5 );
+        pdBuilder.setRank( 6, 3 );
+        pdBuilder.addShortcut( 13, 2, 3 );
+        pdBuilder.addShortcut( 14, 5, 8 );
+        pdBuilder.addShortcut( 15, 12, 11 );
+        pdBuilder.addShortcut( 16, 6, 14 );
+        pdBuilder.addShortcut( 17, 15, 7 );
+        PreprocessedData preprocessedData = pdBuilder.build();
+        ContractionHierarchiesRoutingAlgorithm instance = new ContractionHierarchiesRoutingAlgorithm( graph, preprocessedData );
         RouteBuilder<Route, Graph> routeBuilder = new SimpleRouteBuilder();
         routeBuilder.setSourceNode( graph, 1 );
         routeBuilder.addEdgeAsLast( graph, 1 );
@@ -135,6 +114,20 @@ public class DijkstraRoutingAlgorithmTest {
         to.put( 5, 0F );
         Route result = instance.route( routeBuilder, from, to );
         assertEquals( toString( graph, expResult ), toString( graph, result ) );
+        System.out.println( "new input" );
+        from = new HashMap<>();
+        from.put( 2, 0F );
+        to = new HashMap<>();
+        to.put( 4, 0F );
+        routeBuilder = new SimpleRouteBuilder();
+        routeBuilder.setSourceNode( graph, 3 );
+        routeBuilder.addEdgeAsLast( graph, 6 );
+        routeBuilder.addEdgeAsLast( graph, 5 );
+        routeBuilder.addEdgeAsLast( graph, 8 );
+        expResult = routeBuilder.build();
+        result = instance.route( routeBuilder, from, to );
+        assertEquals( toString( graph, expResult ), toString( graph, result ) );
+
     }
 
     public String toString( Graph graph, Route route ) {
@@ -155,4 +148,5 @@ public class DijkstraRoutingAlgorithmTest {
         sb.append( ")" );
         return sb.toString();
     }
+
 }

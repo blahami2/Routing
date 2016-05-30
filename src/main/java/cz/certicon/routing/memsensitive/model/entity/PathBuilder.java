@@ -21,6 +21,8 @@ public interface PathBuilder<T, G> {
     public void addLength( double length );
 
     public void addTime( double time );
+    
+    public void clear();
 
     public T build();
 }

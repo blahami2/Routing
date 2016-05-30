@@ -8,6 +8,7 @@ package cz.certicon.routing.memsensitive.model.entity.neighbourlist;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.utils.EffectiveUtils;
 import cz.certicon.routing.utils.efficient.BitArray;
+import gnu.trove.iterator.TIntIterator;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -177,12 +178,12 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public Iterator<Integer> getIncomingEdgesIterator( int node ) {
+    public TIntIterator getIncomingEdgesIterator( int node ) {
         return new IncomingIterator( node );
     }
 
     @Override
-    public Iterator<Integer> getOutgoingEdgesIterator( int node ) {
+    public TIntIterator getOutgoingEdgesIterator( int node ) {
         return new OutgoingIterator( node );
     }
 
@@ -217,7 +218,7 @@ public class NeighbourlistGraph implements Graph {
         return nodeLongitudes[node];
     }
 
-    private class IncomingIterator implements Iterator<Integer> {
+    private class IncomingIterator implements TIntIterator {
 
         private final int node;
         private int position = -1;
@@ -232,13 +233,18 @@ public class NeighbourlistGraph implements Graph {
         }
 
         @Override
-        public Integer next() {
+        public int next() {
             return incomingEdges[node][++position];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
         }
 
     }
 
-    private class OutgoingIterator implements Iterator<Integer> {
+    private class OutgoingIterator implements TIntIterator{
 
         private final int node;
         private int position = -1;
@@ -253,8 +259,13 @@ public class NeighbourlistGraph implements Graph {
         }
 
         @Override
-        public Integer next() {
+        public int next() {
             return outgoingEdges[node][++position];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
         }
     }
 

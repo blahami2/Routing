@@ -53,6 +53,13 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     }
 
     @Override
+    public void clear() {
+        coordinates.clear();
+        time = 0;
+        length = 0;
+    }
+
+    @Override
     public Path build() {
         return new SimplePath( coordinates, length, time );
     }
