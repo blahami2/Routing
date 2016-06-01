@@ -6,6 +6,7 @@
 package cz.certicon.routing.application.algorithm.datastructures;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -109,6 +110,11 @@ public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
         return min.value;
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return new NodeIterator();
+    }
+
     private static class NodeContainer<T> {
 
         public final T node;
@@ -120,4 +126,19 @@ public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
         }
     }
 
+    private class NodeIterator implements Iterator<T> {
+
+        private int counter = -1;
+
+        @Override
+        public boolean hasNext() {
+            return counter + 1 < nodes.size();
+        }
+
+        @Override
+        public T next() {
+            return nodes.get( ++counter ).node;
+        }
+
+    }
 }

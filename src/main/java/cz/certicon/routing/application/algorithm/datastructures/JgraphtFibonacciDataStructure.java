@@ -7,6 +7,7 @@ package cz.certicon.routing.application.algorithm.datastructures;
 
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
@@ -101,6 +102,11 @@ public class JgraphtFibonacciDataStructure<T> implements NodeDataStructure<T> {
         } else {
             return Double.MAX_VALUE;
         }
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return nodeMap.keySet().iterator();
     }
 
 }

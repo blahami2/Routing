@@ -7,13 +7,16 @@ package cz.certicon.routing.memsensitive.model.entity;
 
 import cz.certicon.routing.utils.efficient.BitArray;
 import gnu.trove.iterator.TIntIterator;
-import java.util.Iterator;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface Graph {
+
+    public static final float DISTANCE_DEFAULT = Float.MAX_VALUE;
+    public static final boolean CLOSED_DEFAULT = false;
+    public static final int PREDECESSOR_DEFAULT = -1;
 
     public void setEdgeOrigId( int edge, long id );
 

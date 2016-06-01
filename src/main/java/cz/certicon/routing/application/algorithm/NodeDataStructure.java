@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.application.algorithm;
 
+import java.util.Iterator;
+
 /**
  * The root interface for various data structures used by algorithms.
  *
@@ -67,4 +69,6 @@ public interface NodeDataStructure<T> {
     public T peek();
     
     public double minValue();
+    
+    public Iterator<T> iterator();
 }

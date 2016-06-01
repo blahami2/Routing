@@ -54,6 +54,17 @@ public class TimeLogger {
             void execute( TimeMeasurement timeMeasurement ) {
                 timeMeasurement.stop();
             }
+        },
+        PAUSE {
+            @Override
+            void execute( TimeMeasurement timeMeasurement ) {
+                timeMeasurement.pause();
+            }
+        }, CONTINUE {
+            @Override
+            void execute( TimeMeasurement timeMeasurement ) {
+                timeMeasurement.continue_();
+            }
         };
 
         abstract void execute( TimeMeasurement timeMeasurement );

@@ -33,10 +33,6 @@ public class NeighbourlistGraph implements Graph {
     private final long[] nodeOrigIds;
     private final long[] edgeOrigIds;
 
-    private static final float DISTANCE_DEFAULT = Float.MAX_VALUE;
-    private static final boolean CLOSED_DEFAULT = false;
-    private static final int PREDECESSOR_DEFAULT = -1;
-
     private final Map<Long, Integer> fromOrigNodesMap;
     private final Map<Long, Integer> fromOrigEdgesMap;
 

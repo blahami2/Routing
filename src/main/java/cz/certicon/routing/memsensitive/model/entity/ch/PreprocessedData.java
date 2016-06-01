@@ -6,6 +6,7 @@
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.utils.EffectiveUtils;
 import gnu.trove.iterator.TIntIterator;
 import java.util.Arrays;
 
@@ -24,7 +25,9 @@ public class PreprocessedData {
     /* more memory, more efficiency */
     private final int[] startEdges;
     private final int[] endEdges;
-    
+
+    private final float[] lengths;
+
     private final long startId;
 
     public PreprocessedData( int nodeCount, int edgeCount, int shortcutCount, long startId ) {
@@ -36,6 +39,8 @@ public class PreprocessedData {
 
         this.startEdges = new int[shortcutCount];
         this.endEdges = new int[shortcutCount];
+        this.lengths = new float[shortcutCount];
+        EffectiveUtils.fillArray( lengths, -1 );
         this.startId = startId;
     }
 
@@ -47,6 +52,8 @@ public class PreprocessedData {
         this.targets = targets;
         this.startEdges = startEdges;
         this.endEdges = endEdges;
+        this.lengths = new float[sources.length];
+        EffectiveUtils.fillArray( lengths, -1 );
         this.startId = startId;
     }
 
@@ -163,9 +170,13 @@ public class PreprocessedData {
         if ( shortcut < graph.getEdgeCount() ) {
             return graph.getLength( shortcut );
         }
-        int start = startEdges[shortcut - graph.getEdgeCount()];
-        int end = endEdges[shortcut - graph.getEdgeCount()];
-        return getLength( start, graph ) + getLength( end, graph );
+        shortcut -= graph.getEdgeCount();
+        if ( lengths[shortcut] < 0 ) {
+            int start = startEdges[shortcut];
+            int end = endEdges[shortcut];
+            lengths[shortcut] = getLength( start, graph ) + getLength( end, graph );
+        }
+        return lengths[shortcut];
     }
 
     public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {

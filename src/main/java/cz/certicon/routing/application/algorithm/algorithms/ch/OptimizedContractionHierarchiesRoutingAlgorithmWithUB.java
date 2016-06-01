@@ -174,6 +174,11 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                 fromVisitedNodes.add( currentNode );
                 int sourceRank = rankArray[currentNode];
                 double currentDistance = fromDistanceArray[currentNode];
+                if(currentDistance > UB){
+                    fromRun = false;
+                    nodeDataStructure[0].clear();
+                    continue;
+                }
                 if ( DEBUG_CORRECTNESS ) {
                     System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
@@ -215,6 +220,11 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                 toVisitedNodes.add( currentNode );
                 int sourceRank = rankArray[currentNode];
                 double currentDistance = toDistanceArray[currentNode];
+                if(currentDistance > UB){
+                    fromRun = true;
+                    nodeDataStructure[1].clear();
+                    continue;
+                }
                 if ( DEBUG_CORRECTNESS ) {
                     System.out.println( "current node = " + origNodes[currentNode].getId().getValue() + ", " + currentDistance );
                 }
@@ -252,9 +262,9 @@ public class OptimizedContractionHierarchiesRoutingAlgorithmWithUB extends Abstr
                 }
             }
 
-            if ( fromDistanceArray[nodeDataStructure[0].peek()] + toDistanceArray[nodeDataStructure[1].peek()] >= UB ) {
-                break;
-            }
+//            if ( fromDistanceArray[nodeDataStructure[0].peek()] + toDistanceArray[nodeDataStructure[1].peek()] >= UB ) {
+//                break;
+//            }
         }
 
         if ( DEBUG_TIME ) {
