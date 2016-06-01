@@ -10,13 +10,10 @@ import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
-import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
-import cz.certicon.routing.memsensitive.model.entity.ch.SimpleChDataBuilder;
 import cz.certicon.routing.memsensitive.model.entity.common.SimpleGraphBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
-import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,9 +29,9 @@ import static org.junit.Assert.*;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class ContractionHierarchiesRoutingAlgorithmTest {
+public class AstarRoutingAlgorithmTest {
 
-    public ContractionHierarchiesRoutingAlgorithmTest() {
+    public AstarRoutingAlgorithmTest() {
     }
 
     @BeforeClass
@@ -54,7 +51,7 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
     }
 
     /**
-     * Test of route method, of class ContractionHierarchiesRoutingAlgorithm.
+     * Test of route method, of class AstarRoutingAlgorithm.
      */
     @Test
     public void testRoute() {
@@ -88,47 +85,25 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
         for ( int i = 0; i < graph.getEdgeCount(); i++ ) {
             System.out.println( "length[" + i + "]: " + graph.getLength( i ) );
         }
-        SimpleChDataBuilder pdBuilder = new SimpleChDataBuilder( graph, DistanceType.LENGTH );
-        pdBuilder.setRank( 1, 1 );
-        pdBuilder.setRank( 2, 2 );
-        pdBuilder.setRank( 3, 6 );
-        pdBuilder.setRank( 4, 4 );
-        pdBuilder.setRank( 5, 5 );
-        pdBuilder.setRank( 6, 3 );
-        pdBuilder.addShortcut( 13, 2, 3 );
-        pdBuilder.addShortcut( 14, 5, 8 );
-        pdBuilder.addShortcut( 15, 12, 11 );
-        pdBuilder.addShortcut( 16, 6, 14 );
-        pdBuilder.addShortcut( 17, 15, 7 );
-        PreprocessedData preprocessedData = pdBuilder.build();
-        ContractionHierarchiesRoutingAlgorithm instance = new ContractionHierarchiesRoutingAlgorithm( graph, preprocessedData );
-        RouteBuilder<Route, Graph> routeBuilder = new SimpleRouteBuilder();
-        routeBuilder.setSourceNode( graph, 1 );
-        routeBuilder.addEdgeAsLast( graph, 1 );
-        routeBuilder.addEdgeAsLast( graph, 8 );
-        routeBuilder.addEdgeAsLast( graph, 12 );
-        Route expResult = routeBuilder.build();
-        Map<Integer, Float> from = new HashMap<>();
-        from.put( 0, 0F );
-        Map<Integer, Float> to = new HashMap<>();
-        to.put( 5, 0F );
-        Route result = instance.route( routeBuilder, from, to );
-        assertEquals( toString( graph, expResult ), toString( graph, result ) );
-        System.out.println( "new input" );
-        from = new HashMap<>();
-        from.put( 2, 0F );
-        to = new HashMap<>();
-        to.put( 4, 0F );
-        routeBuilder = new SimpleRouteBuilder();
-        routeBuilder.setSourceNode( graph, 3 );
-        routeBuilder.addEdgeAsLast( graph, 6 );
-        routeBuilder.addEdgeAsLast( graph, 5 );
-        routeBuilder.addEdgeAsLast( graph, 8 );
-        expResult = routeBuilder.build();
-        result = instance.route( routeBuilder, from, to );
 
-        assertEquals( toString( graph, expResult ), toString( graph, result ) );
-
+        DijkstraRoutingAlgorithm optimalAlgorithm = new DijkstraRoutingAlgorithm( graph );
+        AstarRoutingAlgorithm instance = new AstarRoutingAlgorithm( graph, DistanceType.LENGTH );
+        for ( int i = 0; i < 6; i++ ) {
+            for ( int j = 0; j < 6; j++ ) {
+                if ( i != j ) {
+                    System.out.println( "from: " + i + " to " + j );
+                    Map<Integer, Float> from = new HashMap<>();
+                    from.put( i, 0F );
+                    Map<Integer, Float> to = new HashMap<>();
+                    to.put( j, 0F );
+                    Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), from, to );
+                    Route result = instance.route( new SimpleRouteBuilder(), from, to );
+                    System.out.println( toString( graph, result ) );
+                    assertEquals( toString( graph, expResult ), toString( graph, result ) );
+                }
+            }
+        }
+//        fail("");
     }
 
     public String toString( Graph graph, Route route ) {
@@ -139,9 +114,9 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
             Pair<Long, Boolean> next = edgeIterator.next();
 //            System.out.println( next );
             sb.append( "(" )
-                    .append( graph.getNodeOrigId( graph.getSource( graph.getEdgeByOrigId( next.a ) ) ) )
+                    .append( (int) graph.getNodeOrigId( graph.getSource( graph.getEdgeByOrigId( next.a ) ) ) )
                     .append( " " )
-                    .append( graph.getNodeOrigId( graph.getTarget( graph.getEdgeByOrigId( next.a ) ) ) )
+                    .append( (int) graph.getNodeOrigId( graph.getTarget( graph.getEdgeByOrigId( next.a ) ) ) )
                     .append( "), " );
 //            System.out.println( sb.toString() );
         }
@@ -149,5 +124,4 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
         sb.append( ")" );
         return sb.toString();
     }
-
 }

@@ -6,6 +6,7 @@
 package cz.certicon.routing.utils.efficient;
 
 import cz.certicon.routing.utils.EffectiveUtils;
+import java.util.Arrays;
 
 /**
  *
@@ -64,6 +65,20 @@ public class LongBitArray implements BitArray {
     @Override
     public int size() {
         return size;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append( "[");
+        for ( int i = 0; i < size; i++ ) {
+            sb.append( get(i) ? "1" : "0"  ).append( ", ");
+        }
+        if(sb.length() > 3){
+            sb.replace( sb.length() - 2, sb.length(), "");
+        }
+        sb.append( "]");
+        return sb.toString();
     }
 
 }

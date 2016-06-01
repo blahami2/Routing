@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.memsensitive.algorithm.preprocessing;
+package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch;
 
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
@@ -41,5 +41,9 @@ public interface Preprocessor<PreprocessedData> {
      * @return an instance of {@link PreprocessedData}
      */
     public PreprocessedData preprocess( ChDataBuilder<PreprocessedData> dataBuilder, Graph graph, DistanceType distanceType, long minimalShortcutId, ProgressListener progressListener );
+
+    public void setNodeRecalculationStrategy( NodeRecalculationStrategy nodeRecalculationStrategy );
+
+    public void setEdgeDifferenceCalculator( EdgeDifferenceCalculator edgeDifferenceCalculator );
 
 }

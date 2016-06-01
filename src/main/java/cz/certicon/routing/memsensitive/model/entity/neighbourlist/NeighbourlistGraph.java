@@ -218,6 +218,11 @@ public class NeighbourlistGraph implements Graph {
         return nodeLongitudes[node];
     }
 
+    @Override
+    public int getNodeDegree( int node ) {
+        return outgoingEdges[node].length + incomingEdges[node].length;
+    }
+
     private class IncomingIterator implements TIntIterator {
 
         private final int node;
@@ -244,7 +249,7 @@ public class NeighbourlistGraph implements Graph {
 
     }
 
-    private class OutgoingIterator implements TIntIterator{
+    private class OutgoingIterator implements TIntIterator {
 
         private final int node;
         private int position = -1;

@@ -39,7 +39,9 @@ public class SimpleGraphBuilder implements GraphBuilder<Graph> {
     @Override
     public void addNode( long id, long dataId, long osmId, double latitude, double longitude ) {
 //        System.out.println( "adding node: " + id + ", idx = " + nodeCounter );
-        graph.setNodeOrigId( nodeCounter++, id );
+        graph.setNodeOrigId( nodeCounter, id );
+        graph.setCoordinate( nodeCounter, (float) latitude, (float) longitude );
+        nodeCounter++;
     }
 
     @Override

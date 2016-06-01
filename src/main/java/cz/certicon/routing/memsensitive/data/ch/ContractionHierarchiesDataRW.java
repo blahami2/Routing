@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.memsensitive.data.ch;
 
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.Preprocessor;
+import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.model.entity.ch.ChDataFactory;
 import java.io.IOException;
 
@@ -15,6 +17,8 @@ import java.io.IOException;
 public interface ContractionHierarchiesDataRW {
 
     public <T> T read( ChDataFactory<T> chDataFactory ) throws NotPreprocessedException, IOException;
+
+    public <T> T read( ChDataFactory<T> chDataFactory, Graph graph, Preprocessor<T> preprocessor ) throws IOException;
 
     public <T> void write( ChDataFactory<T> chDataFactory, T entity ) throws IOException;
 }

@@ -66,4 +66,8 @@ public class EffectiveUtils {
     public static void copyArray( boolean[] source, boolean[] target ) {
         System.arraycopy( source, 0, target, 0, target.length );
     }
+
+    public static void copyArray( float[] source, float[] target ) {
+        System.arraycopy( source, 0, target, 0, target.length );
+    }
 }

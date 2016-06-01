@@ -5,24 +5,45 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import cz.certicon.routing.utils.CoordinateUtils;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum DistanceType {
+
     TIME {
         @Override
-        public double calculateDistance( double length, double speed ) {
+        public double calculateDistance( double length, double speed ) { // m, km/s
             return 3.6 * length / speed;
+        }
+
+        @Override
+        public double calculateApproximateDistance( double alat, double alon, double blat, double blon ) {
+            return calculateDistance( CoordinateUtils.calculateDistance( alat, alon, blat, blon ), MAX_SPEED );
         }
     }, LENGTH {
         @Override
         public double calculateDistance( double length, double speed ) {
             return length;
         }
+
+        @Override
+        public double calculateApproximateDistance( double alat, double alon, double blat, double blon ) {
+            return CoordinateUtils.calculateDistance( alat, alon, blat, blon );
+        }
     };
 
+    private static final int MAX_SPEED = 130;
+
     public abstract double calculateDistance( double length, double speed );
+
+    public abstract double calculateApproximateDistance( double aLat, double aLon, double bLat, double bLon );
+
+    public int toInt() {
+        return toInt( this );
+    }
 
     public static int toInt( DistanceType distanceType ) {
         switch ( distanceType ) {

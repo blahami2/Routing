@@ -5,17 +5,21 @@
  */
 package cz.certicon.routing.model.entity.ch;
 
+import cz.certicon.routing.memsensitive.model.entity.DistanceType;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface ChDataBuilder<T> {
-
+    
+    public void setStartId(long startId);
+    
     public void setRank( long nodeId, int rank );
 
     public void addShortcut( long shortcutId, long sourceEdgeId, long targetEdgeId );
-
-    public int getDistanceTypeIntValue();
+    
+    public DistanceType getDistanceType();
 
     public T build();
 }

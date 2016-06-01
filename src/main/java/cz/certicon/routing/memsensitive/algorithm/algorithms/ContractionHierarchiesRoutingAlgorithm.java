@@ -17,6 +17,7 @@ import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
 import cz.certicon.routing.utils.measuring.TimeLogger;
+import gnu.trove.iterator.TIntIterator;
 import java.util.Map;
 
 /**
@@ -106,16 +107,16 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             finalNode = currentNode;
                         }
                     }
-
-                    for ( int i = 0; i < graph.getOutgoingEdges( currentNode ).length; i++ ) {
-                        int edge = graph.getOutgoingEdges( currentNode )[i];
-                        int otherNode = graph.getOtherNode( edge, currentNode );
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                    TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( currentNode, graph);
+                    while(outgoingEdgesIterator.hasNext()){
+                        int edge = outgoingEdgesIterator.next();
+                        int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph);
+                        if(preprocessedData.getRank( otherNode) > sourceRank){
                             if ( MEASURE_STATS ) {
                                 StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                             }
                             float otherNodeDistance = nodeFromDistanceArray[otherNode];
-                            float distance = currentDistance + graph.getLength( edge );
+                            float distance = currentDistance + preprocessedData.getLength( edge, graph );
                             if ( distance < otherNodeDistance ) {
                                 nodeFromDistanceArray[otherNode] = distance;
 //                                System.out.println( "F: pred for " + otherNode + " = " + edge );
@@ -124,23 +125,41 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             }
                         }
                     }
-                    for ( int i = 0; i < preprocessedData.getOutgoingShortcuts( currentNode ).length; i++ ) {
-                        int shortcut = preprocessedData.getOutgoingShortcuts( currentNode )[i];
-                        int otherNode = preprocessedData.getTarget( shortcut );
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            if ( MEASURE_STATS ) {
-                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-                            }
-                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
-                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
-                            if ( distance < otherNodeDistance ) {
-                                nodeFromDistanceArray[otherNode] = distance;
-//                                System.out.println( "F: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
-                                nodeFromPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
-                                nodeFromDataStructure.notifyDataChange( otherNode, distance );
-                            }
-                        }
-                    }
+//
+//                    for ( int i = 0; i < graph.getOutgoingEdges( currentNode ).length; i++ ) {
+//                        int edge = graph.getOutgoingEdges( currentNode )[i];
+//                        int otherNode = graph.getOtherNode( edge, currentNode );
+//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+//                            if ( MEASURE_STATS ) {
+//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+//                            }
+//                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
+//                            float distance = currentDistance + graph.getLength( edge );
+//                            if ( distance < otherNodeDistance ) {
+//                                nodeFromDistanceArray[otherNode] = distance;
+////                                System.out.println( "F: pred for " + otherNode + " = " + edge );
+//                                nodeFromPredecessorArray[otherNode] = edge;
+//                                nodeFromDataStructure.notifyDataChange( otherNode, distance );
+//                            }
+//                        }
+//                    }
+//                    for ( int i = 0; i < preprocessedData.getOutgoingShortcuts( currentNode ).length; i++ ) {
+//                        int shortcut = preprocessedData.getOutgoingShortcuts( currentNode )[i];
+//                        int otherNode = preprocessedData.getTarget( shortcut );
+//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+//                            if ( MEASURE_STATS ) {
+//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+//                            }
+//                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
+//                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
+//                            if ( distance < otherNodeDistance ) {
+//                                nodeFromDistanceArray[otherNode] = distance;
+////                                System.out.println( "F: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
+//                                nodeFromPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
+//                                nodeFromDataStructure.notifyDataChange( otherNode, distance );
+//                            }
+//                        }
+//                    }
                 }
             }
             if ( !nodeToDataStructure.isEmpty() ) {
@@ -166,41 +185,60 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             finalNode = currentNode;
                         }
                     }
-                    for ( int i = 0; i < graph.getIncomingEdges( currentNode ).length; i++ ) {
-                        int edge = graph.getIncomingEdges( currentNode )[i];
-                        int otherNode = graph.getOtherNode( edge, currentNode );
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                    
+                    TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator(currentNode, graph);
+                    while(incomingEdgesIterator.hasNext()){
+                        int edge = incomingEdgesIterator.next();
+                        int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph);
+                        if(preprocessedData.getRank( otherNode) > sourceRank){
                             if ( MEASURE_STATS ) {
                                 StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                             }
                             float otherNodeDistance = nodeToDistanceArray[otherNode];
-                            float distance = currentDistance + graph.getLength( edge );
+                            float distance = currentDistance + preprocessedData.getLength( edge, graph );
                             if ( distance < otherNodeDistance ) {
                                 nodeToDistanceArray[otherNode] = distance;
-//                                System.out.println( "T: pred for " + otherNode + " = " + edge );
+//                                System.out.println( "F: pred for " + otherNode + " = " + edge );
                                 nodeToPredecessorArray[otherNode] = edge;
                                 nodeToDataStructure.notifyDataChange( otherNode, distance );
                             }
                         }
                     }
-                    for ( int i = 0; i < preprocessedData.getIncomingShortcuts( currentNode ).length; i++ ) {
-                        int shortcut = preprocessedData.getIncomingShortcuts( currentNode )[i];
-                        int otherNode = preprocessedData.getSource( shortcut );
-//                        System.out.println( "T: incoming shortcuts for: " + currentNode  +  " = " + shortcut + " with otherNode = " + otherNode);
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-                            if ( MEASURE_STATS ) {
-                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-                            }
-                            float otherNodeDistance = nodeToDistanceArray[otherNode];
-                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
-                            if ( distance < otherNodeDistance ) {
-                                nodeToDistanceArray[otherNode] = distance;
-//                                System.out.println( "T: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
-                                nodeToPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
-                                nodeToDataStructure.notifyDataChange( otherNode, distance );
-                            }
-                        }
-                    }
+//                    for ( int i = 0; i < graph.getIncomingEdges( currentNode ).length; i++ ) {
+//                        int edge = graph.getIncomingEdges( currentNode )[i];
+//                        int otherNode = graph.getOtherNode( edge, currentNode );
+//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+//                            if ( MEASURE_STATS ) {
+//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+//                            }
+//                            float otherNodeDistance = nodeToDistanceArray[otherNode];
+//                            float distance = currentDistance + graph.getLength( edge );
+//                            if ( distance < otherNodeDistance ) {
+//                                nodeToDistanceArray[otherNode] = distance;
+////                                System.out.println( "T: pred for " + otherNode + " = " + edge );
+//                                nodeToPredecessorArray[otherNode] = edge;
+//                                nodeToDataStructure.notifyDataChange( otherNode, distance );
+//                            }
+//                        }
+//                    }
+//                    for ( int i = 0; i < preprocessedData.getIncomingShortcuts( currentNode ).length; i++ ) {
+//                        int shortcut = preprocessedData.getIncomingShortcuts( currentNode )[i];
+//                        int otherNode = preprocessedData.getSource( shortcut );
+////                        System.out.println( "T: incoming shortcuts for: " + currentNode  +  " = " + shortcut + " with otherNode = " + otherNode);
+//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+//                            if ( MEASURE_STATS ) {
+//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
+//                            }
+//                            float otherNodeDistance = nodeToDistanceArray[otherNode];
+//                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
+//                            if ( distance < otherNodeDistance ) {
+//                                nodeToDistanceArray[otherNode] = distance;
+////                                System.out.println( "T: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
+//                                nodeToPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
+//                                nodeToDataStructure.notifyDataChange( otherNode, distance );
+//                            }
+//                        }
+//                    }
                 }
             }
         }

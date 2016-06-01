@@ -24,8 +24,10 @@ public class PreprocessedData {
     /* more memory, more efficiency */
     private final int[] startEdges;
     private final int[] endEdges;
+    
+    private final long startId;
 
-    public PreprocessedData( int nodeCount, int edgeCount, int shortcutCount ) {
+    public PreprocessedData( int nodeCount, int edgeCount, int shortcutCount, long startId ) {
         this.ranks = new int[nodeCount];
         this.incomingShortcuts = new int[nodeCount][];
         this.outgoingShortcuts = new int[nodeCount][];
@@ -34,9 +36,10 @@ public class PreprocessedData {
 
         this.startEdges = new int[shortcutCount];
         this.endEdges = new int[shortcutCount];
+        this.startId = startId;
     }
 
-    public PreprocessedData( int[] ranks, int[][] incomingShortcuts, int[][] outgoingShortcuts, int[] sources, int[] targets, int[] startEdges, int[] endEdges ) {
+    public PreprocessedData( int[] ranks, int[][] incomingShortcuts, int[][] outgoingShortcuts, int[] sources, int[] targets, int[] startEdges, int[] endEdges, long startId ) {
         this.ranks = ranks;
         this.incomingShortcuts = incomingShortcuts;
         this.outgoingShortcuts = outgoingShortcuts;
@@ -44,6 +47,7 @@ public class PreprocessedData {
         this.targets = targets;
         this.startEdges = startEdges;
         this.endEdges = endEdges;
+        this.startId = startId;
     }
 
     public void setRank( int node, int rank ) {
@@ -132,6 +136,17 @@ public class PreprocessedData {
         return targets[edge - graph.getEdgeCount()];
     }
 
+    public int getOtherNode( int edge, int node, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return graph.getOtherNode( edge, node );
+        }
+        edge -= graph.getEdgeCount();
+        if ( targets[edge] != node ) {
+            return targets[edge];
+        }
+        return sources[edge];
+    }
+
     public int getStartEdge( int shortcut ) {
         return startEdges[shortcut];
     }
@@ -140,21 +155,17 @@ public class PreprocessedData {
         return endEdges[shortcut];
     }
 
+    public long getStartId() {
+        return startId;
+    }
+
     public float getLength( int shortcut, Graph graph ) {
-        int start = startEdges[shortcut];
-        int end = endEdges[shortcut];
-        float length = 0;
-        if ( start >= graph.getEdgeCount() ) {
-            length += getLength( start - graph.getEdgeCount(), graph );
-        } else {
-            length += graph.getLength( start );
+        if ( shortcut < graph.getEdgeCount() ) {
+            return graph.getLength( shortcut );
         }
-        if ( end >= graph.getEdgeCount() ) {
-            length += getLength( end - graph.getEdgeCount(), graph );
-        } else {
-            length += graph.getLength( end );
-        }
-        return length;
+        int start = startEdges[shortcut - graph.getEdgeCount()];
+        int end = endEdges[shortcut - graph.getEdgeCount()];
+        return getLength( start, graph ) + getLength( end, graph );
     }
 
     public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {
@@ -186,7 +197,7 @@ public class PreprocessedData {
             if ( position + 1 < graph.getIncomingEdges( node ).length ) {
                 return graph.getIncomingEdges( node )[++position];
             } else {
-                return incomingShortcuts[node][++position - graph.getIncomingEdges( node ).length];
+                return incomingShortcuts[node][++position - graph.getIncomingEdges( node ).length] + graph.getEdgeCount();
             }
         }
 
@@ -218,7 +229,7 @@ public class PreprocessedData {
             if ( position + 1 < graph.getOutgoingEdges( node ).length ) {
                 return graph.getOutgoingEdges( node )[++position];
             } else {
-                return outgoingShortcuts[node][++position - graph.getOutgoingEdges( node ).length];
+                return outgoingShortcuts[node][++position - graph.getOutgoingEdges( node ).length] + graph.getEdgeCount();
             }
         }
 

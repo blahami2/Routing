@@ -24,15 +24,13 @@ public class CoordinateUtils {
     private static final double EARTH_RADIUS = 6371000;
 
 //    private static final CoordinateReferenceSystem COORDINATE_REFERENCE_SYSTEM;
-
 //    static {
-            //        try {
+    //        try {
 //            COORDINATE_REFERENCE_SYSTEM = org.geotools.referencing.crs.DefaultGeographicCRS.WGS84;
 //        } catch ( FactoryException ex ) {
 //            throw new IllegalStateException( ex );
 //        }
 //    }
-
     /**
      * Calculates the geographical midpoint of the given coordinates.
      *
@@ -78,13 +76,26 @@ public class CoordinateUtils {
      * @return calculated distance in meters
      */
     public static double calculateDistance( Coordinate a, Coordinate b ) {
+        return calculateDistance( a.getLatitude(), a.getLongitude(), b.getLatitude(), b.getLongitude() );
+    }
+
+    /**
+     * Calculates the geographical distance between two points
+     *
+     * @param aLat latitude of point A
+     * @param aLon longitude of point A
+     * @param bLat latitude of point B
+     * @param bLon longitude of point B
+     * @return calculated distance in meters
+     */
+    public static double calculateDistance( double aLat, double aLon, double bLat, double bLon ) {
 //        System.out.println( "calcualting distance:" );
 //        System.out.println( a );
 //        System.out.println( b );
-        double aLatRad = toRadians( a.getLatitude() );
-        double aLonRad = toRadians( a.getLongitude() );
-        double bLatRad = toRadians( b.getLatitude() );
-        double bLonRad = toRadians( b.getLongitude() );
+        double aLatRad = toRadians( aLat );
+        double aLonRad = toRadians( aLon );
+        double bLatRad = toRadians( bLat );
+        double bLonRad = toRadians( bLon );
         double result;
         // Pythagoras distance
 //        double varX = ( aLatRad - bLatRad ) * cos( ( aLonRad + bLonRad ) / 2 );
@@ -92,8 +103,8 @@ public class CoordinateUtils {
 //        result = sqrt( varX * varX + varY * varY ) * EARTH_RADIUS;
 //        System.out.println( "Pythagoras: " + result );
         // Haversine formula
-        double deltaLatRad = toRadians( a.getLatitude() - b.getLatitude() );
-        double deltaLonRad = toRadians( a.getLongitude() - b.getLongitude() );
+        double deltaLatRad = toRadians( aLat - bLat );
+        double deltaLonRad = toRadians( aLon - bLon );
         double varA = sin( deltaLatRad / 2 ) * sin( deltaLatRad / 2 ) + cos( aLatRad ) * cos( bLatRad ) * sin( deltaLonRad / 2 ) * sin( deltaLonRad / 2 );
         double varC = 2 * atan2( sqrt( varA ), sqrt( 1 - varA ) );
         result = EARTH_RADIUS * varC;
@@ -107,7 +118,6 @@ public class CoordinateUtils {
 //            throw new RuntimeException( ex );
 //        }
 //        result = geodeticCalculator.getOrthodromicDistance();
-
         return result;
     }
 
@@ -128,7 +138,7 @@ public class CoordinateUtils {
         for ( int i = 0; i < count; i++ ) {
             double avgLat = ( ( count - 1 - i ) * aLat + ( i ) * bLat ) / ( count - 1 );
             double avgLon = ( ( count - 1 - i ) * aLon + ( i ) * bLon ) / ( count - 1 );
-            coords.add(new Coordinate( avgLat, avgLon ) );
+            coords.add( new Coordinate( avgLat, avgLon ) );
         }
         return coords;
     }

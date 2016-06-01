@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  */
 public class OptimizedContractionHierarchiesPreprocessor implements ContractionHierarchiesPreprocessor {
 
-    private static final int THREADS = 8;
+    private static final int THREADS = 1;
 
     private static final double INIT_NODE_RANKING = 0.1;
 
@@ -169,9 +169,10 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                 IntegerArray res = futures.get( i ).get();
                 for ( int j = 0; j < res.array.length; j++ ) {
                     priorityQueue.add( from + j, res.array[j] );
-                    if ( GlobalOptions.DEBUG_CORRECTNESS ) {
-                        Log.dln( getClass().getSimpleName(), "inserting: " + origNodes[from + j].getId().getValue() + " with value: " + ( res.array[j] ) );
-                    }
+                    System.out.println( "#" + ( from + j ) + " = " + res.array[j] );
+//                    if ( GlobalOptions.DEBUG_CORRECTNESS ) {
+//                        Log.dln( getClass().getSimpleName(), "inserting: " + origNodes[from + j].getId().getValue() + " with value: " + ( res.array[j] ) );
+//                    }
                     progressListener.nextStep();
                 }
             } catch ( InterruptedException | ExecutionException ex ) {
@@ -217,6 +218,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
             int currentNode = extractMin.a;
 //            System.out.println( "extracted: " + origNodes[currentNode].getId().getValue() + " with ED = " + extractMin.b );
 
+            System.out.println( "contracting: " + currentNode );
             if ( GlobalOptions.DEBUG_CORRECTNESS ) {
                 Log.dln( getClass().getSimpleName(), "extracted: " + origNodes[currentNode].getId().getValue() + " with ED = " + extractMin.b );
             }
@@ -267,6 +269,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                     IntegerArray res = futures.get( i ).get();
                     for ( int j = 0; j < res.array.length; j++ ) {
                         priorityQueue.notifyDataChange( neighboursArray[from + j], res.array[j] );
+                        System.out.println( "#" + ( neighboursArray[from + j] ) + " = " + res.array[j] );
                         if ( GlobalOptions.DEBUG_CORRECTNESS ) {
                             Log.dln( getClass().getSimpleName(), "inserting: " + origNodes[neighboursArray[from + j]].getId().getValue() + " with value: " + ( res.array[j] ) );
                         }
@@ -464,6 +467,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                     targetsAddedTo.add( to );
                     numOfShortcuts++;
 
+                    System.out.println( "#" + node + " - creating shortcut: " + from + " -> " + to );
                     if ( GlobalOptions.DEBUG_CORRECTNESS ) {
                         Log.dln( getClass().getSimpleName(), "shortcut: " + origNodes[from].getId() + " to " + origNodes[to].getId() + " via " + origNodes[node].getId() + ", " + shortcutDistance + " < " + distance );
                     }
@@ -726,6 +730,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
                     int degree = preprocessor.incomingEdgesArray[node].size() + preprocessor.outgoingEdgesArray[node].size();
 //                System.out.println( "#" + id + ": calling shortcuts for: " + i );
                     int numberOfShortcuts = preprocessor.calculateShortcuts( shortcuts, node, dijkstraPriorityQueue, nodeDistanceArray );
+//                    System.out.println( "#" + node + " - calculate: " + preprocessor.contractedNeighboursCount[node] + " + " + numberOfShortcuts + " - " + degree );
                     results.array[i - from] = preprocessor.contractedNeighboursCount[node] + numberOfShortcuts - degree;
                 }
                 return results;

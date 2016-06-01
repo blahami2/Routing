@@ -28,6 +28,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     private long minId = Long.MAX_VALUE;
     private long maxId = -1;
     private int counter;
+    private long startId = 0;
     private Map<Long, Integer> shortcutIdMap = new HashMap<>();
 
     public SimpleChDataBuilder( Graph graph, DistanceType distanceType ) {
@@ -37,6 +38,11 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         this.ranks = new int[graph.getNodeCount()];
         this.counter = 0;
         this.shortcutIdMap.clear();
+    }
+
+    @Override
+    public void setStartId( long startId ) {
+        this.startId = startId;
     }
 
     @Override
@@ -52,8 +58,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     }
 
     @Override
-    public int getDistanceTypeIntValue() {
-        return DistanceType.toInt( distanceType );
+    public DistanceType getDistanceType() {
+        return distanceType;
     }
 
     @Override
@@ -125,11 +131,14 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
                 outgoingShortcuts[i] = new int[0];
             }
         }
-        return new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges );
+        return new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startId );
     }
 
     private int getSourceNode( long shortcutId ) {
         long sourceEdge = shortcuts.get( shortcutId ).a;
+//        for ( Map.Entry<Long, Pair<Long, Long>> entry : shortcuts.entrySet()) {
+//            System.out.println( "shortcut#" + entry.getKey() + " - " + entry.getValue() );
+//        }
         if ( shortcuts.containsKey( sourceEdge ) ) {
             return getSourceNode( sourceEdge );
         } else {

@@ -65,6 +65,8 @@ public interface Graph {
     public int getNodeCount();
 
     public int getEdgeCount();
+    
+    public int getNodeDegree(int node);
 
     public TIntIterator getIncomingEdgesIterator( int node );
 

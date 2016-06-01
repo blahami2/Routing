@@ -136,7 +136,8 @@ public class SimpleChDataBuilderTest {
                 new int[]{ 1, 3, 4, 2, 4 },
                 new int[]{ 2, 4, 3, 4, 2 },
                 new int[]{ 1, 4, 11, 5, 14 },
-                new int[]{ 2, 7, 10, 13, 6 } );
+                new int[]{ 2, 7, 10, 13, 6 }, 
+                0 );
 //        System.out.println( expResult );
 //        System.out.println( result );
         assertEquals( expResult, result );

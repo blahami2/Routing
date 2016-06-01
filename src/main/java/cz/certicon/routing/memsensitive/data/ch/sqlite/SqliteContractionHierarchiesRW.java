@@ -5,16 +5,21 @@
  */
 package cz.certicon.routing.memsensitive.data.ch.sqlite;
 
+import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.memsensitive.data.ch.ContractionHierarchiesDataRW;
 import cz.certicon.routing.memsensitive.data.ch.NotPreprocessedException;
+import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import cz.certicon.routing.model.entity.ch.ChDataExtractor;
 import cz.certicon.routing.model.entity.ch.ChDataFactory;
+import cz.certicon.routing.model.utility.progress.SimpleProgressListener;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,18 +53,27 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
 
     @Override
     public <T> T read( ChDataFactory<T> chDataFactory ) throws NotPreprocessedException, IOException {
+        T data = read( chDataFactory, null, null );
+        if ( data == null ) {
+            throw new NotPreprocessedException();
+        }
+        return data;
+    }
+
+    @Override
+    public <T> T read( ChDataFactory<T> chDataFactory, Graph graph, Preprocessor<T> preprocessor ) throws IOException {
         try {
             ChDataBuilder<T> chDataBuilder = chDataFactory.createChDataBuilder();
             if ( db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next()
                     && db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='ranks'" ).next()
-                    && db.read( "SELECT distanceType FROM ranks WHERE distanceType=" + chDataBuilder.getDistanceTypeIntValue() + " LIMIT 1" ).next() ) {
+                    && db.read( "SELECT distanceType FROM ranks WHERE distanceType=" + chDataBuilder.getDistanceType().toInt() + " LIMIT 1" ).next() ) {
                 ResultSet rs;
 //                rs = db.read( "SELECT MIN(id) AS min FROM shortcuts WHERE distanceType=" + chDataBuilder.getDistanceTypeIntValue() );
 //                long minId = 0;
 //                if ( rs.next() ) {
 //                    minId = rs.getLong( "min" );
 //                }
-                rs = db.read( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + chDataBuilder.getDistanceTypeIntValue() );
+                rs = db.read( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + chDataBuilder.getDistanceType().toInt() );
                 int edgeIdIdx = rs.findColumn( "id" );
                 int sourceIdIdx = rs.findColumn( "edge_source" );
                 int targetIdIdx = rs.findColumn( "edge_target" );
@@ -69,7 +83,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
                     long targetId = rs.getLong( targetIdIdx );
                     chDataBuilder.addShortcut( id, sourceId, targetId );
                 }
-                rs = db.read( "SELECT node_id, rank FROM ranks WHERE distanceType=" + chDataBuilder.getDistanceTypeIntValue() );
+                rs = db.read( "SELECT node_id, rank FROM ranks WHERE distanceType=" + chDataBuilder.getDistanceType().toInt() );
                 int nodeIdIdx = rs.findColumn( "node_id" );
                 int rankIdx = rs.findColumn( "rank" );
                 while ( rs.next() ) {
@@ -79,7 +93,25 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
                 }
                 return chDataBuilder.build();
             } else {
-                throw new NotPreprocessedException();
+                if ( preprocessor == null ) {
+                    return null;
+                }
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.PREPROCESSING, TimeLogger.Command.START );
+                }
+                long startId = 0;
+                if ( db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
+                    ResultSet rs = db.read( "SELECT max(id) AS startId FROM shortcuts" );
+                    if ( rs.next() ) {
+                        startId = rs.getLong( "startId" );
+                    }// else the table is empty and then leave it to zero
+                }
+                T preprocessedData = preprocessor.preprocess( chDataBuilder, graph, chDataBuilder.getDistanceType(), startId );
+                write( chDataFactory, preprocessedData );
+                if ( MEASURE_TIME ) {
+                    TimeLogger.log( TimeLogger.Event.PREPROCESSING, TimeLogger.Command.STOP );
+                }
+                return preprocessedData;
             }
         } catch ( SQLException ex ) {
             throw new IOException( ex );
@@ -98,7 +130,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
             db.execute( "DROP INDEX IF EXISTS `idx_id_ranks`" );
             db.execute( "DROP INDEX IF EXISTS `idx_dist_ranks`" );
 
-            int distanceType = chDataExtractor.getDistanceTypeIntValue();
+            int distanceType = chDataExtractor.getDistanceType().toInt();
             if ( db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
                 db.execute( "DELETE FROM shortcuts WHERE distanceType=" + distanceType );
             } else {

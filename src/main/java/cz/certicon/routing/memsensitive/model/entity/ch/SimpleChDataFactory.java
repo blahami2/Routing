@@ -27,12 +27,12 @@ public class SimpleChDataFactory implements ChDataFactory<PreprocessedData> {
 
     @Override
     public ChDataBuilder<PreprocessedData> createChDataBuilder() {
-        return new SimpleChDataBuilder( graph, DistanceType.TIME );
+        return new SimpleChDataBuilder( graph, distanceType );
     }
 
     @Override
     public ChDataExtractor<PreprocessedData> createChDataExtractor( PreprocessedData extracted ) {
-        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
+        return new SimpleChDataExtractor(graph, distanceType, extracted);
     }
 
 }
