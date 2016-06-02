@@ -68,8 +68,8 @@ public interface Graph {
     public int getNodeCount();
 
     public int getEdgeCount();
-    
-    public int getNodeDegree(int node);
+
+    public int getNodeDegree( int node );
 
     public TIntIterator getIncomingEdgesIterator( int node );
 
@@ -80,4 +80,5 @@ public interface Graph {
     public boolean containsNode( long nodeOrigId );
 
     public boolean isValidPredecessor( int predecessor );
+    
 }
