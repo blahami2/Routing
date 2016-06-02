@@ -21,6 +21,11 @@ import cz.certicon.routing.model.utility.progress.EmptyProgressListener;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -350,19 +355,20 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     public static class ProcessingData {
 
-        public final ArrayList<Integer> sources = new ArrayList<>();
-        public final ArrayList<Integer> targets = new ArrayList<>();
-        public final ArrayList<Integer> startEdges = new ArrayList<>();
-        public final ArrayList<Integer> endEdges = new ArrayList<>();
-        public final ArrayList<Integer>[] incomingShortcuts;
-        public final ArrayList<Integer>[] outgoingShortcuts;
+        public final TIntList sources = new TIntArrayList();
+        public final TIntList targets = new TIntArrayList();
+        public final TIntList startEdges = new TIntArrayList();
+        public final TIntList endEdges = new TIntArrayList();
+        public final TIntList[] incomingShortcuts;
+        public final TIntList[] outgoingShortcuts;
+        public final TFloatList lengths = new TFloatArrayList();
         public final Graph graph;
         private int shortcutCounter = 0;
 
         public ProcessingData( Graph graph ) {
             this.graph = graph;
-            incomingShortcuts = new ArrayList[graph.getNodeCount()];
-            outgoingShortcuts = new ArrayList[graph.getNodeCount()];
+            incomingShortcuts = new TIntArrayList[graph.getNodeCount()];
+            outgoingShortcuts = new TIntArrayList[graph.getNodeCount()];
         }
 
         public void addShortcut( int startEdge, int endEdge ) {
@@ -378,13 +384,14 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            System.out.println( "shortcut - start edges = " + startEdges );
             endEdges.add( endEdge );
 //            System.out.println( "shortcut - end edges = " + endEdges );
+            lengths.add( getLength( startEdge ) + getLength( endEdge ) );
             if ( incomingShortcuts[target] == null ) {
-                incomingShortcuts[target] = new ArrayList<>();
+                incomingShortcuts[target] = new TIntArrayList();
             }
             incomingShortcuts[target].add( shortcutCounter + graph.getEdgeCount() );
 //            System.out.println( "shortcut - incoming[#" + target + "] = " + incomingShortcuts[target] );
             if ( outgoingShortcuts[source] == null ) {
-                outgoingShortcuts[source] = new ArrayList<>();
+                outgoingShortcuts[source] = new TIntArrayList();
             }
             outgoingShortcuts[source].add( shortcutCounter + graph.getEdgeCount() );
             shortcutCounter++;
@@ -395,13 +402,14 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             shortcutCounter--;
 //            System.out.println( "#" + shortcutCounter + " - removing shortcut[edges] - " + startEdges.get( shortcutCounter ) + " -> " + endEdges.get( shortcutCounter ) );
             int source = sources.get( shortcutCounter );
-            sources.remove( shortcutCounter );
+            sources.removeAt( shortcutCounter );
             int target = targets.get( shortcutCounter );
-            targets.remove( shortcutCounter );
-            startEdges.remove( shortcutCounter );
-            endEdges.remove( shortcutCounter );
-            outgoingShortcuts[source].remove( outgoingShortcuts[source].size() - 1 );
-            incomingShortcuts[target].remove( incomingShortcuts[target].size() - 1 );
+            targets.removeAt( shortcutCounter );
+            startEdges.removeAt( shortcutCounter );
+            endEdges.removeAt( shortcutCounter );
+            lengths.removeAt( shortcutCounter );
+            outgoingShortcuts[source].removeAt( outgoingShortcuts[source].size() - 1 );
+            incomingShortcuts[target].removeAt( incomingShortcuts[target].size() - 1 );
         }
 
         public int size() {
@@ -454,9 +462,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             if ( edge < graph.getEdgeCount() ) {
                 return graph.getLength( edge );
             }
-            int start = startEdges.get( edge - graph.getEdgeCount() );
-            int end = endEdges.get( edge - graph.getEdgeCount() );
-            return getLength( start ) + getLength( end );
+            return lengths.get( edge - graph.getEdgeCount() );
         }
 
         private class IncomingIterator implements TIntIterator {
@@ -475,7 +481,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             public boolean hasNext() { // ... see note at NeighbourListGraph
 //                System.out.println( "#" + node + " - IN counter = " + position );
                 if ( incomingShortcuts[node] == null ) {
-                    incomingShortcuts[node] = new ArrayList<>();
+                    incomingShortcuts[node] = new TIntArrayList();
                 }
 //                System.out.println( "#" + node + " - IN comparison: " + ( position + 1 ) + " < " + graph.getIncomingEdges( node ).length + " + " + incomingShortcuts[node].size() );
 //                System.out.println( "#" + node + " - IN has next = " + ( position + 1 < graph.getIncomingEdges( node ).length + incomingShortcuts[node].size() ) );
@@ -519,7 +525,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //                System.out.println( "#" + node + " - OUT counter = " + position );
                 boolean hasNext;
                 if ( outgoingShortcuts[node] == null ) {
-                    outgoingShortcuts[node] = new ArrayList<>();
+                    outgoingShortcuts[node] = new TIntArrayList();
                 }
                 hasNext = position + 1 < graph.getOutgoingEdges( node ).length + outgoingShortcuts[node].size();
 //                System.out.println( "#" + node + " - OUT comparison: " + ( position + 1 ) + " < " + graph.getOutgoingEdges( node ).length + " + " + outgoingShortcuts[node].size() );

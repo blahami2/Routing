@@ -32,9 +32,9 @@ import static org.junit.Assert.*;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class ContractionHierarchiesRoutingAlgorithmTest {
+public class ContractionHierarchiesUbRoutingAlgorithmTest {
 
-    public ContractionHierarchiesRoutingAlgorithmTest() {
+    public ContractionHierarchiesUbRoutingAlgorithmTest() {
     }
 
     @BeforeClass
@@ -101,7 +101,7 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
         pdBuilder.addShortcut( 16, 6, 14 );
         pdBuilder.addShortcut( 17, 15, 7 );
         PreprocessedData preprocessedData = pdBuilder.build();
-        ContractionHierarchiesRoutingAlgorithm instance = new ContractionHierarchiesRoutingAlgorithm( graph, preprocessedData );
+        ContractionHierarchiesUbRoutingAlgorithm instance = new ContractionHierarchiesUbRoutingAlgorithm( graph, preprocessedData );
         RouteBuilder<Route, Graph> routeBuilder = new SimpleRouteBuilder();
         routeBuilder.setSourceNode( graph, 1 );
         routeBuilder.addEdgeAsLast( graph, 1 );

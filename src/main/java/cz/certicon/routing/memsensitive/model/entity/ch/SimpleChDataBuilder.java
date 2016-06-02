@@ -25,6 +25,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
 
     private int[] ranks;
     private Map<Long, Pair<Long, Long>> shortcuts;
+    private Map<Long, Integer> sourceMap;
+    private Map<Long, Integer> targetMap;
     private long minId = Long.MAX_VALUE;
     private long maxId = -1;
     private int counter;
@@ -35,6 +37,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         this.graph = graph;
         this.distanceType = distanceType;
         this.shortcuts = new HashMap<>();
+        this.sourceMap = new HashMap<>();
+        this.targetMap = new HashMap<>();
         this.ranks = new int[graph.getNodeCount()];
         this.counter = 0;
         this.shortcutIdMap.clear();
@@ -54,7 +58,9 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     public void addShortcut( long shortcutId, long sourceEdgeId, long targetEdgeId ) {
         shortcuts.put( shortcutId, new Pair<>( sourceEdgeId, targetEdgeId ) );
         shortcutIdMap.put( shortcutId, counter++ );
-//        System.out.println( "shortcut: " + shortcutId + ": " + shortcuts.get( shortcutId ) );
+        getSourceNode( shortcutId );
+        getTargetNode( shortcutId );
+//        System.out.println( "adding shortcut#" + shortcutId + " - source = " + getSourceNode( shortcutId ) + ", target = " + getTargetNode( shortcutId ) );
     }
 
     @Override
@@ -135,24 +141,33 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     }
 
     private int getSourceNode( long shortcutId ) {
-        long sourceEdge = shortcuts.get( shortcutId ).a;
-//        for ( Map.Entry<Long, Pair<Long, Long>> entry : shortcuts.entrySet()) {
-//            System.out.println( "shortcut#" + entry.getKey() + " - " + entry.getValue() );
-//        }
-        if ( shortcuts.containsKey( sourceEdge ) ) {
-            return getSourceNode( sourceEdge );
-        } else {
-            return graph.getSource( graph.getEdgeByOrigId( sourceEdge ) );
+        Integer source = sourceMap.get( shortcutId );
+        if ( source == null ) {
+//            System.out.println( "#" + shortcutId + " - source is null" );
+            long sourceEdge = shortcuts.get( shortcutId ).a;
+            if ( shortcuts.containsKey( sourceEdge ) ) {
+                source = getSourceNode( sourceEdge );
+            } else {
+                source = graph.getSource( graph.getEdgeByOrigId( sourceEdge ) );
+            }
+            sourceMap.put( shortcutId, source );
         }
+        return source;
     }
 
     private int getTargetNode( long shortcutId ) {
-        long targetEdge = shortcuts.get( shortcutId ).b;
-        if ( shortcuts.containsKey( targetEdge ) ) {
-            return getTargetNode( targetEdge );
-        } else {
-            return graph.getTarget( graph.getEdgeByOrigId( targetEdge ) );
+        Integer target = targetMap.get( shortcutId );
+        if ( target == null ) {
+//            System.out.println( "#" + shortcutId + " - target is null" );
+            long targetEdge = shortcuts.get( shortcutId ).b;
+            if ( shortcuts.containsKey( targetEdge ) ) {
+                target = getTargetNode( targetEdge );
+            } else {
+                target = graph.getTarget( graph.getEdgeByOrigId( targetEdge ) );
+            }
+            targetMap.put( shortcutId, target );
         }
+        return target;
     }
 
 }

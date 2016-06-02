@@ -6,7 +6,7 @@
 package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch;
 
 import cz.certicon.routing.memsensitive.algorithm.Route;
-import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesRoutingAlgorithm;
+import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesUbRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.algorithms.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
@@ -121,7 +121,7 @@ public class ContractionHierarchiesPreprocessorTest {
 //        assertEquals( expResult, preprocessedData );
 
         DijkstraRoutingAlgorithm optimalAlgorithm = new DijkstraRoutingAlgorithm( graph );
-        ContractionHierarchiesRoutingAlgorithm chAlgorithm = new ContractionHierarchiesRoutingAlgorithm( graph, preprocessedData );
+        ContractionHierarchiesUbRoutingAlgorithm chAlgorithm = new ContractionHierarchiesUbRoutingAlgorithm( graph, preprocessedData );
         for ( int i = 0; i < 6; i++ ) {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
@@ -135,6 +135,7 @@ public class ContractionHierarchiesPreprocessorTest {
                 }
             }
         }
+//        fail();
     }
 
     /**
