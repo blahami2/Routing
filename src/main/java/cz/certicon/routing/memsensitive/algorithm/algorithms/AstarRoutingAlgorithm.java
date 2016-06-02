@@ -10,6 +10,7 @@ import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
+import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
@@ -50,7 +51,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException {
 //        System.out.println( "ROUTING: from = " + from.keySet() + ", to = " + to.keySet() );
         routeBuilder.clear();
         if ( MEASURE_STATS ) {
@@ -137,6 +138,8 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 pred = nodePredecessorArray[node];
                 currentNode = node;
             }
+        } else {
+            throw new RouteNotFoundException();
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );

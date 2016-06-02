@@ -13,5 +13,5 @@ import java.util.Map;
  */
 public interface RoutingAlgorithm<G> {
 
-    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to );
+    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException;
 }

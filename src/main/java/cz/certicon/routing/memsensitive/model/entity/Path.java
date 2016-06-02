@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import cz.certicon.routing.model.basic.Length;
+import cz.certicon.routing.model.basic.Time;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.util.List;
 
@@ -14,9 +16,9 @@ import java.util.List;
  */
 public interface Path {
 
-    public double getLength();
+    public Length getLength();
 
-    public double getTime();
+    public Time getTime();
 
     public List<Coordinate> getCoordinates();
     

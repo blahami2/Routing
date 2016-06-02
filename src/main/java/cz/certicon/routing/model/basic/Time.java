@@ -54,6 +54,10 @@ public class Time {
         return "" + getTime();
     }
 
+    public String toString( TimeUnits timeUnits ) {
+        return getTime( timeUnits ) + " " + timeUnits.getUnit();
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

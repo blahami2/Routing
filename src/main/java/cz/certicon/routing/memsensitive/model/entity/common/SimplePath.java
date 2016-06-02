@@ -6,6 +6,8 @@
 package cz.certicon.routing.memsensitive.model.entity.common;
 
 import cz.certicon.routing.memsensitive.model.entity.Path;
+import cz.certicon.routing.model.basic.Length;
+import cz.certicon.routing.model.basic.Time;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,22 +19,22 @@ import java.util.List;
 public class SimplePath implements Path {
     
     private final ArrayList<Coordinate> coordinates;
-    private final double length;
-    private final double time;
+    private final Length length;
+    private final Time time;
 
-    public SimplePath( ArrayList<Coordinate> coordinates, double length, double time ) {
+    public SimplePath( ArrayList<Coordinate> coordinates, Length length, Time time ) {
         this.coordinates = coordinates;
         this.length = length;
         this.time = time;
     }
 
     @Override
-    public double getLength() {
+    public Length getLength() {
         return length;
     }
 
     @Override
-    public double getTime() {
+    public Time getTime() {
         return time;
     }
 

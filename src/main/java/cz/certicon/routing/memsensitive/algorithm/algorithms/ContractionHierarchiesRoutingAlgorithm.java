@@ -10,6 +10,7 @@ import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
+import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
@@ -63,7 +64,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException {
         routeBuilder.clear();
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
@@ -157,7 +158,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             int node = itFrom.next();
             if ( nodeFromClosedArray.get( node ) && nodeToClosedArray.get( node ) ) {
                 double distance = nodeFromDistanceArray[node] + nodeToDistanceArray[node];
-                if(0 <= distance && distance < finalDistance){
+                if ( 0 <= distance && distance < finalDistance ) {
                     finalDistance = distance;
                     finalNode = node;
                 }
@@ -192,6 +193,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 pred = nodeToPredecessorArray[node];
                 currentNode = node;
             }
+        } else {
+            throw new RouteNotFoundException();
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );

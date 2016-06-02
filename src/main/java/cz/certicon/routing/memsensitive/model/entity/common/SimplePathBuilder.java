@@ -9,6 +9,10 @@ import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.Path;
 import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
+import cz.certicon.routing.model.basic.Length;
+import cz.certicon.routing.model.basic.LengthUnits;
+import cz.certicon.routing.model.basic.Time;
+import cz.certicon.routing.model.basic.TimeUnits;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +65,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
 
     @Override
     public Path build() {
-        return new SimplePath( coordinates, length, time );
+        return new SimplePath( coordinates, new Length( LengthUnits.NANOMETERS, (long) ( length * 10E9 ) ), new Time( TimeUnits.NANOSECONDS, (long) ( time * 10E9 ) ) );
     }
 
 }
