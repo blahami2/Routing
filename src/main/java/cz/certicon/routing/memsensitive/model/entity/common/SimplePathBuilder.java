@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class SimplePathBuilder implements PathBuilder<Path, Graph> {
 
-    private final ArrayList<Coordinate> coordinates = new ArrayList<>();
+    private ArrayList<Coordinate> coordinates = new ArrayList<>();
     private double time = 0;
     private double length = 0;
 
@@ -37,6 +37,28 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
             Collections.reverse( edgeCoordinates );
         }
         this.coordinates.addAll( edgeCoordinates );
+        addLength( length );
+        addTime( time );
+    }
+
+    @Override
+    public void addStartEdge( Graph graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time ) {
+        if ( !isForward ) {
+            Collections.reverse( coordinates );
+        }
+        ArrayList<Coordinate> newCoordinates = new ArrayList<>( coordinates );
+        newCoordinates.addAll( this.coordinates );
+        this.coordinates = newCoordinates;
+        addLength( length );
+        addTime( time );
+    }
+
+    @Override
+    public void addEndEdge( Graph graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time ) {
+        if ( !isForward ) {
+            Collections.reverse( coordinates );
+        }
+        this.coordinates.addAll( coordinates );
         addLength( length );
         addTime( time );
     }

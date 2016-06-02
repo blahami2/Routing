@@ -7,13 +7,14 @@ package cz.certicon.routing.memsensitive.data.path;
 
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface PathReader {
+public interface PathReader<G> {
 
-    public <T, G> T readPath( PathBuilder<T, G> pathBuilder, G graph, Route route ) throws IOException;
+    public <T> T readPath( PathBuilder<T, G> pathBuilder, G graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException;
 }

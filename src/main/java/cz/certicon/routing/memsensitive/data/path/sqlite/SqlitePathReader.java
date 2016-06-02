@@ -9,6 +9,7 @@ import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.data.path.PathReader;
+import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
@@ -27,7 +28,7 @@ import java.util.Properties;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SqlitePathReader implements PathReader {
+public class SqlitePathReader implements PathReader<Graph> {
 
     private static final int BATCH_SIZE = 200;
 
@@ -38,11 +39,26 @@ public class SqlitePathReader implements PathReader {
     }
 
     @Override
-    public <T, G> T readPath( PathBuilder<T, G> pathBuilder, G graph, Route route ) throws IOException {
+    public <T> T readPath( PathBuilder<T, Graph> pathBuilder, Graph graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException {
         if ( route.getSource() != route.getTarget() ) {
             reader.open();
             Map<Long, Boolean> forwardMap = new HashMap<>();
             try {
+                // if source is not a crossroad => needs to be loaded
+                Coordinate routeStartCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( route.getSource() ) ), graph.getLongitude( graph.getNodeByOrigId( route.getSource() ) ) );
+                if ( !routeStartCoord.equals( origSource ) ) {
+                    // really complex SQL query
+                    // - find edges connected to the "route.source" node
+                    // - order them by distance from "origSource"
+                    // - take the first
+                    // - find the closest point on edge geometry
+                    // - obtain a subgeometry, it's length and speed etc.
+                    // - unpack and voila
+                }
+                Coordinate routeEndCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( route.getTarget() ) ), graph.getLongitude( graph.getNodeByOrigId( route.getTarget() ) ) );
+                if ( !routeEndCoord.equals( origTarget ) ) {
+                }
+
                 // create temporary table
                 reader.setAutoCommit( false );
                 if ( !reader.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='path'" ).next() ) {

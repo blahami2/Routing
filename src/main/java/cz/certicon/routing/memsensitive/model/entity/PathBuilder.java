@@ -14,6 +14,10 @@ import java.util.List;
  */
 public interface PathBuilder<T, G> {
 
+    public void addStartEdge( G graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time );
+
+    public void addEndEdge( G graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time );
+
     public void addEdge( G graph, long edgeId, boolean isForward, List<Coordinate> coordinates, double length, double time );
 
     public void addCoordinates( Coordinate coordinates );
@@ -21,7 +25,7 @@ public interface PathBuilder<T, G> {
     public void addLength( double length );
 
     public void addTime( double time );
-    
+
     public void clear();
 
     public T build();
