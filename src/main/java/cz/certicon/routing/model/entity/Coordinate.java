@@ -16,7 +16,7 @@ import cz.certicon.routing.utils.DoubleComparator;
  */
 public class Coordinate {
 
-    private static final double EPS = 10E-10;
+    private static final double EPS = 10E-6;
 
     private final double latitude;
     private final double longitude;

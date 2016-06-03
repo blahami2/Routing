@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.data.nodesearch;
 
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
 import java.io.IOException;
 
@@ -14,7 +15,7 @@ import java.io.IOException;
  */
 public interface NodeSearcher {
 
-    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, double latitude, double longitude, SearchFor searchfor ) throws IOException;
+    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException, EvaluableOnlyException;
 
     public static enum SearchFor {
         SOURCE, TARGET;

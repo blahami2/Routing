@@ -197,4 +197,9 @@ public class CoordinateUtils {
         }
         return coords;
     }
+    
+    public boolean equals(Coordinate a, Coordinate b, double precision){
+        return (DoubleComparator.isEqualTo( a.getLatitude(), b.getLatitude(), 10E-6)
+                && DoubleComparator.isEqualTo( a.getLongitude(), b.getLongitude(), 10E-6));
+    }
 }

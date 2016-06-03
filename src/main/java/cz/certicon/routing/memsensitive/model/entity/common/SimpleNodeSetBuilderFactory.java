@@ -7,15 +7,15 @@ package cz.certicon.routing.memsensitive.model.entity.common;
 
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet;
 import cz.certicon.routing.model.entity.NodeSetBuilder;
 import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
-import java.util.Map;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<Map<Integer, Float>> {
+public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<NodeSet<Graph>> {
 
     private final DistanceType distanceType;
     private final Graph graph;
@@ -26,7 +26,7 @@ public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<Map<In
     }
 
     @Override
-    public NodeSetBuilder<Map<Integer, Float>> createNodeSetBuilder() {
+    public NodeSetBuilder<NodeSet<Graph>> createNodeSetBuilder() {
         return new SimpleNodeSetBuilder( graph, distanceType );
     }
 

@@ -7,6 +7,7 @@ package cz.certicon.routing.memsensitive.algorithm.algorithms;
 
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
+import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
@@ -54,7 +55,7 @@ public class AstarRoutingAlgorithmTest {
      * Test of route method, of class AstarRoutingAlgorithm.
      */
     @Test
-    public void testRoute() {
+    public void testRoute() throws RouteNotFoundException {
         System.out.println( "route" );
         GraphBuilder<Graph> graphBuilder = new SimpleGraphBuilder( 6, 12, DistanceType.LENGTH );
         Coordinate a = new Coordinate( 50.1001831, 14.3856114 );

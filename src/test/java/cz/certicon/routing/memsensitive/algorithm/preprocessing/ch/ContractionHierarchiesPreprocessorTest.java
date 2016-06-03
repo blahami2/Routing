@@ -6,6 +6,7 @@
 package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch;
 
 import cz.certicon.routing.memsensitive.algorithm.Route;
+import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesUbRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.algorithms.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
@@ -96,7 +97,7 @@ public class ContractionHierarchiesPreprocessorTest {
      * Test of preprocess method, of class ContractionHierarchiesPreprocessor.
      */
     @Test
-    public void testPreprocess_4args() {
+    public void testPreprocess_4args() throws RouteNotFoundException {
         System.out.println( "preprocess" );
         DistanceType distanceType = DistanceType.LENGTH;
         ChDataBuilder<PreprocessedData> dataBuilder = new SimpleChDataBuilder( graph, distanceType );

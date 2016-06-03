@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.data.path.sqlite;
 
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.algorithm.Route;
@@ -14,15 +15,19 @@ import cz.certicon.routing.memsensitive.model.entity.PathBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.utils.GeometryUtils;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -40,12 +45,22 @@ public class SqlitePathReader implements PathReader<Graph> {
 
     @Override
     public <T> T readPath( PathBuilder<T, Graph> pathBuilder, Graph graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException {
+        pathBuilder.clear();
+        if ( GlobalOptions.MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.START );
+        }
         if ( route.getSource() != route.getTarget() ) {
             reader.open();
             Map<Long, Boolean> forwardMap = new HashMap<>();
+            ResultSet rs;
+            final String keyDistanceFromStart = "distance_from_start";
+            final String keyDistanceToEnd = "distance_to_end";
+            final String keyGeomFromStart = "geom_from_start";
+            final String keyGeomToEnd = "geom_to_end";
             try {
                 // if source is not a crossroad => needs to be loaded
-                Coordinate routeStartCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( route.getSource() ) ), graph.getLongitude( graph.getNodeByOrigId( route.getSource() ) ) );
+                long sourceId = route.getSource();
+                Coordinate routeStartCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( sourceId ) ), graph.getLongitude( graph.getNodeByOrigId( sourceId ) ) );
                 if ( !routeStartCoord.equals( origSource ) ) {
                     // really complex SQL query
                     // - find edges connected to the "route.source" node
@@ -54,9 +69,83 @@ public class SqlitePathReader implements PathReader<Graph> {
                     // - find the closest point on edge geometry
                     // - obtain a subgeometry, it's length and speed etc.
                     // - unpack and voila
+                    final String pointString = "ST_GeomFromText('POINT(" + origSource.getLongitude() + " " + origSource.getLatitude() + ")',4326)";
+                    String query = "SELECT e.id, e.is_forward, e.source_id, e.target_id, ed.is_paid, ed.length, ed.speed_fw, ed.speed_bw "
+                            + ", ST_Length(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point)), 1) AS " + keyDistanceFromStart + " "
+                            + ", ST_Length(ST_Line_Substring(ed.geom, ST_Line_Locate_Point(ed.geom, x.point),1), 1) AS " + keyDistanceToEnd + " "
+                            + ", ST_AsText(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point))) AS " + keyGeomFromStart + " "
+                            + ", ST_AsText(ST_Line_Substring(ed.geom, ST_Line_Locate_Point(ed.geom, x.point),1)) AS " + keyGeomToEnd + " "
+                            + "FROM edges e "
+                            + "JOIN edges_data ed ON e.data_id = ed.id AND (e.source_id = " + sourceId + " OR e.target_id = " + sourceId + ") "
+                            + "JOIN (SELECT " + pointString + " AS point) AS x ON 1 = 1 "
+                            + "ORDER BY Distance( ed.geom, x.point) "
+                            + "LIMIT 1 ";
+                    rs = reader.read( query );
+//                    System.out.println( query );
+                    if ( rs.next() ) {
+                        long edgeId = rs.getLong( "id" );
+                        boolean isForward = rs.getInt( "is_forward" ) == 1;
+                        long sId = rs.getLong( "source_id" );
+                        long tId = rs.getLong( "target_id" );
+                        List<Coordinate> coordinates;
+                        boolean reverse;
+                        int speed;
+                        double length;
+                        if ( isForward != ( sourceId == tId ) ) {
+                            coordinates = getCoordinatesCheckNull( rs, keyGeomFromStart );
+                            length = rs.getDouble( keyDistanceFromStart );
+                            reverse = true;
+                            speed = rs.getInt( "speed_bw" );
+                        } else {
+                            coordinates = getCoordinatesCheckNull( rs, keyGeomToEnd );
+                            length = rs.getDouble( keyDistanceToEnd );
+                            reverse = false;
+                            speed = rs.getInt( "speed_fw" );
+                        }
+                        pathBuilder.addStartEdge( graph, edgeId, !reverse, coordinates, length, 3.6 * length / speed );
+                    } else {
+                        throw new IOException( "Could not find the closest edge:\n" + query );
+                    }
                 }
-                Coordinate routeEndCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( route.getTarget() ) ), graph.getLongitude( graph.getNodeByOrigId( route.getTarget() ) ) );
+                long targetId = route.getTarget();
+                Coordinate routeEndCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( targetId ) ), graph.getLongitude( graph.getNodeByOrigId( targetId ) ) );
                 if ( !routeEndCoord.equals( origTarget ) ) {
+                    final String pointString = "ST_GeomFromText('POINT(" + origTarget.getLongitude() + " " + origTarget.getLatitude() + ")',4326)";
+                    String query = "SELECT e.id, e.is_forward, e.source_id, e.target_id, ed.is_paid, ed.length, ed.speed_fw, ed.speed_bw "
+                            + ", ST_Length(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point)), 1) AS " + keyDistanceFromStart + " "
+                            + ", ST_Length(ST_Line_Substring(ed.geom, ST_Line_Locate_Point(ed.geom, x.point),1), 1) AS " + keyDistanceToEnd + " "
+                            + ", ST_AsText(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point))) AS " + keyGeomFromStart + " "
+                            + ", ST_AsText(ST_Line_Substring(ed.geom, ST_Line_Locate_Point(ed.geom, x.point),1)) AS " + keyGeomToEnd + " "
+                            + "FROM edges e "
+                            + "JOIN edges_data ed ON e.data_id = ed.id AND (e.source_id = " + targetId + " OR e.target_id = " + targetId + ") "
+                            + "JOIN (SELECT " + pointString + " AS point) AS x ON 1 = 1 "
+                            + "ORDER BY Distance( ed.geom, x.point) "
+                            + "LIMIT 1 ";
+                    rs = reader.read( query );
+                    if ( rs.next() ) {
+                        long edgeId = rs.getLong( "id" );
+                        boolean isForward = rs.getInt( "is_forward" ) == 1;
+                        long sId = rs.getLong( "source_id" );
+                        long tId = rs.getLong( "target_id" );
+                        List<Coordinate> coordinates;
+                        boolean reverse;
+                        int speed;
+                        double length;
+                        if ( isForward != ( targetId == sId ) ) {
+                            coordinates = getCoordinatesCheckNull( rs, keyGeomToEnd );
+                            length = rs.getDouble( keyDistanceToEnd );
+                            reverse = true;
+                            speed = rs.getInt( "speed_bw" );
+                        } else {
+                            coordinates = getCoordinatesCheckNull( rs, keyGeomFromStart );
+                            length = rs.getDouble( keyDistanceFromStart );
+                            reverse = false;
+                            speed = rs.getInt( "speed_fw" );
+                        }
+                        pathBuilder.addEndEdge( graph, edgeId, !reverse, coordinates, length, 3.6 * length / speed );
+                    } else {
+                        throw new IOException( "Could not find the closest edge:\n" + query );
+                    }
                 }
 
                 // create temporary table
@@ -83,7 +172,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 }
                 ps.executeBatch();
                 reader.execute( "CREATE INDEX `idx_path_order` ON `path` (`order_id` ASC)" );
-                ResultSet rs = reader.read( "SELECT e.id AS edge_id, ST_AsText(d.geom) AS linestring, e.is_forward, d.length, d.speed_fw, d.speed_bw "
+                rs = reader.read( "SELECT e.id AS edge_id, ST_AsText(d.geom) AS linestring, e.is_forward, d.length, d.speed_fw, d.speed_bw "
                         + "FROM edges e "
                         + "JOIN path p "
                         + "ON e.id = p.edge_id "
@@ -114,7 +203,73 @@ public class SqlitePathReader implements PathReader<Graph> {
                 throw new IOException( ex );
             }
         }
+        if ( GlobalOptions.MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.STOP );
+        }
         return pathBuilder.build();
+    }
+
+    @Override
+    public <T> T readPath( PathBuilder<T, Graph> pathBuilder, Graph graph, long edgeIdd, Coordinate origSource, Coordinate origTarget ) throws IOException {
+        pathBuilder.clear();
+        if ( GlobalOptions.MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.START );
+        }
+        ResultSet rs;
+        final String keyDistanceForward = "distance_from_start";
+        final String keyDistanceBackward = "distance_to_end";
+        final String keyGeomForward = "geom_from_start";
+        final String keyGeomBackward = "geom_to_end";
+        final String startPointString = "ST_GeomFromText('POINT(" + origSource.getLongitude() + " " + origSource.getLatitude() + ")',4326)";
+        final String endPointString = "ST_GeomFromText('POINT(" + origTarget.getLongitude() + " " + origTarget.getLatitude() + ")',4326)";
+        String query = "SELECT e.id, e.is_forward, e.source_id, e.target_id, ed.is_paid, ed.length, ed.speed_fw, ed.speed_bw "
+                + ", ST_Length(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, y.point)), ST_Line_Locate_Point(ed.geom, x.point),1), 1) AS " + keyDistanceForward + " "
+                + ", ST_Length(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point)), ST_Line_Locate_Point(ed.geom, y.point),1), 1) AS " + keyDistanceBackward + " "
+                + ", ST_AsText(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, y.point)), ST_Line_Locate_Point(ed.geom, x.point),1)) AS " + keyGeomForward + " "
+                + ", ST_AsText(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point)), ST_Line_Locate_Point(ed.geom, y.point),1)) AS " + keyGeomBackward + " "
+                + "FROM edges e "
+                + "JOIN edges_data ed ON e.data_id = ed.id AND (e.id = " + edgeIdd + ") "
+                + "JOIN (SELECT " + startPointString + " AS point) AS x ON 1 = 1 "
+                + "JOIN (SELECT " + endPointString + " AS point) AS y ON 1 = 1 "
+                + "LIMIT 1 ";
+        try {
+            rs = reader.read( query );
+//            System.out.println( query );
+            if ( rs.next() ) {
+                long edgeId = rs.getLong( "id" );
+                boolean isForward = rs.getInt( "is_forward" ) == 1;
+                List<Coordinate> coordinates;
+                int speed;
+                double length;
+                if ( isForward ) {
+                    coordinates = getCoordinatesCheckNull( rs, keyGeomForward );
+                    length = rs.getDouble( keyDistanceForward );
+                    speed = rs.getInt( "speed_fw" );
+                } else {
+                    coordinates = getCoordinatesCheckNull( rs, keyGeomBackward );
+                    length = rs.getDouble( keyDistanceBackward );
+                    speed = rs.getInt( "speed_bw" );
+                }
+                pathBuilder.addEdge( graph, edgeId, isForward, coordinates, length, 3.6 * length / speed );
+            } else {
+                throw new IOException( "Could not find the closest edge:\n" + query );
+            }
+        } catch ( SQLException ex ) {
+            throw new IOException( ex );
+        } finally {
+            if ( GlobalOptions.MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.STOP );
+            }
+        }
+        return pathBuilder.build();
+    }
+
+    private List<Coordinate> getCoordinatesCheckNull( ResultSet rs, String key ) throws SQLException {
+        if ( rs.getString( key ) != null ) {
+            return GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( key ) );
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     private static class InnerDatabase extends AbstractSqliteDatabase<ResultSet, String> {

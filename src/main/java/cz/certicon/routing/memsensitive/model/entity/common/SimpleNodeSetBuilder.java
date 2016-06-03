@@ -5,42 +5,66 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.common;
 
+import cz.certicon.routing.memsensitive.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeCategory;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeEntry;
+import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NodeSetBuilder;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleNodeSetBuilder implements NodeSetBuilder<Map<Integer, Float>> {
+public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
 
     private final DistanceType distanceType;
     private final Graph graph;
-    private final Map<Integer, Float> nodeDistanceMap;
+    private final NodeSet<Graph> nodeSet;
 
     public SimpleNodeSetBuilder( Graph graph, DistanceType distanceType ) {
         this.distanceType = distanceType;
         this.graph = graph;
-        this.nodeDistanceMap = new HashMap<>();
+        this.nodeSet = new SimpleNodeSet();
     }
 
     @Override
-    public void addNode( long nodeId, long edgeId, float length, float speed ) {
+    public NodeSet<Graph> build() throws EvaluableOnlyException {
+        Iterator<NodeEntry> itSource = nodeSet.iterator( NodeCategory.SOURCE );
+        while ( itSource.hasNext() ) {
+            Iterator<NodeEntry> itTarget = nodeSet.iterator( NodeCategory.TARGET );
+            NodeEntry sourceEntry = itSource.next();
+            while ( itTarget.hasNext() ) {
+                NodeEntry targetEntry = itTarget.next();
+                if ( sourceEntry.getEdgeId() == targetEntry.getEdgeId() ) {
+                    float edgeLength = graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) );
+                    float sourceDist = edgeLength - sourceEntry.getDistance();
+                    float targetDist = targetEntry.getDistance();
+                    if ( sourceDist < targetDist ) {
+                        int srcNode = graph.getNodeByOrigId( sourceEntry.getNodeId() );
+                        int tarNode = graph.getNodeByOrigId( targetEntry.getNodeId() );
+                        Coordinate src = new Coordinate( graph.getLatitude( srcNode ), graph.getLongitude( srcNode ) );
+                        Coordinate tar = new Coordinate( graph.getLatitude( tarNode ), graph.getLongitude( tarNode ) );
+                        throw new EvaluableOnlyException( sourceEntry.getEdgeId(), src, tar );
+                    }
+                }
+            }
+        }
+        return nodeSet;
+    }
+
+    @Override
+    public void addNode( NodeCategory nodeCategory, long nodeId, long edgeId, float length, float speed ) {
         float dist = (float) distanceType.calculateDistance( length, speed );
-        nodeDistanceMap.put( graph.getNodeByOrigId( nodeId ), dist );
+        nodeSet.put( nodeCategory, edgeId, nodeId, dist );
     }
 
     @Override
-    public void addCrossroad( long nodeId ) {
-        nodeDistanceMap.put( graph.getNodeByOrigId( nodeId ), 0.0F );
-    }
-
-    @Override
-    public Map<Integer, Float> build() {
-        return nodeDistanceMap;
+    public void addCrossroad( NodeCategory nodeCategory, long nodeId ) {
+        nodeSet.put( nodeCategory, -1, nodeId, 0 );
     }
 
 }

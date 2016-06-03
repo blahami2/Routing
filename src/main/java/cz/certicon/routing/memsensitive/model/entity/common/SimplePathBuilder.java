@@ -25,6 +25,8 @@ import java.util.List;
 public class SimplePathBuilder implements PathBuilder<Path, Graph> {
 
     private ArrayList<Coordinate> coordinates = new ArrayList<>();
+    private List<Coordinate> start = null;
+    private List<Coordinate> end = null;
     private double time = 0;
     private double length = 0;
 
@@ -46,9 +48,11 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
         if ( !isForward ) {
             Collections.reverse( coordinates );
         }
-        ArrayList<Coordinate> newCoordinates = new ArrayList<>( coordinates );
-        newCoordinates.addAll( this.coordinates );
-        this.coordinates = newCoordinates;
+        if ( this.coordinates.isEmpty() ) {
+            this.coordinates.addAll( coordinates );
+        } else {
+            start = coordinates;
+        }
         addLength( length );
         addTime( time );
     }
@@ -58,7 +62,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
         if ( !isForward ) {
             Collections.reverse( coordinates );
         }
-        this.coordinates.addAll( coordinates );
+        end = coordinates;
         addLength( length );
         addTime( time );
     }
@@ -81,13 +85,25 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     @Override
     public void clear() {
         coordinates.clear();
+        start = null;
+        end = null;
         time = 0;
         length = 0;
     }
 
     @Override
     public Path build() {
-        return new SimplePath( coordinates, new Length( LengthUnits.NANOMETERS, (long) ( length * 10E9 ) ), new Time( TimeUnits.NANOSECONDS, (long) ( time * 10E9 ) ) );
+        ArrayList<Coordinate> coords;
+        if ( start != null ) {
+            coords = new ArrayList<>( start );
+            coords.addAll( coordinates );
+        } else {
+            coords = coordinates;
+        }
+        if ( end != null ) {
+            coords.addAll( end );
+        }
+        return new SimplePath( coords, new Length( LengthUnits.NANOMETERS, (long) ( length * 10E9 ) ), new Time( TimeUnits.NANOSECONDS, (long) ( time * 10E9 ) ) );
     }
 
 }

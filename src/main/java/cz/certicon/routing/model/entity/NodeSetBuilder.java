@@ -5,6 +5,9 @@
  */
 package cz.certicon.routing.model.entity;
 
+import cz.certicon.routing.memsensitive.data.nodesearch.EvaluableOnlyException;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeCategory;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
@@ -12,9 +15,9 @@ package cz.certicon.routing.model.entity;
  */
 public interface NodeSetBuilder<T> {
 
-    public void addNode( long nodeId, long edgeId, float length, float speed );
+    public void addNode( NodeCategory nodeCategory, long nodeId, long edgeId, float length, float speed );
 
-    public void addCrossroad( long nodeId );
+    public void addCrossroad( NodeCategory nodeCategory, long nodeId );
 
-    public T build();
+    public T build() throws EvaluableOnlyException;
 }

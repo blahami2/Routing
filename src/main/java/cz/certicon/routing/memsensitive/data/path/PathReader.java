@@ -17,4 +17,5 @@ import java.io.IOException;
 public interface PathReader<G> {
 
     public <T> T readPath( PathBuilder<T, G> pathBuilder, G graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException;
+    public <T> T readPath( PathBuilder<T, G> pathBuilder, G graph, long edgeId, Coordinate origSource, Coordinate origTarget ) throws IOException;
 }
