@@ -92,7 +92,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     }
 
     @Override
-    public Path build() {
+    public Path build( Graph graph, Coordinate sourceCoordinate, Coordinate targetCoordinate ) {
         ArrayList<Coordinate> coords;
         if ( start != null ) {
             coords = new ArrayList<>( start );
@@ -102,6 +102,10 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
         }
         if ( end != null ) {
             coords.addAll( end );
+        }
+        if ( coords.isEmpty() ) {
+            coords.add( sourceCoordinate );
+            coords.add( targetCoordinate );
         }
         return new SimplePath( coords, new Length( LengthUnits.NANOMETERS, (long) ( length * 10E9 ) ), new Time( TimeUnits.NANOSECONDS, (long) ( time * 10E9 ) ) );
     }

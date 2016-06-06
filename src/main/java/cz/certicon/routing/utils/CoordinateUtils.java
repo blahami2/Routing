@@ -22,6 +22,8 @@ import java.util.ArrayList;
 public class CoordinateUtils {
 
     private static final double EARTH_RADIUS = 6371000;
+    public static final double COORDINATE_PRECISION = 10E-5; // 0.11 meter accuracy
+    public static final double DISTANCE_PRECISION_METERS = 10E-1; // 0.1 meter accuracy
 
 //    private static final CoordinateReferenceSystem COORDINATE_REFERENCE_SYSTEM;
 //    static {

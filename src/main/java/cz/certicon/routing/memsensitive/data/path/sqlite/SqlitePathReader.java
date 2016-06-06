@@ -203,10 +203,15 @@ public class SqlitePathReader implements PathReader<Graph> {
                 throw new IOException( ex );
             }
         }
+        int sourceNode = graph.getNodeByOrigId( route.getSource() );
+        int targetNode = graph.getNodeByOrigId( route.getTarget() );
+        T result = pathBuilder.build( graph,
+                new Coordinate( graph.getLatitude( sourceNode ), graph.getLongitude( sourceNode ) ),
+                new Coordinate( graph.getLatitude( targetNode ), graph.getLongitude( targetNode ) ) );
         if ( GlobalOptions.MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.STOP );
         }
-        return pathBuilder.build();
+        return result;
     }
 
     @Override
@@ -220,9 +225,13 @@ public class SqlitePathReader implements PathReader<Graph> {
         final String keyDistanceBackward = "distance_to_end";
         final String keyGeomForward = "geom_from_start";
         final String keyGeomBackward = "geom_to_end";
+        final String keyClosestStart = "closest_point_x";
+        final String keyClosestEnd = "closest_point_y";
         final String startPointString = "ST_GeomFromText('POINT(" + origSource.getLongitude() + " " + origSource.getLatitude() + ")',4326)";
         final String endPointString = "ST_GeomFromText('POINT(" + origTarget.getLongitude() + " " + origTarget.getLatitude() + ")',4326)";
         String query = "SELECT e.id, e.is_forward, e.source_id, e.target_id, ed.is_paid, ed.length, ed.speed_fw, ed.speed_bw "
+                + ", ST_AsText(ST_Line_Interpolate_Point(ed.geom, ST_Line_Locate_Point(ed.geom, x.point))) AS " + keyClosestStart + " "
+                + ", ST_AsText(ST_Line_Interpolate_Point(ed.geom, ST_Line_Locate_Point(ed.geom, y.point))) AS " + keyClosestEnd + " "
                 + ", ST_Length(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, y.point)), ST_Line_Locate_Point(ed.geom, x.point),1), 1) AS " + keyDistanceForward + " "
                 + ", ST_Length(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, x.point)), ST_Line_Locate_Point(ed.geom, y.point),1), 1) AS " + keyDistanceBackward + " "
                 + ", ST_AsText(ST_Line_Substring(ST_Line_Substring(ed.geom, 0, ST_Line_Locate_Point(ed.geom, y.point)), ST_Line_Locate_Point(ed.geom, x.point),1)) AS " + keyGeomForward + " "
@@ -232,6 +241,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 + "JOIN (SELECT " + startPointString + " AS point) AS x ON 1 = 1 "
                 + "JOIN (SELECT " + endPointString + " AS point) AS y ON 1 = 1 "
                 + "LIMIT 1 ";
+        System.out.println( query );
         try {
             rs = reader.read( query );
 //            System.out.println( query );
@@ -251,6 +261,9 @@ public class SqlitePathReader implements PathReader<Graph> {
                     speed = rs.getInt( "speed_bw" );
                 }
                 pathBuilder.addEdge( graph, edgeId, isForward, coordinates, length, 3.6 * length / speed );
+                Coordinate source = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( keyClosestStart ) );
+                Coordinate target = GeometryUtils.toCoordinatesFromWktPoint( rs.getString( keyClosestEnd ) );
+                return pathBuilder.build( graph, source, target );
             } else {
                 throw new IOException( "Could not find the closest edge:\n" + query );
             }
@@ -261,7 +274,6 @@ public class SqlitePathReader implements PathReader<Graph> {
                 TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.STOP );
             }
         }
-        return pathBuilder.build();
     }
 
     private List<Coordinate> getCoordinatesCheckNull( ResultSet rs, String key ) throws SQLException {

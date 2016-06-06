@@ -13,6 +13,8 @@ import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeCategory;
 import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeEntry;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NodeSetBuilder;
+import cz.certicon.routing.utils.CoordinateUtils;
+import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Iterator;
 
 /**
@@ -43,7 +45,8 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
                     float edgeLength = graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) );
                     float sourceDist = edgeLength - sourceEntry.getDistance();
                     float targetDist = targetEntry.getDistance();
-                    if ( sourceDist < targetDist ) {
+                    System.out.println( "comparing: " + sourceDist + " vs " + targetDist );
+                    if ( DoubleComparator.isLowerOrEqualTo( sourceDist, targetDist, CoordinateUtils.DISTANCE_PRECISION_METERS ) ) {
                         int srcNode = graph.getNodeByOrigId( sourceEntry.getNodeId() );
                         int tarNode = graph.getNodeByOrigId( targetEntry.getNodeId() );
                         Coordinate src = new Coordinate( graph.getLatitude( srcNode ), graph.getLongitude( srcNode ) );

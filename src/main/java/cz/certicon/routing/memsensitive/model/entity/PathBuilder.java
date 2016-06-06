@@ -28,5 +28,5 @@ public interface PathBuilder<T, G> {
 
     public void clear();
 
-    public T build();
+    public T build( Graph graph, Coordinate sourceCoordinate, Coordinate targetCoordinate );
 }
