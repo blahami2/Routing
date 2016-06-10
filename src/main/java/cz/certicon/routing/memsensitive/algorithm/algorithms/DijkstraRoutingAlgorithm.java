@@ -88,6 +88,9 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
+                if(!graph.isValidWay( node, edge, nodePredecessorArray )){
+                    continue;
+                }
                 int target = graph.getOtherNode( edge, node );
 //                System.out.println( "edge = " + edge + ", target = " + target );
                 if ( !nodeClosedArray.get( target ) ) {
