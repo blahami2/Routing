@@ -42,14 +42,14 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
 //            connectionProperties.load( in );
 //            in.close();
 //        }
-        if ( !isOpened ) {
-            try {
+        try {
+            if ( !isOpened || connection.isClosed() ) {
                 connection = createConnection( connectionProperties );
                 statement = connection.createStatement();
-            } catch ( ClassNotFoundException | SQLException ex ) {
-                throw new IOException( ex );
+                isOpened = true;
             }
-            isOpened = true;
+        } catch ( ClassNotFoundException | SQLException ex ) {
+            throw new IOException( ex );
         }
     }
 
@@ -121,11 +121,14 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
     }
 
     /**
-     * Create new {@link Connection} based on given connection {@link Properties}
+     * Create new {@link Connection} based on given connection
+     * {@link Properties}
+     *
      * @param properties connection data
      * @return an instance of {@link Connection}
      * @throws ClassNotFoundException thrown when the driver is not found
-     * @throws SQLException  thrown when the connection cannot be established for some reason
+     * @throws SQLException thrown when the connection cannot be established for
+     * some reason
      */
     protected abstract Connection createConnection( Properties properties ) throws ClassNotFoundException, SQLException;
 
