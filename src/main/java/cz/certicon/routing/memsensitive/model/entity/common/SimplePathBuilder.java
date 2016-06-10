@@ -75,11 +75,13 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     @Override
     public void addLength( double length ) {
         this.length += length;
+//        System.out.println( "adding length: " + length );
     }
 
     @Override
     public void addTime( double time ) {
         this.time += time;
+//        System.out.println( "adding time: " + time );
     }
 
     @Override
@@ -107,7 +109,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
             coords.add( sourceCoordinate );
             coords.add( targetCoordinate );
         }
-        return new SimplePath( coords, new Length( LengthUnits.NANOMETERS, (long) ( length * 10E9 ) ), new Time( TimeUnits.NANOSECONDS, (long) ( time * 10E9 ) ) );
+        return new SimplePath( coords, new Length( LengthUnits.METERS, (long) length), new Time( TimeUnits.SECONDS, (long) time) );
     }
 
 }
