@@ -6,11 +6,12 @@
 package cz.certicon.routing.memsensitive.data.turntables;
 
 import cz.certicon.routing.memsensitive.model.entity.TurnTablesBuilder;
+import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface TurnTablesReader {
-    public <T,G> T read(G graph, TurnTablesBuilder<T,G> builder);
+    public <T,G> T read(G graph, TurnTablesBuilder<T,G> builder) throws IOException;
 }

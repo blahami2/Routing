@@ -31,6 +31,8 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
         for ( long e : from ) {
             edges.add( graph.getEdgeByOrigId( e ) );
         }
+//        System.out.println( "node[via] = " + via );
+//        System.out.println( "edge[to] = " + to );
         edges.add( graph.getEdgeByOrigId( to ) );
         tr[node].add( edges );
     }
