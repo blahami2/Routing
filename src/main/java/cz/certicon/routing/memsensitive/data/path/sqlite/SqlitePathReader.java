@@ -180,11 +180,14 @@ public class SqlitePathReader implements PathReader<Graph> {
                 time.start();
                 // create temporary table
                 reader.setAutoCommit( false );
-                if ( !reader.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='path'" ).next() ) {
+                boolean create = !reader.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='path'" ).next();
+                if ( create ) {
                     reader.execute( "CREATE TABLE path ("
                             + "order_id INTEGER,"
                             + "edge_id INTEGER"
                             + ")" );
+                } else {
+                    reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
                 }
                 PreparedStatement ps = reader.prepareStatement( "INSERT INTO path (order_id, edge_id) VALUES (?, ?)" );
                 Iterator<Pair<Long, Boolean>> it = route.getEdgeIterator();
@@ -230,11 +233,14 @@ public class SqlitePathReader implements PathReader<Graph> {
                 }
                 System.out.println( "coordinates loaded in: " + time.getCurrentTimeString() );
                 time.start();
-                reader.execute( "DELETE FROM path" );
-                reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
-                reader.setAutoCommit( true );
+                // TODO do I have to delete it???
+//                reader.execute( "DELETE FROM path" );
+//                reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
+//                reader.setAutoCommit( true );
+//                System.out.println( "Autocommit on in: " + time.getCurrentTimeString() );
+                time.start();
                 reader.close();
-                System.out.println( "temporary data deleted in: " + time.getCurrentTimeString() );
+                System.out.println( "Connection closed in: " + time.getCurrentTimeString() );
             } catch ( SQLException ex ) {
                 throw new IOException( query, ex );
             }
