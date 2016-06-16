@@ -34,22 +34,22 @@ import static org.junit.Assert.*;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class ContractionHierarchiesRoutingAlgorithmTest {
-    
+
     public ContractionHierarchiesRoutingAlgorithmTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -130,7 +130,7 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
 
         assertEquals( toString( graph, expResult ), toString( graph, result ) );
     }
-    
+
     public String toString( Graph graph, Route route ) {
         StringBuilder sb = new StringBuilder();
         sb.append( "(" );

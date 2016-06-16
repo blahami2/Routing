@@ -73,7 +73,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
 //                if ( rs.next() ) {
 //                    minId = rs.getLong( "min" );
 //                }
-                rs = db.read( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + chDataBuilder.getDistanceType().toInt() );
+                rs = db.read( "SELECT id, edge_source, edge_target FROM shortcuts WHERE distanceType=" + chDataBuilder.getDistanceType().toInt() + " ORDER BY id;" );
                 int edgeIdIdx = rs.findColumn( "id" );
                 int sourceIdIdx = rs.findColumn( "edge_source" );
                 int targetIdIdx = rs.findColumn( "edge_target" );
