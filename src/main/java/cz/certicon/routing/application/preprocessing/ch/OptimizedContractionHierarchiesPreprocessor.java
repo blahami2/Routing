@@ -61,7 +61,7 @@ public class OptimizedContractionHierarchiesPreprocessor implements ContractionH
     public List<Pair<Integer, String>> shortcutCounts = new ArrayList<>();
     public int nodeOfInterest = 71235;
 
-    private static final int THREADS = 1;
+    private static final int THREADS = 8;
 
     private static final double INIT_NODE_RANKING = 0.1;
 
