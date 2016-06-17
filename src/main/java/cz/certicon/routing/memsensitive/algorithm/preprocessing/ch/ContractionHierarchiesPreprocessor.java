@@ -70,7 +70,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         // DEBUG
         try {
             out = new PrintStream( new File( "C:\\Routing\\Testing\\minimized.txt" ) );
-            ( (NeighboursOnlyRecalculationStrategy) nodeRecalculationStrategy ).preprocessor =  this ;
+            ( (NeighboursOnlyRecalculationStrategy) nodeRecalculationStrategy ).preprocessor = this;
         } catch ( FileNotFoundException ex ) {
             Logger.getLogger( ContractionHierarchiesPreprocessor.class.getName() ).log( Level.SEVERE, null, ex );
         }
@@ -184,7 +184,8 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             progressListener.nextStep();
         }
         for ( int i = 0; i < data.size(); i++ ) {
-//            System.out.println( "adding shortcut: #" + ( startId + i ) + " where i = " + i );
+            // DEBUG
+//            System.out.println( "adding shortcut: #" + ( startId + i ) + " where i = " + i  + ", startEdge = " + data.startEdges.get( i ) + ", endEdge = " + data.endEdges.get( i ) );
             dataBuilder.addShortcut( startId + i, data.getEdgeOrigId( data.startEdges.get( i ), startId ), data.getEdgeOrigId( data.endEdges.get( i ), startId ) );
         }
         // DEBUG
@@ -470,26 +471,26 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     private Pair<Integer, Double> extractMin( NodeDataStructure<Integer> priorityQueue, Graph graph ) {
         double minValue = priorityQueue.minValue();
-//        int minNode = priorityQueue.extractMin();
-        double precision = 0.001;
-        List<Integer> mins = new ArrayList<>();
-        int minNode = -1;
-        while ( DoubleComparator.isEqualTo( priorityQueue.minValue(), minValue, precision ) ) {
-            int n = priorityQueue.extractMin();
-            mins.add( n );
-            if ( minNode == -1 || graph.getNodeOrigId( n ) < graph.getNodeOrigId( minNode ) ) {
-                minNode = n;
-            }
-        }
-        for ( Integer min : mins ) {
-            if ( !min.equals( minNode ) ) {
-                priorityQueue.add( min, minValue );
-            }
-        }
+        int minNode = priorityQueue.extractMin();
         // DEBUG
-        if ( graph.getNodeOrigId( minNode ) == nodeOfInterest ) {
-            out.println( "extracted: " + graph.getNodeOrigId( minNode ) + ", " + minValue );
-        }
+//        double precision = 0.001;
+//        List<Integer> mins = new ArrayList<>();
+//        int minNode = -1;
+//        while ( DoubleComparator.isEqualTo( priorityQueue.minValue(), minValue, precision ) ) {
+//            int n = priorityQueue.extractMin();
+//            mins.add( n );
+//            if ( minNode == -1 || graph.getNodeOrigId( n ) < graph.getNodeOrigId( minNode ) ) {
+//                minNode = n;
+//            }
+//        }
+//        for ( Integer min : mins ) {
+//            if ( !min.equals( minNode ) ) {
+//                priorityQueue.add( min, minValue );
+//            }
+//        }
+//        if ( graph.getNodeOrigId( minNode ) == nodeOfInterest ) {
+//            out.println( "extracted: " + graph.getNodeOrigId( minNode ) + ", " + minValue );
+//        }
         return new Pair<>( minNode, minValue );
     }
 
@@ -524,6 +525,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         public void addShortcut( int startEdge, int endEdge ) {
             int source = getSource( startEdge );
             int target = getTarget( endEdge );
+
+            int thisId = sources.size() + graph.getEdgeCount();
+            if ( thisId == source || thisId == target ) {
+                throw new AssertionError( "shortcut #" + thisId + " = " + source + " -> " + target );
+            }
+
 //            System.out.println( "#" + shortcutCounter + " - adding shortcut[edges] - " + startEdge + " -> " + endEdge );
 //            System.out.println( "shortcut[nodes] - " + source + " -> " + target );
             sources.add( source );

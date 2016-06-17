@@ -162,45 +162,45 @@ public class ContractionHierarchiesPreprocessorTest {
      */
     @Test
     public void testPreprocess_5args() throws IOException {
-        GlobalOptions.DEBUG_CORRECTNESS = false;
-        GlobalOptions.DEBUG_TIME = false;
-        Properties properties = new Properties();
-        properties.setProperty( "driver", "org.sqlite.JDBC" );
-        properties.setProperty( "url", "jdbc:sqlite:C:\\Users\\blaha\\Documents\\NetBeansProjects\\RoutingParser\\routing_brandysek.sqlite" );
-        properties.setProperty( "spatialite_path", "C:/Routing/Utils/mod_spatialite-4.3.0a-win-amd64/mod_spatialite.dll" );
-        DistanceType distanceType = cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH;
-        GraphReader gr = new SqliteGraphReader( properties );
-        Graph graph = gr.readGraph( new SimpleGraphBuilderFactory( cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH ), cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH );
-        ContractionHierarchiesPreprocessor preprocessor = new cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor();
-        preprocessor.setEdgeDifferenceCalculator( new SpatialHeuristicEdgeDifferenceCalculator( graph.getNodeCount() ) );
-
-        System.out.println( "edge count = " + graph.getEdgeCount() );
-        TimeMeasurement time = new TimeMeasurement();
-        time.setTimeUnits( TimeUnits.MILLISECONDS );
-        time.start();
-        PreprocessedData data = preprocessor.preprocess(new SimpleChDataBuilder( graph, distanceType ), graph, distanceType, (long) 10E9);
-        System.out.println( "Memsensitive preprocessed in: " + time.getCurrentTimeString() );
-        System.out.println( "Created " + data.getShortcutCount() + " shortcuts" );
-
-        cz.certicon.routing.data.DistanceType distanceType2 = cz.certicon.routing.data.DistanceType.LENGTH;
-        GraphEntityFactory graphEntityFactory = new NeighborListGraphEntityFactory();
-        DistanceFactory distanceFactory = distanceType2.getDistanceFactory();
-        cz.certicon.routing.data.graph.GraphReader gr2 = new SqliteGraphRW( properties );
-        gr2.open();
-        cz.certicon.routing.model.entity.Graph graph2 = gr2.read( new Pair<>( graphEntityFactory, distanceFactory ) );
-        gr2.close();
-        OptimizedContractionHierarchiesPreprocessor preprocessor2 = new OptimizedContractionHierarchiesPreprocessor();
-
-        time.start();
-        Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData2 = preprocessor2.preprocess( graph2, graphEntityFactory, distanceFactory );
-        System.out.println( "Object-based preprocessed in: " + time.getCurrentTimeString() );
-        System.out.println( "Created " + preprocessedData2.b.size() + " shortcuts" );
-
-        System.out.println( "Initialize" );
-        for ( int i = 0; i < graph.getNodeCount(); i++ ) {
-            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
-        }
-        System.out.println( "Computation" );
+//        GlobalOptions.DEBUG_CORRECTNESS = false;
+//        GlobalOptions.DEBUG_TIME = false;
+//        Properties properties = new Properties();
+//        properties.setProperty( "driver", "org.sqlite.JDBC" );
+//        properties.setProperty( "url", "jdbc:sqlite:C:\\Users\\blaha\\Documents\\NetBeansProjects\\RoutingParser\\routing_prague_plain.sqlite" );
+//        properties.setProperty( "spatialite_path", "C:/Routing/Utils/mod_spatialite-4.3.0a-win-amd64/mod_spatialite.dll" );
+//        DistanceType distanceType = cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH;
+//        GraphReader gr = new SqliteGraphReader( properties );
+//        Graph graph = gr.readGraph( new SimpleGraphBuilderFactory( cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH ), cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH );
+//        ContractionHierarchiesPreprocessor preprocessor = new cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor();
+//        preprocessor.setEdgeDifferenceCalculator( new SpatialHeuristicEdgeDifferenceCalculator( graph.getNodeCount() ) );
+//
+//        System.out.println( "edge count = " + graph.getEdgeCount() );
+//        TimeMeasurement time = new TimeMeasurement();
+//        time.setTimeUnits( TimeUnits.MILLISECONDS );
+//        time.start();
+//        PreprocessedData data = preprocessor.preprocess(new SimpleChDataBuilder( graph, distanceType ), graph, distanceType, (long) 10E9);
+//        System.out.println( "Memsensitive preprocessed in: " + time.getCurrentTimeString() );
+//        System.out.println( "Created " + data.getShortcutCount() + " shortcuts" );
+//
+//        cz.certicon.routing.data.DistanceType distanceType2 = cz.certicon.routing.data.DistanceType.LENGTH;
+//        GraphEntityFactory graphEntityFactory = new NeighborListGraphEntityFactory();
+//        DistanceFactory distanceFactory = distanceType2.getDistanceFactory();
+//        cz.certicon.routing.data.graph.GraphReader gr2 = new SqliteGraphRW( properties );
+//        gr2.open();
+//        cz.certicon.routing.model.entity.Graph graph2 = gr2.read( new Pair<>( graphEntityFactory, distanceFactory ) );
+//        gr2.close();
+//        OptimizedContractionHierarchiesPreprocessor preprocessor2 = new OptimizedContractionHierarchiesPreprocessor();
+//
+//        time.start();
+//        Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData2 = preprocessor2.preprocess( graph2, graphEntityFactory, distanceFactory );
+//        System.out.println( "Object-based preprocessed in: " + time.getCurrentTimeString() );
+//        System.out.println( "Created " + preprocessedData2.b.size() + " shortcuts" );
+//
+//        System.out.println( "Initialize" );
+//        for ( int i = 0; i < graph.getNodeCount(); i++ ) {
+//            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
+//        }
+//        System.out.println( "Computation" );
 //        for ( int i = 0; i < preprocessor.shortcutCounts.size(); i++ ) {
 //            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
 //        }

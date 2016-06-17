@@ -182,7 +182,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 reader.setAutoCommit( false );
                 boolean create = !reader.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='path'" ).next();
                 if ( create ) {
-                    reader.execute( "CREATE TABLE path ("
+                    reader.execute( "CREATE TEMP TABLE path ("
                             + "order_id INTEGER,"
                             + "edge_id INTEGER"
                             + ")" );
@@ -194,6 +194,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 int i = 1;
                 while ( it.hasNext() ) {
                     Pair<Long, Boolean> next = it.next();
+                    System.out.println( "inserting: " + next.a + ", " + next.b );
                     forwardMap.put( next.a, next.b );
                     int idx = 1;
                     ps.setInt( idx++, i );
@@ -224,6 +225,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 while ( rs.next() ) {
                     long id = rs.getLong( idIdx );
                     boolean dbForward = rs.getBoolean( forwardIdx );
+                    System.out.println( "getting: " + id );
                     boolean mapForward = forwardMap.get( id );
                     boolean isForward = ( dbForward && mapForward ) || ( !dbForward && !mapForward );
                     List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
