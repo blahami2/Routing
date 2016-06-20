@@ -39,9 +39,9 @@ public class NeighboursOnlyRecalculationStrategy implements NodeRecalculationStr
         if ( priorityQueue.contains( node ) ) {
             int ed = edgeDifferenceCalculator.calculate( contractedNode, nodeDegrees, node, shortcuts );
             // DEBUG
-            if ( graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest ) {
-                preprocessor.out.println( "ED for #" + graph.getNodeOrigId( node ) + " = " + ed );
-            }
+//            if ( graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest || preprocessor.nodeOfInterest < 0 ) {
+//                preprocessor.out.println( "ED for #" + graph.getNodeOrigId( node ) + " = " + ed );
+//            }
 
 //            System.out.println( "#" + node + " = " + ed );
             priorityQueue.notifyDataChange( node, ed );

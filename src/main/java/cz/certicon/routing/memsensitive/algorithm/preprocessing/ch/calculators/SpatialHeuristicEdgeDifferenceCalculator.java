@@ -36,7 +36,7 @@ public class SpatialHeuristicEdgeDifferenceCalculator implements EdgeDifferenceC
                 lastNodeContractedArray[node] = contractedNode;
             }
         }
-        if ( preprocessor != null && preprocessor.graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest ) {
+        if ( preprocessor != null && preprocessor.graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest || preprocessor.nodeOfInterest < 0 ) {
             preprocessor.out.println( "#" + preprocessor.graph.getNodeOrigId( node ) + " - calculate: " + contractedNeighboursCountArray[node] + " + " + numberOfShortcuts + " - " + nodeDegrees[node] );
         }
         return contractedNeighboursCountArray[node] + numberOfShortcuts - nodeDegrees[node];
