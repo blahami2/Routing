@@ -49,10 +49,10 @@ import java.util.logging.Logger;
 public class ContractionHierarchiesPreprocessor implements Preprocessor<PreprocessedData> {
 
     // DEBUG
-    public PrintStream out = null;
-    public List<Pair<Integer, String>> shortcutCounts = new ArrayList<>();
-    public int nodeOfInterest = -1;
-    public Graph graph;
+//    public PrintStream out = null;
+//    public List<Pair<Integer, String>> shortcutCounts = new ArrayList<>();
+//    public int nodeOfInterest = -1;
+//    public Graph graph;
 
     private static final int THREADS = 8;
 
@@ -68,12 +68,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        this.nodeRecalculationStrategy = new LazyRecalculationStrategy();
         this.edgeDifferenceCalculator = new BasicEdgeDifferenceCalculator();
         // DEBUG
-        try {
-            out = new PrintStream( new File( "C:\\Routing\\Testing\\minimized.txt" ) );
-            ( (NeighboursOnlyRecalculationStrategy) nodeRecalculationStrategy ).preprocessor = this;
-        } catch ( FileNotFoundException ex ) {
-            Logger.getLogger( ContractionHierarchiesPreprocessor.class.getName() ).log( Level.SEVERE, null, ex );
-        }
+//        try {
+//            out = new PrintStream( new File( "C:\\Routing\\Testing\\minimized.txt" ) );
+//            ( (NeighboursOnlyRecalculationStrategy) nodeRecalculationStrategy ).preprocessor = this;
+//        } catch ( FileNotFoundException ex ) {
+//            Logger.getLogger( ContractionHierarchiesPreprocessor.class.getName() ).log( Level.SEVERE, null, ex );
+//        }
     }
 
     public ContractionHierarchiesPreprocessor( NodeRecalculationStrategy nodeRecalculationStrategy ) {
@@ -88,9 +88,10 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
     @Override
     public void setEdgeDifferenceCalculator( EdgeDifferenceCalculator edgeDifferenceCalculator ) {
         this.edgeDifferenceCalculator = edgeDifferenceCalculator;
-        if ( edgeDifferenceCalculator instanceof SpatialHeuristicEdgeDifferenceCalculator ) {
-            ( (SpatialHeuristicEdgeDifferenceCalculator) edgeDifferenceCalculator ).preprocessor = this;
-        }
+        // DEBUG
+//        if ( edgeDifferenceCalculator instanceof SpatialHeuristicEdgeDifferenceCalculator ) {
+//            ( (SpatialHeuristicEdgeDifferenceCalculator) edgeDifferenceCalculator ).preprocessor = this;
+//        }
     }
 
     @Override
@@ -101,8 +102,8 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
     @Override
     public PreprocessedData preprocess( ChDataBuilder<PreprocessedData> dataBuilder, Graph graph, DistanceType distanceType, long startId, ProgressListener progressListener ) {
         // DEBUG
-        this.graph = graph;
-        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
+//        this.graph = graph;
+//        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
 
         int nodeCount = graph.getNodeCount();
         NodeDataStructure<Integer> priorityQueue = new JgraphtFibonacciDataStructure<>();
@@ -116,25 +117,26 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //
         progressListener.init( nodeCount, INIT_NODE_RANKING );
 
-        List<Pair<Integer, Long>> sortedNodes = new ArrayList<>();
+        // DEBUG
+//        List<Pair<Integer, Long>> sortedNodes = new ArrayList<>();
         for ( int node = 0; node < nodeCount; node++ ) {
             nodeDegrees[node] = graph.getNodeDegree( node );
             // DEBUG
-            sortedNodes.add( new Pair<>( node, graph.getNodeOrigId( node ) ) );
+//            sortedNodes.add( new Pair<>( node, graph.getNodeOrigId( node ) ) );
 //            if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
 //                out.println( "node degree #" + graph.getNodeOrigId( node ) + " = " + graph.getNodeDegree( node ) );
 //            }
         }
-        Collections.sort( sortedNodes, new Comparator<Pair<Integer, Long>>() {
-            @Override
-            public int compare( Pair<Integer, Long> o1, Pair<Integer, Long> o2 ) {
-                return Long.compare( o1.b, o2.b );
-            }
-        } );
+//        Collections.sort( sortedNodes, new Comparator<Pair<Integer, Long>>() {
+//            @Override
+//            public int compare( Pair<Integer, Long> o1, Pair<Integer, Long> o2 ) {
+//                return Long.compare( o1.b, o2.b );
+//            }
+//        } );
         // DEBUG
-        //for ( int node = 0; node < nodeCount; node++ ) {
-        for ( int i = 0; i < nodeCount; i++ ) {
-            int node = sortedNodes.get( i ).a;
+        for ( int node = 0; node < nodeCount; node++ ) {
+//        for ( int i = 0; i < nodeCount; i++ ) {
+//            int node = sortedNodes.get( i ).a;
 //            out.println("node#" + node + " = " + graph.getNodeOrigId( node ));
             int numberOfShortcuts = calculateShortcuts( data, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray, graph );
             int ed = nodeRecalculationStrategy.getEdgeDifferenceCalculator().calculate( -1, nodeDegrees, node, numberOfShortcuts );
@@ -144,18 +146,18 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         }
 
         // DEBUG
-        this.graph = graph;
-        Collections.sort( shortcutCounts, new Comparator<Pair<Integer, String>>() {
-            @Override
-            public int compare( Pair<Integer, String> o1, Pair<Integer, String> o2 ) {
-                return Integer.compare( o1.a, o2.a );
-            }
-        } );
-        for ( Pair<Integer, String> shortcutCount : shortcutCounts ) {
-            if ( shortcutCount.a == nodeOfInterest || nodeOfInterest < 0 ) {
-                out.println( "shortcut: #" + shortcutCount.a + ": " + shortcutCount.b );
-            }
-        }
+//        this.graph = graph;
+//        Collections.sort( shortcutCounts, new Comparator<Pair<Integer, String>>() {
+//            @Override
+//            public int compare( Pair<Integer, String> o1, Pair<Integer, String> o2 ) {
+//                return Integer.compare( o1.a, o2.a );
+//            }
+//        } );
+//        for ( Pair<Integer, String> shortcutCount : shortcutCounts ) {
+//            if ( shortcutCount.a == nodeOfInterest || nodeOfInterest < 0 ) {
+//                out.println( "shortcut: #" + shortcutCount.a + ": " + shortcutCount.b );
+//            }
+//        }
         // DEBUG
 //        if ( true ) {
 //            return dataBuilder.build();
@@ -176,21 +178,21 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
             TIntIterator it = nodeRecalculationStrategy.recalculationIterator( graph, data, node, priorityQueue );
             // DEBUG
-            List<Pair<Integer, Long>> sortedNeighbours = new ArrayList<>();
-            while ( it.hasNext() ) {
-                int n = it.next();
-                sortedNeighbours.add( new Pair<>( n, graph.getNodeOrigId( n ) ) );
-            }
-            Collections.sort( sortedNeighbours, new Comparator<Pair<Integer, Long>>() {
-                @Override
-                public int compare( Pair<Integer, Long> o1, Pair<Integer, Long> o2 ) {
-                    return Long.compare( o1.b, o2.b );
-                }
-            } );
-            for ( Pair<Integer, Long> p : sortedNeighbours ) {
-                int n = p.a;
+//            List<Pair<Integer, Long>> sortedNeighbours = new ArrayList<>();
 //            while ( it.hasNext() ) {
 //                int n = it.next();
+//                sortedNeighbours.add( new Pair<>( n, graph.getNodeOrigId( n ) ) );
+//            }
+//            Collections.sort( sortedNeighbours, new Comparator<Pair<Integer, Long>>() {
+//                @Override
+//                public int compare( Pair<Integer, Long> o1, Pair<Integer, Long> o2 ) {
+//                    return Long.compare( o1.b, o2.b );
+//                }
+//            } );
+//            for ( Pair<Integer, Long> p : sortedNeighbours ) {
+//                int n = p.a;
+            while ( it.hasNext() ) {
+                int n = it.next();
 //                System.out.println( "#" + node + " - iterated to: " + n );
                 // if not calculated yet and not removed yet
                 if ( !calculatedNodes.get( n ) && !removedNodes.get( n ) ) {
@@ -213,7 +215,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             dataBuilder.addShortcut( startId + i, data.getEdgeOrigId( data.startEdges.get( i ), startId ), data.getEdgeOrigId( data.endEdges.get( i ), startId ) );
         }
         // DEBUG
-        out.flush();
+//        out.flush();
         return dataBuilder.build();
     }
 
@@ -222,12 +224,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             return 0;
         }
         // DEBUG
-        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-            out.println( "shortcut for #" + graph.getNodeOrigId( node ) );
-        }
+//        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//            out.println( "shortcut for #" + graph.getNodeOrigId( node ) );
+//        }
         removedNodes.set( node, true );
-        Set<Integer> sourceSet = new HashSet<>();
-        Set<Integer> targetSet = new HashSet<>();
+        Set<Integer> sources = new HashSet<>();
+        Set<Integer> targets = new HashSet<>();
         Map<Integer, Float> upperBounds = new HashMap<>();
         Map<Pair<Integer, Integer>, Trinity<Integer, Integer, Float>> fromToDistanceMap = new HashMap<>();
         // for each pair of edges going through node:
@@ -250,9 +252,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                         if ( !fromToDistanceMap.containsKey( pair ) || DoubleComparator.isLowerThan( newDistance, fromToDistanceMap.get( pair ).c, PRECISION ) ) {
                             fromToDistanceMap.put( pair, new Trinity<>( incomingEdge, outgoingEdge, newDistance ) );
                             //   collect sources in a set
-                            sourceSet.add( sourceNode );
+                            sources.add( sourceNode );
                             //   collect targets in a set
-                            targetSet.add( targetNode );
+                            targets.add( targetNode );
 //                            System.out.println( "#" + node + " - neighbours: " + sourceNode + " -> " + targetNode + " = " + newDistance );
                         }
 //                        if ( !upperBounds.containsKey( sourceNode ) || upperBounds.get( sourceNode ) < newDistance ) {
@@ -272,21 +274,21 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         }
 
         // DEBUG
-        List<Integer> sources = new ArrayList<>( sourceSet );
-        Collections.sort( sources );
-        List<Integer> targets = new ArrayList<>( targetSet );
-        Collections.sort( targets );
-        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-            for ( int from : sources ) {
-                out.println( "#" + graph.getNodeOrigId( node ) + "-neighbour incoming: #" + graph.getNodeOrigId( from ) );
-            }
-            for ( int to : targets ) {
-                out.println( "#" + graph.getNodeOrigId( node ) + "-neighbour outgoing: #" + graph.getNodeOrigId( to ) );
-            }
-            for ( Map.Entry<Pair<Integer, Integer>, Trinity<Integer, Integer, Float>> entry : fromToDistanceMap.entrySet() ) {
-                out.println( "#" + graph.getNodeOrigId( node ) + "-path: from #" + graph.getNodeOrigId( entry.getKey().a ) + " to #" + graph.getNodeOrigId( entry.getKey().b ) + " in " + entry.getValue().c );
-            }
-        }
+//        List<Integer> sources = new ArrayList<>( sourceSet );
+//        Collections.sort( sources );
+//        List<Integer> targets = new ArrayList<>( targetSet );
+//        Collections.sort( targets );
+//        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//            for ( int from : sources ) {
+//                out.println( "#" + graph.getNodeOrigId( node ) + "-neighbour incoming: #" + graph.getNodeOrigId( from ) );
+//            }
+//            for ( int to : targets ) {
+//                out.println( "#" + graph.getNodeOrigId( node ) + "-neighbour outgoing: #" + graph.getNodeOrigId( to ) );
+//            }
+//            for ( Map.Entry<Pair<Integer, Integer>, Trinity<Integer, Integer, Float>> entry : fromToDistanceMap.entrySet() ) {
+//                out.println( "#" + graph.getNodeOrigId( node ) + "-path: from #" + graph.getNodeOrigId( entry.getKey().a ) + " to #" + graph.getNodeOrigId( entry.getKey().b ) + " in " + entry.getValue().c );
+//            }
+//        }
         Set<Integer> visitedNodes = new HashSet<>();
         List<Pair<Integer, Integer>> addedShortcuts = new ArrayList<>();
         // for each source calculate Dijkstra to all the targets {without using the node)
@@ -296,16 +298,16 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             visitedNodes.add( from );
             dijkstraPriorityQueue.add( from, 0 );
             // DEBUG
-            if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                out.println( "#" + graph.getNodeOrigId( node ) + "-Dijkstra for #" + graph.getNodeOrigId( from ) + ", upper bound = " + upperBound );
-            }
+//            if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                out.println( "#" + graph.getNodeOrigId( node ) + "-Dijkstra for #" + graph.getNodeOrigId( from ) + ", upper bound = " + upperBound );
+//            }
             while ( !dijkstraPriorityQueue.isEmpty() ) {
                 int currentNode = dijkstraPriorityQueue.extractMin();
                 float currentDistance = nodeDistanceArray[currentNode];
                 // DEBUG
-                if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                    out.println( "#" + graph.getNodeOrigId( node ) + "-extracted #" + graph.getNodeOrigId( currentNode ) + " -> " + currentDistance );
-                }
+//                if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                    out.println( "#" + graph.getNodeOrigId( node ) + "-extracted #" + graph.getNodeOrigId( currentNode ) + " -> " + currentDistance );
+//                }
                 //   use the longest distance as an upper bound
                 if ( DoubleComparator.isLowerThan( upperBound, currentDistance, PRECISION ) ) {
                     dijkstraPriorityQueue.clear();
@@ -339,9 +341,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                     data.addShortcut( shortcutDistanceT.a, shortcutDistanceT.b );
                     addedShortcuts.add( new Pair<>( from, to ) );
                     // DEBUG
-                    if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                        out.println( "#" + graph.getNodeOrigId( node ) + "- adding shortcut #" + graph.getNodeOrigId( from ) + " -> #" + graph.getNodeOrigId( to ) );
-                    }
+//                    if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                        out.println( "#" + graph.getNodeOrigId( node ) + "- adding shortcut #" + graph.getNodeOrigId( from ) + " -> #" + graph.getNodeOrigId( to ) );
+//                    }
 //                    System.out.println( "#" + node + " - creating temporary shortcut: " + from + " -> " + to );
                 }
             }
@@ -362,10 +364,10 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        }
         removedNodes.set( node, false );
         // DEBUG
-        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-            out.println( "shortcut for #" + graph.getNodeOrigId( node ) + " = " + addedShortcuts.size() );
-        }
-        shortcutCounts.add( new Pair<>( (int) graph.getNodeOrigId( node ), "" + addedShortcuts.size() ) );
+//        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//            out.println( "shortcut for #" + graph.getNodeOrigId( node ) + " = " + addedShortcuts.size() );
+//        }
+//        shortcutCounts.add( new Pair<>( (int) graph.getNodeOrigId( node ), "" + addedShortcuts.size() ) );
         return addedShortcuts.size();
     }
 
@@ -374,9 +376,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         removedNodes.set( node, true );
 
         // DEBUG
-        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
-            out.println( "contract for #" + graph.getNodeOrigId( node ) );
-        }
+//        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//            out.println( "contract for #" + graph.getNodeOrigId( node ) );
+//        }
         // lower neighbour's degree
         TIntIterator incIt = data.getIncomingEdgesIterator( node );
         while ( incIt.hasNext() ) {
@@ -384,9 +386,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             int source = data.getOtherNode( edge, node );
             if ( !removedNodes.get( source ) ) {
                 //  DEBUG
-                if ( graph.getNodeOrigId( source ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                    out.println( "#" + graph.getNodeOrigId( source ) + "-removing outgoing edge #" + ( ( edge < graph.getEdgeCount() ) ? graph.getEdgeOrigId( edge ) : edge ) );
-                }
+//                if ( graph.getNodeOrigId( source ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                    out.println( "#" + graph.getNodeOrigId( source ) + "-removing outgoing edge #" + ( ( edge < graph.getEdgeCount() ) ? graph.getEdgeOrigId( edge ) : edge ) );
+//                }
                 nodeDegrees[source]--;
             }
         }
@@ -396,14 +398,14 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             int target = data.getOtherNode( edge, node );
             if ( !removedNodes.get( target ) ) {
                 //  DEBUG
-                if ( graph.getNodeOrigId( target ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                    out.println( "#" + graph.getNodeOrigId( target ) + "-removing incoming edge #" + ( ( edge < graph.getEdgeCount() ) ? graph.getEdgeOrigId( edge ) : edge ) );
-                }
+//                if ( graph.getNodeOrigId( target ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                    out.println( "#" + graph.getNodeOrigId( target ) + "-removing incoming edge #" + ( ( edge < graph.getEdgeCount() ) ? graph.getEdgeOrigId( edge ) : edge ) );
+//                }
                 nodeDegrees[target]--;
             }
         }
-        Set<Integer> sourceSet = new HashSet<>();
-        Set<Integer> targetSet = new HashSet<>();
+        Set<Integer> sources = new HashSet<>();
+        Set<Integer> targets = new HashSet<>();
         Map<Integer, Float> upperBounds = new HashMap<>();
         Map<Pair<Integer, Integer>, Trinity<Integer, Integer, Float>> fromToDistanceMap = new HashMap<>();
         // for each pair of edges going through node:
@@ -436,9 +438,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                         if ( !fromToDistanceMap.containsKey( pair ) || DoubleComparator.isLowerThan( newDistance, fromToDistanceMap.get( pair ).c, PRECISION ) ) {
                             fromToDistanceMap.put( pair, new Trinity<>( incomingEdge, outgoingEdge, newDistance ) );
                             //   collect sources in a set
-                            sourceSet.add( sourceNode );
+                            sources.add( sourceNode );
                             //   collect targets in a set
-                            targetSet.add( targetNode );
+                            targets.add( targetNode );
 //                            System.out.println( "#" + node + " - neighbours: " + sourceNode + " -> " + targetNode + " = " + newDistance + "[" + incomingEdge + " -> " + outgoingEdge + "]" );
                         }
                         //   find the longest distance for each source
@@ -459,10 +461,10 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         }
 
         // DEBUG
-        List<Integer> sources = new ArrayList<>( sourceSet );
-        Collections.sort( sources );
-        List<Integer> targets = new ArrayList<>( targetSet );
-        Collections.sort( targets );
+//        List<Integer> sources = new ArrayList<>( sourceSet );
+//        Collections.sort( sources );
+//        List<Integer> targets = new ArrayList<>( targetSet );
+//        Collections.sort( targets );
 
         Set<Integer> visitedNodes = new HashSet<>();
         // for each source calculate Dijkstra to all the targets {without using the node)
@@ -506,12 +508,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 if ( DoubleComparator.isLowerThan( shortcutDistanceT.c, distance, PRECISION ) ) {
 //                    System.out.println( "#" + node + " - creating shortcut: " + from + " -> " + to );
                     // DEBUG
-                    if ( graph.getNodeOrigId( from ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                        out.println( "#" + graph.getNodeOrigId( from ) + "-adding outgoing edge #" + data.shortcutCounter );
-                    }
-                    if ( graph.getNodeOrigId( to ) == nodeOfInterest || nodeOfInterest < 0 ) {
-                        out.println( "#" + graph.getNodeOrigId( to ) + "-adding outgoing edge #" + data.shortcutCounter );
-                    }
+//                    if ( graph.getNodeOrigId( from ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                        out.println( "#" + graph.getNodeOrigId( from ) + "-adding outgoing edge #" + data.shortcutCounter );
+//                    }
+//                    if ( graph.getNodeOrigId( to ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//                        out.println( "#" + graph.getNodeOrigId( to ) + "-adding outgoing edge #" + data.shortcutCounter );
+//                    }
                     nodeDegrees[from]++;
                     nodeDegrees[to]++;
                     data.addShortcut( shortcutDistanceT.a, shortcutDistanceT.b );
@@ -529,26 +531,26 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     private Pair<Integer, Double> extractMin( NodeDataStructure<Integer> priorityQueue, Graph graph ) {
         double minValue = priorityQueue.minValue();
-//        int minNode = priorityQueue.extractMin();
+        int minNode = priorityQueue.extractMin();
         // DEBUG
-        double precision = 0.001;
-        List<Integer> mins = new ArrayList<>();
-        int minNode = -1;
-        while ( DoubleComparator.isEqualTo( priorityQueue.minValue(), minValue, precision ) ) {
-            int n = priorityQueue.extractMin();
-            mins.add( n );
-            if ( minNode == -1 || graph.getNodeOrigId( n ) < graph.getNodeOrigId( minNode ) ) {
-                minNode = n;
-            }
-        }
-        for ( Integer min : mins ) {
-            if ( !min.equals( minNode ) ) {
-                priorityQueue.add( min, minValue );
-            }
-        }
-        if ( graph.getNodeOrigId( minNode ) == nodeOfInterest || nodeOfInterest < 0 ) {
-            out.println( "extracted: " + graph.getNodeOrigId( minNode ) + ", " + minValue );
-        }
+//        double precision = 0.001;
+//        List<Integer> mins = new ArrayList<>();
+//        int minNode = -1;
+//        while ( DoubleComparator.isEqualTo( priorityQueue.minValue(), minValue, precision ) ) {
+//            int n = priorityQueue.extractMin();
+//            mins.add( n );
+//            if ( minNode == -1 || graph.getNodeOrigId( n ) < graph.getNodeOrigId( minNode ) ) {
+//                minNode = n;
+//            }
+//        }
+//        for ( Integer min : mins ) {
+//            if ( !min.equals( minNode ) ) {
+//                priorityQueue.add( min, minValue );
+//            }
+//        }
+//        if ( graph.getNodeOrigId( minNode ) == nodeOfInterest || nodeOfInterest < 0 ) {
+//            out.println( "extracted: " + graph.getNodeOrigId( minNode ) + ", " + minValue );
+//        }
         return new Pair<>( minNode, minValue );
     }
 
