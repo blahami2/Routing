@@ -49,14 +49,14 @@ public class SqlitePathReader implements PathReader<Graph> {
     @Override
     public <T> T readPath( PathBuilder<T, Graph> pathBuilder, Graph graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException {
         pathBuilder.clear();
-        TimeMeasurement time = new TimeMeasurement();
-        time.setTimeUnits( TimeUnits.MICROSECONDS );
+//        TimeMeasurement time = new TimeMeasurement();
+//        time.setTimeUnits( TimeUnits.MICROSECONDS );
         if ( GlobalOptions.MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.PATH_LOADING, TimeLogger.Command.START );
         }
         String query = "";
         if ( route.getSource() != route.getTarget() ) {
-            time.start();
+//            time.start();
             reader.open();
             Map<Long, Boolean> forwardMap = new HashMap<>();
             ResultSet rs;
@@ -124,8 +124,8 @@ public class SqlitePathReader implements PathReader<Graph> {
                         throw new IOException( "Could not find the closest edge:\n" + query );
                     }
                 }
-                System.out.println( "load coordinates for source: " + time.getCurrentTimeString() );
-                time.start();
+//                System.out.println( "load coordinates for source: " + time.getCurrentTimeString() );
+//                time.start();
                 long targetId = route.getTarget();
                 Coordinate routeEndCoord = new Coordinate( graph.getLatitude( graph.getNodeByOrigId( targetId ) ), graph.getLongitude( graph.getNodeByOrigId( targetId ) ) );
                 if ( !routeEndCoord.equals( origTarget ) ) {
@@ -176,13 +176,13 @@ public class SqlitePathReader implements PathReader<Graph> {
                         throw new IOException( "Could not find the closest edge:\n" + query );
                     }
                 }
-                System.out.println( "load coordinates for target: " + time.getCurrentTimeString() );
-                time.start();
+//                System.out.println( "load coordinates for target: " + time.getCurrentTimeString() );
+//                time.start();
                 // create temporary table
                 reader.setAutoCommit( false );
                 boolean create = !reader.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='path'" ).next();
                 if ( create ) {
-                    reader.execute( "CREATE TABLE path ("
+                    reader.execute( "CREATE TEMP TABLE path ("
                             + "order_id INTEGER,"
                             + "edge_id INTEGER"
                             + ")" );
@@ -194,6 +194,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 int i = 1;
                 while ( it.hasNext() ) {
                     Pair<Long, Boolean> next = it.next();
+                    System.out.println( "inserting: " + next.a + ", " + next.b );
                     forwardMap.put( next.a, next.b );
                     int idx = 1;
                     ps.setInt( idx++, i );
@@ -203,8 +204,8 @@ public class SqlitePathReader implements PathReader<Graph> {
                         ps.executeBatch();
                     }
                 }
-                System.out.println( "paths inserted in: " + time.getCurrentTimeString() );
-                time.start();
+//                System.out.println( "paths inserted in: " + time.getCurrentTimeString() );
+//                time.start();
                 ps.executeBatch();
                 reader.execute( "CREATE INDEX `idx_path_order` ON `path` (`order_id` ASC)" );
                 query = "SELECT e.id AS edge_id, ST_AsText(d.geom) AS linestring, e.is_forward, d.length, d.speed_fw, d.speed_bw "
@@ -224,6 +225,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 while ( rs.next() ) {
                     long id = rs.getLong( idIdx );
                     boolean dbForward = rs.getBoolean( forwardIdx );
+                    System.out.println( "getting: " + id );
                     boolean mapForward = forwardMap.get( id );
                     boolean isForward = ( dbForward && mapForward ) || ( !dbForward && !mapForward );
                     List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
@@ -231,16 +233,15 @@ public class SqlitePathReader implements PathReader<Graph> {
                     int speed = rs.getInt( isForward ? speedFwIdx : speedBwIdx );
                     pathBuilder.addEdge( graph, id, isForward, coordinates, length, 3.6 * length / speed );
                 }
-                System.out.println( "coordinates loaded in: " + time.getCurrentTimeString() );
-                time.start();
+//                System.out.println( "coordinates loaded in: " + time.getCurrentTimeString() );
+//                time.start();
                 // TODO do I have to delete it???
 //                reader.execute( "DELETE FROM path" );
 //                reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
 //                reader.setAutoCommit( true );
 //                System.out.println( "Autocommit on in: " + time.getCurrentTimeString() );
-                time.start();
                 reader.close();
-                System.out.println( "Connection closed in: " + time.getCurrentTimeString() );
+//                System.out.println( "Connection closed in: " + time.getCurrentTimeString() );
             } catch ( SQLException ex ) {
                 throw new IOException( query, ex );
             }

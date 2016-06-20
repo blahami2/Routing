@@ -5,19 +5,26 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.strategies;
 
+import com.vividsolutions.jts.io.OutStream;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor.ProcessingData;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.NodeRecalculationStrategy;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.SpatialHeuristicEdgeDifferenceCalculator;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import gnu.trove.iterator.TIntIterator;
+import java.io.PrintStream;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class NeighboursOnlyRecalculationStrategy implements NodeRecalculationStrategy {
+
+    // DEBUG
+    public ContractionHierarchiesPreprocessor preprocessor;
 
     private EdgeDifferenceCalculator edgeDifferenceCalculator = new BasicEdgeDifferenceCalculator();
 
@@ -31,9 +38,19 @@ public class NeighboursOnlyRecalculationStrategy implements NodeRecalculationStr
     public void onShortcutsCalculated( Graph graph, int[] nodeDegrees, int node, NodeDataStructure<Integer> priorityQueue, int shortcuts, int contractedNode ) {
         if ( priorityQueue.contains( node ) ) {
             int ed = edgeDifferenceCalculator.calculate( contractedNode, nodeDegrees, node, shortcuts );
+            // DEBUG
+//            if ( graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest || preprocessor.nodeOfInterest < 0 ) {
+//                preprocessor.out.println( "ED for #" + graph.getNodeOrigId( node ) + " = " + ed );
+//            }
+
 //            System.out.println( "#" + node + " = " + ed );
             priorityQueue.notifyDataChange( node, ed );
         }
+    }
+
+    //DEBUG
+    public void setPreprocessor( ContractionHierarchiesPreprocessor preprocessor ) {
+        this.preprocessor = preprocessor;
     }
 
     @Override

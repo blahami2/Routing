@@ -5,10 +5,9 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators;
 
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.utils.EffectiveUtils;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -18,6 +17,9 @@ public class SpatialHeuristicEdgeDifferenceCalculator implements EdgeDifferenceC
 
     private final int[] contractedNeighboursCountArray;
     private final int[] lastNodeContractedArray;
+
+    // DEBUG
+//    public ContractionHierarchiesPreprocessor preprocessor;
 
     public SpatialHeuristicEdgeDifferenceCalculator( int nodeCount ) {
         contractedNeighboursCountArray = new int[nodeCount];
@@ -34,7 +36,9 @@ public class SpatialHeuristicEdgeDifferenceCalculator implements EdgeDifferenceC
                 lastNodeContractedArray[node] = contractedNode;
             }
         }
-//        System.out.println( "#" + node + " - calculate: " + contractedNeighboursCountArray[node] + " + " + numberOfShortcuts + " - " + nodeDegrees[node] );
+//        if ( preprocessor != null && preprocessor.graph.getNodeOrigId( node ) == preprocessor.nodeOfInterest || preprocessor.nodeOfInterest < 0 ) {
+//            preprocessor.out.println( "#" + preprocessor.graph.getNodeOrigId( node ) + " - calculate: " + contractedNeighboursCountArray[node] + " + " + numberOfShortcuts + " - " + nodeDegrees[node] );
+//        }
         return contractedNeighboursCountArray[node] + numberOfShortcuts - nodeDegrees[node];
     }
 

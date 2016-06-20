@@ -56,11 +56,16 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
 
     @Override
     public void addShortcut( long shortcutId, long sourceEdgeId, long targetEdgeId ) {
+        if ( shortcutId == sourceEdgeId || shortcutId == targetEdgeId ) {
+            throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
+        }
+        if(shortcutId == 127945){
+            throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
+        }
         shortcuts.put( shortcutId, new Pair<>( sourceEdgeId, targetEdgeId ) );
         shortcutIdMap.put( shortcutId, counter++ );
-        getSourceNode( shortcutId );
-        getTargetNode( shortcutId );
-//        System.out.println( "adding shortcut#" + shortcutId + " - source = " + getSourceNode( shortcutId ) + ", target = " + getTargetNode( shortcutId ) );
+        sourceMap.put( shortcutId, getSourceNode( shortcutId ) );
+        targetMap.put( shortcutId, getTargetNode( shortcutId ) );
     }
 
     @Override
@@ -145,6 +150,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         if ( source == null ) {
 //            System.out.println( "#" + shortcutId + " - source is null" );
             long sourceEdge = shortcuts.get( shortcutId ).a;
+//            System.out.println( "#" + shortcutId + " - source edge is = " + sourceEdge );
             if ( shortcuts.containsKey( sourceEdge ) ) {
                 source = getSourceNode( sourceEdge );
             } else {
