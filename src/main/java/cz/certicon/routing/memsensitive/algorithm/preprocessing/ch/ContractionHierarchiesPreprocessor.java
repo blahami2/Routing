@@ -28,6 +28,8 @@ import gnu.trove.list.TFloatList;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -53,7 +55,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //    public List<Pair<Integer, String>> shortcutCounts = new ArrayList<>();
 //    public int nodeOfInterest = -1;
 //    public Graph graph;
-
     private static final int THREADS = 8;
 
     private static final double INIT_NODE_RANKING = 0.1;
@@ -109,7 +110,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         NodeDataStructure<Integer> priorityQueue = new JgraphtFibonacciDataStructure<>();
         NodeDataStructure<Integer> dijkstraPriorityQueue = new JgraphtFibonacciDataStructure<>();
         float[] nodeDistanceArray = new float[nodeCount];
+        int[] nodePredecessorArray = new int[nodeCount];
         graph.resetNodeDistanceArray( nodeDistanceArray );
+        graph.resetNodePredecessorArray( nodePredecessorArray );
         ProcessingData data = new ProcessingData( graph );
         BitArray removedNodes = new LongBitArray( graph.getNodeCount() );
         BitArray calculatedNodes = new LongBitArray( graph.getNodeCount() );
@@ -138,7 +141,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        for ( int i = 0; i < nodeCount; i++ ) {
 //            int node = sortedNodes.get( i ).a;
 //            out.println("node#" + node + " = " + graph.getNodeOrigId( node ));
-            int numberOfShortcuts = calculateShortcuts( data, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray, graph );
+            int numberOfShortcuts = calculateShortcuts( data, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray, nodePredecessorArray, graph );
             int ed = nodeRecalculationStrategy.getEdgeDifferenceCalculator().calculate( -1, nodeDegrees, node, numberOfShortcuts );
 //            System.out.println( "#" + node + " = " + ed );
             priorityQueue.add( node, ed );
@@ -162,7 +165,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        if ( true ) {
 //            return dataBuilder.build();
 //        }
-
         int rank = 1;
         progressListener.init( priorityQueue.size(), 1.0 - INIT_NODE_RANKING );
         while ( !priorityQueue.isEmpty() ) {
@@ -174,7 +176,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            }
             // shortcuts
 //            System.out.println( "contracting: " + node );
-            contractNode( data, nodeDegrees, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray );
+            contractNode( data, nodeDegrees, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray, nodePredecessorArray, graph );
 
             TIntIterator it = nodeRecalculationStrategy.recalculationIterator( graph, data, node, priorityQueue );
             // DEBUG
@@ -196,7 +198,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //                System.out.println( "#" + node + " - iterated to: " + n );
                 // if not calculated yet and not removed yet
                 if ( !calculatedNodes.get( n ) && !removedNodes.get( n ) ) {
-                    int numberOfShortcuts = calculateShortcuts( data, removedNodes, n, dijkstraPriorityQueue, nodeDistanceArray, graph );
+                    int numberOfShortcuts = calculateShortcuts( data, removedNodes, n, dijkstraPriorityQueue, nodeDistanceArray, nodePredecessorArray, graph );
                     nodeRecalculationStrategy.onShortcutsCalculated( graph, nodeDegrees, n, priorityQueue, numberOfShortcuts, node );
                     calculatedNodes.set( n, true );
                 }
@@ -219,7 +221,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return dataBuilder.build();
     }
 
-    private int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray, Graph graph ) {
+    private int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray, int[] nodePredecessorArray, Graph graph ) {
         if ( removedNodes.get( node ) ) {
             return 0;
         }
@@ -317,12 +319,16 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 TIntIterator it = data.getOutgoingEdgesIterator( currentNode );
                 while ( it.hasNext() ) {
                     int edge = it.next();
+                    if ( !data.isValidWay( node, edge, nodePredecessorArray ) ) {
+                        continue;
+                    }
                     int target = data.getTarget( edge );
                     float targetDistance = nodeDistanceArray[target];
                     float newDistance = currentDistance + data.getLength( edge );
                     // if the target is active (removal simulation)
                     if ( !removedNodes.get( target ) && DoubleComparator.isLowerThan( newDistance, targetDistance, PRECISION ) ) {
                         nodeDistanceArray[target] = newDistance;
+                        nodePredecessorArray[target] = edge;
                         visitedNodes.add( target );
                         dijkstraPriorityQueue.notifyDataChange( target, newDistance );
                     }
@@ -349,7 +355,8 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             }
             // reset node distances
             for ( int visitedNode : visitedNodes ) {
-                nodeDistanceArray[visitedNode] = Float.MAX_VALUE;
+                nodeDistanceArray[visitedNode] = Graph.DISTANCE_DEFAULT;
+                nodePredecessorArray[visitedNode] = Graph.PREDECESSOR_DEFAULT;
             }
         }
         // delete added shortcuts
@@ -371,7 +378,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return addedShortcuts.size();
     }
 
-    private void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray ) {
+    private void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray, int[] nodePredecessorArray, Graph graph ) {
         // disable node
         removedNodes.set( node, true );
 
@@ -465,7 +472,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        Collections.sort( sources );
 //        List<Integer> targets = new ArrayList<>( targetSet );
 //        Collections.sort( targets );
-
         Set<Integer> visitedNodes = new HashSet<>();
         // for each source calculate Dijkstra to all the targets {without using the node)
         for ( int from : sources ) {
@@ -485,12 +491,16 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 TIntIterator it = data.getOutgoingEdgesIterator( currentNode );
                 while ( it.hasNext() ) {
                     int edge = it.next();
+                    if ( !data.isValidWay( node, edge, nodePredecessorArray ) ) {
+                        continue;
+                    }
                     int target = data.getTarget( edge );
                     float targetDistance = nodeDistanceArray[target];
                     float newDistance = currentDistance + data.getLength( edge );
                     // if the target is active (removal simulation)
                     if ( !removedNodes.get( target ) && DoubleComparator.isLowerThan( newDistance, targetDistance, PRECISION ) ) {
                         nodeDistanceArray[target] = newDistance;
+                        nodePredecessorArray[target] = edge;
                         visitedNodes.add( target );
                         dijkstraPriorityQueue.notifyDataChange( target, newDistance );
                     }
@@ -523,7 +533,8 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             }
             // reset node distances
             for ( int visitedNode : visitedNodes ) {
-                nodeDistanceArray[visitedNode] = Float.MAX_VALUE;
+                nodeDistanceArray[visitedNode] = Graph.DISTANCE_DEFAULT;
+                nodePredecessorArray[visitedNode] = Graph.PREDECESSOR_DEFAULT;
             }
         }
 
@@ -574,12 +585,40 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         public final TIntList[] outgoingShortcuts;
         public final TFloatList lengths = new TFloatArrayList();
         public final Graph graph;
+        public final TIntObjectMap<List<TIntList>> turnRestrictions = new TIntObjectHashMap<>();
+        public final TIntObjectMap<List<Pair<Integer, Integer>>> shortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
         private int shortcutCounter = 0;
 
         public ProcessingData( Graph graph ) {
             this.graph = graph;
             incomingShortcuts = new TIntArrayList[graph.getNodeCount()];
             outgoingShortcuts = new TIntArrayList[graph.getNodeCount()];
+            // add all shortcuts from graph
+            if ( graph.getTurnRestrictions() != null ) {
+                int[][][] tr = graph.getTurnRestrictions();
+                for ( int i = 0; i < graph.getNodeCount(); i++ ) {
+                    int[][] nodeTr = tr[i];
+                    if ( nodeTr != null ) {
+                        List<TIntList> sequences = turnRestrictions.get( i );
+                        if ( sequences == null ) {
+                            sequences = new ArrayList<>();
+                            turnRestrictions.put( i, sequences );
+                        }
+                        for ( int j = 0; j < nodeTr.length; j++ ) {
+                            sequences.add( new TIntArrayList( nodeTr[j] ) );
+                            for ( int k = 0; k < nodeTr[j].length; k++ ) {
+                                int edge = nodeTr[j][k];
+                                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( edge );
+                                if ( pairs == null ) {
+                                    pairs = new ArrayList<>();
+                                    shortcutsTrs.put( edge, pairs );
+                                }
+                                pairs.add( new Pair<>( i, sequences.size() - 1 ) );
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void addShortcut( int startEdge, int endEdge ) {
@@ -611,12 +650,111 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 outgoingShortcuts[source] = new TIntArrayList();
             }
             outgoingShortcuts[source].add( shortcutCounter + graph.getEdgeCount() );
-            shortcutCounter++;
 //            System.out.println( "shortcut - outgoing[#" + source + "] = " + outgoingShortcuts[source] );
+
+            // ADD TR if needed
+            Set<Pair<Integer, Integer>> trSet = new HashSet<>();
+            if ( shortcutsTrs.containsKey( startEdge ) ) {
+                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( startEdge );
+                for ( Pair<Integer, Integer> pair : pairs ) {
+                    TIntList sequence = turnRestrictions.get( pair.a ).get( pair.b );
+                    if ( endEdge == sequence.get( 0 ) ) {
+                        trSet.add( pair );
+                    } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
+                        trSet.add( pair );
+                    } else {
+                        for ( int i = 0; i < sequence.size(); i++ ) {
+                            int edge = sequence.get( i );
+                            if ( edge == startEdge ) {
+                                if ( ( i + 1 < sequence.size() && sequence.get( i + 1 ) == endEdge ) || i + 1 == sequence.size() ) {
+                                    trSet.add( pair );
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if ( shortcutsTrs.containsKey( endEdge ) ) {
+                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( endEdge );
+                for ( Pair<Integer, Integer> pair : pairs ) {
+                    TIntList sequence = turnRestrictions.get( pair.a ).get( pair.b );
+                    if ( endEdge == sequence.get( 0 ) ) {
+                        trSet.add( pair );
+                    } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
+                        trSet.add( pair );
+                    } else {
+                        for ( int i = 0; i < sequence.size(); i++ ) {
+                            int edge = sequence.get( i );
+                            if ( edge == startEdge ) {
+                                if ( ( i + 1 < sequence.size() && sequence.get( i + 1 ) == endEdge ) || i + 1 == sequence.size() ) {
+                                    trSet.add( pair );
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for ( Pair<Integer, Integer> pair : trSet ) {
+                int node = pair.a;
+                int seqId = pair.b;
+                TIntList sequence = turnRestrictions.get( node ).get( seqId );
+                TIntArrayList seq = new TIntArrayList();
+                int lastNode = -1;
+                int lastEdge = -1;
+                { // get the FIRST node independent of the direction
+                    int e1 = sequence.get( 0 );
+                    int s1 = getSource( e1 );
+                    int t1 = getTarget( e1 );
+                    int e2 = sequence.get( 1 );
+                    int s2 = getSource( e2 );
+                    int t2 = getTarget( e2 );
+                    if ( t1 == s2 || t1 == t2 ) {
+                        lastNode = s1;
+                    } else if ( s1 == s2 || s1 == t2 ) {
+                        lastNode = t1;
+                    }
+                }
+                if ( endEdge == sequence.get( 0 ) ) {
+                    seq.add( shortcutCounter + graph.getEdgeCount() );
+                    for ( int i = 1; i < sequence.size(); i++ ) {
+                        seq.add( sequence.get( i ) );
+                    }
+                    lastNode = node;
+                } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
+                    for ( int i = 0; i < sequence.size() - 1; i++ ) {
+                        seq.add( sequence.get( i ) );
+                    }
+                    seq.add( shortcutCounter + graph.getEdgeCount() );
+                    lastNode = node;
+                } else {
+                    for ( int i = 0; i < sequence.size(); i++ ) { // for each part of this sequence
+                        // add to the list until the start and edge are met - add them as one
+                        // save last node
+                        if ( lastEdge != -1 ) {
+                            lastNode = getOtherNode( lastEdge, lastNode );
+                        }
+                        if ( sequence.get( i ) == startEdge && ( i + 1 == sequence.size() || sequence.get( i + 1 ) == endEdge ) ) {
+                            lastEdge = shortcutCounter + graph.getEdgeCount();
+                            i++; // move past the target edge
+                        } else {
+                            lastEdge = sequence.get( i );
+                        }
+                        seq.add( lastEdge );
+                    }
+                }
+                List<TIntList> get = turnRestrictions.get( lastNode );
+                get.add( seq );
+                shortcutsTrs.get( shortcutCounter + graph.getEdgeCount() ).add( new Pair<>( lastNode, get.size() - 1 ) );
+            }
+            shortcutCounter++;
         }
 
         public void removeLastShortcut() {
             shortcutCounter--;
+            int startEdge = startEdges.get( shortcutCounter );
+            int endEdge = endEdges.get( shortcutCounter );
 //            System.out.println( "#" + shortcutCounter + " - removing shortcut[edges] - " + startEdges.get( shortcutCounter ) + " -> " + endEdges.get( shortcutCounter ) );
             int source = sources.get( shortcutCounter );
             sources.removeAt( shortcutCounter );
@@ -627,6 +765,18 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             lengths.removeAt( shortcutCounter );
             outgoingShortcuts[source].removeAt( outgoingShortcuts[source].size() - 1 );
             incomingShortcuts[target].removeAt( incomingShortcuts[target].size() - 1 );
+            if ( shortcutsTrs.containsKey( startEdge ) ) {
+                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( startEdge );
+                for ( Pair<Integer, Integer> pair : pairs ) {
+                    turnRestrictions.get( pair.a ).remove( pair.b.intValue() );
+                }
+            }
+            if ( shortcutsTrs.containsKey( endEdge ) ) {
+                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( endEdge );
+                for ( Pair<Integer, Integer> pair : pairs ) {
+                    turnRestrictions.get( pair.a ).remove( pair.b.intValue() );
+                }
+            }
         }
 
         public int size() {
@@ -680,6 +830,34 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 return graph.getLength( edge );
             }
             return lengths.get( edge - graph.getEdgeCount() );
+        }
+
+        private boolean isValidWay( int node, int edge, int[] nodePredecessorArray ) {
+            // what if predecessor is a shortcut...
+            if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
+                return true;
+            }
+            if ( !turnRestrictions.containsKey( node ) ) { // without turn restrictions for the concrete node, every turn is valid
+                return true;
+            }
+            List<TIntList> sequences = turnRestrictions.get( node );
+            for ( int i = 0; i < sequences.size(); i++ ) { // for all restrictions for this node
+                TIntList edgeSequence = sequences.get( i ); // load the edge sequence of this particular restrictions
+                if ( edgeSequence.get( edgeSequence.size() - 1 ) == edge ) { // if the last edge of this sequence is the target edge
+                    int currNode = node;
+                    for ( int j = edgeSequence.size() - 2; j >= 0; j-- ) { // for every edge in the sequence (except for the last, it is already checked) compare it with the predecessor
+                        int pred = nodePredecessorArray[currNode];
+                        currNode = getOtherNode( pred, currNode );
+                        if ( pred != edgeSequence.get( j ) ) { // this turn restriction edge sequence does not match the way
+                            break;
+                        }
+                        if ( j == 0 ) { // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         private class IncomingIterator implements TIntIterator {

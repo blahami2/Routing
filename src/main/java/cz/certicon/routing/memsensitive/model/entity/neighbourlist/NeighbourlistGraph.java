@@ -251,6 +251,11 @@ public class NeighbourlistGraph implements Graph {
     public void setTurnRestrictions( int[][][] turnRestrictions ) {
         this.turnRestrictions = turnRestrictions;
     }
+
+    @Override
+    public int[][][] getTurnRestrictions() {
+        return turnRestrictions;
+    }
    
 
     private class IncomingIterator implements TIntIterator {

@@ -33,8 +33,10 @@ public interface Graph {
     public void setOutgoingEdges( int node, int[] outgoingEdges );
 
     public void setCoordinate( int node, float latitude, float longitude );
-    
-    public void setTurnRestrictions(int[][][] turnRestrictions);
+
+    public void setTurnRestrictions( int[][][] turnRestrictions );
+
+    public int[][][] getTurnRestrictions();
 
     public void resetNodePredecessorArray( int[] nodePredecessors );
 
@@ -82,7 +84,7 @@ public interface Graph {
     public boolean containsNode( long nodeOrigId );
 
     public boolean isValidPredecessor( int predecessor );
-    
-    public boolean isValidWay(int node, int targetEdge, int[] predecessorArray);
-    
+
+    public boolean isValidWay( int node, int targetEdge, int[] predecessorArray );
+
 }
