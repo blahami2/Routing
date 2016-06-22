@@ -194,7 +194,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 int i = 1;
                 while ( it.hasNext() ) {
                     Pair<Long, Boolean> next = it.next();
-                    System.out.println( "inserting: " + next.a + ", " + next.b );
+//                    System.out.println( "inserting: " + next.a + ", " + next.b );
                     forwardMap.put( next.a, next.b );
                     int idx = 1;
                     ps.setInt( idx++, i );
@@ -216,6 +216,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                         + "ON e.data_id = d.id "
                         + "ORDER BY p.order_id";
                 rs = reader.read( query );
+//                System.out.println( query );
                 int idIdx = rs.findColumn( "edge_id" );
                 int linestringIdx = rs.findColumn( "linestring" );
                 int lengthIdx = rs.findColumn( "length" );
@@ -225,7 +226,7 @@ public class SqlitePathReader implements PathReader<Graph> {
                 while ( rs.next() ) {
                     long id = rs.getLong( idIdx );
                     boolean dbForward = rs.getBoolean( forwardIdx );
-                    System.out.println( "getting: " + id );
+//                    System.out.println( "getting: " + id );
                     boolean mapForward = forwardMap.get( id );
                     boolean isForward = ( dbForward && mapForward ) || ( !dbForward && !mapForward );
                     List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( linestringIdx ) );
@@ -236,9 +237,9 @@ public class SqlitePathReader implements PathReader<Graph> {
 //                System.out.println( "coordinates loaded in: " + time.getCurrentTimeString() );
 //                time.start();
                 // TODO do I have to delete it???
-//                reader.execute( "DELETE FROM path" );
-//                reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
-//                reader.setAutoCommit( true );
+                reader.execute( "DELETE FROM path" );
+                reader.execute( "DROP INDEX IF EXISTS `idx_path_order`" );
+                reader.setAutoCommit( true );
 //                System.out.println( "Autocommit on in: " + time.getCurrentTimeString() );
                 reader.close();
 //                System.out.println( "Connection closed in: " + time.getCurrentTimeString() );
