@@ -8,9 +8,7 @@ package cz.certicon.routing.memsensitive.data.turntables.sqlite;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.data.turntables.TurnTablesReader;
 import cz.certicon.routing.memsensitive.model.entity.TurnTablesBuilder;
-import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -50,6 +48,9 @@ public class SqliteTurnTablesReader implements TurnTablesReader {
             while ( rs.next() ) {
                 int position = rs.getInt( positionId );
                 if ( position <= lastPosition && fromList.size() > 0 ) { // new
+                    if ( lastNode < 0 || lastEdgeTo < 0 ) {
+                        throw new AssertionError( "List already added to: " + fromList.size() + ", but lastNode = " + lastNode + " and lastEdgeTo = " + lastEdgeTo );
+                    }
                     builder.addRestriction( graph, fromList.toArray(), lastNode, lastEdgeTo );
                     fromList = new TLongArrayList();
                 }

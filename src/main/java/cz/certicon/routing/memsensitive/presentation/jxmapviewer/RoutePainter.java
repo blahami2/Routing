@@ -21,6 +21,7 @@ import org.jdesktop.swingx.painter.Painter;
 /**
  *
  * Paints a route
+ *
  * @author Martin Steiger
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -29,7 +30,7 @@ public class RoutePainter implements Painter<JXMapViewer> {
     private Color color = Color.RED;
     private boolean antiAlias = true;
 
-    private List<GeoPosition> track;
+    public List<GeoPosition> track;
 
     /**
      * @param track the track
@@ -38,6 +39,10 @@ public class RoutePainter implements Painter<JXMapViewer> {
         // copy the list so that changes in the 
         // original list do not have an effect here
         this.track = new ArrayList<>( track );
+    }
+
+    public void setColor( Color color ) {
+        this.color = color;
     }
 
     @Override

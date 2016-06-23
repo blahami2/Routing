@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.algorithms;
 
+import cz.certicon.routing.GlobalOptions;
+import static cz.certicon.routing.GlobalOptions.DEBUG_DISPLAY;
 import static cz.certicon.routing.GlobalOptions.MEASURE_STATS;
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
@@ -13,6 +15,8 @@ import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.presentation.DebugViewer;
+import cz.certicon.routing.memsensitive.presentation.jxmapviewer.JxDebugViewer;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
@@ -42,6 +46,10 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 
     @Override
     public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException {
+        DebugViewer debugViewer = null;
+        if ( DEBUG_DISPLAY ) {
+            debugViewer = new JxDebugViewer( GlobalOptions.DEBUG_DISPLAY_PROPERTIES, GlobalOptions.DEBUG_DISPLAY_PAUSE );
+        }
         routeBuilder.clear();
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
@@ -66,6 +74,12 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         double finalDistance = Double.MAX_VALUE;
         while ( !nodeDataStructure.isEmpty() ) {
             int node = nodeDataStructure.extractMin();
+            if ( DEBUG_DISPLAY ) {
+                System.out.println( "#" + graph.getNodeOrigId( node ) + "-closed" );
+                if ( nodePredecessorArray[node] >= 0 ) {
+                    debugViewer.closeEdge( graph.getEdgeOrigId( nodePredecessorArray[node] ) );
+                }
+            }
             if ( MEASURE_STATS ) {
                 StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
             }
@@ -88,21 +102,29 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
-                if(!graph.isValidWay( node, edge, nodePredecessorArray )){
-                    continue;
-                }
                 int target = graph.getOtherNode( edge, node );
 //                System.out.println( "edge = " + edge + ", target = " + target );
                 if ( !nodeClosedArray.get( target ) ) {
                     if ( MEASURE_STATS ) {
                         StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
-                    float targetDistance = nodeDistanceArray[target];
-                    float alternativeDistance = distance + graph.getLength( edge );
-                    if ( alternativeDistance < targetDistance ) {
-                        nodeDistanceArray[target] = alternativeDistance;
-                        nodePredecessorArray[target] = edge;
-                        nodeDataStructure.notifyDataChange( target, alternativeDistance );
+                    if ( !graph.isValidWay( node, edge, nodePredecessorArray ) ) {
+                        if ( DEBUG_DISPLAY ) {
+                            System.out.println( "#" + graph.getNodeOrigId( target ) + "-restricted" );
+                            debugViewer.blinkEdge( graph.getEdgeOrigId( edge ) );
+                        }
+                    } else {
+                        if ( DEBUG_DISPLAY ) {
+                            System.out.println( "#" + graph.getNodeOrigId( target ) + "-visited" );
+                            debugViewer.displayEdge( graph.getEdgeOrigId( edge ) );
+                        }
+                        float targetDistance = nodeDistanceArray[target];
+                        float alternativeDistance = distance + graph.getLength( edge );
+                        if ( alternativeDistance < targetDistance ) {
+                            nodeDistanceArray[target] = alternativeDistance;
+                            nodePredecessorArray[target] = edge;
+                            nodeDataStructure.notifyDataChange( target, alternativeDistance );
+                        }
                     }
                 }
             }
@@ -112,6 +134,9 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
+        }
+        if ( DEBUG_DISPLAY ) {
+            debugViewer.close();
         }
         if ( finalNode != -1 ) {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );

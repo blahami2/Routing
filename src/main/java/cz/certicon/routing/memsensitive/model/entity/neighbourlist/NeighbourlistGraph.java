@@ -222,23 +222,41 @@ public class NeighbourlistGraph implements Graph {
 
     @Override
     public boolean isValidWay( int node, int targetEdge, int[] predecessorArray ) {
-        if(turnRestrictions == null){ // without turn restrictions, everything is valid
+        if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
             return true;
         }
-        if(turnRestrictions[node] == null){ // without turn restrictions for the concrete node, every turn is valid
+        if ( turnRestrictions[node] == null ) { // without turn restrictions for the concrete node, every turn is valid
             return true;
         }
         for ( int i = 0; i < turnRestrictions[node].length; i++ ) { // for all restrictions for this node
             int[] edgeSequence = turnRestrictions[node][i]; // load the edge sequence of this particular restrictions
-            if(edgeSequence[edgeSequence.length - 1] == targetEdge){ // if the last edge of this sequence is the target edge
+            if ( edgeSequence[edgeSequence.length - 1] == targetEdge ) { // if the last edge of this sequence is the target edge
                 int currNode = node;
                 for ( int j = edgeSequence.length - 2; j >= 0; j-- ) { // for every edge in the sequence (except for the last, it is already checked) compare it with the predecessor
                     int pred = predecessorArray[currNode];
-                    currNode = (edgeTargets[pred] == currNode) ? edgeSources[pred] : edgeTargets[pred];
-                    if(pred != edgeSequence[j]){ // the turn restriction edge sequence does not match the way
+                    if ( pred == -1 ) { // end of predecessor array
                         break;
                     }
-                    if(j == 0){ // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
+                    currNode = ( edgeTargets[pred] == currNode ) ? edgeSources[pred] : edgeTargets[pred];
+                    if ( pred != edgeSequence[j] ) { // the turn restriction edge sequence does not match the way
+                        break;
+                    }
+                    if ( j == 0 ) { // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
+                        System.out.println( "#" + getNodeOrigId( node ) + ": matches: " );
+                        String predE = "";
+                        int cn = getOtherNode( targetEdge, node );
+                        int ce = targetEdge;
+                        while ( ce != -1 ) {
+                            cn = getOtherNode( ce, cn );
+                            predE = getEdgeOrigId( ce ) + " " + predE;
+                            ce = predecessorArray[cn];
+                        }
+                        System.out.println( "current path: " + predE );
+                        String tr = "";
+                        for ( int e : edgeSequence ) {
+                            tr = tr + getEdgeOrigId( e ) + " ";
+                        }
+                        System.out.println( "turn restriction way: " + tr );
                         return false;
                     }
                 }
@@ -256,7 +274,6 @@ public class NeighbourlistGraph implements Graph {
     public int[][][] getTurnRestrictions() {
         return turnRestrictions;
     }
-   
 
     private class IncomingIterator implements TIntIterator {
 
