@@ -51,7 +51,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
 //        System.out.println( "ROUTING: from = " + from.keySet() + ", to = " + to.keySet() );
         routeBuilder.clear();
         if ( MEASURE_STATS ) {
@@ -67,12 +67,13 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         EffectiveUtils.copyArray( nodeSpatialDistancePrototype, nodeSpatialDistanceArray );
         nodeDataStructure.clear();
 
-        for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
-            int node = entry.getKey();
-            float distance = entry.getValue();
+        for ( NodeEntry nodeEntry : from.values() ) {
+            int node = nodeEntry.getNodeId();
+            int edge = nodeEntry.getEdgeId();
+            float distance = nodeEntry.getDistance();
             nodeDistanceArray[node] = distance;
             nodeDataStructure.add( node, distance );
-//            System.out.println( "adding: " + node + " with distance: " + distance );
+            nodePredecessorArray[node] = edge;
         }
         int finalNode = -1;
         double finalDistance = Double.MAX_VALUE;
@@ -88,20 +89,22 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 //                System.out.println( "finishing - " + finalDistance + " < " + distance );
                 break;
             }
-            if ( to.containsKey( node ) ) {
+            if ( to.containsKey( node ) ) { // found one of the final nodes
+                if ( graph.isValidWay( node, to.get( node ).getEdgeId(), nodePredecessorArray ) ) { // is able to turn there
 //                System.out.println( "found end node: " + node );
-                double nodeDistance = distance + to.get( node );
-                if ( nodeDistance < finalDistance ) {
+                    double nodeDistance = distance + to.get( node ).getDistance();
+                    if ( nodeDistance < finalDistance ) {
 //                    System.out.println( nodeDistance + " < " + finalDistance );
-                    finalNode = node;
-                    finalDistance = nodeDistance;
+                        finalNode = node;
+                        finalDistance = nodeDistance;
+                    }
                 }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
-                if(!graph.isValidWay( node, edge, nodePredecessorArray )){
+                if ( !graph.isValidWay( node, edge, nodePredecessorArray ) ) {
                     continue;
                 }
                 int target = graph.getOtherNode( edge, node );
@@ -140,6 +143,10 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 //                System.out.println( "node = " + graph.getNodeOrigId( node ) );
                 pred = nodePredecessorArray[node];
                 currentNode = node;
+                NodeEntry nodeEntry = from.get( node );
+                if ( nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred ) { // omit the first edge
+                    break;
+                }
             }
         } else {
             throw new RouteNotFoundException();
@@ -150,16 +157,17 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         return routeBuilder.build();
     }
 
-    private float calculateSpatialDistance( int node, Map<Integer, Float> target ) {
+    private float calculateSpatialDistance( int node, Map<Integer, NodeEntry> target ) {
 //        System.out.println( "calculating distance for: #" + node );
         if ( nodeSpatialDistanceArray[node] < 0 ) {
             float aLat = graph.getLatitude( node );
             float aLon = graph.getLongitude( node );
 //            System.out.println( "#" + node + " - coordinates[" + aLat + "," + aLon + "]" );
             float min = Float.MAX_VALUE;
-            for ( Map.Entry<Integer, Float> entry : target.entrySet() ) {
-                float bLat = graph.getLatitude( entry.getKey() );
-                float bLon = graph.getLongitude( entry.getKey() );
+            for ( NodeEntry nodeEntry : target.values() ) {
+                int n = nodeEntry.getNodeId();
+                float bLat = graph.getLatitude( n );
+                float bLon = graph.getLongitude( n );
                 float dist = (float) distanceType.calculateApproximateDistance( aLat, aLon, bLat, bLon );
 //                System.out.println( "#" + entry.getKey() + " - coordinates[" + bLat + "," + bLon + "]" );
 //                System.out.println( "distance to #" + entry.getKey() + " = " + dist );

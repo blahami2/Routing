@@ -6,6 +6,7 @@
 package cz.certicon.routing.memsensitive.algorithm;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -13,5 +14,31 @@ import java.util.Map;
  */
 public interface RoutingAlgorithm<G> {
 
-    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException;
+    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException;
+
+    
+    public static class NodeEntry {
+
+        private final int edgeId;
+        private final int nodeId;
+        private final float distance;
+
+        public NodeEntry( int edgeId, int nodeId, float distance ) {
+            this.edgeId = edgeId;
+            this.nodeId = nodeId;
+            this.distance = distance;
+        }
+
+        public int getEdgeId() {
+            return edgeId;
+        }
+
+        public int getNodeId() {
+            return nodeId;
+        }
+
+        public float getDistance() {
+            return distance;
+        }
+    }
 }

@@ -8,9 +8,11 @@ package cz.certicon.routing.memsensitive.algorithm.algorithms;
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
+import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm.NodeEntry;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet;
 import cz.certicon.routing.memsensitive.model.entity.common.SimpleGraphBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
@@ -93,10 +95,10 @@ public class AstarRoutingAlgorithmTest {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
                     System.out.println( "from: " + i + " to " + j );
-                    Map<Integer, Float> from = new HashMap<>();
-                    from.put( i, 0F );
-                    Map<Integer, Float> to = new HashMap<>();
-                    to.put( j, 0F );
+                    Map<Integer, NodeEntry> from = new HashMap<>();
+                    from.put( i, new NodeEntry( -1, i, 0F ) );
+                    Map<Integer, NodeEntry> to = new HashMap<>();
+                    to.put( j, new NodeEntry( -1, j, 0F ) );
                     Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), from, to );
                     Route result = instance.route( new SimpleRouteBuilder(), from, to );
                     System.out.println( toString( graph, result ) );

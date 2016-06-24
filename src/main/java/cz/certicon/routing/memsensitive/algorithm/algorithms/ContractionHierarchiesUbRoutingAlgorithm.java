@@ -65,7 +65,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException {
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
         routeBuilder.clear();
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
@@ -77,17 +77,21 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         TIntList nodesFromVisited = new TIntArrayList();
         TIntList nodesToVisited = new TIntArrayList();
 
-        for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
-            int node = entry.getKey();
-            float distance = entry.getValue();
+        for ( NodeEntry nodeEntry : from.values() ) {
+            int node = nodeEntry.getNodeId();
+            int edge = nodeEntry.getEdgeId();
+            float distance = nodeEntry.getDistance();
             nodeFromDistanceArray[node] = distance;
             nodeFromDataStructure.add( node, distance );
+            nodeFromPredecessorArray[node] = edge;
         }
-        for ( Map.Entry<Integer, Float> entry : to.entrySet() ) {
-            int node = entry.getKey();
-            float distance = entry.getValue();
+        for ( NodeEntry nodeEntry : to.values() ) {
+            int node = nodeEntry.getNodeId();
+            int edge = nodeEntry.getEdgeId();
+            float distance = nodeEntry.getDistance();
             nodeToDistanceArray[node] = distance;
             nodeToDataStructure.add( node, distance );
+            nodeToPredecessorArray[node] = edge;
         }
         int finalNode = -1;
         double finalDistance = Double.MAX_VALUE;
@@ -279,6 +283,10 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
 //                System.out.println( "F: node = " + node );
                 pred = nodeFromPredecessorArray[node];
                 currentNode = node;
+                NodeEntry nodeEntry = from.get( node );
+                if ( nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred ) { // omit the first edge
+                    break;
+                }
             }
             currentNode = finalNode;
             pred = nodeToPredecessorArray[finalNode];
@@ -288,6 +296,10 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
 //                System.out.println( "T: node = " + node );
                 pred = nodeToPredecessorArray[node];
                 currentNode = node;
+                NodeEntry nodeEntry = to.get( node );
+                if ( nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred ) { // omit the last edge
+                    break;
+                }
             }
         } else {
             throw new RouteNotFoundException();

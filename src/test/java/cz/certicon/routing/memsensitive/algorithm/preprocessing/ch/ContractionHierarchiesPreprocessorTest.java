@@ -11,6 +11,7 @@ import cz.certicon.routing.application.preprocessing.ch.OptimizedContractionHier
 import cz.certicon.routing.data.graph.sqlite.SqliteGraphRW;
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
+import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesUbRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.algorithms.DijkstraRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
@@ -19,6 +20,7 @@ import cz.certicon.routing.memsensitive.data.graph.GraphReader;
 import cz.certicon.routing.memsensitive.data.graph.sqlite.SqliteGraphReader;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
 import cz.certicon.routing.memsensitive.model.entity.ch.SimpleChDataBuilder;
 import cz.certicon.routing.memsensitive.model.entity.common.SimpleGraphBuilder;
@@ -144,10 +146,10 @@ public class ContractionHierarchiesPreprocessorTest {
         for ( int i = 0; i < 6; i++ ) {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
-                    Map<Integer, Float> from = new HashMap<>();
-                    from.put( i, 0F );
-                    Map<Integer, Float> to = new HashMap<>();
-                    to.put( j, 0F );
+                    Map<Integer, RoutingAlgorithm.NodeEntry> from = new HashMap<>();
+                    from.put( i, new RoutingAlgorithm.NodeEntry( -1, i, 0F ) );
+                    Map<Integer, RoutingAlgorithm.NodeEntry> to = new HashMap<>();
+                    to.put( j, new RoutingAlgorithm.NodeEntry( -1, j, 0F ) );
                     Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), from, to );
                     Route result = chAlgorithm.route( new SimpleRouteBuilder(), from, to );
                     assertEquals( toString( graph, expResult ), toString( graph, result ) );

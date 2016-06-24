@@ -249,6 +249,16 @@ public class NeighbourlistGraph implements Graph {
                         while ( ce != -1 ) {
                             cn = getOtherNode( ce, cn );
                             predE = getEdgeOrigId( ce ) + " " + predE;
+                            int nextE = predecessorArray[cn];
+                            if ( nextE >= 0 ) {
+                                int a = cn;
+                                int b = getOtherNode( ce, cn );
+                                int c = getOtherNode( nextE, cn );
+                                int d = getOtherNode( nextE, c );
+                                if ( ( a == c && b == d ) || ( a == d && b == c ) ) {
+                                    break;
+                                }
+                            }
                             ce = predecessorArray[cn];
                         }
                         System.out.println( "current path: " + predE );

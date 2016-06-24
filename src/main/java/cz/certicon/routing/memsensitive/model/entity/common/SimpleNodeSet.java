@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.common;
 
+import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeSet;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.Set;
  */
 public class SimpleNodeSet implements NodeSet<Graph> {
 
-    private Map<NodeCategory, Set<NodeEntry>> nodeEntriesMap = new HashMap<>();
+    private final Map<NodeCategory, Set<NodeEntry>> nodeEntriesMap = new HashMap<>();
 
     @Override
     public void put( NodeCategory nodeCategory, long edgeId, long nodeId, float distance ) {
@@ -41,12 +42,15 @@ public class SimpleNodeSet implements NodeSet<Graph> {
     }
 
     @Override
-    public Map<Integer, Float> getMap( Graph graph, NodeCategory nodeCategory ) {
-        Map<Integer, Float> map = new HashMap<>();
+    public Map<Integer, RoutingAlgorithm.NodeEntry> getMap( Graph graph, NodeCategory nodeCategory ) {
+        Map<Integer, RoutingAlgorithm.NodeEntry> map = new HashMap<>();
         Iterator<NodeEntry> it = iterator( nodeCategory );
         while ( it.hasNext() ) {
             NodeEntry entry = it.next();
-            map.put( graph.getNodeByOrigId( entry.getNodeId() ), entry.getDistance() );
+            int node = graph.getNodeByOrigId( entry.getNodeId() );
+            int edge = graph.getEdgeByOrigId( entry.getEdgeId() );
+            float distance = entry.getDistance();
+            map.put( graph.getNodeByOrigId( entry.getNodeId() ), new RoutingAlgorithm.NodeEntry( edge, node, distance ) );
         }
         return map;
     }

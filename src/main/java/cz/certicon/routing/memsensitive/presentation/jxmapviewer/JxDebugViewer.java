@@ -98,6 +98,9 @@ public class JxDebugViewer implements DebugViewer {
             mapViewer.zoomToBestFit( fitGeoPosition, 0.7 );
         }
         long timeLeft = delay - time.stop();
+        if ( timeLeft < 0 ) {
+            timeLeft = 0;
+        }
         try {
             Thread.sleep( timeLeft );
         } catch ( InterruptedException ex ) {
@@ -132,6 +135,9 @@ public class JxDebugViewer implements DebugViewer {
             mapViewer.zoomToBestFit( fitGeoPosition, 0.7 );
         }
         long timeLeft = delay - time.stop();
+        if ( timeLeft < 0 ) {
+            timeLeft = 0;
+        }
         try {
             Thread.sleep( timeLeft );
         } catch ( InterruptedException ex ) {

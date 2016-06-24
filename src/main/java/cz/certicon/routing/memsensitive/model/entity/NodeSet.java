@@ -5,8 +5,10 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -17,8 +19,8 @@ public interface NodeSet<G> {
     public void put( NodeCategory nodeCategory, long edgeId, long nodeId, float distance );
 
     public Iterator<NodeEntry> iterator( NodeCategory nodeCategory );
-    
-    public Map<Integer,Float> getMap(G graph, NodeCategory nodeCategory);
+
+    public Map<Integer, RoutingAlgorithm.NodeEntry> getMap( G graph, NodeCategory nodeCategory );
 
     public static class NodeEntry {
 

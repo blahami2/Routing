@@ -8,9 +8,11 @@ package cz.certicon.routing.memsensitive.algorithm.algorithms;
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
+import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.algorithm.common.SimpleRouteBuilder;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeSet;
 import cz.certicon.routing.memsensitive.model.entity.common.SimpleGraphBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
@@ -130,10 +132,10 @@ public class DijkstraRoutingAlgorithmTest {
         routeBuilder.addEdgeAsLast( graph, 8 );
         routeBuilder.addEdgeAsLast( graph, 12 );
         Route expResult = routeBuilder.build();
-        Map<Integer, Float> from = new HashMap<>();
-        from.put( 0, 0F );
-        Map<Integer, Float> to = new HashMap<>();
-        to.put( 5, 0F );
+        Map<Integer, RoutingAlgorithm.NodeEntry> from = new HashMap<>();
+        from.put( 0, new RoutingAlgorithm.NodeEntry( -1, 0, 0F ) );
+        Map<Integer, RoutingAlgorithm.NodeEntry> to = new HashMap<>();
+        to.put( 5, new RoutingAlgorithm.NodeEntry( -1, 5, 0F ) );
         Route result = instance.route( routeBuilder, from, to );
         assertEquals( toString( graph, expResult ), toString( graph, result ) );
     }
