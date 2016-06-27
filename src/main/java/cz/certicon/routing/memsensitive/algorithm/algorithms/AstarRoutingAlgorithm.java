@@ -90,7 +90,8 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 break;
             }
             if ( to.containsKey( node ) ) { // found one of the final nodes
-                if ( graph.isValidWay( node, to.get( node ).getEdgeId(), nodePredecessorArray ) ) { // is able to turn there
+                // TODO
+//                if ( graph.isValidWay( node, to.get( node ).getEdgeId(), nodePredecessorArray ) ) { // is able to turn there
 //                System.out.println( "found end node: " + node );
                     double nodeDistance = distance + to.get( node ).getDistance();
                     if ( nodeDistance < finalDistance ) {
@@ -98,15 +99,16 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                         finalNode = node;
                         finalDistance = nodeDistance;
                     }
-                }
+//                }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
-                if ( !graph.isValidWay( node, edge, nodePredecessorArray ) ) {
-                    continue;
-                }
+                // TODO
+//                if ( !graph.isValidWay( node, edge, nodePredecessorArray ) ) {
+//                    continue;
+//                }
                 int target = graph.getOtherNode( edge, node );
 //                System.out.println( "edge = " + edge + ", target = " + target );
                 if ( !nodeClosedArray.get( target ) ) {

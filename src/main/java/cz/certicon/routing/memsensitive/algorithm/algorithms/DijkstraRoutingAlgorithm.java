@@ -11,9 +11,11 @@ import static cz.certicon.routing.GlobalOptions.MEASURE_STATS;
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
+import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
+import cz.certicon.routing.memsensitive.model.entity.common.SimpleNodeState;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.presentation.DebugViewer;
 import cz.certicon.routing.memsensitive.presentation.jxmapviewer.JxDebugViewer;
@@ -22,6 +24,8 @@ import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import gnu.trove.iterator.TIntIterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,21 +36,17 @@ import java.util.Set;
 public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 
     private final Graph graph;
-    private final int[] nodePredecessorArray;
-    private final float[] nodeDistanceArray;
-    private final BitArray nodeClosedArray;
-    private final NodeDataStructure<Integer> nodeDataStructure;
 
     public DijkstraRoutingAlgorithm( Graph graph ) {
         this.graph = graph;
-        this.nodePredecessorArray = new int[graph.getNodeCount()];
-        this.nodeDistanceArray = new float[graph.getNodeCount()];
-        this.nodeClosedArray = new LongBitArray( graph.getNodeCount() );
-        this.nodeDataStructure = new JgraphtFibonacciDataStructure();
     }
 
     @Override
     public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
+        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
+        Set<NodeState> nodeClosedArray = new HashSet<>();
+        NodeDataStructure<NodeState> nodeDataStructure = new JgraphtFibonacciDataStructure();
         DebugViewer debugViewer = null;
         if ( DEBUG_DISPLAY ) {
             debugViewer = new JxDebugViewer( GlobalOptions.DEBUG_DISPLAY_PROPERTIES, GlobalOptions.DEBUG_DISPLAY_PAUSE );
@@ -59,60 +59,66 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
-        graph.resetNodeClosedArray( nodeClosedArray );
-        graph.resetNodeDistanceArray( nodeDistanceArray );
-        graph.resetNodePredecessorArray( nodePredecessorArray );
         nodeDataStructure.clear();
 
         for ( NodeEntry nodeEntry : from.values() ) {
             int node = nodeEntry.getNodeId();
             int edge = nodeEntry.getEdgeId();
             float distance = nodeEntry.getDistance();
-            nodeDistanceArray[node] = distance;
-            nodeDataStructure.add( node, distance );
-            nodePredecessorArray[node] = edge;
+            NodeState state = NodeState.Factory.newInstance( node, edge );
+            nodeDistanceArray.put( state, distance );
+            nodeDataStructure.add( state, distance );
+            // DEBUG
+//            System.out.println( "From: node#" + node + ", edge#" + edge + ", distance = " + distance );
         }
-        int finalNode = -1;
+        NodeState finalState = null;
         double finalDistance = Double.MAX_VALUE;
         while ( !nodeDataStructure.isEmpty() ) {
-            int node = nodeDataStructure.extractMin();
+            NodeState state = nodeDataStructure.extractMin();
             if ( DEBUG_DISPLAY ) {
-                System.out.println( "#" + graph.getNodeOrigId( node ) + "-closed" );
-                if ( nodePredecessorArray[node] >= 0 ) {
-                    debugViewer.closeEdge( graph.getEdgeOrigId( nodePredecessorArray[node] ) );
-                }
+                System.out.println( "#" + graph.getNodeOrigId( state.getNode() ) + "-closed" );
+                debugViewer.closeEdge( graph.getEdgeOrigId( state.getEdge() ) );
             }
             if ( MEASURE_STATS ) {
                 StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
             }
-            float distance = nodeDistanceArray[node];
-            nodeClosedArray.set( node, true );
+            float distance = nodeDistanceArray.get( state );
+            // DEBUG
+//            System.out.println( "Extracted: node#" + state.getNode() + ", edge#" + state.getEdge() + ", distance = " + distance );
+            nodeClosedArray.add( state );
 //            System.out.println( "Extracted: " + node + " with distance: " + distance );
             if ( finalDistance < distance ) {
                 break;
             }
-            if ( to.containsKey( node ) ) { // found one of the final nodes
-                if ( graph.isValidWay( node, to.get( node ).getEdgeId(), nodePredecessorArray ) ) { // is able to turn there
+            if ( to.containsKey( state.getNode() ) ) { // found one of the final nodes
+                if ( graph.isValidWay( state, to.get( state.getNode() ).getEdgeId(), nodePredecessorArray ) ) { // is able to turn there
+                    // DEBUG
+//                    System.out.println( "Final: node#" + state.getNode() + ", edge#" + state.getEdge() + ", distance = " + distance );
 //                System.out.println( "found end node: " + node );
-                    double nodeDistance = distance + to.get( node ).getDistance();
+                    double nodeDistance = distance + to.get( state.getNode() ).getDistance();
                     if ( nodeDistance < finalDistance ) {
 //                    System.out.println( nodeDistance + " < " + finalDistance );
-                        finalNode = node;
+                        finalState = state;
                         finalDistance = nodeDistance;
                     }
                 }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
-            TIntIterator it = graph.getOutgoingEdgesIterator( node );
+            TIntIterator it = graph.getOutgoingEdgesIterator( state.getNode() );
             while ( it.hasNext() ) {
                 int edge = it.next();
-                int target = graph.getOtherNode( edge, node );
+                int target = graph.getOtherNode( edge, state.getNode() );
+                NodeState targetState = NodeState.Factory.newInstance( target, edge );
+                // DEBUG
+//                System.out.println( "Check: node#" + targetState.getNode() + ", edge#" + targetState.getEdge() + ", closed = " + nodeClosedArray.contains( targetState ) );
 //                System.out.println( "edge = " + edge + ", target = " + target );
-                if ( !nodeClosedArray.get( target ) ) {
+                if ( !nodeClosedArray.contains( targetState ) ) {
                     if ( MEASURE_STATS ) {
                         StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
-                    if ( !graph.isValidWay( node, edge, nodePredecessorArray ) ) {
+                    if ( !graph.isValidWay( state, edge, nodePredecessorArray ) ) {
+                        // DEBUG
+//                        System.out.println( "Restricted: node#" + targetState.getNode() + ", edge#" + targetState.getEdge() );
                         if ( DEBUG_DISPLAY ) {
                             System.out.println( "#" + graph.getNodeOrigId( target ) + "-restricted" );
                             debugViewer.blinkEdge( graph.getEdgeOrigId( edge ) );
@@ -122,12 +128,14 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                             System.out.println( "#" + graph.getNodeOrigId( target ) + "-visited" );
                             debugViewer.displayEdge( graph.getEdgeOrigId( edge ) );
                         }
-                        float targetDistance = nodeDistanceArray[target];
+                        float targetDistance = ( nodeDistanceArray.containsKey( targetState ) ) ? nodeDistanceArray.get( targetState ) : Float.MAX_VALUE;
                         float alternativeDistance = distance + graph.getLength( edge );
+                        // DEBUG
+//                        System.out.println( "Visited: node#" + targetState.getNode() + ", edge#" + targetState.getEdge() + ", distance current = " + targetDistance + ", distance alternative = " + alternativeDistance );
                         if ( alternativeDistance < targetDistance ) {
-                            nodeDistanceArray[target] = alternativeDistance;
-                            nodePredecessorArray[target] = edge;
-                            nodeDataStructure.notifyDataChange( target, alternativeDistance );
+                            nodeDistanceArray.put( targetState, alternativeDistance );
+                            nodePredecessorArray.put( targetState, state );
+                            nodeDataStructure.notifyDataChange( targetState, alternativeDistance );
                         }
                     }
                 }
@@ -142,22 +150,17 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( DEBUG_DISPLAY ) {
             debugViewer.close();
         }
-        if ( finalNode != -1 ) {
+        if ( finalState != null ) {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );
-            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalNode ) );
-            int pred = nodePredecessorArray[finalNode];
-            int currentNode = finalNode;
-            while ( graph.isValidPredecessor( pred ) ) {
+            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
+            NodeState currentState = finalState;
+            while ( nodePredecessorArray.containsKey( currentState ) ) {// omit the first edge
 //                System.out.println( "predecessor: " + pred + ", source = " + graph.getNodeOrigId( graph.getSource( pred ) ) + ", target = " + graph.getNodeOrigId( graph.getTarget( pred ) ) );
-                routeBuilder.addEdgeAsFirst( graph, graph.getEdgeOrigId( pred ) );
-                int node = graph.getOtherNode( pred, currentNode );
-//                System.out.println( "node = " + graph.getNodeOrigId( node ) );
-                pred = nodePredecessorArray[node];
-                currentNode = node;
-                NodeEntry nodeEntry = from.get( node);
-                if(nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred){ // omit the first edge
-                    break;
+                if ( !graph.isValidPredecessor( currentState.getEdge() ) ) {
+                    break; // starting from crossroad
                 }
+                routeBuilder.addEdgeAsFirst( graph, graph.getEdgeOrigId( currentState.getEdge() ) );
+                currentState = nodePredecessorArray.get( currentState );
             }
         } else {
             throw new RouteNotFoundException();

@@ -107,9 +107,10 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( currentNode, graph );
                 while ( outgoingEdgesIterator.hasNext() ) {
                     int edge = outgoingEdgesIterator.next();
-                    if ( !graph.isValidWay( currentNode, edge, nodeFromPredecessorArray ) ) {
-                        continue;
-                    }
+                    // TODO
+//                    if ( !graph.isValidWay( currentNode, edge, nodeFromPredecessorArray ) ) {
+//                        continue;
+//                    }
                     int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph );
                     if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
                         if ( MEASURE_STATS ) {
@@ -141,9 +142,10 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( currentNode, graph );
                 while ( incomingEdgesIterator.hasNext() ) {
                     int edge = incomingEdgesIterator.next();
-                    if ( !graph.isValidWay( currentNode, edge, nodeToPredecessorArray ) ) {
-                        continue;
-                    }
+                    // TODO
+//                    if ( !graph.isValidWay( currentNode, edge, nodeToPredecessorArray ) ) {
+//                        continue;
+//                    }
                     int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph );
                     if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
                         if ( MEASURE_STATS ) {

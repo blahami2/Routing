@@ -6,6 +6,7 @@
 package cz.certicon.routing.memsensitive.model.entity.neighbourlist;
 
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.utils.EffectiveUtils;
 import cz.certicon.routing.utils.efficient.BitArray;
 import gnu.trove.iterator.TIntIterator;
@@ -221,45 +222,29 @@ public class NeighbourlistGraph implements Graph {
     }
 
     @Override
-    public boolean isValidWay( int node, int targetEdge, int[] predecessorArray ) {
+    public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray ) {
         if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
             return true;
         }
+        int node = state.getNode();
         if ( turnRestrictions[node] == null ) { // without turn restrictions for the concrete node, every turn is valid
             return true;
         }
         for ( int i = 0; i < turnRestrictions[node].length; i++ ) { // for all restrictions for this node
             int[] edgeSequence = turnRestrictions[node][i]; // load the edge sequence of this particular restrictions
             if ( edgeSequence[edgeSequence.length - 1] == targetEdge ) { // if the last edge of this sequence is the target edge
-                int currNode = node;
-                for ( int j = edgeSequence.length - 2; j >= 0; j-- ) { // for every edge in the sequence (except for the last, it is already checked) compare it with the predecessor
-                    int pred = predecessorArray[currNode];
-                    if ( pred == -1 ) { // end of predecessor array
-                        break;
-                    }
-                    currNode = ( edgeTargets[pred] == currNode ) ? edgeSources[pred] : edgeTargets[pred];
-                    if ( pred != edgeSequence[j] ) { // the turn restriction edge sequence does not match the way
+                NodeState currState = state;
+                for ( int j = edgeSequence.length - 2; j >= 0 && currState != null; j-- ) { // for every edge in the sequence (except for the last, it is already checked) compare it with the predecessor
+                    if ( currState.getEdge() != edgeSequence[j] ) {
                         break;
                     }
                     if ( j == 0 ) { // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
                         System.out.println( "#" + getNodeOrigId( node ) + ": matches: " );
-                        String predE = "";
-                        int cn = getOtherNode( targetEdge, node );
-                        int ce = targetEdge;
-                        while ( ce != -1 ) {
-                            cn = getOtherNode( ce, cn );
-                            predE = getEdgeOrigId( ce ) + " " + predE;
-                            int nextE = predecessorArray[cn];
-                            if ( nextE >= 0 ) {
-                                int a = cn;
-                                int b = getOtherNode( ce, cn );
-                                int c = getOtherNode( nextE, cn );
-                                int d = getOtherNode( nextE, c );
-                                if ( ( a == c && b == d ) || ( a == d && b == c ) ) {
-                                    break;
-                                }
-                            }
-                            ce = predecessorArray[cn];
+                        String predE = "" + targetEdge;
+                        NodeState s = state;
+                        while ( s != null && s.getEdge() >= 0 ) {
+                            predE = getEdgeOrigId( s.getEdge() ) + " " + predE;
+                            s = predecessorArray.get( s );
                         }
                         System.out.println( "current path: " + predE );
                         String tr = "";
@@ -269,10 +254,16 @@ public class NeighbourlistGraph implements Graph {
                         System.out.println( "turn restriction way: " + tr );
                         return false;
                     }
+                    currState = predecessorArray.get( currState );
                 }
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean hasRestriction( int node ) {
+        return ( turnRestrictions != null && turnRestrictions[node] != null );
     }
 
     @Override

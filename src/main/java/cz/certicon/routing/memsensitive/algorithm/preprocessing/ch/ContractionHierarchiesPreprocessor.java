@@ -8,8 +8,6 @@ package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
-import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.SpatialHeuristicEdgeDifferenceCalculator;
-import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.strategies.LazyRecalculationStrategy;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.strategies.NeighboursOnlyRecalculationStrategy;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
@@ -23,26 +21,18 @@ import cz.certicon.routing.utils.DoubleComparator;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TDoubleList;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -745,8 +735,17 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                     }
                 }
                 List<TIntList> get = turnRestrictions.get( lastNode );
+                if ( get == null ) {
+                    get = new ArrayList<>();
+                    turnRestrictions.put( lastNode, get );
+                }
                 get.add( seq );
-                shortcutsTrs.get( shortcutCounter + graph.getEdgeCount() ).add( new Pair<>( lastNode, get.size() - 1 ) );
+                List<Pair<Integer, Integer>> strs = shortcutsTrs.get( shortcutCounter + graph.getEdgeCount() );
+                if ( strs == null ) {
+                    strs = new ArrayList<>();
+                    shortcutsTrs.put( shortcutCounter + graph.getEdgeCount(), strs );
+                }
+                strs.add( new Pair<>( lastNode, get.size() - 1 ) );
             }
             shortcutCounter++;
         }

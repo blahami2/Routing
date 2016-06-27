@@ -7,6 +7,7 @@ package cz.certicon.routing.memsensitive.model.entity;
 
 import cz.certicon.routing.utils.efficient.BitArray;
 import gnu.trove.iterator.TIntIterator;
+import java.util.Map;
 
 /**
  *
@@ -85,6 +86,8 @@ public interface Graph {
 
     public boolean isValidPredecessor( int predecessor );
 
-    public boolean isValidWay( int node, int targetEdge, int[] predecessorArray );
+    public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray );
+
+    public boolean hasRestriction( int node );
 
 }

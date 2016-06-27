@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.algorithms;
 
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.memsensitive.algorithm.Route;
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
@@ -21,6 +22,7 @@ import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import jdk.nashorn.internal.runtime.options.Options;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

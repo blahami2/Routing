@@ -9,6 +9,8 @@ import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.NodeRecalculationStrategy;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.memsensitive.data.ch.ContractionHierarchiesDataRW;
 import cz.certicon.routing.memsensitive.data.ch.NotPreprocessedException;
