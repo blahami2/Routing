@@ -5,10 +5,13 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
+import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.utils.EffectiveUtils;
 import gnu.trove.iterator.TIntIterator;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  *
@@ -21,6 +24,7 @@ public class PreprocessedData {
     private final int[][] outgoingShortcuts;
     private final int[] sources;
     private final int[] targets;
+    private int[][][] turnRestrictions;
 
     /* more memory, more efficiency */
     private final int[] startEdges;
@@ -29,6 +33,7 @@ public class PreprocessedData {
     private final float[] lengths;
 
     private final long startId;
+    private DistanceType distanceType;
 
     public PreprocessedData( int nodeCount, int edgeCount, int shortcutCount, long startId ) {
         this.ranks = new int[nodeCount];
@@ -121,6 +126,10 @@ public class PreprocessedData {
         return sources[shortcut];
     }
 
+    public DistanceType getDistanceType() {
+        return distanceType;
+    }
+
     public int getSource( int edge, Graph graph ) {
         if ( edge < graph.getEdgeCount() ) {
             return graph.getSource( edge );
@@ -166,6 +175,15 @@ public class PreprocessedData {
         return startId;
     }
 
+    public int getEdgeByOrigId( long edgeId, Graph graph ) {
+        try {
+            return graph.getEdgeByOrigId( edgeId );
+        } catch ( NullPointerException ex ) {
+            // does not contain
+            return (int) ( edgeId - startId );
+        }
+    }
+
     public float getLength( int shortcut, Graph graph ) {
         if ( shortcut < graph.getEdgeCount() ) {
             return graph.getLength( shortcut );
@@ -177,6 +195,57 @@ public class PreprocessedData {
             lengths[shortcut] = getLength( start, graph ) + getLength( end, graph );
         }
         return lengths[shortcut];
+    }
+
+    public boolean hasRestriction( int node, Graph graph ) {
+        return graph.hasRestriction( node ) || ( turnRestrictions != null && turnRestrictions[node] != null );
+    }
+
+    public void setTurnRestrictions( int[][][] turnRestrictions ) {
+        this.turnRestrictions = turnRestrictions;
+    }
+
+    public int[][][] getTurnRestrictions() {
+        return turnRestrictions;
+    }
+
+    public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
+        if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
+            return graph.isValidWay( state, targetEdge, predecessorArray );
+        }
+        int node = state.getNode();
+        if ( turnRestrictions[node] == null ) { // without turn restrictions for the concrete node, every turn is valid
+            return graph.isValidWay( state, targetEdge, predecessorArray );
+        }
+        for ( int i = 0; i < turnRestrictions[node].length; i++ ) { // for all restrictions for this node
+            int[] edgeSequence = turnRestrictions[node][i]; // load the edge sequence of this particular restrictions
+            if ( edgeSequence[edgeSequence.length - 1] == targetEdge ) { // if the last edge of this sequence is the target edge
+                NodeState currState = state;
+                for ( int j = edgeSequence.length - 2; j >= 0 && currState != null; j-- ) { // for every edge in the sequence (except for the last, it is already checked) compare it with the predecessor
+                    if ( currState.getEdge() != edgeSequence[j] ) {
+                        break;
+                    }
+                    if ( j == 0 ) { // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
+//                        System.out.println( "#" + getNodeOrigId( node ) + ": matches: " );
+//                        String predE = "" + targetEdge;
+//                        NodeState s = state;
+//                        while ( s != null && s.getEdge() >= 0 ) {
+//                            predE = getEdgeOrigId( s.getEdge() ) + " " + predE;
+//                            s = predecessorArray.get( s );
+//                        }
+//                        System.out.println( "current path: " + predE );
+//                        String tr = "";
+//                        for ( int e : edgeSequence ) {
+//                            tr = tr + getEdgeOrigId( e ) + " ";
+//                        }
+//                        System.out.println( "turn restriction way: " + tr );
+                        return false;
+                    }
+                    currState = predecessorArray.get( currState );
+                }
+            }
+        }
+        return graph.isValidWay( state, targetEdge, predecessorArray );
     }
 
     public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {

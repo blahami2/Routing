@@ -10,9 +10,8 @@ import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.utils.EffectiveUtils;
 import cz.certicon.routing.utils.efficient.BitArray;
 import gnu.trove.iterator.TIntIterator;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Iterator;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import java.util.Map;
 
 /**
@@ -35,8 +34,8 @@ public class NeighbourlistGraph implements Graph {
     private final long[] edgeOrigIds;
     private int[][][] turnRestrictions;
 
-    private final Map<Long, Integer> fromOrigNodesMap;
-    private final Map<Long, Integer> fromOrigEdgesMap;
+    private final TLongIntMap fromOrigNodesMap;
+    private final TLongIntMap fromOrigEdgesMap;
 
     public NeighbourlistGraph( int nodeCount, int edgeCount ) {
         this.edgeSources = new int[edgeCount];
@@ -51,8 +50,8 @@ public class NeighbourlistGraph implements Graph {
         this.outgoingEdges = new int[nodeCount][];
         this.nodeOrigIds = new long[nodeCount];
         this.edgeOrigIds = new long[edgeCount];
-        this.fromOrigEdgesMap = new HashMap<>();
-        this.fromOrigNodesMap = new HashMap<>();
+        this.fromOrigEdgesMap = new TLongIntHashMap( edgeCount );
+        this.fromOrigNodesMap = new TLongIntHashMap( nodeCount );
         EffectiveUtils.fillArray( nodePredecessorsPrototype, PREDECESSOR_DEFAULT );
         EffectiveUtils.fillArray( nodeDistancesPrototype, DISTANCE_DEFAULT );
 //        EffectiveUtils.fillArray( nodeClosedPrototype, CLOSED_DEFAULT );

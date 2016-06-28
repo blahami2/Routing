@@ -5,13 +5,19 @@
  */
 package cz.certicon.routing.memsensitive.model.entity;
 
+import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface TurnTablesBuilder<T, G> {
 
+    public void addRestriction( G graph, PreprocessedData chData, long[] from, long via, long to );
+
     public void addRestriction( G graph, long[] from, long via, long to );
+
+    public T build( G graph, PreprocessedData chData );
 
     public T build( G graph );
 }

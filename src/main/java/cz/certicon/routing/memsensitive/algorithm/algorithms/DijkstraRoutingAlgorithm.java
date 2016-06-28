@@ -154,11 +154,8 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );
             routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
             NodeState currentState = finalState;
-            while ( nodePredecessorArray.containsKey( currentState ) ) {// omit the first edge
+            while ( nodePredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() )) {// omit the first edge // starting from crossroad
 //                System.out.println( "predecessor: " + pred + ", source = " + graph.getNodeOrigId( graph.getSource( pred ) ) + ", target = " + graph.getNodeOrigId( graph.getTarget( pred ) ) );
-                if ( !graph.isValidPredecessor( currentState.getEdge() ) ) {
-                    break; // starting from crossroad
-                }
                 routeBuilder.addEdgeAsFirst( graph, graph.getEdgeOrigId( currentState.getEdge() ) );
                 currentState = nodePredecessorArray.get( currentState );
             }

@@ -13,6 +13,7 @@ import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
+import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
@@ -21,8 +22,11 @@ import cz.certicon.routing.utils.measuring.TimeLogger;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -33,34 +37,11 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
     private static final double ARRAY_COPY_RATIO = 0.01;
 
     private final Graph graph;
-    private final int[] nodeFromPredecessorArray;
-    private final float[] nodeFromDistanceArray;
-    private final BitArray nodeFromClosedArray;
-    private final NodeDataStructure<Integer> nodeFromDataStructure;
-    private final int[] nodeToPredecessorArray;
-    private final float[] nodeToDistanceArray;
-    private final BitArray nodeToClosedArray;
-    private final NodeDataStructure<Integer> nodeToDataStructure;
     private final PreprocessedData preprocessedData;
 
     public ContractionHierarchiesRoutingAlgorithm( Graph graph, PreprocessedData preprocessedData ) {
         this.graph = graph;
-        this.nodeFromPredecessorArray = new int[graph.getNodeCount()];
-        this.nodeFromDistanceArray = new float[graph.getNodeCount()];
-        this.nodeFromClosedArray = new LongBitArray( graph.getNodeCount() );
-        this.nodeFromDataStructure = new JgraphtFibonacciDataStructure();
-        this.nodeToPredecessorArray = new int[graph.getNodeCount()];
-        this.nodeToDistanceArray = new float[graph.getNodeCount()];
-        this.nodeToClosedArray = new LongBitArray( graph.getNodeCount() );
-        this.nodeToDataStructure = new JgraphtFibonacciDataStructure();
         this.preprocessedData = preprocessedData;
-
-        graph.resetNodeDistanceArray( nodeFromDistanceArray );
-        graph.resetNodePredecessorArray( nodeFromPredecessorArray );
-        graph.resetNodeClosedArray( nodeFromClosedArray );
-        graph.resetNodeDistanceArray( nodeToDistanceArray );
-        graph.resetNodePredecessorArray( nodeToPredecessorArray );
-        graph.resetNodeClosedArray( nodeToClosedArray );
     }
 
     @Override
@@ -73,184 +54,140 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
-        TIntList nodesFromVisited = new TIntArrayList();
+        Map<NodeState, NodeState> nodeFromPredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeFromDistanceArray = new HashMap<>();
+        Set<NodeState> nodeFromClosedArray = new HashSet<>();
+        NodeDataStructure<NodeState> nodeFromDataStructure = new JgraphtFibonacciDataStructure();
+        Set<NodeState> nodesFromVisited = new HashSet<>();
+        Map<NodeState, NodeState> nodeToPredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeToDistanceArray = new HashMap<>();
+        Set<NodeState> nodeToClosedArray = new HashSet<>();
+        NodeDataStructure<NodeState> nodeToDataStructure = new JgraphtFibonacciDataStructure();
         TIntList nodesToVisited = new TIntArrayList();
 
         for ( NodeEntry nodeEntry : from.values() ) {
             int node = nodeEntry.getNodeId();
             int edge = nodeEntry.getEdgeId();
             float distance = nodeEntry.getDistance();
-            nodeFromDistanceArray[node] = distance;
-            nodeFromDataStructure.add( node, distance );
-            nodeFromPredecessorArray[node] = edge;
+            NodeState state = NodeState.Factory.newInstance( node, edge );
+            nodeFromDistanceArray.put( state, distance );
+            nodeFromDataStructure.add( state, distance );
         }
         for ( NodeEntry nodeEntry : to.values() ) {
             int node = nodeEntry.getNodeId();
             int edge = nodeEntry.getEdgeId();
             float distance = nodeEntry.getDistance();
-            nodeToDistanceArray[node] = distance;
-            nodeToDataStructure.add( node, distance );
-            nodeToPredecessorArray[node] = edge;
+            NodeState state = NodeState.Factory.newInstance( node, edge );
+            nodeToDistanceArray.put( state, distance );
+            nodeToDataStructure.add( state, distance );
         }
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
-                int currentNode = nodeFromDataStructure.extractMin();
+                NodeState state = nodeFromDataStructure.extractMin();
 //                System.out.println( "F: extracted: " + currentNode );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
-                nodeFromClosedArray.set( currentNode, true );
-                nodesFromVisited.add( currentNode );
-                int sourceRank = preprocessedData.getRank( currentNode );
-                float currentDistance = nodeFromDistanceArray[currentNode];
+                nodesFromVisited.add( state );
+                nodeFromClosedArray.add( state );
+                int sourceRank = preprocessedData.getRank( state.getNode() );
+                float currentDistance = nodeFromDistanceArray.get( state );
 //                System.out.println( "F: distance = " + currentDistance );
-                TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( currentNode, graph );
+                TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( state.getNode(), graph );
                 while ( outgoingEdgesIterator.hasNext() ) {
                     int edge = outgoingEdgesIterator.next();
-                    // TODO
-//                    if ( !graph.isValidWay( currentNode, edge, nodeFromPredecessorArray ) ) {
-//                        continue;
-//                    }
-                    int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph );
+                    int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
                     if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                        if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
+                            continue;
+                        }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                         }
-                        float otherNodeDistance = nodeFromDistanceArray[otherNode];
+                        NodeState targetState = NodeState.Factory.newInstance( otherNode, edge );
+                        float targetDistance = ( nodeFromDistanceArray.containsKey( targetState ) ) ? nodeFromDistanceArray.get( targetState ) : Float.MAX_VALUE;
                         float distance = currentDistance + preprocessedData.getLength( edge, graph );
-                        if ( distance < otherNodeDistance ) {
-                            nodeFromDistanceArray[otherNode] = distance;
-//                                System.out.println( "F: pred for " + otherNode + " = " + edge );
-                            nodeFromPredecessorArray[otherNode] = edge;
-                            nodeFromDataStructure.notifyDataChange( otherNode, distance );
+                        if ( distance < targetDistance ) {
+                            nodeFromDistanceArray.put( targetState, distance );
+                            nodeFromPredecessorArray.put( targetState, state );
+                            nodeFromDataStructure.notifyDataChange( targetState, distance );
                         }
                     }
                 }
             }
             if ( !nodeToDataStructure.isEmpty() ) {
-                int currentNode = nodeToDataStructure.extractMin();
+                NodeState state = nodeToDataStructure.extractMin();
 //                System.out.println( "T: extracted: " + currentNode );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
-                nodeToClosedArray.set( currentNode, true );
-                int sourceRank = preprocessedData.getRank( currentNode );
-                float currentDistance = nodeToDistanceArray[currentNode];
-                nodesToVisited.add( currentNode );
+                nodesToVisited.add( state.getNode() );
+                nodeToClosedArray.add( state );
+                int sourceRank = preprocessedData.getRank( state.getNode() );
+                float currentDistance = nodeToDistanceArray.get( state );
 //                System.out.println( "T: distance = " + currentDistance );
-
-                TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( currentNode, graph );
+                TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( state.getNode(), graph );
                 while ( incomingEdgesIterator.hasNext() ) {
                     int edge = incomingEdgesIterator.next();
-                    // TODO
-//                    if ( !graph.isValidWay( currentNode, edge, nodeToPredecessorArray ) ) {
-//                        continue;
-//                    }
-                    int otherNode = preprocessedData.getOtherNode( edge, currentNode, graph );
+                    int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
                     if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                        if ( !preprocessedData.isValidWay( state, edge, nodeToPredecessorArray, graph ) ) {
+                            continue;
+                        }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                         }
-                        float otherNodeDistance = nodeToDistanceArray[otherNode];
+                        NodeState targetState = NodeState.Factory.newInstance( otherNode, edge );
+                        float targetDistance = ( nodeToDistanceArray.containsKey( targetState ) ) ? nodeToDistanceArray.get( targetState ) : Float.MAX_VALUE;
                         float distance = currentDistance + preprocessedData.getLength( edge, graph );
-                        if ( distance < otherNodeDistance ) {
-                            nodeToDistanceArray[otherNode] = distance;
-//                                System.out.println( "F: pred for " + otherNode + " = " + edge );
-                            nodeToPredecessorArray[otherNode] = edge;
-                            nodeToDataStructure.notifyDataChange( otherNode, distance );
+                        if ( distance < targetDistance ) {
+                            nodeToDistanceArray.put( targetState, distance );
+                            nodeToPredecessorArray.put( targetState, state );
+                            nodeToDataStructure.notifyDataChange( targetState, distance );
                         }
                     }
                 }
             }
         }
-        int finalNode = -1;
+        NodeState finalState = null;
         double finalDistance = Double.MAX_VALUE;
-        TIntIterator itFrom = nodesFromVisited.iterator();
+        Iterator<NodeState> itFrom = nodesFromVisited.iterator();
         while ( itFrom.hasNext() ) {
-            int node = itFrom.next();
-            if ( nodeFromClosedArray.get( node ) && nodeToClosedArray.get( node ) ) {
-                double distance = nodeFromDistanceArray[node] + nodeToDistanceArray[node];
+            NodeState state = itFrom.next();
+            if ( nodeFromClosedArray.contains( state ) && nodeToClosedArray.contains( state ) ) {
+                double distance = nodeFromDistanceArray.get( state ) + nodeToDistanceArray.get( state );
                 if ( 0 <= distance && distance < finalDistance ) {
                     finalDistance = distance;
-                    finalNode = node;
+                    finalState = state;
                 }
             }
         }
 
         if ( MEASURE_TIME ) {
-            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.PAUSE );
+            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
-        if ( finalNode != -1 ) {
+        if ( finalState != null ) {
 //            System.out.println( "final node = " + finalNode );
             // set target to final, then add as first, then add as last for the "to" dijkstra
-            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalNode ) );
-            int pred = nodeFromPredecessorArray[finalNode];
-            int currentNode = finalNode;
-            while ( graph.isValidPredecessor( pred ) ) {
-//                System.out.println( "F: pred = " + pred );
-                int node = addEdgeAsFirst( routeBuilder, pred, currentNode );
-//                System.out.println( "F: node = " + node );
-                pred = nodeFromPredecessorArray[node];
-                currentNode = node;
-                NodeEntry nodeEntry = from.get( node );
-                if ( nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred ) { // omit the first edge
-                    break;
-                }
+            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
+            NodeState currentState = finalState;
+            while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
+                addEdgeAsFirst( routeBuilder, currentState.getEdge(), currentState.getNode() );
+                currentState = nodeFromPredecessorArray.get( currentState );
             }
-            currentNode = finalNode;
-            pred = nodeToPredecessorArray[finalNode];
-            while ( graph.isValidPredecessor( pred ) ) {
-//                System.out.println( "T: pred = " + pred );
-                int node = addEdgeAsLast( routeBuilder, pred, currentNode );
-//                System.out.println( "T: node = " + node );
-                pred = nodeToPredecessorArray[node];
-                currentNode = node;
-                NodeEntry nodeEntry = to.get( node);
-                if(nodeEntry != null && nodeEntry.getNodeId() == node && nodeEntry.getEdgeId() == pred){ // omit the last edge
-                    break;
-                }
+            currentState = finalState;
+            while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
+                addEdgeAsLast( routeBuilder, currentState.getEdge(), currentState.getNode() );
+                currentState = nodeFromPredecessorArray.get( currentState );
             }
         } else {
             throw new RouteNotFoundException();
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
-        }
-
-        if ( MEASURE_TIME ) {
-            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.CONTINUE );
-        }
-        if ( nodesFromVisited.size() < graph.getNodeCount() * ARRAY_COPY_RATIO ) {
-            TIntIterator it = nodesFromVisited.iterator();
-            while ( it.hasNext() ) {
-                int node = it.next();
-                nodeFromDistanceArray[node] = Graph.DISTANCE_DEFAULT;
-                nodeFromPredecessorArray[node] = Graph.PREDECESSOR_DEFAULT;
-                nodeFromClosedArray.set( node, Graph.CLOSED_DEFAULT );
-            }
-        } else {
-            graph.resetNodeDistanceArray( nodeFromDistanceArray );
-            graph.resetNodePredecessorArray( nodeFromPredecessorArray );
-            graph.resetNodeClosedArray( nodeFromClosedArray );
-        }
-        if ( nodesToVisited.size() < graph.getNodeCount() * ARRAY_COPY_RATIO ) {
-            TIntIterator it = nodesToVisited.iterator();
-            while ( it.hasNext() ) {
-                int node = it.next();
-                nodeToDistanceArray[node] = Graph.DISTANCE_DEFAULT;
-                nodeToPredecessorArray[node] = Graph.PREDECESSOR_DEFAULT;
-                nodeToClosedArray.set( node, Graph.CLOSED_DEFAULT );
-            }
-        } else {
-            graph.resetNodeDistanceArray( nodeToDistanceArray );
-            graph.resetNodePredecessorArray( nodeToPredecessorArray );
-            graph.resetNodeClosedArray( nodeToClosedArray );
-        }
-        if ( MEASURE_TIME ) {
-            TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.STOP );
         }
 
         return routeBuilder.build();
