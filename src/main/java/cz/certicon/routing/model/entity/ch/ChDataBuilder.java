@@ -19,6 +19,8 @@ public interface ChDataBuilder<T> {
 
     public void addShortcut( long shortcutId, long sourceEdgeId, long targetEdgeId );
     
+    public void setTurnTables(int[][][] turnTables);
+    
     public DistanceType getDistanceType();
 
     public T build();

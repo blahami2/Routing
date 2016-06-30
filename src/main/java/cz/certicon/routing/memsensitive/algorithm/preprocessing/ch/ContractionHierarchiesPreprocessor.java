@@ -214,6 +214,17 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            System.out.println( "adding shortcut: #" + ( startId + i ) + " where i = " + i  + ", startEdge = " + data.startEdges.get( i ) + ", endEdge = " + data.endEdges.get( i ) );
             dataBuilder.addShortcut( startId + i, data.getEdgeOrigId( data.startEdges.get( i ), startId ), data.getEdgeOrigId( data.endEdges.get( i ), startId ) );
         }
+        int[][][] tts = new int[graph.getNodeCount()][][];
+        for ( int i = 0; i < tts.length; i++ ) {
+            if ( data.turnRestrictions.containsKey( i ) ) { // has turntables for node
+                List<TIntList> list = data.turnRestrictions.get( i );
+                tts[i] = new int[list.size()][];
+                for ( int j = 0; j < tts[i].length; j++ ) { // forall sequences
+                    TIntList sequence = list.get( j );
+                    tts[i][j] = sequence.toArray(); // add
+                }
+            }
+        }
         // DEBUG
 //        out.flush();
         return dataBuilder.build();

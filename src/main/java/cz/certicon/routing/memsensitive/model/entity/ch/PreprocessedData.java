@@ -218,11 +218,11 @@ public class PreprocessedData {
 
     public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
         if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
-            return graph.isValidWay( state, targetEdge, predecessorArray );
+            return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
         }
         int node = state.getNode();
         if ( turnRestrictions[node] == null ) { // without turn restrictions for the concrete node, every turn is valid
-            return graph.isValidWay( state, targetEdge, predecessorArray );
+            return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
         }
         for ( int i = 0; i < turnRestrictions[node].length; i++ ) { // for all restrictions for this node
             int[] edgeSequence = turnRestrictions[node][i]; // load the edge sequence of this particular restrictions
@@ -252,7 +252,7 @@ public class PreprocessedData {
                 }
             }
         }
-        return graph.isValidWay( state, targetEdge, predecessorArray );
+        return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
     }
 
     public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {

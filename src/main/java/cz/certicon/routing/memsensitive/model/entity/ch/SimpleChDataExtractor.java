@@ -10,7 +10,9 @@ import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.ch.ChDataExtractor;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -43,6 +45,11 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
         return distanceType;
     }
 
+    @Override
+    public Iterator<Trinity<List<Long>, Long, Long>> getTurnTableIterator() {
+        return new TurnTableIterator();
+    }
+
     private class RankIterator implements Iterator<Pair<Long, Integer>> {
 
         private int counter = -1;
@@ -72,9 +79,58 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
         @Override
         public Trinity<Long, Long, Long> next() {
             counter++;
-            long startEdge = data.getEdgeOrigId( data.getStartEdge( counter), graph);
-            long endEdge = data.getEdgeOrigId( data.getEndEdge( counter), graph);
+            long startEdge = data.getEdgeOrigId( data.getStartEdge( counter ), graph );
+            long endEdge = data.getEdgeOrigId( data.getEndEdge( counter ), graph );
             return new Trinity<>( data.getStartId() + counter, startEdge, endEdge );
+        }
+
+    }
+
+    private class TurnTableIterator implements Iterator<Trinity<List<Long>, Long, Long>> {
+
+        private int counter = -1;
+        private int secondaryCounter = -1;
+        private final int lastValidIndex;
+
+        public TurnTableIterator() {
+            int last = -1;
+            int[][][] turnRestrictions = data.getTurnRestrictions();
+            for ( int i = turnRestrictions.length - 1; i >= 0; i-- ) {
+                if ( turnRestrictions[i] != null ) {
+                    last = i;
+                    break;
+                }
+            }
+            lastValidIndex = last;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return counter < lastValidIndex;
+        }
+
+        @Override
+        public Trinity<List<Long>, Long, Long> next() {
+            int[][][] turnRestrictions = data.getTurnRestrictions();
+            if ( secondaryCounter >= 0 ) {
+                if ( turnRestrictions[counter].length > ++secondaryCounter ) {
+                    return toTrinity( turnRestrictions[counter][secondaryCounter], counter );
+                } else {
+                    secondaryCounter = -1;
+                }
+            }
+            while ( turnRestrictions[++counter] == null || turnRestrictions[counter].length == 0 ) {
+                // do nothing
+            }
+            return toTrinity( turnRestrictions[counter][++secondaryCounter], counter );
+        }
+
+        public Trinity<List<Long>, Long, Long> toTrinity( int[] sequence, int node ) {
+            List<Long> seq = new ArrayList<>();
+            for ( int i = 0; i < sequence.length - 1; i++ ) { // ommit the last edge
+                seq.add( data.getEdgeOrigId( sequence[i], graph ) );
+            }
+            return new Trinity<>( seq, graph.getNodeOrigId( node ), data.getEdgeOrigId( sequence[sequence.length - 1], graph ) );
         }
 
     }

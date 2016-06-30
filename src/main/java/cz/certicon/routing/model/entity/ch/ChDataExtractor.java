@@ -8,7 +8,9 @@ package cz.certicon.routing.model.entity.ch;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
+import gnu.trove.list.TLongList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -21,4 +23,6 @@ public interface ChDataExtractor<T> {
     public Iterator<Trinity<Long, Long, Long>> getShortcutIterator();
 
     public DistanceType getDistanceType();
+
+    public Iterator<Trinity<List<Long>, Long, Long>> getTurnTableIterator();
 }

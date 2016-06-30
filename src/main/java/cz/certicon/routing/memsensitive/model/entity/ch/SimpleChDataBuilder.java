@@ -32,6 +32,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     private int counter;
     private long startId = 0;
     private Map<Long, Integer> shortcutIdMap = new HashMap<>();
+    private int[][][] turnTables;
 
     public SimpleChDataBuilder( Graph graph, DistanceType distanceType ) {
         this.graph = graph;
@@ -68,6 +69,11 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     @Override
     public DistanceType getDistanceType() {
         return distanceType;
+    }
+
+    @Override
+    public void setTurnTables( int[][][] turnTables ) {
+        this.turnTables = turnTables;
     }
 
     @Override
@@ -139,7 +145,9 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
                 outgoingShortcuts[i] = new int[0];
             }
         }
-        return new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startId );
+        PreprocessedData preprocessedData = new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startId );
+        preprocessedData.setTurnRestrictions( turnTables );
+        return preprocessedData;
     }
 
     private int getSourceNode( long shortcutId ) {
