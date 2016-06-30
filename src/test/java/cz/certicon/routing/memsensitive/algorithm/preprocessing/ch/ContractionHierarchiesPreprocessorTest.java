@@ -142,6 +142,27 @@ public class ContractionHierarchiesPreprocessorTest {
 //        System.out.println( preprocessedData );
 //        assertEquals( expResult, preprocessedData );
 
+        System.out.println( "incoming shortcuts:" );
+        for ( int[] incomingShortcut : preprocessedData.getIncomingShortcuts() ) {
+            for ( int i : incomingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "outgoing shortcuts:" );
+        for ( int[] outgoingShortcut : preprocessedData.getOutgoingShortcuts() ) {
+            for ( int i : outgoingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "ranks: " );
+        int nodeIdx = 0;
+        for ( int rank : preprocessedData.getRanks() ) {
+            System.out.println( "#" + nodeIdx++ + " -> " + rank );
+        }
+        System.out.println( "trs: " + preprocessedData.getTurnRestrictions() );
+
         DijkstraRoutingAlgorithm optimalAlgorithm = new DijkstraRoutingAlgorithm( graph );
         ContractionHierarchiesUbRoutingAlgorithm chAlgorithm = new ContractionHierarchiesUbRoutingAlgorithm( graph, preprocessedData );
         for ( int i = 0; i < 6; i++ ) {
@@ -182,7 +203,7 @@ public class ContractionHierarchiesPreprocessorTest {
 //        TimeMeasurement time = new TimeMeasurement();
 //        time.setTimeUnits( TimeUnits.MILLISECONDS );
 //        time.start();
-        PreprocessedData data = preprocessor.preprocess(new SimpleChDataBuilder( graph, distanceType ), graph, distanceType, (long) 10E9);
+//        PreprocessedData data = preprocessor.preprocess( new SimpleChDataBuilder( graph, distanceType ), graph, distanceType, (long) 10E9 );
 //        System.out.println( "Memsensitive preprocessed in: " + time.getCurrentTimeString() );
 //        System.out.println( "Created " + data.getShortcutCount() + " shortcuts" );
 //

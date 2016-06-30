@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.algorithms;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import static cz.certicon.routing.GlobalOptions.MEASURE_STATS;
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
@@ -15,6 +16,7 @@ import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
@@ -22,9 +24,15 @@ import cz.certicon.routing.utils.measuring.TimeLogger;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,12 +64,11 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         }
         Map<NodeState, NodeState> nodeFromPredecessorArray = new HashMap<>();
         Map<NodeState, Float> nodeFromDistanceArray = new HashMap<>();
-        Set<NodeState> nodeFromClosedArray = new HashSet<>();
         NodeDataStructure<NodeState> nodeFromDataStructure = new JgraphtFibonacciDataStructure();
-        Set<NodeState> nodesFromVisited = new HashSet<>();
+        TIntObjectMap<List<Pair<NodeState, Float>>> nodeFromStates = new TIntObjectHashMap<>();
         Map<NodeState, NodeState> nodeToPredecessorArray = new HashMap<>();
         Map<NodeState, Float> nodeToDistanceArray = new HashMap<>();
-        Set<NodeState> nodeToClosedArray = new HashSet<>();
+        TIntObjectMap<List<Pair<NodeState, Float>>> nodeToStates = new TIntObjectHashMap<>();
         NodeDataStructure<NodeState> nodeToDataStructure = new JgraphtFibonacciDataStructure();
         TIntList nodesToVisited = new TIntArrayList();
 
@@ -84,14 +91,18 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
                 NodeState state = nodeFromDataStructure.extractMin();
-//                System.out.println( "F: extracted: " + currentNode );
+//                System.out.println( "F: extracted: " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
-                nodesFromVisited.add( state );
-                nodeFromClosedArray.add( state );
                 int sourceRank = preprocessedData.getRank( state.getNode() );
                 float currentDistance = nodeFromDistanceArray.get( state );
+                List<Pair<NodeState, Float>> get = nodeFromStates.get( state.getNode() );
+                if ( get == null ) {
+                    get = new ArrayList<>();
+                    nodeFromStates.put( state.getNode(), get );
+                }
+                get.add( new Pair<>( state, currentDistance ) );
 //                System.out.println( "F: distance = " + currentDistance );
                 TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( state.getNode(), graph );
                 while ( outgoingEdgesIterator.hasNext() ) {
@@ -117,14 +128,19 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             }
             if ( !nodeToDataStructure.isEmpty() ) {
                 NodeState state = nodeToDataStructure.extractMin();
-//                System.out.println( "T: extracted: " + currentNode );
+//                System.out.println( "T: extracted: " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
                 nodesToVisited.add( state.getNode() );
-                nodeToClosedArray.add( state );
                 int sourceRank = preprocessedData.getRank( state.getNode() );
                 float currentDistance = nodeToDistanceArray.get( state );
+                List<Pair<NodeState, Float>> get = nodeToStates.get( state.getNode() );
+                if ( get == null ) {
+                    get = new ArrayList<>();
+                    nodeToStates.put( state.getNode(), get );
+                }
+                get.add( new Pair<>( state, currentDistance ) );
 //                System.out.println( "T: distance = " + currentDistance );
                 TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( state.getNode(), graph );
                 while ( incomingEdgesIterator.hasNext() ) {
@@ -149,16 +165,39 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 }
             }
         }
-        NodeState finalState = null;
-        double finalDistance = Double.MAX_VALUE;
-        Iterator<NodeState> itFrom = nodesFromVisited.iterator();
-        while ( itFrom.hasNext() ) {
-            NodeState state = itFrom.next();
-            if ( nodeFromClosedArray.contains( state ) && nodeToClosedArray.contains( state ) ) {
-                double distance = nodeFromDistanceArray.get( state ) + nodeToDistanceArray.get( state );
-                if ( 0 <= distance && distance < finalDistance ) {
-                    finalDistance = distance;
-                    finalState = state;
+        NodeState finalFromState = null;
+        NodeState finalToState = null;
+        float finalDistance = Float.MAX_VALUE;
+        for ( int node : nodeFromStates.keys() ) {
+            if ( nodeFromStates.containsKey( node ) && nodeToStates.containsKey( node ) ) {
+                List<Pair<NodeState, Float>> fromList = nodeFromStates.get( node );
+                List<Pair<NodeState, Float>> toList = nodeToStates.get( node );
+                Comparator<Pair<NodeState, Float>> cmp = new Comparator<Pair<NodeState, Float>>() {
+                    @Override
+                    public int compare( Pair<NodeState, Float> o1, Pair<NodeState, Float> o2 ) {
+                        return Float.compare( o1.b, o2.b );
+                    }
+                };
+                Collections.sort( fromList, cmp );
+                Collections.sort( toList, cmp );
+                for ( Pair<NodeState, Float> fromPair : fromList ) {
+                    boolean valid = true;
+                    for ( Pair<NodeState, Float> toPair : toList ) {
+                        // if is valid
+                        float distance = fromPair.b + toPair.b;
+                        if ( 0 <= distance && distance < finalDistance ) {
+                            finalDistance = distance;
+                            finalFromState = fromPair.a;
+                            finalToState = toPair.a;
+                        }
+                        break;
+                        // else
+                        // valid = false
+
+                    }
+                    if ( valid ) {
+                        break;
+                    }
                 }
             }
         }
@@ -169,19 +208,19 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
-        if ( finalState != null ) {
+        if ( finalFromState != null && finalToState != null ) {
 //            System.out.println( "final node = " + finalNode );
             // set target to final, then add as first, then add as last for the "to" dijkstra
-            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
-            NodeState currentState = finalState;
+            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalFromState.getNode() ) );
+            NodeState currentState = finalFromState;
             while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
                 addEdgeAsFirst( routeBuilder, currentState.getEdge(), currentState.getNode() );
                 currentState = nodeFromPredecessorArray.get( currentState );
             }
-            currentState = finalState;
-            while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
+            currentState = finalToState;
+            while ( nodeToPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
                 addEdgeAsLast( routeBuilder, currentState.getEdge(), currentState.getNode() );
-                currentState = nodeFromPredecessorArray.get( currentState );
+                currentState = nodeToPredecessorArray.get( currentState );
             }
         } else {
             throw new RouteNotFoundException();

@@ -113,7 +113,13 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
                         startId = rs.getLong( "startId" );
                     }
                 }
-                T preprocessedData = preprocessor.preprocess( chDataBuilder, graph, chDataBuilder.getDistanceType(), startId + 1 );
+                chDataBuilder.setStartId( startId );
+                T preprocessedData = preprocessor.preprocess( chDataBuilder, graph, chDataBuilder.getDistanceType(), startId + 1, new SimpleProgressListener( 100 ) {
+                    @Override
+                    public void onProgressUpdate( double d ) {
+                        System.out.println( String.format( "%.0f %%", d * 100 ) );
+                    }
+                } );
                 write( chDataFactory, preprocessedData );
                 if ( MEASURE_TIME ) {
                     TimeLogger.log( TimeLogger.Event.PREPROCESSING, TimeLogger.Command.STOP );
@@ -155,9 +161,6 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
             while ( shortcutIterator.hasNext() ) {
                 Trinity<Long, Long, Long> shortcut = shortcutIterator.next();
                 int idx = 1;
-                if(shortcut.a == 127945){
-                    System.out.println( "statement: " + shortcut.a + " = " + shortcut.b + " -> " + shortcut.c );
-                }
                 shortcutStatement.setLong( idx++, shortcut.a );
                 shortcutStatement.setLong( idx++, shortcut.b );
                 shortcutStatement.setLong( idx++, shortcut.c );

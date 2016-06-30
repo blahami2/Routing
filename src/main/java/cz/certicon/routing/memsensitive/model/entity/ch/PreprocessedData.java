@@ -184,6 +184,13 @@ public class PreprocessedData {
         }
     }
 
+    public long getEdgeOrigId( int edge, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return graph.getEdgeOrigId( edge );
+        }
+        return edge - graph.getEdgeCount() + startId;
+    }
+
     public float getLength( int shortcut, Graph graph ) {
         if ( shortcut < graph.getEdgeCount() ) {
             return graph.getLength( shortcut );

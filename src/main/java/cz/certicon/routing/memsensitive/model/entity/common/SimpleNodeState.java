@@ -59,5 +59,10 @@ public class SimpleNodeState implements NodeState {
         }
         return true;
     }  
+
+    @Override
+    public String toString() {
+        return "SimpleNodeState{" + "node=" + node + ", edge=" + edge + '}';
+    }
     
 }

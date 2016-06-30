@@ -72,23 +72,8 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
         @Override
         public Trinity<Long, Long, Long> next() {
             counter++;
-            long startEdge;
-            if ( data.getStartEdge( counter ) < graph.getEdgeCount() ) {
-                startEdge = graph.getEdgeOrigId( data.getStartEdge( counter ) );
-            } else {
-                startEdge = data.getStartId() + data.getStartEdge( counter ) - graph.getEdgeCount();
-            }
-            long endEdge;
-            if ( data.getEndEdge( counter ) < graph.getEdgeCount() ) {
-                endEdge = graph.getEdgeOrigId( data.getEndEdge( counter ) );
-            } else {
-                endEdge = data.getStartId() + data.getEndEdge( counter ) - graph.getEdgeCount();
-            }
-            if ( data.getStartId() + counter == 127945 ) {
-                System.out.println( "writing: " + ( data.getStartId() + counter ) + " = " + startEdge + " -> " + endEdge );
-                System.out.println( "from: " + counter + " = " + data.getStartEdge( counter ) + " -> " + data.getEndEdge( counter ) );
-                System.out.println( "data: startId = " + data.getStartId() + ", counter = " + counter + ", edgeCount = " + graph.getEdgeCount() );
-            }
+            long startEdge = data.getEdgeOrigId( data.getStartEdge( counter), graph);
+            long endEdge = data.getEdgeOrigId( data.getEndEdge( counter), graph);
             return new Trinity<>( data.getStartId() + counter, startEdge, endEdge );
         }
 

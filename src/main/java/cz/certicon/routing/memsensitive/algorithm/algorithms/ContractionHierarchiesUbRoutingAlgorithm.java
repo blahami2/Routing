@@ -15,6 +15,7 @@ import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
@@ -23,9 +24,13 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,12 +64,12 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         Map<NodeState, Float> nodeFromDistanceArray = new HashMap<>();
         Set<NodeState> nodeFromClosedArray = new HashSet<>();
         NodeDataStructure<NodeState> nodeFromDataStructure = new JgraphtFibonacciDataStructure();
-        Set<NodeState> nodesFromVisited = new HashSet<>();
+        TIntObjectMap<List<Pair<NodeState, Float>>> nodeFromStates = new TIntObjectHashMap<>();
         Map<NodeState, NodeState> nodeToPredecessorArray = new HashMap<>();
         Map<NodeState, Float> nodeToDistanceArray = new HashMap<>();
         Set<NodeState> nodeToClosedArray = new HashSet<>();
         NodeDataStructure<NodeState> nodeToDataStructure = new JgraphtFibonacciDataStructure();
-        Set<NodeState> nodesToVisited = new HashSet<>();
+        TIntObjectMap<List<Pair<NodeState, Float>>> nodeToStates = new TIntObjectHashMap<>();
 
         for ( NodeEntry nodeEntry : from.values() ) {
             int node = nodeEntry.getNodeId();
@@ -82,38 +87,51 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
             nodeToDistanceArray.put( state, distance );
             nodeToDataStructure.add( state, distance );
         }
-        NodeState finalState = null;
+//        NodeState finalState = null;
+        NodeState finalFromState = null;
+        NodeState finalToState = null;
         double finalDistance = Double.MAX_VALUE;
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
                 NodeState state = nodeFromDataStructure.extractMin();
+//                System.out.println( "F: state = " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
-                nodesFromVisited.add( state );
                 nodeFromClosedArray.add( state );
                 int sourceRank = preprocessedData.getRank( state.getNode() );
                 float currentDistance = nodeFromDistanceArray.get( state );
+                List<Pair<NodeState, Float>> get = nodeFromStates.get( state.getNode() );
+                if ( get == null ) {
+                    get = new ArrayList<>();
+                    nodeFromStates.put( state.getNode(), get );
+                }
+                get.add( new Pair<>( state, currentDistance ) );
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
-                    Iterator<NodeState> it = nodeFromDataStructure.iterator();
-                    while ( it.hasNext() ) {
-                        nodesFromVisited.add( it.next() );
-                    }
                     nodeFromDataStructure.clear();
                 } else {
-                    if ( nodeToClosedArray.contains( state ) ) {
-                        float nodeDistance = currentDistance + nodeToDistanceArray.get( state );
-                        if ( nodeDistance < finalDistance ) {
-                            finalDistance = nodeDistance;
-                            finalState = state;
+                    if ( nodeToStates.containsKey( state.getNode() ) ) {
+//                        System.out.println( "F-upper bound: " + state + ", distance = " + currentDistance );
+                        List<Pair<NodeState, Float>> toStates = nodeToStates.get( state.getNode() );
+                        for ( Pair<NodeState, Float> toState : toStates ) {
+                            float nodeDistance = currentDistance + toState.b;
+                            if ( nodeDistance < finalDistance ) {
+                                finalDistance = nodeDistance;
+                                finalFromState = state;
+                                finalToState = toState.a;
+                            }
+                            break;
                         }
                     }
                     TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( state.getNode(), graph );
+//                    System.out.println( "F-iterating over neighbours" );
                     while ( outgoingEdgesIterator.hasNext() ) {
                         int edge = outgoingEdgesIterator.next();
+//                        System.out.println( "F-edge#" + edge );
                         int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
                         if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+//                            System.out.println( "F-rank-ok-node#" + otherNode );
                             if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
                                 continue;
                             }
@@ -128,32 +146,42 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                                 nodeFromPredecessorArray.put( targetState, state );
                                 nodeFromDataStructure.notifyDataChange( targetState, distance );
                             }
+                        } else {
+//                            System.out.println( "F-rank-not-ok-node#" + state.getNode() + " -> " + sourceRank + ", node#" + otherNode + " -> " + preprocessedData.getRank( otherNode ) );
                         }
                     }
                 }
             }
             if ( !nodeToDataStructure.isEmpty() ) {
                 NodeState state = nodeToDataStructure.extractMin();
+//                System.out.println( "T: state = " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
                 }
-                nodesToVisited.add( state );
                 nodeToClosedArray.add( state );
                 int sourceRank = preprocessedData.getRank( state.getNode() );
                 float currentDistance = nodeToDistanceArray.get( state );
+                List<Pair<NodeState, Float>> get = nodeToStates.get( state.getNode() );
+                if ( get == null ) {
+                    get = new ArrayList<>();
+                    nodeToStates.put( state.getNode(), get );
+                }
+                get.add( new Pair<>( state, currentDistance ) );
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
-                    Iterator<NodeState> it = nodeToDataStructure.iterator();
-                    while ( it.hasNext() ) {
-                        nodesToVisited.add( it.next() );
-                    }
                     nodeToDataStructure.clear();
                 } else {
-                    if ( nodeFromClosedArray.contains( state ) ) {
-                        float nodeDistance = currentDistance + nodeFromDistanceArray.get( state );
-                        if ( nodeDistance < finalDistance ) {
-                            finalDistance = nodeDistance;
-                            finalState = state;
+                    if ( nodeFromStates.containsKey( state.getNode() ) ) {
+//                        System.out.println( "T-upper bound: " + state + ", distance = " + currentDistance );
+                        List<Pair<NodeState, Float>> fromStates = nodeFromStates.get( state.getNode() );
+                        for ( Pair<NodeState, Float> fromState : fromStates ) {
+                            float nodeDistance = currentDistance + fromState.b;
+                            if ( nodeDistance < finalDistance ) {
+                                finalDistance = nodeDistance;
+                                finalToState = state;
+                                finalFromState = fromState.a;
+                            }
+                            break;
                         }
                     }
                     TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( state.getNode(), graph );
@@ -187,21 +215,22 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
-        if ( finalState != null ) {
-//            System.out.println( "final node = " + finalNode );
+        if ( finalFromState != null && finalToState != null ) {
+//            System.out.println( "Final states = F: " + finalFromState + ", T: " + finalToState );
             // set target to final, then add as first, then add as last for the "to" dijkstra
-            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
-            NodeState currentState = finalState;
+            routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalFromState.getNode() ) );
+            NodeState currentState = finalFromState;
             while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
                 addEdgeAsFirst( routeBuilder, currentState.getEdge(), currentState.getNode() );
                 currentState = nodeFromPredecessorArray.get( currentState );
             }
-            currentState = finalState;
-            while ( nodeFromPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
+            currentState = finalToState;
+            while ( nodeToPredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {
                 addEdgeAsLast( routeBuilder, currentState.getEdge(), currentState.getNode() );
-                currentState = nodeFromPredecessorArray.get( currentState );
+                currentState = nodeToPredecessorArray.get( currentState );
             }
         } else {
+//            System.out.println( "Final states: NONE" );
             throw new RouteNotFoundException();
         }
         if ( MEASURE_TIME ) {

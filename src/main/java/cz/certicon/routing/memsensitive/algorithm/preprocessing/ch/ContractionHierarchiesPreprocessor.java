@@ -30,6 +30,8 @@ import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,16 +74,20 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     public ContractionHierarchiesPreprocessor( NodeRecalculationStrategy nodeRecalculationStrategy ) {
         this.nodeRecalculationStrategy = nodeRecalculationStrategy;
+        this.edgeDifferenceCalculator = new BasicEdgeDifferenceCalculator();
+        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
     }
 
     @Override
     public void setNodeRecalculationStrategy( NodeRecalculationStrategy nodeRecalculationStrategy ) {
         this.nodeRecalculationStrategy = nodeRecalculationStrategy;
+        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
     }
 
     @Override
     public void setEdgeDifferenceCalculator( EdgeDifferenceCalculator edgeDifferenceCalculator ) {
         this.edgeDifferenceCalculator = edgeDifferenceCalculator;
+        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
         // DEBUG
 //        if ( edgeDifferenceCalculator instanceof SpatialHeuristicEdgeDifferenceCalculator ) {
 //            ( (SpatialHeuristicEdgeDifferenceCalculator) edgeDifferenceCalculator ).preprocessor = this;
@@ -98,6 +104,10 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         // DEBUG
 //        this.graph = graph;
 //        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
+
+        System.out.println( "================================ preprocessing ================================" );
+        System.out.println( "start id = " + startId );
+        dataBuilder.setStartId( startId );
 
         int nodeCount = graph.getNodeCount();
         NodeDataStructure<Integer> priorityQueue = new JgraphtFibonacciDataStructure<>();
@@ -128,7 +138,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         for ( int node = 0; node < nodeCount; node++ ) {
 //        for ( int i = 0; i < nodeCount; i++ ) {
 //            int node = sortedNodes.get( i ).a;
-//            out.println("node#" + node + " = " + graph.getNodeOrigId( node ));
+//            System.out.println( "node#" + node + " = " + graph.getNodeOrigId( node ) );
             int numberOfShortcuts = calculateShortcuts( data, removedNodes, node, graph );
             int ed = nodeRecalculationStrategy.getEdgeDifferenceCalculator().calculate( -1, nodeDegrees, node, numberOfShortcuts );
 //            System.out.println( "#" + node + " = " + ed );
@@ -210,14 +220,11 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
     }
 
     private int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, Graph graph ) {
+//        System.out.println( "-------- shortcut calculation --------" );
         if ( removedNodes.get( node ) ) {
             return 0;
         }
         NodeDataStructure<NodeState> dijkstraPriorityQueue = new JgraphtFibonacciDataStructure<>();
-        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
-        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
-        Set<NodeState> nodeClosedArray = new HashSet<>();
-        TIntFloatMap nodeMinDistanceMap = new TIntFloatHashMap();
         // DEBUG
 //        if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
 //            out.println( "shortcut for #" + graph.getNodeOrigId( node ) );
@@ -284,14 +291,20 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //                out.println( "#" + graph.getNodeOrigId( node ) + "-path: from #" + graph.getNodeOrigId( entry.getKey().a ) + " to #" + graph.getNodeOrigId( entry.getKey().b ) + " in " + entry.getValue().c );
 //            }
 //        }
-        List<Pair<Integer, Integer>> addedShortcuts = new ArrayList<>();
+        int addedShortcuts = 0;
+        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
+        Set<NodeState> nodeClosedArray = new HashSet<>();
+        TIntFloatMap nodeMinDistanceMap = new TIntFloatHashMap();
         // for each source calculate Dijkstra to all the targets {without using the node)
         for ( int from : sources ) {
+//            System.out.println( "Dijkstra-from = " + from );
             float upperBound = upperBounds.get( from );
-            NodeState state = NodeState.Factory.newInstance( node, -1 );
+            NodeState state = NodeState.Factory.newInstance( from, -1 );
             nodeDistanceArray.put( state, 0.0f );
             dijkstraPriorityQueue.add( state, 0.0f );
             nodeMinDistanceMap.put( from, 0.0f );
+//            System.out.println( "Putting-distance-#" + from + ": " + 0.0f );
             // DEBUG
 //            if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
 //                out.println( "#" + graph.getNodeOrigId( node ) + "-Dijkstra for #" + graph.getNodeOrigId( from ) + ", upper bound = " + upperBound );
@@ -299,6 +312,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             while ( !dijkstraPriorityQueue.isEmpty() ) {
                 state = dijkstraPriorityQueue.extractMin();
                 float currentDistance = nodeDistanceArray.get( state );
+//                System.out.println( "Extracted-" + state + ", distance = " + currentDistance );
                 // DEBUG
 //                if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
 //                    out.println( "#" + graph.getNodeOrigId( node ) + "-extracted #" + graph.getNodeOrigId( currentNode ) + " -> " + currentDistance );
@@ -325,6 +339,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                         nodePredecessorArray.put( targetState, state );
                         dijkstraPriorityQueue.notifyDataChange( targetState, newDistance );
                         if ( !nodeMinDistanceMap.containsKey( target ) || nodeMinDistanceMap.get( target ) > newDistance ) {
+//                            System.out.println( "Putting-distance-#" + target + ": " + newDistance );
                             nodeMinDistanceMap.put( target, newDistance );
                         }
                     }
@@ -335,13 +350,13 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 if ( from == to ) {
                     continue;
                 }
-//                System.out.println( "#" + node + " - path: " + from + " -> " + to );
-                float distance = nodeMinDistanceMap.get( to );
+                float distance = nodeMinDistanceMap.containsKey( to ) ? nodeMinDistanceMap.get( to ) : Float.MAX_VALUE;
                 Trinity<Integer, Integer, Float> shortcutDistanceT = fromToDistanceMap.get( new Pair<>( from, to ) );
+//                System.out.println( "#" + node + " - path: " + from + " -> " + to + " => shortcut distance = " + shortcutDistanceT.c + ", path distance = " + distance );
                 //   create shortcut if longer
                 if ( DoubleComparator.isLowerThan( shortcutDistanceT.c, distance, PRECISION ) ) {
-                    data.addShortcut( shortcutDistanceT.a, shortcutDistanceT.b );
-                    addedShortcuts.add( new Pair<>( from, to ) );
+                    data.addTemporaryShortcut( shortcutDistanceT.a, shortcutDistanceT.b );
+                    addedShortcuts++;
                     // DEBUG
 //                    if ( graph.getNodeOrigId( node ) == nodeOfInterest || nodeOfInterest < 0 ) {
 //                        out.println( "#" + graph.getNodeOrigId( node ) + "- adding shortcut #" + graph.getNodeOrigId( from ) + " -> #" + graph.getNodeOrigId( to ) );
@@ -355,9 +370,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             nodePredecessorArray.clear();
         }
         // delete added shortcuts
-        for ( int i = 0; i < addedShortcuts.size(); i++ ) {
-            data.removeLastShortcut();
-        }
+        data.clearTemporaryShortcuts();
 //        for ( Pair<Integer, Integer> addedShortcut : addedShortcuts ) {
 //            int source = addedShortcut.a;
 //            int target = addedShortcut.b;
@@ -370,10 +383,11 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            out.println( "shortcut for #" + graph.getNodeOrigId( node ) + " = " + addedShortcuts.size() );
 //        }
 //        shortcutCounts.add( new Pair<>( (int) graph.getNodeOrigId( node ), "" + addedShortcuts.size() ) );
-        return addedShortcuts.size();
+        return addedShortcuts;
     }
 
     private void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, Graph graph ) {
+//        System.out.println( "-------- contracting node --------" );
         // disable node
         removedNodes.set( node, true );
 
@@ -382,10 +396,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            out.println( "contract for #" + graph.getNodeOrigId( node ) );
 //        }
         NodeDataStructure<NodeState> dijkstraPriorityQueue = new JgraphtFibonacciDataStructure<>();
-        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
-        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
-        Set<NodeState> nodeClosedArray = new HashSet<>();
-        TIntFloatMap nodeMinDistanceMap = new TIntFloatHashMap();
         // lower neighbour's degree
         TIntIterator incIt = data.getIncomingEdgesIterator( node );
         while ( incIt.hasNext() ) {
@@ -472,17 +482,23 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        Collections.sort( sources );
 //        List<Integer> targets = new ArrayList<>( targetSet );
 //        Collections.sort( targets );
+        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
+        Set<NodeState> nodeClosedArray = new HashSet<>();
+        TIntFloatMap nodeMinDistanceMap = new TIntFloatHashMap();
         Set<Integer> visitedNodes = new HashSet<>();
         // for each source calculate Dijkstra to all the targets {without using the node)
         for ( int from : sources ) {
+//            System.out.println( "Dijkstra-from = " + from );
             float upperBound = upperBounds.get( from );
-            NodeState state = NodeState.Factory.newInstance( node, -1 );
+            NodeState state = NodeState.Factory.newInstance( from, -1 );
             nodeDistanceArray.put( state, 0.0f );
             dijkstraPriorityQueue.add( state, 0.0f );
             nodeMinDistanceMap.put( from, 0.0f );
             while ( !dijkstraPriorityQueue.isEmpty() ) {
                 state = dijkstraPriorityQueue.extractMin();
                 float currentDistance = nodeDistanceArray.get( state );
+//                System.out.println( "Extracted-" + state + ", distance = " + currentDistance );
                 //   use the longest distance as an upper bound
                 if ( DoubleComparator.isLowerThan( upperBound, currentDistance, PRECISION ) ) {
                     dijkstraPriorityQueue.clear();
@@ -516,8 +532,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                     continue;
                 }
 //                System.out.println( "#" + node + " - path: " + from + " -> " + to );
-                float distance = nodeMinDistanceMap.get( to );
+                float distance = nodeMinDistanceMap.containsKey( to ) ? nodeMinDistanceMap.get( to ) : Float.MAX_VALUE;
                 Trinity<Integer, Integer, Float> shortcutDistanceT = fromToDistanceMap.get( new Pair<>( from, to ) );
+//                System.out.println( "#" + node + " - path: " + from + " -> " + to + " => shortcut distance = " + shortcutDistanceT.c + ", path distance = " + distance );
                 //   create shortcut if longer
                 if ( DoubleComparator.isLowerThan( shortcutDistanceT.c, distance, PRECISION ) ) {
 //                    System.out.println( "#" + node + " - creating shortcut: " + from + " -> " + to );
@@ -587,36 +604,45 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         public final TIntList[] incomingShortcuts;
         public final TIntList[] outgoingShortcuts;
         public final TFloatList lengths = new TFloatArrayList();
+
+        public final TIntList tmpSources = new TIntArrayList();
+        public final TIntList tmpTargets = new TIntArrayList();
+        public final TIntList tmpStartEdges = new TIntArrayList();
+        public final TIntList tmpEndEdges = new TIntArrayList();
+        public final TIntList[] tmpIncomingShortcuts;
+        public final TIntList[] tmpOutgoingShortcuts;
+        public final TFloatList tmpLengths = new TFloatArrayList();
+        public final TIntSet tmpNodes = new TIntHashSet();
         public final Graph graph;
+        public final TIntObjectMap<List<ShortcutLocator>> edgeTrs = new TIntObjectHashMap<>(); // key = edge, value = list{a = node, b = sequence}
         public final TIntObjectMap<List<TIntList>> turnRestrictions = new TIntObjectHashMap<>();
-        public final TIntObjectMap<List<Pair<Integer, Integer>>> shortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
+        public final TIntObjectMap<List<ShortcutLocator>> shortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
+        public final TIntObjectMap<List<TIntList>> tmpTurnRestrictions = new TIntObjectHashMap<>();
+        public final TIntObjectMap<List<ShortcutLocator>> tmpShortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
         private int shortcutCounter = 0;
+        private int tmpShortcutCounter = -1;
 
         public ProcessingData( Graph graph ) {
             this.graph = graph;
             incomingShortcuts = new TIntArrayList[graph.getNodeCount()];
             outgoingShortcuts = new TIntArrayList[graph.getNodeCount()];
-            // add all shortcuts from graph
+            tmpIncomingShortcuts = new TIntArrayList[graph.getNodeCount()];
+            tmpOutgoingShortcuts = new TIntArrayList[graph.getNodeCount()];
+            // add only to edgeTrs
             if ( graph.getTurnRestrictions() != null ) {
                 int[][][] tr = graph.getTurnRestrictions();
                 for ( int i = 0; i < graph.getNodeCount(); i++ ) {
                     int[][] nodeTr = tr[i];
                     if ( nodeTr != null ) {
-                        List<TIntList> sequences = turnRestrictions.get( i );
-                        if ( sequences == null ) {
-                            sequences = new ArrayList<>();
-                            turnRestrictions.put( i, sequences );
-                        }
                         for ( int j = 0; j < nodeTr.length; j++ ) {
-                            sequences.add( new TIntArrayList( nodeTr[j] ) );
                             for ( int k = 0; k < nodeTr[j].length; k++ ) {
                                 int edge = nodeTr[j][k];
-                                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( edge );
+                                List<ShortcutLocator> pairs = edgeTrs.get( edge );
                                 if ( pairs == null ) {
                                     pairs = new ArrayList<>();
-                                    shortcutsTrs.put( edge, pairs );
+                                    edgeTrs.put( edge, pairs );
                                 }
-                                pairs.add( new Pair<>( i, sequences.size() - 1 ) );
+                                pairs.add( new ShortcutLocator( i, j ) );
                             }
                         }
                     }
@@ -625,12 +651,13 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         }
 
         public void addShortcut( int startEdge, int endEdge ) {
+//            System.out.println( "Adding shortcut: #" + ( shortcutCounter + graph.getEdgeCount() ) + " = " + startEdge + " -> " + endEdge );
             int source = getSource( startEdge );
             int target = getTarget( endEdge );
 
-            int thisId = sources.size() + graph.getEdgeCount();
+            int thisId = shortcutCounter + graph.getEdgeCount();
             if ( thisId == source || thisId == target ) {
-                throw new AssertionError( "shortcut #" + thisId + " = " + source + " -> " + target );
+//                throw new AssertionError( "shortcut #" + thisId + " = " + source + " -> " + target );
             }
 
 //            System.out.println( "#" + shortcutCounter + " - adding shortcut[edges] - " + startEdge + " -> " + endEdge );
@@ -647,158 +674,219 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             if ( incomingShortcuts[target] == null ) {
                 incomingShortcuts[target] = new TIntArrayList();
             }
-            incomingShortcuts[target].add( shortcutCounter + graph.getEdgeCount() );
+            incomingShortcuts[target].add( thisId );
 //            System.out.println( "shortcut - incoming[#" + target + "] = " + incomingShortcuts[target] );
             if ( outgoingShortcuts[source] == null ) {
                 outgoingShortcuts[source] = new TIntArrayList();
             }
-            outgoingShortcuts[source].add( shortcutCounter + graph.getEdgeCount() );
+            outgoingShortcuts[source].add( thisId );
 //            System.out.println( "shortcut - outgoing[#" + source + "] = " + outgoingShortcuts[source] );
 
             // ADD TR if needed
-            Set<Pair<Integer, Integer>> trSet = new HashSet<>();
-            if ( shortcutsTrs.containsKey( startEdge ) ) {
-                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( startEdge );
-                for ( Pair<Integer, Integer> pair : pairs ) {
-                    TIntList sequence = turnRestrictions.get( pair.a ).get( pair.b );
-                    if ( endEdge == sequence.get( 0 ) ) {
-                        trSet.add( pair );
-                    } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
-                        trSet.add( pair );
-                    } else {
-                        for ( int i = 0; i < sequence.size(); i++ ) {
-                            int edge = sequence.get( i );
-                            if ( edge == startEdge ) {
-                                if ( ( i + 1 < sequence.size() && sequence.get( i + 1 ) == endEdge ) || i + 1 == sequence.size() ) {
-                                    trSet.add( pair );
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if ( shortcutsTrs.containsKey( endEdge ) ) {
-                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( endEdge );
-                for ( Pair<Integer, Integer> pair : pairs ) {
-                    TIntList sequence = turnRestrictions.get( pair.a ).get( pair.b );
-                    if ( endEdge == sequence.get( 0 ) ) {
-                        trSet.add( pair );
-                    } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
-                        trSet.add( pair );
-                    } else {
-                        for ( int i = 0; i < sequence.size(); i++ ) {
-                            int edge = sequence.get( i );
-                            if ( edge == startEdge ) {
-                                if ( ( i + 1 < sequence.size() && sequence.get( i + 1 ) == endEdge ) || i + 1 == sequence.size() ) {
-                                    trSet.add( pair );
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            for ( Pair<Integer, Integer> pair : trSet ) {
-                int node = pair.a;
-                int seqId = pair.b;
-                TIntList sequence = turnRestrictions.get( node ).get( seqId );
-                TIntArrayList seq = new TIntArrayList();
-                int lastNode = -1;
-                int lastEdge = -1;
-                { // get the FIRST node independent of the direction
-                    int e1 = sequence.get( 0 );
-                    int s1 = getSource( e1 );
-                    int t1 = getTarget( e1 );
-                    int e2 = sequence.get( 1 );
-                    int s2 = getSource( e2 );
-                    int t2 = getTarget( e2 );
-                    if ( t1 == s2 || t1 == t2 ) {
-                        lastNode = s1;
-                    } else if ( s1 == s2 || s1 == t2 ) {
-                        lastNode = t1;
-                    }
-                }
-                if ( endEdge == sequence.get( 0 ) ) {
-                    seq.add( shortcutCounter + graph.getEdgeCount() );
-                    for ( int i = 1; i < sequence.size(); i++ ) {
-                        seq.add( sequence.get( i ) );
-                    }
-                    lastNode = node;
-                } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) {
-                    for ( int i = 0; i < sequence.size() - 1; i++ ) {
-                        seq.add( sequence.get( i ) );
-                    }
-                    seq.add( shortcutCounter + graph.getEdgeCount() );
-                    lastNode = node;
-                } else {
-                    for ( int i = 0; i < sequence.size(); i++ ) { // for each part of this sequence
-                        // add to the list until the start and edge are met - add them as one
-                        // save last node
-                        if ( lastEdge != -1 ) {
-                            lastNode = getOtherNode( lastEdge, lastNode );
-                        }
-                        if ( sequence.get( i ) == startEdge && ( i + 1 == sequence.size() || sequence.get( i + 1 ) == endEdge ) ) {
-                            lastEdge = shortcutCounter + graph.getEdgeCount();
-                            i++; // move past the target edge
-                        } else {
-                            lastEdge = sequence.get( i );
-                        }
-                        seq.add( lastEdge );
-                    }
-                }
-                List<TIntList> get = turnRestrictions.get( lastNode );
-                if ( get == null ) {
-                    get = new ArrayList<>();
-                    turnRestrictions.put( lastNode, get );
-                }
-                get.add( seq );
-                List<Pair<Integer, Integer>> strs = shortcutsTrs.get( shortcutCounter + graph.getEdgeCount() );
-                if ( strs == null ) {
-                    strs = new ArrayList<>();
-                    shortcutsTrs.put( shortcutCounter + graph.getEdgeCount(), strs );
-                }
-                strs.add( new Pair<>( lastNode, get.size() - 1 ) );
-            }
+            Set<ShortcutLocator> trSet = getShortcutLocators( edgeTrs, startEdge, endEdge );
+            addTurnRestrictions( trSet, turnRestrictions, shortcutsTrs, startEdge, endEdge, thisId );
+            trSet = getShortcutLocators( turnRestrictions, shortcutsTrs, startEdge, endEdge );
+            addTurnRestrictions( trSet, turnRestrictions, turnRestrictions, shortcutsTrs, startEdge, endEdge, thisId );
             shortcutCounter++;
         }
 
-        public void removeLastShortcut() {
-            shortcutCounter--;
-            int startEdge = startEdges.get( shortcutCounter );
-            int endEdge = endEdges.get( shortcutCounter );
-//            System.out.println( "#" + shortcutCounter + " - removing shortcut[edges] - " + startEdges.get( shortcutCounter ) + " -> " + endEdges.get( shortcutCounter ) );
-            int source = sources.get( shortcutCounter );
-            sources.removeAt( shortcutCounter );
-            int target = targets.get( shortcutCounter );
-            targets.removeAt( shortcutCounter );
-            startEdges.removeAt( shortcutCounter );
-            endEdges.removeAt( shortcutCounter );
-            lengths.removeAt( shortcutCounter );
-            outgoingShortcuts[source].removeAt( outgoingShortcuts[source].size() - 1 );
-            incomingShortcuts[target].removeAt( incomingShortcuts[target].size() - 1 );
-            if ( shortcutsTrs.containsKey( startEdge ) ) {
-                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( startEdge );
-                for ( Pair<Integer, Integer> pair : pairs ) {
-                    turnRestrictions.get( pair.a ).remove( pair.b.intValue() );
+        private Set<ShortcutLocator> getShortcutLocators( TIntObjectMap<List<TIntList>> trs, TIntObjectMap<List<ShortcutLocator>> trMap, int startEdge, int endEdge ) {
+            Set<ShortcutLocator> shortcutLocators = new HashSet<>();
+            int[] edges = { startEdge, endEdge };
+            for ( int currentEdge : edges ) {
+                if ( trMap.containsKey( currentEdge ) ) { // if there are turn restrictions on the startEdge, apply the restrictions to this shortcut (prepare them for addition)
+                    List<ShortcutLocator> pairs = trMap.get( currentEdge ); // obtain all the pairs of starting edge
+                    for ( ShortcutLocator pair : pairs ) {
+                        TIntList sequence = trs.get( pair.getNode() ).get( pair.getSequenceIndex() ); // get sequence on the given index for the given node
+                        if ( endEdge == sequence.get( 0 ) ) { // if the sequence begins with the endEdge, add
+                            shortcutLocators.add( pair );
+                        } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) { // if the sequence ends with the startEdge, add
+                            shortcutLocators.add( pair );
+                        } else { // if the sequence just contains the edge, find out whether a turn restriction contains this whole shortcut
+                            for ( int i = 0; i < sequence.size(); i++ ) {
+                                int edge = sequence.get( i );
+                                if ( edge == startEdge ) {
+                                    if ( i + 1 < sequence.size() && sequence.get( i + 1 ) == endEdge ) {
+                                        shortcutLocators.add( pair );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            if ( shortcutsTrs.containsKey( endEdge ) ) {
-                List<Pair<Integer, Integer>> pairs = shortcutsTrs.get( endEdge );
-                for ( Pair<Integer, Integer> pair : pairs ) {
-                    turnRestrictions.get( pair.a ).remove( pair.b.intValue() );
+            return shortcutLocators;
+        }
+
+        private Set<ShortcutLocator> getShortcutLocators( /* turn restrictions provided by graph, */ TIntObjectMap<List<ShortcutLocator>> trMap, int startEdge, int endEdge ) {
+            Set<ShortcutLocator> shortcutLocators = new HashSet<>();
+            int[] edges = { startEdge, endEdge };
+            for ( int currentEdge : edges ) {
+                if ( trMap.containsKey( currentEdge ) ) { // if there are turn restrictions on the startEdge, apply the restrictions to this shortcut (prepare them for addition)
+                    List<ShortcutLocator> pairs = trMap.get( currentEdge ); // obtain all the pairs of starting edge
+                    for ( ShortcutLocator pair : pairs ) {
+                        int[][][] trs = graph.getTurnRestrictions();
+                        int[] sequence = trs[pair.getNode()][pair.getSequenceIndex()]; // get sequence on the given index for the given node
+                        if ( endEdge == sequence[0] ) { // if the sequence begins with the endEdge, add
+                            shortcutLocators.add( pair );
+                        } else if ( startEdge == sequence[sequence.length - 1] ) { // if the sequence ends with the startEdge, add
+                            shortcutLocators.add( pair );
+                        } else { // if the sequence just contains the edge, find out whether a turn restriction contains this whole shortcut
+                            for ( int i = 0; i < sequence.length; i++ ) {
+                                int edge = sequence[i];
+                                if ( edge == startEdge ) {
+                                    if ( i + 1 < sequence.length && sequence[i + 1] == endEdge ) {
+                                        shortcutLocators.add( pair );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+            return shortcutLocators;
+        }
+
+        private void addTurnRestrictions( Set<ShortcutLocator> trSet, TIntObjectMap<List<TIntList>> sourceTurnRestrictions, TIntObjectMap<List<TIntList>> targetTurnRestrictions, TIntObjectMap<List<ShortcutLocator>> targetTurnRestrictionMap, int startEdge, int endEdge, int shortcutId ) {
+            for ( ShortcutLocator pair : trSet ) { // for each relevant <node,sequence> pair add new turn-restriction
+                int node = pair.getNode();
+                int seqId = pair.getSequenceIndex();
+                TIntList sequence = sourceTurnRestrictions.get( node ).get( seqId ); // get current sequence
+                addTurnRestriction( node, sequence, targetTurnRestrictions, targetTurnRestrictionMap, startEdge, endEdge, shortcutId );
+            }
+        }
+
+        private void addTurnRestrictions( Set<ShortcutLocator> trSet, /* turn restrictions provided by graph, */ TIntObjectMap<List<TIntList>> targetTurnRestrictions, TIntObjectMap<List<ShortcutLocator>> targetTurnRestrictionMap, int startEdge, int endEdge, int shortcutId ) {
+            for ( ShortcutLocator pair : trSet ) { // for each relevant <node,sequence> pair add new turn-restriction
+                int node = pair.getNode();
+                int seqId = pair.getSequenceIndex();
+                TIntList sequence = new TIntArrayList( graph.getTurnRestrictions()[node][seqId] ); // get current sequence
+                addTurnRestriction( node, sequence, targetTurnRestrictions, targetTurnRestrictionMap, startEdge, endEdge, shortcutId );
+            }
+        }
+
+        private void addTurnRestriction( int node, TIntList sequence, TIntObjectMap<List<TIntList>> targetTurnRestrictions, TIntObjectMap<List<ShortcutLocator>> targetTurnRestrictionMap, int startEdge, int endEdge, int shortcutId ) {
+            TIntList seq = new TIntArrayList(); // create new sequence for the new turn-restriction
+            int lastNode = -1;
+            if ( endEdge == sequence.get( 0 ) ) { // if the sequence begins with the endEdge, add this shortcut to the beginning and then copy the rest of the turn-restriction sequence
+                seq.add( shortcutId );
+                for ( int i = 1; i < sequence.size(); i++ ) {
+                    seq.add( sequence.get( i ) );
+                }
+                lastNode = node;
+            } else if ( startEdge == sequence.get( sequence.size() - 1 ) ) { // if the sequence ends with the startEdge, copy all but the last of the turn-restriction, then add this shortcut
+                for ( int i = 0; i < sequence.size() - 1; i++ ) {
+                    seq.add( sequence.get( i ) );
+                }
+                seq.add( shortcutId );
+                lastNode = node;
+            } else {
+                int lastEdge = -1;
+                { // get the FIRST node independent of the direction // limit variables to this block // TODO what is this for???
+                    int e1 = sequence.get( 0 ); // first edge
+                    int s1 = getSource( e1 ); // its source and target
+                    int t1 = getTarget( e1 );
+                    int e2 = sequence.get( 1 ); // second edge
+                    int s2 = getSource( e2 ); // its source and target
+                    int t2 = getTarget( e2 );
+                    if ( t1 == s2 || t1 == t2 ) { // if the target is connected to the second edge - regular direction
+                        lastNode = s1;
+                    } else if ( s1 == s2 || s1 == t2 ) { // if the source is connected to the second edge - opposite direction
+                        lastNode = t1;
+                    }
+                } // now the 'lastNode' contains the first node of the sequence
+                for ( int i = 0; i < sequence.size(); i++ ) { // for each part of this sequence
+                    // add to the list until the start and edge are met - add them as one
+                    // save last node
+                    if ( lastEdge != -1 ) {
+                        lastNode = getOtherNode( lastEdge, lastNode ); // get other node at the beginning - will not set after setting the last edge
+                    }
+                    if ( sequence.get( i ) == startEdge && sequence.get( i + 1 ) == endEdge ) {
+                        lastEdge = shortcutId;
+                        i++; // move past the target edge
+                    } else {
+                        lastEdge = sequence.get( i );
+                    }
+                    seq.add( lastEdge );
+                }
+            }
+            List<TIntList> get = targetTurnRestrictions.get( lastNode ); // add new turn-restriction to trs (create new list if necessary)
+            if ( get == null ) {
+                get = new ArrayList<>();
+                targetTurnRestrictions.put( lastNode, get );
+            }
+            get.add( seq );
+            List<ShortcutLocator> strs = targetTurnRestrictionMap.get( shortcutId ); // add new locator to map (create new list if necessary)
+            if ( strs == null ) {
+                strs = new ArrayList<>();
+                targetTurnRestrictionMap.put( shortcutId, strs );
+            }
+            strs.add( new ShortcutLocator( lastNode, get.size() - 1 ) );
+        }
+
+        public void addTemporaryShortcut( int startEdge, int endEdge ) {
+//            System.out.println( "Adding temporary shortcut: #" + ( tmpShortcutCounter + graph.getEdgeCount() ) + " = " + startEdge + " -> " + endEdge );
+            int source = getSource( startEdge );
+            int target = getTarget( endEdge );
+            int thisId = tmpShortcutCounter + shortcutCounter + graph.getEdgeCount();
+            if ( thisId == source || thisId == target ) {
+//                throw new AssertionError( "shortcut #" + thisId + " = " + source + " -> " + target );
+            }
+            tmpSources.add( source );
+            tmpTargets.add( target );
+            tmpStartEdges.add( startEdge );
+            tmpEndEdges.add( endEdge );
+            tmpLengths.add( getLength( startEdge ) + getLength( endEdge ) );
+            if ( tmpIncomingShortcuts[target] == null ) {
+                tmpIncomingShortcuts[target] = new TIntArrayList();
+            }
+            tmpIncomingShortcuts[target].add( thisId );
+            tmpNodes.add( target );
+            if ( tmpOutgoingShortcuts[source] == null ) {
+                tmpOutgoingShortcuts[source] = new TIntArrayList();
+            }
+            tmpNodes.add( source );
+            tmpOutgoingShortcuts[source].add( thisId );
+
+            // ADD TR if needed
+            Set<ShortcutLocator> trSet = getShortcutLocators( edgeTrs, startEdge, endEdge );
+            addTurnRestrictions( trSet, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
+            trSet = getShortcutLocators( turnRestrictions, shortcutsTrs, startEdge, endEdge );
+            addTurnRestrictions( trSet, turnRestrictions, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
+            trSet = getShortcutLocators( tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge );
+            addTurnRestrictions( trSet, tmpTurnRestrictions, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
+            tmpShortcutCounter++;
+        }
+
+        public void clearTemporaryShortcuts() {
+//            System.out.println( "clearing tmp shortcuts" );
+            tmpShortcutsTrs.clear();
+            tmpTurnRestrictions.clear();
+            tmpShortcutCounter = 0;
+            tmpSources.clear();
+            tmpTargets.clear();
+            tmpStartEdges.clear();
+            tmpEndEdges.clear();
+            TIntIterator iterator = tmpNodes.iterator();
+            while ( iterator.hasNext() ) {
+                int n = iterator.next();
+                tmpIncomingShortcuts[n] = null;
+                tmpOutgoingShortcuts[n] = null;
+            }
+            tmpLengths.clear();
+            tmpNodes.clear();
+//            System.out.println( "cleared" );
         }
 
         public int size() {
-            return sources.size();
+            return shortcutCounter;
         }
 
-        public boolean evaluableEdge( int edge ) {
-            return edge < ( graph.getEdgeCount() + size() );
-        }
-
+//        public boolean evaluableEdge( int edge ) {
+//            return edge < ( graph.getEdgeCount() + size() );
+//        }
         public TIntIterator getIncomingEdgesIterator( int node ) {
             return new IncomingIterator( graph, node );
         }
@@ -810,6 +898,9 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         public long getEdgeOrigId( int edge, long startId ) {
             if ( edge < graph.getEdgeCount() ) {
                 return graph.getEdgeOrigId( edge );
+            }
+            if ( edge >= graph.getEdgeCount() + shortcutCounter ) {
+//                throw new AssertionError( "Temporary shortcut@getEdgeOrigId: edge = " + edge + ", edge count = " + graph.getEdgeCount() + ", shortcut counter = " + shortcutCounter );
             }
 //            System.out.println( startId + " + " + edge + " - " + graph.getEdgeCount() );
             return startId + edge - graph.getEdgeCount();
@@ -827,33 +918,46 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             if ( edge < graph.getEdgeCount() ) {
                 return graph.getSource( edge );
             }
-            return sources.get( edge - graph.getEdgeCount() );
+            if ( edge < graph.getEdgeCount() + shortcutCounter ) {
+                return sources.get( edge - graph.getEdgeCount() );
+            }
+            return tmpSources.get( edge - graph.getEdgeCount() - shortcutCounter );
         }
 
         public int getTarget( int edge ) {
             if ( edge < graph.getEdgeCount() ) {
                 return graph.getTarget( edge );
             }
-            return targets.get( edge - graph.getEdgeCount() );
+            if ( edge < graph.getEdgeCount() + shortcutCounter ) {
+                return targets.get( edge - graph.getEdgeCount() );
+            }
+            return tmpTargets.get( edge - graph.getEdgeCount() - shortcutCounter );
         }
 
         public float getLength( int edge ) {
             if ( edge < graph.getEdgeCount() ) {
                 return graph.getLength( edge );
             }
-            return lengths.get( edge - graph.getEdgeCount() );
+            if ( edge < graph.getEdgeCount() + shortcutCounter ) {
+                return lengths.get( edge - graph.getEdgeCount() );
+            }
+            return tmpLengths.get( edge - graph.getEdgeCount() - shortcutCounter );
         }
 
-        private boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray ) {
-            // what if predecessor is a shortcut...
-            if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
+        public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray ) {
+            return isValidWay( state, targetEdge, predecessorArray, turnRestrictions ) && isValidWay( state, targetEdge, predecessorArray, tmpTurnRestrictions ) && graph.isValidWay( state, targetEdge, predecessorArray );
+        }
+
+        private boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, TIntObjectMap<List<TIntList>> trs ) {
+            // what if predecessor is a shortcut... ???
+            if ( trs == null ) { // without turn restrictions, everything is valid
                 return true;
             }
             int node = state.getNode();
-            if ( !turnRestrictions.containsKey( node ) ) { // without turn restrictions for the concrete node, every turn is valid
+            if ( !trs.containsKey( node ) ) { // without turn restrictions for the concrete node, every turn is valid
                 return true;
             }
-            List<TIntList> sequences = turnRestrictions.get( node );
+            List<TIntList> sequences = trs.get( node );
             for ( int i = 0; i < sequences.size(); i++ ) { // for all restrictions for this node
                 TIntList edgeSequence = sequences.get( i ); // load the edge sequence of this particular restrictions
                 if ( edgeSequence.get( edgeSequence.size() - 1 ) == targetEdge ) { // if the last edge of this sequence is the target edge
@@ -886,23 +990,22 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
             @Override
             public boolean hasNext() { // ... see note at NeighbourListGraph
-//                System.out.println( "#" + node + " - IN counter = " + position );
-                if ( incomingShortcuts[node] == null ) {
-                    incomingShortcuts[node] = new TIntArrayList();
-                }
-//                System.out.println( "#" + node + " - IN comparison: " + ( position + 1 ) + " < " + graph.getIncomingEdges( node ).length + " + " + incomingShortcuts[node].size() );
-//                System.out.println( "#" + node + " - IN has next = " + ( position + 1 < graph.getIncomingEdges( node ).length + incomingShortcuts[node].size() ) );
-                return position + 1 < graph.getIncomingEdges( node ).length + incomingShortcuts[node].size();
+                int size = incomingShortcuts[node] != null ? incomingShortcuts[node].size() : 0;
+                int tmpSize = tmpIncomingShortcuts[node] != null ? tmpIncomingShortcuts[node].size() : 0;
+                return ( position + 1 < graph.getIncomingEdges( node ).length + size + tmpSize );
             }
 
             @Override
             public int next() {
                 int next;
                 position++;
+                int size = incomingShortcuts[node] != null ? incomingShortcuts[node].size() : 0;
                 if ( position < graph.getIncomingEdges( node ).length ) {
                     next = graph.getIncomingEdges( node )[position];
-                } else {
+                } else if ( position < graph.getIncomingEdges( node ).length + size ) {
                     next = incomingShortcuts[node].get( position - graph.getIncomingEdges( node ).length );
+                } else {
+                    next = tmpIncomingShortcuts[node].get( position - graph.getIncomingEdges( node ).length - size );
                 }
 //                System.out.println( "#" + node + " - next = " + next );
                 return next;
@@ -929,14 +1032,11 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
             @Override
             public boolean hasNext() { // see above, analogically
-//                System.out.println( "#" + node + " - OUT counter = " + position );
                 boolean hasNext;
-                if ( outgoingShortcuts[node] == null ) {
-                    outgoingShortcuts[node] = new TIntArrayList();
-                }
-                hasNext = position + 1 < graph.getOutgoingEdges( node ).length + outgoingShortcuts[node].size();
-//                System.out.println( "#" + node + " - OUT comparison: " + ( position + 1 ) + " < " + graph.getOutgoingEdges( node ).length + " + " + outgoingShortcuts[node].size() );
-//                System.out.println( "#" + node + " - OUT has next = " + hasNext );
+                int size = outgoingShortcuts[node] != null ? outgoingShortcuts[node].size() : 0;
+                int tmpSize = tmpOutgoingShortcuts[node] != null ? tmpOutgoingShortcuts[node].size() : 0;
+                hasNext = position + 1 < graph.getOutgoingEdges( node ).length + size + tmpSize;
+//                System.out.println( "hasNext=" + hasNext + ", position = " + position + ", edges = " + graph.getOutgoingEdges( node ).length + ", shortcuts = " + size + ", tmpshortcuts = " + tmpSize );
                 return hasNext;
             }
 
@@ -944,13 +1044,16 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             public int next() {
                 int next;
                 position++;
+                int size = outgoingShortcuts[node] != null ? outgoingShortcuts[node].size() : 0;
                 if ( position < graph.getOutgoingEdges( node ).length ) {
                     next = graph.getOutgoingEdges( node )[position];
-                } else {
+                } else if ( position < graph.getOutgoingEdges( node ).length + size ) {
                     next = outgoingShortcuts[node].get( position - graph.getOutgoingEdges( node ).length );
+                } else {
+//                    System.out.println( "index = " + ( position - graph.getOutgoingEdges( node ).length - size ) );
+//                    System.out.println( "size = " + ( tmpOutgoingShortcuts[node] != null ? tmpOutgoingShortcuts[node].size() : 0 ) );
+                    next = tmpOutgoingShortcuts[node].get( position - graph.getOutgoingEdges( node ).length - size );
                 }
-//                System.out.println( "#" + node + " - next = " + next );
-//                System.out.println( "#" + node + "outgoing shorctus " + outgoingShortcuts[node] );
                 return next;
             }
 
@@ -959,5 +1062,54 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
             }
         }
+    }
+
+    private static class ShortcutLocator {
+
+        private final int node;
+        private final int sequenceIndex;
+
+        public ShortcutLocator( int node, int sequenceIndex ) {
+            this.node = node;
+            this.sequenceIndex = sequenceIndex;
+        }
+
+        public int getNode() {
+            return node;
+        }
+
+        public int getSequenceIndex() {
+            return sequenceIndex;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 53 * hash + this.node;
+            hash = 53 * hash + this.sequenceIndex;
+            return hash;
+        }
+
+        @Override
+        public boolean equals( Object obj ) {
+            if ( this == obj ) {
+                return true;
+            }
+            if ( obj == null ) {
+                return false;
+            }
+            if ( getClass() != obj.getClass() ) {
+                return false;
+            }
+            final ShortcutLocator other = (ShortcutLocator) obj;
+            if ( this.node != other.node ) {
+                return false;
+            }
+            if ( this.sequenceIndex != other.sequenceIndex ) {
+                return false;
+            }
+            return true;
+        }
+
     }
 }

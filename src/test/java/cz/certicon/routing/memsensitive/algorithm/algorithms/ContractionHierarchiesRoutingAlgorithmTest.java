@@ -104,6 +104,21 @@ public class ContractionHierarchiesRoutingAlgorithmTest {
         pdBuilder.addShortcut( 16, 6, 14 );
         pdBuilder.addShortcut( 17, 15, 7 );
         PreprocessedData preprocessedData = pdBuilder.build();
+        System.out.println( "incoming shortcuts:" );
+        for ( int[] incomingShortcut : preprocessedData.getIncomingShortcuts() ) {
+            for ( int i : incomingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "outgoing shortcuts:" );
+        for ( int[] outgoingShortcut : preprocessedData.getOutgoingShortcuts() ) {
+            for ( int i : outgoingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "trs: " + preprocessedData.getTurnRestrictions());
         RoutingAlgorithm<Graph> instance = new ContractionHierarchiesRoutingAlgorithm( graph, preprocessedData );
         RouteBuilder<Route, Graph> routeBuilder = new SimpleRouteBuilder();
         routeBuilder.setSourceNode( graph, 1 );
