@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
+import cz.certicon.routing.memsensitive.data.turntables.TurnTablesReader;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.model.basic.Pair;
@@ -93,10 +94,23 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
         private final int lastValidIndex;
 
         public TurnTableIterator() {
-            int last = -1;
+            int last = -2;
             int[][][] turnRestrictions = data.getTurnRestrictions();
+            // TTDEBUG
+//            if ( turnRestrictions != null ) {
+//                int maxLen = 0;
+//                for ( int i = 0; i < turnRestrictions.length; i++ ) {
+//                    if ( turnRestrictions[i] != null ) {
+//                        maxLen = Math.max( maxLen, turnRestrictions[i].length );
+//                    }
+//                }
+//                System.out.println( getClass().getSimpleName() + "-maxlen = " + maxLen );
+//            } else {
+//                System.out.println( getClass().getSimpleName() + "-null " );
+//            }
             for ( int i = turnRestrictions.length - 1; i >= 0; i-- ) {
-                if ( turnRestrictions[i] != null ) {
+                if ( turnRestrictions[i] != null && turnRestrictions[i].length > 0 ) {
+//                    System.out.println( "last valid index = " + i + " with " + turnRestrictions[i].length + " turn restrictions" );
                     last = i;
                     break;
                 }
@@ -106,7 +120,7 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
 
         @Override
         public boolean hasNext() {
-            return counter < lastValidIndex;
+            return counter < lastValidIndex || ( counter == lastValidIndex && secondaryCounter < data.getTurnRestrictions()[counter].length - 1 );
         }
 
         @Override
@@ -126,6 +140,7 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
         }
 
         public Trinity<List<Long>, Long, Long> toTrinity( int[] sequence, int node ) {
+//            System.out.println( "returning for: " + node );
             List<Long> seq = new ArrayList<>();
             for ( int i = 0; i < sequence.length - 1; i++ ) { // ommit the last edge
                 seq.add( data.getEdgeOrigId( sequence[i], graph ) );

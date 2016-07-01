@@ -13,9 +13,9 @@ import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
  */
 public interface TurnTablesBuilder<T, G> {
 
-    public void addRestriction( G graph, PreprocessedData chData, long[] from, long via, long to );
+    public void addRestriction( G graph, PreprocessedData chData, int arrayId, long from, int fromPosition, long via, long to );
 
-    public void addRestriction( G graph, long[] from, long via, long to );
+    public void addRestriction( G graph, int arrayId, long from, int fromPosition, long via, long to );
 
     public T build( G graph, PreprocessedData chData );
 

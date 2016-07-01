@@ -215,16 +215,20 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             dataBuilder.addShortcut( startId + i, data.getEdgeOrigId( data.startEdges.get( i ), startId ), data.getEdgeOrigId( data.endEdges.get( i ), startId ) );
         }
         int[][][] tts = new int[graph.getNodeCount()][][];
+//        int maxLen = 0;
         for ( int i = 0; i < tts.length; i++ ) {
             if ( data.turnRestrictions.containsKey( i ) ) { // has turntables for node
                 List<TIntList> list = data.turnRestrictions.get( i );
                 tts[i] = new int[list.size()][];
+//                maxLen = Math.max( maxLen, tts[i].length );
                 for ( int j = 0; j < tts[i].length; j++ ) { // forall sequences
                     TIntList sequence = list.get( j );
                     tts[i][j] = sequence.toArray(); // add
                 }
             }
         }
+//        System.out.println( getClass().getSimpleName() + "-maxlen = " + maxLen );
+        dataBuilder.setTurnTables( tts );
         // DEBUG
 //        out.flush();
         return dataBuilder.build();
@@ -632,6 +636,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         public final TIntObjectMap<List<ShortcutLocator>> tmpShortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
         private int shortcutCounter = 0;
         private int tmpShortcutCounter = -1;
+        private boolean temporary = false;
 
         public ProcessingData( Graph graph ) {
             this.graph = graph;
@@ -779,6 +784,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         }
 
         private void addTurnRestriction( int node, TIntList sequence, TIntObjectMap<List<TIntList>> targetTurnRestrictions, TIntObjectMap<List<ShortcutLocator>> targetTurnRestrictionMap, int startEdge, int endEdge, int shortcutId ) {
+//            if ( temporary ) {
+//
+//            } else {
+//                System.out.println( "Adding turn restriction for node#" + node + ", shortcutId = " + shortcutId + ", startEdge = " + startEdge + ", endEdge = " + endEdge );
+//
+//            }
             TIntList seq = new TIntArrayList(); // create new sequence for the new turn-restriction
             int lastNode = -1;
             if ( endEdge == sequence.get( 0 ) ) { // if the sequence begins with the endEdge, add this shortcut to the beginning and then copy the rest of the turn-restriction sequence
@@ -862,12 +873,14 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
             tmpOutgoingShortcuts[source].add( thisId );
 
             // ADD TR if needed
+            temporary = true;
             Set<ShortcutLocator> trSet = getShortcutLocators( edgeTrs, startEdge, endEdge );
             addTurnRestrictions( trSet, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
             trSet = getShortcutLocators( turnRestrictions, shortcutsTrs, startEdge, endEdge );
             addTurnRestrictions( trSet, turnRestrictions, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
             trSet = getShortcutLocators( tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge );
             addTurnRestrictions( trSet, tmpTurnRestrictions, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
+            temporary = false;
             tmpShortcutCounter++;
         }
 

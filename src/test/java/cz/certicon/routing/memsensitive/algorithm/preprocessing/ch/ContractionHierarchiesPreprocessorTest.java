@@ -186,64 +186,37 @@ public class ContractionHierarchiesPreprocessorTest {
      */
     @Test
     public void testPreprocess_5args() throws IOException {
-//        GlobalOptions.DEBUG_CORRECTNESS = false;
-//        GlobalOptions.DEBUG_TIME = false;
-        Properties properties = new Properties();
-        properties.setProperty( "driver", "org.sqlite.JDBC" );
-        properties.setProperty( "url", "jdbc:sqlite:C:\\Users\\blaha\\Documents\\NetBeansProjects\\RoutingParser\\routing_brandysek.sqlite" );
-        properties.setProperty( "spatialite_path", "C:/Routing/Utils/mod_spatialite-4.3.0a-win-amd64/mod_spatialite.dll" );
-        DistanceType distanceType = cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH;
-        GraphReader gr = new SqliteGraphReader( properties );
-        Graph graph = gr.readGraph( new SimpleGraphBuilderFactory( cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH ), cz.certicon.routing.memsensitive.model.entity.DistanceType.LENGTH );
-        ContractionHierarchiesPreprocessor preprocessor = new cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor();
-        preprocessor.setNodeRecalculationStrategy( new NeighboursOnlyRecalculationStrategy() );
-        preprocessor.setEdgeDifferenceCalculator( new SpatialHeuristicEdgeDifferenceCalculator( graph.getNodeCount() ) );
-//
-//        System.out.println( "edge count = " + graph.getEdgeCount() );
-//        TimeMeasurement time = new TimeMeasurement();
-//        time.setTimeUnits( TimeUnits.MILLISECONDS );
-//        time.start();
-//        PreprocessedData data = preprocessor.preprocess( new SimpleChDataBuilder( graph, distanceType ), graph, distanceType, (long) 10E9 );
-//        System.out.println( "Memsensitive preprocessed in: " + time.getCurrentTimeString() );
-//        System.out.println( "Created " + data.getShortcutCount() + " shortcuts" );
-//
-//        cz.certicon.routing.data.DistanceType distanceType2 = cz.certicon.routing.data.DistanceType.LENGTH;
-//        GraphEntityFactory graphEntityFactory = new NeighborListGraphEntityFactory();
-//        DistanceFactory distanceFactory = distanceType2.getDistanceFactory();
-//        cz.certicon.routing.data.graph.GraphReader gr2 = new SqliteGraphRW( properties );
-//        gr2.open();
-//        cz.certicon.routing.model.entity.Graph graph2 = gr2.read( new Pair<>( graphEntityFactory, distanceFactory ) );
-//        gr2.close();
-//        OptimizedContractionHierarchiesPreprocessor preprocessor2 = new OptimizedContractionHierarchiesPreprocessor();
-//
-//        time.start();
-//        Pair<Map<Node.Id, Integer>, List<Shortcut>> preprocessedData2 = preprocessor2.preprocess( graph2, graphEntityFactory, distanceFactory );
-//        System.out.println( "Object-based preprocessed in: " + time.getCurrentTimeString() );
-//        System.out.println( "Created " + preprocessedData2.b.size() + " shortcuts" );
-
-//        System.out.println( "Initialize" );
-//        for ( int i = 0; i < graph.getNodeCount(); i++ ) {
-//            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
-//        }
-//        System.out.println( "Computation" );
-//        for ( int i = 0; i < preprocessor.shortcutCounts.size(); i++ ) {
-//            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
-//        }
-//        assertEquals( preprocessedData2.b.size(), data.getShortcutCount() );
-//        Pair<Map<Node.Id, Integer>, List<Shortcut>> expResult = null;
-//        Pair<Map<Node.Id, Integer>, List<Shortcut>> result = instance.preprocess( graph, graphEntityFactory, distanceFactory );
-//        System.out.println( "preprocess" );
-//        ChDataBuilder<PreprocessedData> dataBuilder = null;
-//        Graph graph = null;
-//        DistanceType distanceType = null;
-//        long startId = 0L;
-//        ProgressListener progressListener = null;
-//        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
-//        PreprocessedData expResult = null;
-//        PreprocessedData result = instance.preprocess( dataBuilder, graph, distanceType, startId, progressListener );
-//        assertEquals( expResult, result );
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail( "The test case is a prototype." );
+        DistanceType distanceType = DistanceType.LENGTH;
+        ChDataBuilder<PreprocessedData> dataBuilder = new SimpleChDataBuilder( graph, distanceType );
+        long startId = 12L;
+        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
+        int[][][] tr = new int[graph.getNodeCount()][][];
+        tr[3] = new int[1][2];
+        tr[3][0][0] = 10;
+        tr[3][0][1] = 4;
+        graph.setTurnRestrictions( tr );
+        PreprocessedData preprocessedData = instance.preprocess( dataBuilder, graph, distanceType, startId );
+        System.out.println( "incoming shortcuts:" );
+        for ( int[] incomingShortcut : preprocessedData.getIncomingShortcuts() ) {
+            for ( int i : incomingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "; " + preprocessedData.getStartEdge( i ) + " -> " + preprocessedData.getEndEdge( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "outgoing shortcuts:" );
+        for ( int[] outgoingShortcut : preprocessedData.getOutgoingShortcuts() ) {
+            for ( int i : outgoingShortcut ) {
+                System.out.print( i + " => ( " + preprocessedData.getSource( i ) + " -> " + preprocessedData.getTarget( i ) + "; " + preprocessedData.getStartEdge( i ) + " -> " + preprocessedData.getEndEdge( i ) + "), " );
+            }
+            System.out.println( "" );
+        }
+        System.out.println( "ranks: " );
+        int nodeIdx = 0;
+        for ( int rank : preprocessedData.getRanks() ) {
+            System.out.println( "#" + nodeIdx++ + " -> " + rank );
+        }
+        print( preprocessedData.getTurnRestrictions() );
+        fail();
     }
 
     public String toString( Graph graph, Route route ) {
@@ -265,4 +238,20 @@ public class ContractionHierarchiesPreprocessorTest {
         return sb.toString();
     }
 
+    private static void print( int[][][] array ) {
+        for ( int i = 0; i < array.length; i++ ) {
+            System.out.print( i );
+            if ( array[i] != null ) {
+                for ( int j = 0; j < array[i].length; j++ ) {
+                    System.out.print( "\t" + j + " -> " );
+                    for ( int k = 0; k < array[i][j].length; k++ ) {
+                        System.out.print( array[i][j][k] + " " );
+                    }
+                    System.out.println( "" );
+                }
+            } else {
+                System.out.println( "" );
+            }
+        }
+    }
 }

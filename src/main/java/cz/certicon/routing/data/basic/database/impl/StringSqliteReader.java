@@ -8,6 +8,7 @@ package cz.certicon.routing.data.basic.database.impl;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 /**
@@ -22,7 +23,12 @@ public class StringSqliteReader {
         this.database = new AbstractSqliteDatabase<ResultSet, String>( connectionProperties ) {
             @Override
             protected ResultSet checkedRead( String in ) throws SQLException {
-                return getStatement().executeQuery( in );
+//                System.out.println( "Gonna return resultset" );
+                Statement st = getStatement();
+//                System.out.println( "statement closed = " + st.isClosed() );
+                ResultSet rs = st.executeQuery( in );
+//                System.out.println( "Returning resultset => closed = " + rs.isClosed() );
+                return rs;
             }
 
             @Override

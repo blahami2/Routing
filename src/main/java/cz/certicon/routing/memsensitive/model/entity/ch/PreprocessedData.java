@@ -126,6 +126,10 @@ public class PreprocessedData {
         return sources[shortcut];
     }
 
+    public void setDistanceType( DistanceType distanceType ) {
+        this.distanceType = distanceType;
+    }
+
     public DistanceType getDistanceType() {
         return distanceType;
     }
@@ -209,6 +213,18 @@ public class PreprocessedData {
     }
 
     public void setTurnRestrictions( int[][][] turnRestrictions ) {
+//        // TTDEBUG
+//        if ( turnRestrictions != null ) {
+//            int maxLen = 0;
+//            for ( int i = 0; i < turnRestrictions.length; i++ ) {
+//                if ( turnRestrictions[i] != null ) {
+//                    maxLen = Math.max( maxLen, turnRestrictions[i].length );
+//                }
+//            }
+//            System.out.println( getClass().getSimpleName() + "-maxlen = " + maxLen );
+//        } else {
+//            System.out.println( getClass().getSimpleName() + "-null " );
+//        }
         this.turnRestrictions = turnRestrictions;
     }
 

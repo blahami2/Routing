@@ -25,43 +25,34 @@ public class SqliteTurnTablesReader implements TurnTablesReader {
     private final StringSqliteReader reader;
 
     public SqliteTurnTablesReader( Properties connectionProperties ) {
-        this.reader = new StringSqliteReader( connectionProperties );
+        reader = new StringSqliteReader( connectionProperties );
     }
 
     @Override
     public <T, G> T read( G graph, TurnTablesBuilder<T, G> builder ) throws IOException {
         try {
             ResultSet rs;
-            String query = "SELECT n.id as node_via, d1.id as edge_to, d2.id as edge_from, position FROM turn_restrictions tr JOIN turn_restrictions_array tra ON tr.from_id = tra.array_id "
+            String query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+                    + "FROM turn_restrictions tr "
+                    + "JOIN turn_restrictions_array tra ON tr.from_id = tra.array_id "
                     + "JOIN nodes n ON tr.via_id = n.data_id "
-                    + "JOIN edges d1 ON tr.to_id = d1.data_id "
+                    + "JOIN edges d1 ON tr.to_id = d1.data_id AND n.id = d1.source_id "
                     + "JOIN edges d2 ON tra.edge_id = d2.data_id "
                     + "ORDER BY tr.from_id, tra.position;";
+            System.out.println( query );
             rs = reader.read( query );
-            TLongList fromList = new TLongArrayList();
             int nodeId = rs.findColumn( "node_via" );
             int edgeFromId = rs.findColumn( "edge_from" );
             int edgeToId = rs.findColumn( "edge_to" );
             int positionId = rs.findColumn( "position" );
-            int lastPosition = Integer.MAX_VALUE;
-            long lastNode = -1;
-            long lastEdgeTo = -1;
+            int arrayIdIdx = rs.findColumn( "array_id" );
             while ( rs.next() ) {
                 int position = rs.getInt( positionId );
-                if ( position <= lastPosition && fromList.size() > 0 ) { // new
-                    if ( lastNode < 0 || lastEdgeTo < 0 ) {
-                        throw new AssertionError( "List already added to: " + fromList.size() + ", but lastNode = " + lastNode + " and lastEdgeTo = " + lastEdgeTo );
-                    }
-                    builder.addRestriction( graph, fromList.toArray(), lastNode, lastEdgeTo );
-                    fromList = new TLongArrayList();
-                }
-                lastNode = rs.getLong( nodeId );
-                lastEdgeTo = rs.getLong( edgeToId );
-                long edgeFrom = rs.getLong( edgeFromId );
-                fromList.add( edgeFrom );
-            }
-            if ( fromList.size() > 0 ) {
-                builder.addRestriction( graph, fromList.toArray(), lastNode, lastEdgeTo );
+                int arrayId = rs.getInt( arrayIdIdx );
+                long from = rs.getLong( edgeFromId );
+                long to = rs.getLong( edgeToId );
+                long via = rs.getLong( nodeId );
+                builder.addRestriction( graph, arrayId, from, position, via, to );
             }
             reader.close();
             return builder.build( graph );
@@ -72,45 +63,70 @@ public class SqliteTurnTablesReader implements TurnTablesReader {
 
     @Override
     public <T, G> T read( G graph, TurnTablesBuilder<T, G> builder, PreprocessedData preprocessedData ) throws IOException {
+        // from = edge, to = edge
+        String query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+                + "FROM ch_turn_restrictions tr "
+                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+                + "JOIN nodes n ON tr.via_id = n.data_id "
+                + "JOIN edges d1 ON tr.to_id = d1.data_id AND n.id = d1.source_id "
+                + "JOIN edges d2 ON tra.edge_id = d2.data_id "
+                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " "
+                + "ORDER BY tr.from_id, tra.position;";
+        addChTurnTables( graph, builder, preprocessedData, query );
+        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+                + "FROM ch_turn_restrictions tr "
+                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+                + "JOIN nodes n ON tr.via_id = n.data_id "
+                + "JOIN shortcuts d1 ON tr.to_id = d1.id "
+                + "JOIN edges d2 ON tra.edge_id = d2.data_id "
+                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d1.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
+                + "ORDER BY tr.from_id, tra.position;";
+        addChTurnTables( graph, builder, preprocessedData, query );
+        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+                + "FROM ch_turn_restrictions tr "
+                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+                + "JOIN nodes n ON tr.via_id = n.data_id "
+                + "JOIN edges d1 ON tr.to_id = d1.data_id AND n.id = d1.source_id "
+                + "JOIN shortcuts d2 ON tra.edge_id = d2.id "
+                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d2.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
+                + "ORDER BY tr.from_id, tra.position;";
+        addChTurnTables( graph, builder, preprocessedData, query );
+        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+                + "FROM ch_turn_restrictions tr "
+                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+                + "JOIN nodes n ON tr.via_id = n.data_id "
+                + "JOIN shortcuts d1 ON tr.to_id = d1.id "
+                + "JOIN shortcuts d2 ON tra.edge_id = d2.id "
+                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d1.distanceType = " + preprocessedData.getDistanceType().toInt() + " AND d2.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
+                + "ORDER BY tr.from_id, tra.position;";
+        addChTurnTables( graph, builder, preprocessedData, query );
+        reader.close();
+        return builder.build( graph, preprocessedData );
+    }
+
+    private <T, G> void addChTurnTables( G graph, TurnTablesBuilder<T, G> builder, PreprocessedData preprocessedData, String query ) throws IOException {
         try {
             ResultSet rs;
-            String query = "SELECT n.id as node_via, d1.id as edge_to, d2.id as edge_from, position FROM ch_turn_restrictions tr JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
-                    + "JOIN nodes n ON tr.via_id = n.data_id "
-                    + "JOIN edges d1 ON tr.to_id = d1.data_id "
-                    + "JOIN edges d2 ON tra.edge_id = d2.data_id "
-                    + "WHERE distance_type = " + preprocessedData.getDistanceType().toInt() + " "
-                    + "ORDER BY tr.from_id, tra.position;";
             rs = reader.read( query );
-            TLongList fromList = new TLongArrayList();
-            int nodeId = rs.findColumn( "node_via" );
-            int edgeFromId = rs.findColumn( "edge_from" );
-            int edgeToId = rs.findColumn( "edge_to" );
-            int positionId = rs.findColumn( "position" );
-            int lastPosition = Integer.MAX_VALUE;
-            long lastNode = -1;
-            long lastEdgeTo = -1;
-            while ( rs.next() ) {
-                int position = rs.getInt( positionId );
-                if ( position <= lastPosition && fromList.size() > 0 ) { // new
-                    if ( lastNode < 0 || lastEdgeTo < 0 ) {
-                        throw new AssertionError( "List already added to: " + fromList.size() + ", but lastNode = " + lastNode + " and lastEdgeTo = " + lastEdgeTo );
-                    }
-                    builder.addRestriction( graph, preprocessedData, fromList.toArray(), lastNode, lastEdgeTo );
-                    fromList = new TLongArrayList();
+            if ( !rs.isClosed() ) {
+//            System.out.println( "Opened = !" + rs.isClosed() );
+                System.out.println( query );
+                int nodeId = rs.findColumn( "node_via" );
+                int edgeFromId = rs.findColumn( "edge_from" );
+                int edgeToId = rs.findColumn( "edge_to" );
+                int positionId = rs.findColumn( "position" );
+                int arrayIdIdx = rs.findColumn( "array_id" );
+                while ( rs.next() ) {
+                    int position = rs.getInt( positionId );
+                    int arrayId = rs.getInt( arrayIdIdx );
+                    long from = rs.getLong( edgeFromId );
+                    long to = rs.getLong( edgeToId );
+                    long via = rs.getLong( nodeId );
+                    builder.addRestriction( graph, preprocessedData, arrayId, from, position, via, to );
                 }
-                lastNode = rs.getLong( nodeId );
-                lastEdgeTo = rs.getLong( edgeToId );
-                long edgeFrom = rs.getLong( edgeFromId );
-                fromList.add( edgeFrom );
             }
-            if ( fromList.size() > 0 ) {
-                builder.addRestriction( graph, preprocessedData, fromList.toArray(), lastNode, lastEdgeTo );
-            }
-            reader.close();
-            return builder.build( graph, preprocessedData );
         } catch ( SQLException ex ) {
             throw new IOException( ex );
         }
     }
-
 }

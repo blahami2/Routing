@@ -8,8 +8,36 @@ package cz.certicon.routing.memsensitive.model.entity.common;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.TurnTablesBuilder;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.model.basic.Pair;
+import cz.certicon.routing.model.basic.Trinity;
+import gnu.trove.TIntCollection;
+import gnu.trove.function.TIntFunction;
+import gnu.trove.function.TObjectFunction;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TLongObjectIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.procedure.TLongObjectProcedure;
+import gnu.trove.procedure.TLongProcedure;
+import gnu.trove.procedure.TObjectProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -17,55 +45,112 @@ import java.util.List;
  */
 public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTablesBuilder.TurnTablesContainer, Graph> {
 
-    private ArrayList<ArrayList<Integer>>[] tr;
+    private Map<Trinity<Integer, Integer, Integer>, ArrayList<EdgePair>> map = new HashMap<>(); // <array_id, to> -> <list<from>,via,to>
+    private TIntObjectMap<Set<Trinity<Integer, Integer, Integer>>> nodeToArrayIdMap = new TIntObjectHashMap<>(); // node -> set<array_id, to>
 
     @Override
-    public void addRestriction( Graph graph, long[] from, long via, long to ) {
-        if ( tr == null ) {
-            tr = (ArrayList<ArrayList<Integer>>[]) new ArrayList[graph.getNodeCount()];
+    public void addRestriction( Graph graph, int arrayId, long from, int fromPosition, long via, long to ) {
+//        System.out.println( "adding: arrayId = " + arrayId + ", from = " + from + ", pos = " + fromPosition + ", via = " + via + ", to = " + to );
+        int viaInt = graph.getNodeByOrigId( via );
+        int toInt = graph.getEdgeByOrigId( to );
+        int fromInt = graph.getEdgeByOrigId( from );
+        ArrayList<EdgePair> fromList;
+        Trinity<Integer, Integer, Integer> key = new Trinity<>( arrayId, viaInt, toInt );
+        if ( map.containsKey( key ) ) {
+            fromList = map.get( key );
+        } else {
+            fromList = new ArrayList<>();
+            map.put( key, fromList );
         }
-        int node = graph.getNodeByOrigId( via );
-        if ( tr[node] == null ) {
-            tr[node] = new ArrayList<>();
+        while ( fromList.size() < fromPosition + 1 ) {
+            fromList.add( null );
         }
-        ArrayList<Integer> edges = new ArrayList<>();
-        for ( long e : from ) {
-            edges.add( graph.getEdgeByOrigId( e ) );
+        EdgePair edgePair = fromList.get( fromPosition );
+        if ( edgePair != null ) {
+            edgePair.b = fromInt;
+        } else {
+            edgePair = new EdgePair();
+            edgePair.a = fromInt;
+            fromList.set( fromPosition, edgePair );
         }
-        edges.add( graph.getEdgeByOrigId( to ) );
-        tr[node].add( edges );
+        Set<Trinity<Integer, Integer, Integer>> arrayIdSet;
+        if ( nodeToArrayIdMap.containsKey( viaInt ) ) {
+            arrayIdSet = nodeToArrayIdMap.get( viaInt );
+        } else {
+            arrayIdSet = new HashSet<>();
+            nodeToArrayIdMap.put( viaInt, arrayIdSet );
+        }
+        arrayIdSet.add( key );
     }
 
     @Override
-    public void addRestriction( Graph graph, PreprocessedData chData, long[] from, long via, long to ) {
-        if ( tr == null ) {
-            tr = (ArrayList<ArrayList<Integer>>[]) new ArrayList[graph.getNodeCount()];
+    public void addRestriction( Graph graph, PreprocessedData chData, int arrayId, long from, int fromPosition, long via, long to ) {
+        int viaInt = graph.getNodeByOrigId( via );
+        int toInt = chData.getEdgeByOrigId( to, graph );
+        int fromInt = chData.getEdgeByOrigId( from, graph );
+        ArrayList<EdgePair> fromList;
+        Trinity<Integer, Integer, Integer> key = new Trinity<>( arrayId, viaInt, toInt );
+        if ( map.containsKey( key ) ) {
+            fromList = map.get( key );
+        } else {
+            fromList = new ArrayList<>();
+            map.put( key, fromList );
         }
-        int node = graph.getNodeByOrigId( via );
-        if ( tr[node] == null ) {
-            tr[node] = new ArrayList<>();
+        while ( fromList.size() < fromPosition + 1 ) {
+            fromList.add( null );
         }
-        ArrayList<Integer> edges = new ArrayList<>();
-        for ( long e : from ) {
-            edges.add( chData.getEdgeByOrigId( e, graph ) );
+        EdgePair edgePair = fromList.get( fromPosition );
+        if ( edgePair != null ) {
+            edgePair.b = fromInt;
+        } else {
+            edgePair = new EdgePair();
+            edgePair.a = fromInt;
+            fromList.set( fromPosition, edgePair );
         }
-        edges.add( graph.getEdgeByOrigId( to ) );
-        tr[node].add( edges );
+        Set<Trinity<Integer, Integer, Integer>> arrayIdSet;
+        if ( nodeToArrayIdMap.containsKey( viaInt ) ) {
+            arrayIdSet = nodeToArrayIdMap.get( viaInt );
+        } else {
+            arrayIdSet = new HashSet<>();
+            nodeToArrayIdMap.put( viaInt, arrayIdSet );
+        }
+        arrayIdSet.add( key );
     }
 
     @Override
     public TurnTablesContainer build( Graph graph ) {
+//        System.out.println( "map" );
+//        for ( Map.Entry<Trinity<Integer, Integer, Integer>, ArrayList<EdgePair>> entry : map.entrySet() ) {
+//            System.out.println( entry.getKey() + " -> " + entry.getValue() );
+//        }
+//        System.out.println( "nodeToArrayIdMap" );
+//        for ( int key : nodeToArrayIdMap.keys() ) {
+//            System.out.println( key + " -> " + nodeToArrayIdMap.get( key ) );
+//        }
+
         int[][][] arr = new int[graph.getNodeCount()][][];
-        for ( int i = 0; i < tr.length; i++ ) {
-            if ( tr[i] != null ) {
-                ArrayList<ArrayList<Integer>> trs = tr[i];
-                arr[i] = new int[trs.size()][];
-                for ( int j = 0; j < trs.size(); j++ ) {
-                    ArrayList<Integer> edges = trs.get( j );
-                    arr[i][j] = new int[edges.size()];
-                    for ( int k = 0; k < edges.size(); k++ ) {
-                        arr[i][j][k] = edges.get( k );
+        for ( int i = 0; i < arr.length; i++ ) {
+            if ( nodeToArrayIdMap.containsKey( i ) ) {
+                Set<Trinity<Integer, Integer, Integer>> set = nodeToArrayIdMap.get( i );
+                arr[i] = new int[set.size()][];
+                int j = 0;
+                for ( Trinity<Integer, Integer, Integer> trinity : set ) {
+                    ArrayList<EdgePair> edgePairList = map.get( trinity );
+                    arr[i][j] = new int[edgePairList.size() + 1];
+                    for ( int k = arr[i][j].length - 2; k >= 0; k-- ) {
+                        EdgePair edgePair = edgePairList.get( k );
+                        arr[i][j][k] = ( i == graph.getTarget( edgePair.a ) ) ? edgePair.a : edgePair.b;
                     }
+                    arr[i][j][arr[i][j].length - 1] = trinity.c;
+
+//                    System.out.print( "node#" + graph.getNodeOrigId( i ) + "-sequence#" + j + ": " );
+//                    for ( int k = 0; k < arr[i][j].length; k++ ) {
+//                        int l = arr[i][j][k];
+//                        System.out.print( graph.getEdgeByOrigId( l ) + " " );
+//                    }
+//                    System.out.println( "" );
+
+                    j++;
                 }
             }
         }
@@ -75,20 +160,40 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
     @Override
     public TurnTablesContainer build( Graph graph, PreprocessedData chData ) {
         int[][][] arr = new int[graph.getNodeCount()][][];
-        for ( int i = 0; i < tr.length; i++ ) {
-            if ( tr[i] != null ) {
-                ArrayList<ArrayList<Integer>> trs = tr[i];
-                arr[i] = new int[trs.size()][];
-                for ( int j = 0; j < trs.size(); j++ ) {
-                    ArrayList<Integer> edges = trs.get( j );
-                    arr[i][j] = new int[edges.size()];
-                    for ( int k = 0; k < edges.size(); k++ ) {
-                        arr[i][j][k] = edges.get( k );
+        for ( int i = 0; i < arr.length; i++ ) {
+            if ( nodeToArrayIdMap.containsKey( i ) ) {
+                Set<Trinity<Integer, Integer, Integer>> set = nodeToArrayIdMap.get( i );
+                arr[i] = new int[set.size()][];
+                int j = 0;
+                for ( Trinity<Integer, Integer, Integer> trinity : set ) {
+                    ArrayList<EdgePair> edgePairList = map.get( trinity );
+                    arr[i][j] = new int[edgePairList.size() + 1];
+                    for ( int k = arr[i][j].length - 2; k >= 0; k-- ) {
+                        EdgePair edgePair = edgePairList.get( k );
+                        arr[i][j][k] = ( i == graph.getTarget( edgePair.a ) ) ? edgePair.a : edgePair.b;
                     }
+                    arr[i][j][arr[i][j].length - 1] = trinity.c;
+                    j++;
                 }
             }
         }
         return new TurnTablesContainer( arr );
+    }
+
+    private static class EdgePair {
+
+        int a;
+        int b;
+
+        public EdgePair() {
+            this.a = -1;
+            this.b = -1;
+        }
+
+        public EdgePair( int a, int b ) {
+            this.a = a;
+            this.b = b;
+        }
     }
 
     public static class TurnTablesContainer {

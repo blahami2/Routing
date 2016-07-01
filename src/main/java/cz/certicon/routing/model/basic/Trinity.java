@@ -52,6 +52,6 @@ public class Trinity<A, B, C> extends Pair<A, B> {
 
     @Override
     public String toString() {
-        return "Trinity{" + "a=" + a + "b=" + b + "c=" + c + '}';
+        return "Trinity{" + "a = " + a + ", b = " + b + ", c = " + c + '}';
     }
 }

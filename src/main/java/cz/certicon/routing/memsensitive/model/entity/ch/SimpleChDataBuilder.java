@@ -146,7 +146,20 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
             }
         }
         PreprocessedData preprocessedData = new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startId );
+//        // TTDEBUG
+//        if ( turnTables != null ) {
+//            int maxLen = 0;
+//            for ( int i = 0; i < turnTables.length; i++ ) {
+//                if ( turnTables[i] != null ) {
+//                    maxLen = Math.max( maxLen, turnTables[i].length );
+//                }
+//            }
+//            System.out.println( getClass().getSimpleName() + "-maxlen = " + maxLen );
+//        } else {
+//            System.out.println( getClass().getSimpleName() + "-null " );
+//        }
         preprocessedData.setTurnRestrictions( turnTables );
+        preprocessedData.setDistanceType( distanceType );
         return preprocessedData;
     }
 

@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,6 +94,8 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
                     int rank = rs.getInt( rankIdx );
                     chDataBuilder.setRank( id, rank );
                 }
+//                System.out.println( "Database-" + getClass().getSimpleName() + "@read" );
+                db.close();
                 return chDataBuilder.build();
             } else {
                 if ( preprocessor == null ) {
@@ -124,6 +127,8 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
                 if ( MEASURE_TIME ) {
                     TimeLogger.log( TimeLogger.Event.PREPROCESSING, TimeLogger.Command.STOP );
                 }
+//                System.out.println( "Database-" + getClass().getSimpleName() + "@read" );
+                db.close();
                 return preprocessedData;
             }
         } catch ( SQLException ex ) {
@@ -142,6 +147,8 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
             db.execute( "DROP INDEX IF EXISTS `idx_dist_shortcuts`" );
             db.execute( "DROP INDEX IF EXISTS `idx_id_ranks`" );
             db.execute( "DROP INDEX IF EXISTS `idx_dist_ranks`" );
+            db.execute( "DROP INDEX IF EXISTS `idx_dist_tt`" );
+            db.execute( "DROP INDEX IF EXISTS `idx_tt_array`" );
 
             int distanceType = chDataExtractor.getDistanceType().toInt();
             if ( db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='shortcuts'" ).next() ) {
@@ -196,13 +203,73 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
             }
             rankStatement.executeBatch();
 
+            i = 1;
+            if ( db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='ch_turn_restrictions'" ).next() ) {
+                db.execute( "DELETE FROM ch_turn_restrictions_array "
+                        + "WHERE array_id IN ("
+                        + "  SELECT from_id FROM ch_turn_restrictions t WHERE distance_type = " + distanceType
+                        + " ) " );
+                db.execute( "DELETE FROM ch_turn_restrictions "
+                        + "WHERE distance_type = " + distanceType );
+                ResultSet rs = db.checkedRead( "SELECT max(from_id) AS max_array FROM ch_turn_restrictions" );
+                i = rs.getInt( "max_array" ) + 1; // get max and increment
+            } else {
+                db.execute( "CREATE TABLE ch_turn_restrictions ("
+                        + "from_id INTEGER,"
+                        + "via_id INTEGER,"
+                        + "to_id INTEGER,"
+                        + "distance_type INTEGER"
+                        + ")" );
+            }
+            if ( !db.read( "SELECT name FROM sqlite_master WHERE type='table' AND name='ch_turn_restrictions_array'" ).next() ) {
+                db.execute( "CREATE TABLE ch_turn_restrictions_array ("
+                        + "array_id INTEGER,"
+                        + "position INTEGER,"
+                        + "edge_id INTEGER"
+                        + ")" );
+            }
+            int i2 = 1;
+            PreparedStatement turnTableStatement = db.prepareStatement( "INSERT INTO ch_turn_restrictions (from_id, via_id, to_id, distance_type) VALUES (?, ?, ?, ?)" );
+            PreparedStatement turnTableArrayStatement = db.prepareStatement( "INSERT INTO ch_turn_restrictions_array (array_id, position, edge_id) VALUES (?, ?, ?)" );
+            Iterator<Trinity<List<Long>, Long, Long>> turnTableIterator = chDataExtractor.getTurnTableIterator();
+            while ( turnTableIterator.hasNext() ) {
+                Trinity<List<Long>, Long, Long> tt = turnTableIterator.next();
+//                System.out.println( "inserting: node#" + tt.b );
+                int idx = 1;
+                turnTableStatement.setInt( idx++, i ); // array_id
+                turnTableStatement.setLong( idx++, tt.b ); // node_id
+                turnTableStatement.setLong( idx++, tt.c ); // last_edge_id
+                turnTableStatement.setInt( idx++, distanceType ); // distance_type
+                turnTableStatement.addBatch();
+                for ( int j = 0; j < tt.a.size(); j++ ) {
+                    i2++;
+                    long edgeId = tt.a.get( j );
+                    idx = 1;
+                    turnTableArrayStatement.setInt( idx++, i ); // array_id
+                    turnTableArrayStatement.setInt( idx++, j ); // position
+                    turnTableArrayStatement.setLong( idx++, edgeId ); // edge_id
+                    turnTableArrayStatement.addBatch();
+                }
+                if ( i++ % batchSize == 0 ) {
+                    turnTableStatement.executeBatch();
+                }
+                if ( i2 % batchSize == 0 ) {
+                    turnTableArrayStatement.executeBatch();
+                }
+            }
+            turnTableStatement.executeBatch();
+            turnTableArrayStatement.executeBatch();
+
             db.execute( "CREATE INDEX `idx_id_shortcuts` ON `shortcuts` (`id` ASC)" );
             db.execute( "CREATE INDEX `idx_dist_shortcuts` ON `shortcuts` (`distanceType` ASC)" );
             db.execute( "CREATE INDEX `idx_id_ranks` ON `ranks` (`node_id` ASC)" );
             db.execute( "CREATE INDEX `idx_dist_ranks` ON `ranks` (`distanceType` ASC)" );
+            db.execute( "CREATE INDEX `idx_dist_tt` ON `ch_turn_restrictions` (`distance_type` ASC)" );
+            db.execute( "CREATE INDEX `idx_tt_array` ON `ch_turn_restrictions_array` (`array_id` ASC)" );
 
             db.commit();
             db.setAutoCommit( true );
+//            System.out.println( "Database-" + getClass().getSimpleName() + "@write" );
             db.close();
         } catch ( SQLException ex ) {
             Logger.getLogger( SqliteContractionHierarchiesRW.class.getName() ).log( Level.SEVERE, null, ex );

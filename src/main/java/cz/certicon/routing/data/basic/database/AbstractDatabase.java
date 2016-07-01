@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An abstract implementation of the {@link Reader}/{@link Writer} interfaces
@@ -105,6 +107,7 @@ public abstract class AbstractDatabase<Entity, AdditionalData> implements Reader
     @Override
     public void close() throws IOException {
         if ( isOpened ) {
+            System.out.println( "Closing the connection" );
             try {
                 statement.close();
                 connection.close();

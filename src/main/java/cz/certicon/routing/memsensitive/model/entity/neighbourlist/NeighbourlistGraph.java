@@ -238,19 +238,19 @@ public class NeighbourlistGraph implements Graph {
                         break;
                     }
                     if ( j == 0 ) { // all passed, the turn restriction edge sequence matches the way, therefore it is forbidden
-                        System.out.println( "#" + getNodeOrigId( node ) + ": matches: " );
-                        String predE = "" + targetEdge;
-                        NodeState s = state;
-                        while ( s != null && s.getEdge() >= 0 ) {
-                            predE = getEdgeOrigId( s.getEdge() ) + " " + predE;
-                            s = predecessorArray.get( s );
-                        }
-                        System.out.println( "current path: " + predE );
-                        String tr = "";
-                        for ( int e : edgeSequence ) {
-                            tr = tr + getEdgeOrigId( e ) + " ";
-                        }
-                        System.out.println( "turn restriction way: " + tr );
+//                        System.out.println( "#" + getNodeOrigId( node ) + ": matches: " );
+//                        String predE = "" + targetEdge;
+//                        NodeState s = state;
+//                        while ( s != null && s.getEdge() >= 0 ) {
+//                            predE = getEdgeOrigId( s.getEdge() ) + " " + predE;
+//                            s = predecessorArray.get( s );
+//                        }
+//                        System.out.println( "current path: " + predE );
+//                        String tr = "";
+//                        for ( int e : edgeSequence ) {
+//                            tr = tr + getEdgeOrigId( e ) + " ";
+//                        }
+//                        System.out.println( "turn restriction way: " + tr );
                         return false;
                     }
                     currState = predecessorArray.get( currState );
