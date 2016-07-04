@@ -108,7 +108,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 while ( outgoingEdgesIterator.hasNext() ) {
                     int edge = outgoingEdgesIterator.next();
                     int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
-                    if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                    if ( preprocessedData.getRank( otherNode ) > sourceRank 
+                            && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
                         if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
                             continue;
                         }
@@ -146,7 +147,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 while ( incomingEdgesIterator.hasNext() ) {
                     int edge = incomingEdgesIterator.next();
                     int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
-                    if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                    if ( preprocessedData.getRank( otherNode ) > sourceRank
+                            && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
                         if ( !preprocessedData.isValidWay( state, edge, nodeToPredecessorArray, graph ) ) {
                             continue;
                         }

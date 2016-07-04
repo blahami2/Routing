@@ -100,7 +100,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 int target = graph.getOtherNode( edge, state.getNode() );
                 NodeState targetState = NodeState.Factory.newInstance( target, edge );
 //                System.out.println( "edge = " + edge + ", target = " + target );
-                if ( !nodeClosedArray.contains( targetState ) ) {
+                if ( !nodeClosedArray.contains( targetState ) && ( state.getEdge() < 0 || target != graph.getOtherNode( state.getEdge(), state.getNode() ) )) {
                     if ( !graph.isValidWay( state, edge, nodePredecessorArray ) ) {
                     } else {
                         if ( MEASURE_STATS ) {

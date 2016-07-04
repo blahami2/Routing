@@ -130,7 +130,8 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                         int edge = outgoingEdgesIterator.next();
 //                        System.out.println( "F-edge#" + edge );
                         int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                        if ( preprocessedData.getRank( otherNode ) > sourceRank
+                                && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
 //                            System.out.println( "F-rank-ok-node#" + otherNode );
                             if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
                                 continue;
@@ -188,7 +189,8 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                     while ( incomingEdgesIterator.hasNext() ) {
                         int edge = incomingEdgesIterator.next();
                         int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
-                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
+                        if ( preprocessedData.getRank( otherNode ) > sourceRank
+                                && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
                             if ( !preprocessedData.isValidWay( state, edge, nodeToPredecessorArray, graph ) ) {
                                 continue;
                             }

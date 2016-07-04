@@ -112,7 +112,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 // DEBUG
 //                System.out.println( "Check: node#" + targetState.getNode() + ", edge#" + targetState.getEdge() + ", closed = " + nodeClosedArray.contains( targetState ) );
 //                System.out.println( "edge = " + edge + ", target = " + target );
-                if ( !nodeClosedArray.contains( targetState ) ) {
+                if ( !nodeClosedArray.contains( targetState ) && ( state.getEdge() < 0 || target != graph.getOtherNode( state.getEdge(), state.getNode() ) ) ) { // if not closed and not returning to the previous node
                     if ( MEASURE_STATS ) {
                         StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
@@ -154,7 +154,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );
             routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalState.getNode() ) );
             NodeState currentState = finalState;
-            while ( nodePredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() )) {// omit the first edge // starting from crossroad
+            while ( nodePredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {// omit the first edge // starting from crossroad
 //                System.out.println( "predecessor: " + pred + ", source = " + graph.getNodeOrigId( graph.getSource( pred ) ) + ", target = " + graph.getNodeOrigId( graph.getTarget( pred ) ) );
                 routeBuilder.addEdgeAsFirst( graph, graph.getEdgeOrigId( currentState.getEdge() ) );
                 currentState = nodePredecessorArray.get( currentState );

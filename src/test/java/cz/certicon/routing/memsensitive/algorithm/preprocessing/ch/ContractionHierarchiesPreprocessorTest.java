@@ -216,7 +216,7 @@ public class ContractionHierarchiesPreprocessorTest {
             System.out.println( "#" + nodeIdx++ + " -> " + rank );
         }
         print( preprocessedData.getTurnRestrictions() );
-        fail();
+//        fail();
     }
 
     public String toString( Graph graph, Route route ) {
