@@ -66,11 +66,11 @@ public class JxNodeViewer implements PathDisplayer {
             for ( Coordinate coordinate : path.getCoordinates() ) {
                 track.add( new GeoPosition( coordinate.getLatitude(), coordinate.getLongitude() ) );
             }
-            NodePainter routePainter = new NodePainter(track );
+//            NodePainter routePainter = new NodePainter(track );
             for ( LabelWaypoint waypoint : waypoints ) {
                 mapViewer.add( waypoint.getComponent() );
             }
-            painters.add( routePainter );
+//            painters.add( routePainter );
             LabelWaypointOverlayPainter p = new LabelWaypointOverlayPainter();
             p.setWaypoints( waypoints );
             painters.add( p );

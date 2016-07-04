@@ -64,42 +64,30 @@ public class SqliteTurnTablesReader implements TurnTablesReader {
     @Override
     public <T, G> T read( G graph, TurnTablesBuilder<T, G> builder, PreprocessedData preprocessedData ) throws IOException {
         // from = edge, to = edge
-        String query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
+        String query = "SELECT tra.array_id As array_id, tr.via_id as node_via, tr.to_id as edge_to, tra.edge_id as edge_from, position "
                 + "FROM ch_turn_restrictions tr "
                 + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
-                + "JOIN nodes n ON tr.via_id = n.data_id "
-                + "JOIN edges d1 ON tr.to_id = d1.data_id AND n.id = d1.source_id "
-                + "JOIN edges d2 ON tra.edge_id = d2.data_id "
                 + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " "
                 + "ORDER BY tr.from_id, tra.position;";
         addChTurnTables( graph, builder, preprocessedData, query );
-        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
-                + "FROM ch_turn_restrictions tr "
-                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
-                + "JOIN nodes n ON tr.via_id = n.data_id "
-                + "JOIN shortcuts d1 ON tr.to_id = d1.id "
-                + "JOIN edges d2 ON tra.edge_id = d2.data_id "
-                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d1.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
-                + "ORDER BY tr.from_id, tra.position;";
-        addChTurnTables( graph, builder, preprocessedData, query );
-        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
-                + "FROM ch_turn_restrictions tr "
-                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
-                + "JOIN nodes n ON tr.via_id = n.data_id "
-                + "JOIN edges d1 ON tr.to_id = d1.data_id AND n.id = d1.source_id "
-                + "JOIN shortcuts d2 ON tra.edge_id = d2.id "
-                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d2.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
-                + "ORDER BY tr.from_id, tra.position;";
-        addChTurnTables( graph, builder, preprocessedData, query );
-        query = "SELECT tra.array_id As array_id, n.id as node_via, d1.id as edge_to, d2.id as edge_from, position "
-                + "FROM ch_turn_restrictions tr "
-                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
-                + "JOIN nodes n ON tr.via_id = n.data_id "
-                + "JOIN shortcuts d1 ON tr.to_id = d1.id "
-                + "JOIN shortcuts d2 ON tra.edge_id = d2.id "
-                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " AND d1.distanceType = " + preprocessedData.getDistanceType().toInt() + " AND d2.distanceType = " + preprocessedData.getDistanceType().toInt() + " "
-                + "ORDER BY tr.from_id, tra.position;";
-        addChTurnTables( graph, builder, preprocessedData, query );
+//        query = "SELECT tra.array_id As array_id, tr.via_id as node_via, tr.to_id as edge_to, tra.edge_id as edge_from, position "
+//                + "FROM ch_turn_restrictions tr "
+//                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+//                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " "
+//                + "ORDER BY tr.from_id, tra.position;";
+//        addChTurnTables( graph, builder, preprocessedData, query );
+//        query = "SELECT tra.array_id As array_id, tr.via_id as node_via, tr.to_id as edge_to, tra.edge_id as edge_from, position "
+//                + "FROM ch_turn_restrictions tr "
+//                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+//                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " "
+//                + "ORDER BY tr.from_id, tra.position;";
+//        addChTurnTables( graph, builder, preprocessedData, query );
+//        query = "SELECT tra.array_id As array_id, tr.via_id as node_via, tr.to_id as edge_to, tra.edge_id as edge_from, position "
+//                + "FROM ch_turn_restrictions tr "
+//                + "JOIN ch_turn_restrictions_array tra ON tr.from_id = tra.array_id "
+//                + "WHERE tr.distance_type = " + preprocessedData.getDistanceType().toInt() + " "
+//                + "ORDER BY tr.from_id, tra.position;";
+//        addChTurnTables( graph, builder, preprocessedData, query );
         reader.close();
         return builder.build( graph, preprocessedData );
     }
@@ -108,6 +96,7 @@ public class SqliteTurnTablesReader implements TurnTablesReader {
         try {
             ResultSet rs;
             rs = reader.read( query );
+            System.out.println( query );
             if ( !rs.isClosed() ) {
 //            System.out.println( "Opened = !" + rs.isClosed() );
                 System.out.println( query );

@@ -151,7 +151,11 @@ public class NeighbourlistGraph implements Graph {
 
     @Override
     public int getEdgeByOrigId( long edgeId ) {
-        return fromOrigEdgesMap.get( edgeId );
+        if ( fromOrigEdgesMap.containsKey( edgeId ) ) {
+            return fromOrigEdgesMap.get( edgeId );
+        } else {
+            throw new NullPointerException();
+        }
     }
 
     @Override

@@ -5,19 +5,25 @@
  */
 package cz.certicon.routing.memsensitive.presentation;
 
+import cz.certicon.routing.memsensitive.model.entity.Graph;
+
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface DebugViewer {
 
-    
-    public void blinkEdge(long edgeId);
+    public void setStepByInput( boolean stepByInput );
+
+    public void blinkEdge( long edgeId );
+
     public void displayEdge( long edgeId );
 
     public void removeEdge( long edgeId );
 
     public void closeEdge( long edgeId );
     
+    public void displayNode(long nodeId, Graph graph);
+
     public void close();
 }

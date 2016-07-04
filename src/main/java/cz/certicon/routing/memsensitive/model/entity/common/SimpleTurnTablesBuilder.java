@@ -66,12 +66,12 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
             fromList.add( null );
         }
         EdgePair edgePair = fromList.get( fromPosition );
-        if ( edgePair != null ) {
-            edgePair.b = fromInt;
-        } else {
+        if ( edgePair == null ) {
             edgePair = new EdgePair();
             edgePair.a = fromInt;
             fromList.set( fromPosition, edgePair );
+        } else {
+            edgePair.b = fromInt;
         }
         Set<Trinity<Integer, Integer, Integer>> arrayIdSet;
         if ( nodeToArrayIdMap.containsKey( viaInt ) ) {
@@ -85,9 +85,15 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
 
     @Override
     public void addRestriction( Graph graph, PreprocessedData chData, int arrayId, long from, int fromPosition, long via, long to ) {
+//        if ( via == 11647 ) {
+//            System.out.println( "ORIG from: " + from + ", via = " + via + " , to = " + to );
+//        }
         int viaInt = graph.getNodeByOrigId( via );
         int toInt = chData.getEdgeByOrigId( to, graph );
         int fromInt = chData.getEdgeByOrigId( from, graph );
+//        if ( via == 11647 ) {
+//            System.out.println( "from: " + fromInt + ", via = " + viaInt + " , to = " + toInt );
+//        }
         ArrayList<EdgePair> fromList;
         Trinity<Integer, Integer, Integer> key = new Trinity<>( arrayId, viaInt, toInt );
         if ( map.containsKey( key ) ) {
@@ -99,14 +105,20 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
         while ( fromList.size() < fromPosition + 1 ) {
             fromList.add( null );
         }
+//        if ( via == 11647 ) {
+//            System.out.println( "key: " + key );
+//        }
         EdgePair edgePair = fromList.get( fromPosition );
-        if ( edgePair != null ) {
-            edgePair.b = fromInt;
-        } else {
+        if ( edgePair == null ) {
             edgePair = new EdgePair();
             edgePair.a = fromInt;
             fromList.set( fromPosition, edgePair );
+        } else {
+            edgePair.b = fromInt;
         }
+//        if ( via == 11647 ) {
+//            System.out.println( "pair: " + edgePair );
+//        }
         Set<Trinity<Integer, Integer, Integer>> arrayIdSet;
         if ( nodeToArrayIdMap.containsKey( viaInt ) ) {
             arrayIdSet = nodeToArrayIdMap.get( viaInt );
@@ -140,6 +152,7 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
                     for ( int k = arr[i][j].length - 2; k >= 0; k-- ) {
                         EdgePair edgePair = edgePairList.get( k );
                         arr[i][j][k] = ( i == graph.getTarget( edgePair.a ) ) ? edgePair.a : edgePair.b;
+//                        System.out.println( "#" + i + " -> " + ( edgePair.a != -1 ? graph.getTarget( edgePair.a ) : -1 ) + " vs " + ( edgePair.b != -1 ? graph.getTarget( edgePair.b ) : -1 ) );
                     }
                     arr[i][j][arr[i][j].length - 1] = trinity.c;
 
@@ -149,7 +162,6 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
 //                        System.out.print( graph.getEdgeByOrigId( l ) + " " );
 //                    }
 //                    System.out.println( "" );
-
                     j++;
                 }
             }
@@ -170,7 +182,8 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
                     arr[i][j] = new int[edgePairList.size() + 1];
                     for ( int k = arr[i][j].length - 2; k >= 0; k-- ) {
                         EdgePair edgePair = edgePairList.get( k );
-                        arr[i][j][k] = ( i == graph.getTarget( edgePair.a ) ) ? edgePair.a : edgePair.b;
+                        arr[i][j][k] = ( i == chData.getTarget( edgePair.a, graph ) ) ? edgePair.a : edgePair.b;
+//                        System.out.println( "#" + i + " -> " + ( edgePair.a != -1 ? chData.getTarget( edgePair.a, graph ) : -1 ) + " vs " + ( edgePair.b != -1 ? chData.getTarget( edgePair.b, graph ) : -1 ) );
                     }
                     arr[i][j][arr[i][j].length - 1] = trinity.c;
                     j++;
@@ -194,6 +207,12 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
             this.a = a;
             this.b = b;
         }
+
+        @Override
+        public String toString() {
+            return "EdgePair{" + "a=" + a + ", b=" + b + '}';
+        }
+
     }
 
     public static class TurnTablesContainer {

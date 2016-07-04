@@ -5,12 +5,14 @@
  */
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
+import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesRoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.utils.EffectiveUtils;
 import gnu.trove.iterator.TIntIterator;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -184,7 +186,7 @@ public class PreprocessedData {
             return graph.getEdgeByOrigId( edgeId );
         } catch ( NullPointerException ex ) {
             // does not contain
-            return (int) ( edgeId - startId );
+            return (int) ( edgeId - startId + graph.getEdgeCount() );
         }
     }
 
@@ -232,6 +234,20 @@ public class PreprocessedData {
         return turnRestrictions;
     }
 
+    public int[][] getTurnTableSequences( int node, int edge, Graph graph ) {
+        int[][][] tts;
+        if ( edge < graph.getEdgeCount() ) {
+            tts = graph.getTurnRestrictions();
+        } else {
+            tts = turnRestrictions;
+        }
+        if ( tts == null || tts[node] == null || tts[node].length == 0 ) {
+            return new int[0][];
+        } else {
+            return tts[node];
+        }
+    }
+
     public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
         if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
             return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
@@ -269,6 +285,38 @@ public class PreprocessedData {
             }
         }
         return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
+    }
+
+    public boolean isValidWay( LinkedList<ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite> currentTurnTables, int targetEdge ) {
+        for ( ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite currentTurnTable : currentTurnTables ) {
+            if ( currentTurnTable.current == 1 // the next will be the last edge
+                    && currentTurnTable.edges[0] == targetEdge ) { // and the last edge matches the target edge
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isValidWay( NodeState state, LinkedList<ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite> currentTurnTables, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
+        System.out.println( "checking: #" + graph.getNodeOrigId( state.getNode() ) + "-edge#" + ( state.getEdge() >= 0 ? getEdgeOrigId( state.getEdge(), graph ) : -1 ) );
+        for ( ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite currentTurnTable : currentTurnTables ) {
+            NodeState currentState = state;
+            for ( int i = currentTurnTable.current - 1; i >= 0; i++ ) {
+                int edge = currentTurnTable.edges[i];
+                System.out.print( ( currentState.getEdge() >= 0 ? getEdgeOrigId( currentState.getEdge(), graph ) : -1 ) + " =? " + ( edge >= 0 ? getEdgeOrigId( edge, graph ) : -1 ) );
+                if ( currentState.getEdge() < 0 || currentState.getEdge() != edge ) { // if the path ends or the edges do not match
+                    break;
+                }
+                if ( i == 0 ) { // all match
+                    System.out.println( "-match" );
+                    return false;
+                }
+                currentState = predecessorArray.get( currentState );
+            }
+            System.out.println( "-ok" );
+        }
+        System.out.println( "-all-ok" );
+        return true;
     }
 
     public TIntIterator getIncomingEdgesIterator( int node, Graph graph ) {
@@ -414,5 +462,4 @@ public class PreprocessedData {
                 + ", startEdges=" + Arrays.toString( startEdges )
                 + ", endEdges=" + Arrays.toString( endEdges ) + '}';
     }
-
 }

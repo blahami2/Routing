@@ -6,6 +6,8 @@
 package cz.certicon.routing.memsensitive.algorithm.algorithms;
 
 import com.sun.javafx.scene.control.skin.VirtualFlow;
+import cz.certicon.routing.GlobalOptions;
+import static cz.certicon.routing.GlobalOptions.DEBUG_DISPLAY;
 import static cz.certicon.routing.GlobalOptions.MEASURE_STATS;
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
@@ -16,6 +18,8 @@ import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.memsensitive.presentation.DebugViewer;
+import cz.certicon.routing.memsensitive.presentation.jxmapviewer.JxDebugViewer;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
@@ -32,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +67,14 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
+        DebugViewer debugViewerFrom = null;
+        DebugViewer debugViewerTo = null;
+        if ( DEBUG_DISPLAY ) {
+            debugViewerFrom = new JxDebugViewer( GlobalOptions.DEBUG_DISPLAY_PROPERTIES, GlobalOptions.DEBUG_DISPLAY_PAUSE, preprocessedData, graph );
+            debugViewerFrom.setStepByInput( GlobalOptions.DEBUG_DISPLAY_MANUAL_STEP );
+            debugViewerTo = new JxDebugViewer( GlobalOptions.DEBUG_DISPLAY_PROPERTIES, GlobalOptions.DEBUG_DISPLAY_PAUSE, preprocessedData, graph );
+            debugViewerTo.setStepByInput( GlobalOptions.DEBUG_DISPLAY_MANUAL_STEP );
+        }
         Map<NodeState, NodeState> nodeFromPredecessorArray = new HashMap<>();
         Map<NodeState, Float> nodeFromDistanceArray = new HashMap<>();
         NodeDataStructure<NodeState> nodeFromDataStructure = new JgraphtFibonacciDataStructure();
@@ -71,6 +84,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         TIntObjectMap<List<Pair<NodeState, Float>>> nodeToStates = new TIntObjectHashMap<>();
         NodeDataStructure<NodeState> nodeToDataStructure = new JgraphtFibonacciDataStructure();
         TIntList nodesToVisited = new TIntArrayList();
+        Map<NodeState, LinkedList<TurnTableSequenceOpposite>> toCarriedTtMap = new HashMap<>();
 
         for ( NodeEntry nodeEntry : from.values() ) {
             int node = nodeEntry.getNodeId();
@@ -91,6 +105,10 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
                 NodeState state = nodeFromDataStructure.extractMin();
+                if ( DEBUG_DISPLAY ) {
+                    System.out.println( "F#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    debugViewerFrom.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                }
 //                System.out.println( "F: extracted: " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -108,10 +126,20 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 while ( outgoingEdgesIterator.hasNext() ) {
                     int edge = outgoingEdgesIterator.next();
                     int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
-                    if ( preprocessedData.getRank( otherNode ) > sourceRank 
+                    if ( preprocessedData.getRank( otherNode ) > sourceRank
                             && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
+//                        System.out.println( "outgoing edge id = " + edge );
                         if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
+                            if ( DEBUG_DISPLAY ) {
+                                System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
+                                debugViewerFrom.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            }
                             continue;
+                        }
+                        if ( DEBUG_DISPLAY ) {
+                            System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
+//                            System.out.println( edge + " to orig = " + preprocessedData.getEdgeOrigId( edge, graph ) );
+                            debugViewerFrom.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
                         }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -129,6 +157,10 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             }
             if ( !nodeToDataStructure.isEmpty() ) {
                 NodeState state = nodeToDataStructure.extractMin();
+                if ( DEBUG_DISPLAY ) {
+                    System.out.println( "T#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    debugViewerTo.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                }
 //                System.out.println( "T: extracted: " + state );
                 if ( MEASURE_STATS ) {
                     StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -143,14 +175,32 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 }
                 get.add( new Pair<>( state, currentDistance ) );
 //                System.out.println( "T: distance = " + currentDistance );
+                // turntables
+                LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( state );
+                currentTurnTables = ( currentTurnTables != null ) ? currentTurnTables : new LinkedList<TurnTableSequenceOpposite>();
+                int[][] turnTableSequences = preprocessedData.getTurnTableSequences( state.getNode(), state.getEdge(), graph );
+                for ( int[] turnTableSequence : turnTableSequences ) {
+                    if ( turnTableSequence[turnTableSequence.length - 1] == state.getEdge() ) { // if the last edge matches this
+                        currentTurnTables.add( new TurnTableSequenceOpposite( turnTableSequence ) );
+                    }
+                }
+
                 TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( state.getNode(), graph );
                 while ( incomingEdgesIterator.hasNext() ) {
                     int edge = incomingEdgesIterator.next();
                     int otherNode = preprocessedData.getOtherNode( edge, state.getNode(), graph );
                     if ( preprocessedData.getRank( otherNode ) > sourceRank
                             && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
-                        if ( !preprocessedData.isValidWay( state, edge, nodeToPredecessorArray, graph ) ) {
+                        if ( !preprocessedData.isValidWay( currentTurnTables, edge ) ) {
+                            if ( DEBUG_DISPLAY ) {
+                                System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
+                                debugViewerTo.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            }
                             continue;
+                        }
+                        if ( DEBUG_DISPLAY ) {
+                            System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
+                            debugViewerTo.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
                         }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -162,6 +212,19 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             nodeToDistanceArray.put( targetState, distance );
                             nodeToPredecessorArray.put( targetState, state );
                             nodeToDataStructure.notifyDataChange( targetState, distance );
+                            // add turn restrictions
+
+                            // set current turntables here minus the ones that do not match after this step
+                            // when taking the node out of the heap, add its turnrestrictions
+                            LinkedList<TurnTableSequenceOpposite> nextTurnTables = new LinkedList<>();
+                            for ( TurnTableSequenceOpposite currentTurnTable : currentTurnTables ) {
+                                if ( currentTurnTable.edges[currentTurnTable.current - 1] == edge ) { // if still matches for the next step
+                                    nextTurnTables.add( currentTurnTable.next() );
+                                }
+                            }
+                            if ( currentTurnTables.size() > 0 ) { // if not empty
+                                toCarriedTtMap.put( targetState, nextTurnTables );
+                            }
                         }
                     }
                 }
@@ -186,16 +249,23 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                     boolean valid = true;
                     for ( Pair<NodeState, Float> toPair : toList ) {
                         // if is valid
-                        float distance = fromPair.b + toPair.b;
-                        if ( 0 <= distance && distance < finalDistance ) {
-                            finalDistance = distance;
-                            finalFromState = fromPair.a;
-                            finalToState = toPair.a;
+                        // check turn restrictions
+                        LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( toPair.a );
+                        System.out.println( "pair from: node = " + graph.getNodeOrigId( fromPair.a.getNode() ) + ", edge = " + ( fromPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( fromPair.a.getEdge(), graph ) : -1 )
+                                + ", pairTo: node = " + graph.getNodeOrigId( toPair.a.getNode() ) + ", edge = " + ( toPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( toPair.a.getEdge(), graph ) : -1 )
+                                + ", carried tts: " + currentTurnTables );
+                        if ( currentTurnTables == null || preprocessedData.isValidWay( fromPair.a, currentTurnTables, nodeFromPredecessorArray, graph ) ) {
+                            float distance = fromPair.b + toPair.b;
+                            if ( 0 <= distance && distance < finalDistance ) {
+                                finalDistance = distance;
+                                finalFromState = fromPair.a;
+                                finalToState = toPair.a;
+                            }
+                            break;
                         }
-                        break;
+
                         // else
                         // valid = false
-
                     }
                     if ( valid ) {
                         break;
@@ -211,7 +281,13 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
         if ( finalFromState != null && finalToState != null ) {
-//            System.out.println( "final node = " + finalNode );
+            if ( DEBUG_DISPLAY ) {
+                debugViewerFrom.displayNode( graph.getNodeOrigId( finalFromState.getNode() ), graph );
+                debugViewerTo.displayNode( graph.getNodeOrigId( finalToState.getNode() ), graph );
+            }
+            System.out.println( "F#" + graph.getNodeOrigId( finalFromState.getNode() ) + "-finished-via#" + ( finalFromState.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( finalFromState.getEdge(), graph ) : -1 ) );
+            System.out.println( "T#" + graph.getNodeOrigId( finalToState.getNode() ) + "-finished-via#" + ( finalToState.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( finalToState.getEdge(), graph ) : -1 ) );
+            //            System.out.println( "final node = " + finalNode );
             // set target to final, then add as first, then add as last for the "to" dijkstra
             routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalFromState.getNode() ) );
             NodeState currentState = finalFromState;
@@ -226,6 +302,10 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             }
         } else {
             throw new RouteNotFoundException();
+        }
+        if ( DEBUG_DISPLAY ) {
+            debugViewerFrom.close();
+            debugViewerTo.close();
         }
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.STOP );
@@ -257,6 +337,23 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             addEdgeAsLast( routeBuilder, preprocessedData.getStartEdge( edge ), currentNode );
             addEdgeAsLast( routeBuilder, preprocessedData.getEndEdge( edge ), currentNode );
             return preprocessedData.getTarget( edge );
+        }
+    }
+
+    public static class TurnTableSequenceOpposite {
+
+        public final int[] edges;
+        public int current;
+
+        public TurnTableSequenceOpposite( int[] edges ) {
+            this.edges = edges;
+            this.current = edges.length - 1;
+        }
+
+        public TurnTableSequenceOpposite next() {
+            TurnTableSequenceOpposite n = new TurnTableSequenceOpposite( edges );
+            n.current = current - 1;
+            return n;
         }
     }
 }

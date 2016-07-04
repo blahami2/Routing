@@ -20,4 +20,5 @@ public class GlobalOptions {
     public static Properties DEBUG_DISPLAY_PROPERTIES = null;
     public static boolean MEASURE_TIME = false;
     public static boolean MEASURE_STATS = false;
+    public static boolean DEBUG_DISPLAY_MANUAL_STEP = false;
 }

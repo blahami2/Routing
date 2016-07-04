@@ -23,18 +23,18 @@ import org.jdesktop.swingx.painter.Painter;
  */
 public class NodePainter implements Painter<JXMapViewer> {
 
-    private Color color = Color.RED;
+    private Color color = Color.GREEN;
     private boolean antiAlias = true;
 
-    private List<GeoPosition> track;
+    private GeoPosition position;
 
     /**
-     * @param track the track
+     * @param position
      */
-    public NodePainter( List<GeoPosition> track ) {
+    public NodePainter( GeoPosition position ) {
         // copy the list so that changes in the 
         // original list do not have an effect here
-        this.track = new ArrayList<>( track );
+        this.position = position;
     }
 
     @Override
@@ -53,13 +53,13 @@ public class NodePainter implements Painter<JXMapViewer> {
         g.setColor( Color.BLACK );
         g.setStroke( new BasicStroke( 4 ) );
 
-        drawRoute( g, map );
+        drawNode( g, map );
 
         // do the drawing again
         g.setColor( color );
         g.setStroke( new BasicStroke( 2 ) );
 
-        drawRoute( g, map );
+        drawNode( g, map );
 
         g.dispose();
     }
@@ -68,26 +68,10 @@ public class NodePainter implements Painter<JXMapViewer> {
      * @param g the graphics object
      * @param map the map
      */
-    private void drawRoute( Graphics2D g, JXMapViewer map ) {
-        int lastX = 0;
-        int lastY = 0;
+    private void drawNode( Graphics2D g, JXMapViewer map ) {
+        // convert geo-coordinate to world bitmap pixel
+        Point2D pt = map.getTileFactory().geoToPixel( position, map.getZoom() );
 
-        boolean first = true;
-
-        int counter = 0;
-        for ( GeoPosition gp : track ) {
-            // convert geo-coordinate to world bitmap pixel
-            Point2D pt = map.getTileFactory().geoToPixel( gp, map.getZoom() );
-
-            g.drawString( Integer.toString( counter++ ), (int) pt.getX(), (int) pt.getY() );
-//            if ( first ) {
-//                first = false;
-//            } else {
-//                g.drawLine( lastX, lastY, (int) pt.getX(), (int) pt.getY() );
-//            }
-
-            lastX = (int) pt.getX();
-            lastY = (int) pt.getY();
-        }
+        g.drawOval( (int) pt.getX(), (int) pt.getY(), 8, 8 );
     }
 }
