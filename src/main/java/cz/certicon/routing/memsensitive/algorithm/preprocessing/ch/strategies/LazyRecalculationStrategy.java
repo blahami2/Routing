@@ -9,6 +9,7 @@ import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.NodeRecalculationStrategy;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ProcessingData;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import gnu.trove.iterator.TIntIterator;
@@ -24,11 +25,11 @@ public class LazyRecalculationStrategy implements NodeRecalculationStrategy, TIn
     private EdgeDifferenceCalculator edgeDifferenceCalculator = new BasicEdgeDifferenceCalculator();
 
     private NodeDataStructure<Integer> priorityQueue;
-    private ContractionHierarchiesPreprocessor.ProcessingData data;
+    private ProcessingData data;
     private boolean calculate;
 
     @Override
-    public TIntIterator recalculationIterator( Graph graph, ContractionHierarchiesPreprocessor.ProcessingData data, int contractedNode, NodeDataStructure<Integer> priorityQueue ) {
+    public TIntIterator recalculationIterator( Graph graph, ProcessingData data, int contractedNode, NodeDataStructure<Integer> priorityQueue ) {
         this.priorityQueue = priorityQueue;
         this.data = data;
         this.calculate = true;

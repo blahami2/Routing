@@ -56,6 +56,7 @@ public class JxDebugViewer implements DebugViewer {
     private final Set<LabelWaypoint> waypoints = new HashSet<>();
     private final StringSqliteReader reader;
     private Map<Long, Painter<JXMapViewer>> painterMap = new HashMap<>();
+    private Map<Long, Painter<JXMapViewer>> nodePainterMap = new HashMap<>();
     private final long delay;
     private boolean centered = false;
     private PreprocessedData preprocessedData;
@@ -100,12 +101,14 @@ public class JxDebugViewer implements DebugViewer {
     }
 
     @Override
-    public void displayNode( long nodeId, Graph graph ) {
+    public void displayNode( long nodeId ) {
         TimeMeasurement time = new TimeMeasurement();
         time.setTimeUnits( TimeUnits.MILLISECONDS );
         time.start();
         int node = graph.getNodeByOrigId( nodeId );
-        painters.add( new NodePainter( new GeoPosition( graph.getLatitude( node ), graph.getLongitude( node ) ) ) );
+        NodePainter nodePainter = new NodePainter( new GeoPosition( graph.getLatitude( node ), graph.getLongitude( node ) ) );
+        nodePainterMap.put( nodeId, nodePainter );
+        painters.add( nodePainter );
         CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
         mapViewer.setOverlayPainter( painter );
 
@@ -114,6 +117,15 @@ public class JxDebugViewer implements DebugViewer {
             mapViewer.zoomToBestFit( fitGeoPosition, 0.7 );
         }
         nextStep( time.stop() );
+    }
+
+    @Override
+    public void removeNode( long nodeId ) {
+        Painter<JXMapViewer> p = nodePainterMap.get( nodeId );
+        nodePainterMap.remove( nodeId );
+        painters.remove( p );
+        CompoundPainter<JXMapViewer> painter = new CompoundPainter<>( painters );
+        mapViewer.setOverlayPainter( painter );
     }
 
     @Override

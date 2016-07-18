@@ -6,12 +6,14 @@
 package cz.certicon.routing.memsensitive.model.entity.ch;
 
 import cz.certicon.routing.memsensitive.algorithm.algorithms.ContractionHierarchiesRoutingAlgorithm;
+import cz.certicon.routing.memsensitive.model.containers.IntArrayContainer;
 import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.utils.EffectiveUtils;
 import gnu.trove.iterator.TIntIterator;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -234,18 +236,9 @@ public class PreprocessedData {
         return turnRestrictions;
     }
 
-    public int[][] getTurnTableSequences( int node, int edge, Graph graph ) {
-        int[][][] tts;
-        if ( edge < graph.getEdgeCount() ) {
-            tts = graph.getTurnRestrictions();
-        } else {
-            tts = turnRestrictions;
-        }
-        if ( tts == null || tts[node] == null || tts[node].length == 0 ) {
-            return new int[0][];
-        } else {
-            return tts[node];
-        }
+    public Iterator<IntArrayContainer> getTurnTableSequencesIterator( int node, int edge, Graph graph ) {
+        return new TurnTableSequenceIterator( graph.getTurnRestrictions(), turnRestrictions, node );
+
     }
 
     public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
@@ -388,6 +381,39 @@ public class PreprocessedData {
         public void remove() {
             throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
         }
+    }
+
+    private class TurnTableSequenceIterator implements Iterator<IntArrayContainer> {
+
+        private final int[][][] graphTts;
+        private final int[][][] dataTts;
+        private final int node;
+        private int counter = -1;
+        private final int graphLen;
+        private final int dataLen;
+
+        public TurnTableSequenceIterator( int[][][] graphTts, int[][][] dataTts, int node ) {
+            this.graphTts = graphTts;
+            this.dataTts = dataTts;
+            this.node = node;
+            this.graphLen = ( graphTts == null || graphTts[node] == null ) ? 0 : graphTts[node].length;
+            this.dataLen = ( dataTts == null || dataTts[node] == null ) ? 0 : dataTts[node].length;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return counter + 1 < graphLen + dataLen;
+        }
+
+        @Override
+        public IntArrayContainer next() {
+            if ( counter + 1 < graphTts[node].length ) {
+                return new IntArrayContainer( graphTts[node][++counter] );
+            } else {
+                return new IntArrayContainer( dataTts[node][++counter - graphLen] );
+            }
+        }
+
     }
 
     @Override

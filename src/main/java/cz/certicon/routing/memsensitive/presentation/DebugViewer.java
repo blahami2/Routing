@@ -22,8 +22,10 @@ public interface DebugViewer {
     public void removeEdge( long edgeId );
 
     public void closeEdge( long edgeId );
-    
-    public void displayNode(long nodeId, Graph graph);
+
+    public void displayNode( long nodeId );
+
+    public void removeNode( long nodeId );
 
     public void close();
 }

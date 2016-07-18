@@ -15,7 +15,7 @@ import gnu.trove.iterator.TIntIterator;
  */
 public interface NodeRecalculationStrategy {
 
-    public TIntIterator recalculationIterator( Graph graph,ContractionHierarchiesPreprocessor.ProcessingData data,  int contractedNode, NodeDataStructure<Integer> priorityQueue );
+    public TIntIterator recalculationIterator( Graph graph,ProcessingData data,  int contractedNode, NodeDataStructure<Integer> priorityQueue );
 
     public void onShortcutsCalculated( Graph graph, int[] nodeDegrees, int node, NodeDataStructure<Integer> priorityQueue, int shortcuts, int contractedNode );
     

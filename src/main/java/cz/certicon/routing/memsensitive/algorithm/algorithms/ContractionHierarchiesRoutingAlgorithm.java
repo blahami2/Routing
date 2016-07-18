@@ -15,6 +15,7 @@ import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacci
 import cz.certicon.routing.memsensitive.algorithm.RouteBuilder;
 import cz.certicon.routing.memsensitive.algorithm.RouteNotFoundException;
 import cz.certicon.routing.memsensitive.algorithm.RoutingAlgorithm;
+import cz.certicon.routing.memsensitive.model.containers.IntArrayContainer;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
@@ -31,6 +32,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -177,11 +179,18 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
 //                System.out.println( "T: distance = " + currentDistance );
                 // turntables
                 LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( state );
-                currentTurnTables = ( currentTurnTables != null ) ? currentTurnTables : new LinkedList<TurnTableSequenceOpposite>();
-                int[][] turnTableSequences = preprocessedData.getTurnTableSequences( state.getNode(), state.getEdge(), graph );
-                for ( int[] turnTableSequence : turnTableSequences ) {
+                if ( currentTurnTables == null ) {
+                    currentTurnTables = new LinkedList<>();
+                    toCarriedTtMap.put( state, currentTurnTables );
+                }
+                System.out.println( "creating turn tables for node#" + graph.getNodeOrigId( state.getNode() ) );
+                Iterator<IntArrayContainer> turnTableSequencesIterator = preprocessedData.getTurnTableSequencesIterator( state.getNode(), state.getEdge(), graph );
+                while ( turnTableSequencesIterator.hasNext() ) {
+                    int[] turnTableSequence = turnTableSequencesIterator.next().array;
                     if ( turnTableSequence[turnTableSequence.length - 1] == state.getEdge() ) { // if the last edge matches this
-                        currentTurnTables.add( new TurnTableSequenceOpposite( turnTableSequence ) );
+                        TurnTableSequenceOpposite turnTableSequenceOpposite = new TurnTableSequenceOpposite( turnTableSequence );
+                        currentTurnTables.add( turnTableSequenceOpposite );
+                        System.out.println( turnTableSequenceOpposite.toString() );
                     }
                 }
 
@@ -213,13 +222,15 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             nodeToPredecessorArray.put( targetState, state );
                             nodeToDataStructure.notifyDataChange( targetState, distance );
                             // add turn restrictions
-
+                            System.out.println( "adding turn tables for node#" + graph.getNodeOrigId( otherNode ) );
                             // set current turntables here minus the ones that do not match after this step
                             // when taking the node out of the heap, add its turnrestrictions
                             LinkedList<TurnTableSequenceOpposite> nextTurnTables = new LinkedList<>();
                             for ( TurnTableSequenceOpposite currentTurnTable : currentTurnTables ) {
                                 if ( currentTurnTable.edges[currentTurnTable.current - 1] == edge ) { // if still matches for the next step
-                                    nextTurnTables.add( currentTurnTable.next() );
+                                    TurnTableSequenceOpposite next = currentTurnTable.next();
+                                    nextTurnTables.add( next );
+                                    System.out.println( next.toString() );
                                 }
                             }
                             if ( currentTurnTables.size() > 0 ) { // if not empty
@@ -282,8 +293,8 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         }
         if ( finalFromState != null && finalToState != null ) {
             if ( DEBUG_DISPLAY ) {
-                debugViewerFrom.displayNode( graph.getNodeOrigId( finalFromState.getNode() ), graph );
-                debugViewerTo.displayNode( graph.getNodeOrigId( finalToState.getNode() ), graph );
+                debugViewerFrom.displayNode( graph.getNodeOrigId( finalFromState.getNode() ) );
+                debugViewerTo.displayNode( graph.getNodeOrigId( finalToState.getNode() ) );
             }
             System.out.println( "F#" + graph.getNodeOrigId( finalFromState.getNode() ) + "-finished-via#" + ( finalFromState.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( finalFromState.getEdge(), graph ) : -1 ) );
             System.out.println( "T#" + graph.getNodeOrigId( finalToState.getNode() ) + "-finished-via#" + ( finalToState.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( finalToState.getEdge(), graph ) : -1 ) );
@@ -315,10 +326,12 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
     }
 
     private <R> int addEdgeAsFirst( RouteBuilder<R, Graph> routeBuilder, int edge, int currentNode ) {
+        System.out.println( "adding edge as first: " + ( edge < graph.getEdgeCount() ? "e#" : "s#" ) + preprocessedData.getEdgeOrigId( edge, graph ) );
         if ( edge < graph.getEdgeCount() ) { // edge
             routeBuilder.addEdgeAsFirst( graph, graph.getEdgeOrigId( edge ) );
             return graph.getOtherNode( edge, currentNode );
         } else { // shortcut
+            System.out.println( "splitting" );
             edge -= graph.getEdgeCount();
             addEdgeAsFirst( routeBuilder, preprocessedData.getEndEdge( edge ), currentNode );
             addEdgeAsFirst( routeBuilder, preprocessedData.getStartEdge( edge ), currentNode );
@@ -327,12 +340,14 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
     }
 
     private <R> int addEdgeAsLast( RouteBuilder<R, Graph> routeBuilder, int edge, int currentNode ) {
+        System.out.println( "adding edge as last: " + ( edge < graph.getEdgeCount() ? "e#" : "s#" ) + preprocessedData.getEdgeOrigId( edge, graph ) );
         if ( edge < graph.getEdgeCount() ) { // edge
 //            System.out.println( "edge: " + edge );
             routeBuilder.addEdgeAsLast( graph, graph.getEdgeOrigId( edge ) );
             return graph.getOtherNode( edge, currentNode );
         } else { // shortcut
             edge -= graph.getEdgeCount();
+            System.out.println( "splitting" );
 //            System.out.println( "shortcut: " + edge );
             addEdgeAsLast( routeBuilder, preprocessedData.getStartEdge( edge ), currentNode );
             addEdgeAsLast( routeBuilder, preprocessedData.getEndEdge( edge ), currentNode );
@@ -340,7 +355,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
         }
     }
 
-    public static class TurnTableSequenceOpposite {
+    public class TurnTableSequenceOpposite {
 
         public final int[] edges;
         public int current;
@@ -355,5 +370,17 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             n.current = current - 1;
             return n;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append( "[" );
+            for ( int edge : edges ) {
+                sb.append( edge < 0 ? -1 : preprocessedData.getEdgeOrigId( edge, graph ) ).append( ", " );
+            }
+            sb.replace( sb.length() - 2, sb.length(), "]" );
+            return "TurnTableSequenceOpposite{" + "current=" + current + ", edges=" + sb.toString() + '}';
+        }
+
     }
 }

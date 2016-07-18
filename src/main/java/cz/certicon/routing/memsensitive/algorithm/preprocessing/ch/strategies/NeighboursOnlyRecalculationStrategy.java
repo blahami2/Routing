@@ -8,7 +8,7 @@ package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.strategies;
 import com.vividsolutions.jts.io.OutStream;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
-import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor.ProcessingData;
+import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.ProcessingData;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.NodeRecalculationStrategy;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;

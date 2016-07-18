@@ -183,6 +183,22 @@ public class SimpleTurnTablesBuilder implements TurnTablesBuilder<SimpleTurnTabl
                     for ( int k = arr[i][j].length - 2; k >= 0; k-- ) {
                         EdgePair edgePair = edgePairList.get( k );
                         arr[i][j][k] = ( i == chData.getTarget( edgePair.a, graph ) ) ? edgePair.a : edgePair.b;
+                        if ( arr[i][j][k] < 0 ) { // opposite direction edge - created by CH, invalid here, ignore
+//                            StringBuilder sb = new StringBuilder();
+//                            sb.append( "[" );
+//                            for ( int l = 0; l <= k; l++ ) {
+//                                sb.append( arr[i][j][k] < 0 ? "-1" : chData.getEdgeOrigId( arr[i][j][l], graph ) ).append( ", " );
+//                            }
+//                            sb.replace( sb.length() - 2, sb.length(), "," + trinity.c + "]" );
+//                            String arrayContent = sb.toString();
+//                            sb.replace( 0, sb.length(), "[" );
+//                            for ( int l = arr[i][j].length - 2; l >= 0; l-- ) {
+//                                EdgePair edgePair2 = edgePairList.get( l );
+//                                sb.append( "{" ).append( edgePair2.a < 0 ? "-1" : chData.getEdgeOrigId( edgePair2.a, graph ) ).append( "," ).append( edgePair2.b < 0 ? "-1" : chData.getEdgeOrigId( edgePair2.b, graph ) ).append( "}, " );
+//                            }
+//                            sb.replace( sb.length() - 2, sb.length(), "]" );
+//                            throw new AssertionError( "Edge is -1 for node#" + graph.getNodeOrigId( i ) + ", sequence[" + j + "] on position[" + k + "], content = " + arrayContent + ", edgePairs = " + sb.toString() );
+                        }
 //                        System.out.println( "#" + i + " -> " + ( edgePair.a != -1 ? chData.getTarget( edgePair.a, graph ) : -1 ) + " vs " + ( edgePair.b != -1 ? chData.getTarget( edgePair.b, graph ) : -1 ) );
                     }
                     arr[i][j][arr[i][j].length - 1] = trinity.c;
