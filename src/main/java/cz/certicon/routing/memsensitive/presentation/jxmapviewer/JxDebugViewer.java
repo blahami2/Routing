@@ -223,6 +223,7 @@ public class JxDebugViewer implements DebugViewer {
             } else if ( preprocessedData != null ) {
                 LinkedList<Long> edges = new LinkedList<>();
                 int edge = preprocessedData.getEdgeByOrigId( edgeId, graph );
+//                System.out.println( "edge = " + edge );
                 addEdgeAsLast( edges, edge, preprocessedData, graph );
 //                System.out.println( "edges = " + edges );
                 StringBuilder sb = new StringBuilder();
@@ -276,7 +277,7 @@ public class JxDebugViewer implements DebugViewer {
     }
 
     private void addEdgeAsLast( LinkedList<Long> edges, int edge, PreprocessedData preprocessedData, Graph graph ) {
-//        System.out.println( "adding edge: " + edge );
+//        System.out.println( "adding edge: " + preprocessedData.getEdgeOrigId( edge, graph ) );
         if ( edge < graph.getEdgeCount() ) { // edge
             edges.add( preprocessedData.getEdgeOrigId( edge, graph ) );
         } else { // shortcut

@@ -154,7 +154,7 @@ public class NeighbourlistGraph implements Graph {
         if ( fromOrigEdgesMap.containsKey( edgeId ) ) {
             return fromOrigEdgesMap.get( edgeId );
         } else {
-            throw new NullPointerException();
+            throw new NullPointerException("Unknown edge id: " + edgeId);
         }
     }
 

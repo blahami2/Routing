@@ -60,6 +60,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         if ( shortcutId == sourceEdgeId || shortcutId == targetEdgeId ) {
             throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
         }
+//        System.out.println( "adding shortcut: " + shortcutId + " -> " + sourceEdgeId + " + " + targetEdgeId );
         shortcuts.put( shortcutId, new Pair<>( sourceEdgeId, targetEdgeId ) );
         shortcutIdMap.put( shortcutId, counter++ );
         sourceMap.put( shortcutId, getSourceNode( shortcutId ) );

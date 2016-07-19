@@ -108,8 +108,11 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             if ( !nodeFromDataStructure.isEmpty() ) {
                 NodeState state = nodeFromDataStructure.extractMin();
                 if ( DEBUG_DISPLAY ) {
-                    System.out.println( "F#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
-                    debugViewerFrom.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    System.out.println( "F#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + ( state.getEdge() < 0 ? -1 : preprocessedData.getEdgeOrigId( state.getEdge(), graph ) ) );
+
+                    if ( state.getEdge() >= 0 ) {
+                        debugViewerFrom.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    }
                 }
 //                System.out.println( "F: extracted: " + state );
                 if ( MEASURE_STATS ) {
@@ -133,15 +136,20 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
 //                        System.out.println( "outgoing edge id = " + edge );
                         if ( !preprocessedData.isValidWay( state, edge, nodeFromPredecessorArray, graph ) ) {
                             if ( DEBUG_DISPLAY ) {
-                                System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
-                                debugViewerFrom.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                                System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + ( edge < 0 ? -1 : preprocessedData.getEdgeOrigId( edge, graph ) ) );
+
+                                if ( edge >= 0 ) {
+                                    debugViewerFrom.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                                }
                             }
                             continue;
                         }
                         if ( DEBUG_DISPLAY ) {
-                            System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
+                            System.out.println( "F#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + ( edge < 0 ? -1 : preprocessedData.getEdgeOrigId( edge, graph ) ) );
 //                            System.out.println( edge + " to orig = " + preprocessedData.getEdgeOrigId( edge, graph ) );
-                            debugViewerFrom.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            if ( edge >= 0 ) {
+                                debugViewerFrom.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            }
                         }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -160,8 +168,11 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             if ( !nodeToDataStructure.isEmpty() ) {
                 NodeState state = nodeToDataStructure.extractMin();
                 if ( DEBUG_DISPLAY ) {
-                    System.out.println( "T#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
-                    debugViewerTo.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    System.out.println( "T#" + graph.getNodeOrigId( state.getNode() ) + "-closed-via#" + ( state.getEdge() < 0 ? -1 : preprocessedData.getEdgeOrigId( state.getEdge(), graph ) ) );
+
+                    if ( state.getEdge() >= 0 ) {
+                        debugViewerTo.closeEdge( preprocessedData.getEdgeOrigId( state.getEdge(), graph ) );
+                    }
                 }
 //                System.out.println( "T: extracted: " + state );
                 if ( MEASURE_STATS ) {
@@ -202,14 +213,18 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             && ( state.getEdge() < 0 || otherNode != preprocessedData.getOtherNode( state.getEdge(), state.getNode(), graph ) ) ) {
                         if ( !preprocessedData.isValidWay( currentTurnTables, edge ) ) {
                             if ( DEBUG_DISPLAY ) {
-                                System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
-                                debugViewerTo.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                                System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-restricted-via#" + ( edge < 0 ? -1 : preprocessedData.getEdgeOrigId( edge, graph ) ) );
+                                if ( edge >= 0 ) {
+                                    debugViewerTo.blinkEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                                }
                             }
                             continue;
                         }
                         if ( DEBUG_DISPLAY ) {
-                            System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + preprocessedData.getEdgeOrigId( edge, graph ) );
-                            debugViewerTo.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            System.out.println( "T#" + graph.getNodeOrigId( otherNode ) + "-visited-via#" + ( edge < 0 ? -1 : preprocessedData.getEdgeOrigId( edge, graph ) ) );
+                            if ( edge >= 0 ) {
+                                debugViewerTo.displayEdge( preprocessedData.getEdgeOrigId( edge, graph ) );
+                            }
                         }
                         if ( MEASURE_STATS ) {
                             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );

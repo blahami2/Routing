@@ -341,7 +341,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 TIntIterator it = data.getOutgoingEdgesIterator( state.getNode() );
                 while ( it.hasNext() ) {
                     int edge = it.next();
-                    if ( !data.isValidWay( state, edge, nodePredecessorArray ) ) {
+                    if ( !data.isValidWay( state, edge, nodePredecessorArray ) ) { // TODO or contains any valid turnrestriction, maybe add to the function? edit also for graph, not IN graph though
                         continue;
                     }
                     int target = data.getTarget( edge );

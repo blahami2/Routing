@@ -48,7 +48,7 @@ public class SimpleNodeSet implements NodeSet<Graph> {
         while ( it.hasNext() ) {
             NodeEntry entry = it.next();
             int node = graph.getNodeByOrigId( entry.getNodeId() );
-            int edge = graph.getEdgeByOrigId( entry.getEdgeId() );
+            int edge = ( entry.getEdgeId() != -1 ) ? graph.getEdgeByOrigId( entry.getEdgeId() ) : -1;
             float distance = entry.getDistance();
             map.put( graph.getNodeByOrigId( entry.getNodeId() ), new RoutingAlgorithm.NodeEntry( edge, node, distance ) );
         }

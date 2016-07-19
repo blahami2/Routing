@@ -39,19 +39,21 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
         while ( itSource.hasNext() ) {
             Iterator<NodeEntry> itTarget = nodeSet.iterator( NodeCategory.TARGET );
             NodeEntry sourceEntry = itSource.next();
-            while ( itTarget.hasNext() ) {
-                NodeEntry targetEntry = itTarget.next();
-                if ( sourceEntry.getEdgeId() == targetEntry.getEdgeId() ) {
-                    float edgeLength = graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) );
-                    float sourceDist = edgeLength - sourceEntry.getDistance();
-                    float targetDist = targetEntry.getDistance();
-                    System.out.println( "comparing: " + sourceDist + " vs " + targetDist );
-                    if ( DoubleComparator.isLowerOrEqualTo( sourceDist, targetDist, CoordinateUtils.DISTANCE_PRECISION_METERS ) ) {
-                        int srcNode = graph.getNodeByOrigId( sourceEntry.getNodeId() );
-                        int tarNode = graph.getNodeByOrigId( targetEntry.getNodeId() );
-                        Coordinate src = new Coordinate( graph.getLatitude( srcNode ), graph.getLongitude( srcNode ) );
-                        Coordinate tar = new Coordinate( graph.getLatitude( tarNode ), graph.getLongitude( tarNode ) );
-                        throw new EvaluableOnlyException( sourceEntry.getEdgeId(), src, tar );
+            if ( sourceEntry.getEdgeId() != -1 ) {
+                while ( itTarget.hasNext() ) {
+                    NodeEntry targetEntry = itTarget.next();
+                    if ( targetEntry.getEdgeId() != -1 && sourceEntry.getEdgeId() == targetEntry.getEdgeId() ) {
+                        float edgeLength = graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) );
+                        float sourceDist = edgeLength - sourceEntry.getDistance();
+                        float targetDist = targetEntry.getDistance();
+                        System.out.println( "comparing: " + sourceDist + " vs " + targetDist );
+                        if ( DoubleComparator.isLowerOrEqualTo( sourceDist, targetDist, CoordinateUtils.DISTANCE_PRECISION_METERS ) ) {
+                            int srcNode = graph.getNodeByOrigId( sourceEntry.getNodeId() );
+                            int tarNode = graph.getNodeByOrigId( targetEntry.getNodeId() );
+                            Coordinate src = new Coordinate( graph.getLatitude( srcNode ), graph.getLongitude( srcNode ) );
+                            Coordinate tar = new Coordinate( graph.getLatitude( tarNode ), graph.getLongitude( tarNode ) );
+                            throw new EvaluableOnlyException( sourceEntry.getEdgeId(), src, tar );
+                        }
                     }
                 }
             }
