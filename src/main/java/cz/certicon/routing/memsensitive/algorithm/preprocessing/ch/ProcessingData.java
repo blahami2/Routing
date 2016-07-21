@@ -49,8 +49,10 @@ public class ProcessingData {
     public final TIntObjectMap<List<ShortcutLocator>> shortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
     public final TIntObjectMap<List<TIntList>> tmpTurnRestrictions = new TIntObjectHashMap<>();
     public final TIntObjectMap<List<ShortcutLocator>> tmpShortcutsTrs = new TIntObjectHashMap<>(); // key = shortcut, value = list{a = node, b = sequence}
-    private int shortcutCounter = 0;
-    private int tmpShortcutCounter = -1;
+    public final TIntSet shortcutWithTt = new TIntHashSet();
+    public final TIntSet tmpShortcutWithTt = new TIntHashSet();
+    public int shortcutCounter = 0;
+    public int tmpShortcutCounter = -1;
     private boolean temporary = false;
 
     public ProcessingData( Graph graph ) {
@@ -66,6 +68,7 @@ public class ProcessingData {
                 int[][] nodeTr = tr[i];
                 if ( nodeTr != null ) {
                     for ( int j = 0; j < nodeTr.length; j++ ) {
+                        shortcutWithTt.add( nodeTr[j][0] );
                         for ( int k = 0; k < nodeTr[j].length; k++ ) {
                             int edge = nodeTr[j][k];
                             List<ShortcutLocator> pairs = edgeTrs.get( edge );
@@ -115,6 +118,16 @@ public class ProcessingData {
         addTurnRestrictions( trSet, turnRestrictions, shortcutsTrs, startEdge, endEdge, thisId );
         trSet = getShortcutLocators( turnRestrictions, shortcutsTrs, startEdge, endEdge );
         addTurnRestrictions( trSet, turnRestrictions, turnRestrictions, shortcutsTrs, startEdge, endEdge, thisId );
+
+        if ( graph.getEdgeCount() > 57675 ) {
+            if ( startEdge == graph.getEdgeByOrigId( 57675 ) || endEdge == graph.getEdgeByOrigId( 57675 ) ) {
+                System.out.println( "#57675-hastt: " + hasTt( startEdge, endEdge ) );
+            }
+        }
+        if ( hasTt( startEdge, endEdge ) ) {
+            shortcutWithTt.add( thisId );
+        }
+
         shortcutCounter++;
     }
 
@@ -324,6 +337,10 @@ public class ProcessingData {
         trSet = getShortcutLocators( tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge );
         addTurnRestrictions( trSet, tmpTurnRestrictions, tmpTurnRestrictions, tmpShortcutsTrs, startEdge, endEdge, thisId );
         temporary = false;
+
+        if ( hasTt( startEdge, endEdge ) ) {
+            tmpShortcutWithTt.add( thisId );
+        }
         tmpShortcutCounter++;
     }
 
@@ -344,6 +361,7 @@ public class ProcessingData {
         }
         tmpLengths.clear();
         tmpNodes.clear();
+        tmpShortcutWithTt.clear();
         //            System.out.println( "cleared" );
     }
 
@@ -411,8 +429,34 @@ public class ProcessingData {
         return tmpLengths.get( edge - graph.getEdgeCount() - shortcutCounter );
     }
 
+    /**
+     * Originally checks validity with the turn restrictions, now has to take
+     * into account an issue with turn-tables and shortcuts - must add shortcut
+     * every time a turntable is present in the witness path (the path which is
+     * shorter or equal to the deleted path connecting the same nodes) =&gt;
+     * this is done by making the witness path invalid if it contains a
+     * turn-restriction
+     *
+     * @param state
+     * @param targetEdge
+     * @param predecessorArray
+     * @return
+     */
     public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray ) {
-        return isValidWay( state, targetEdge, predecessorArray, turnRestrictions ) && isValidWay( state, targetEdge, predecessorArray, tmpTurnRestrictions ) && graph.isValidWay( state, targetEdge, predecessorArray );
+        if ( hasTt( state.getEdge(), targetEdge ) ) {
+            return false;
+        }
+        int[][][] tts = graph.getTurnRestrictions();
+        if ( tts != null && tts[state.getNode()] != null ) {
+            for ( int[] sequence : tts[state.getNode()] ) {
+                if ( sequence.length > 0 && sequence[0] == state.getEdge() ) {
+                    return false;
+                }
+            }
+        }
+        return isValidWay( state, targetEdge, predecessorArray, turnRestrictions ) && isValidWay( state, targetEdge, predecessorArray, tmpTurnRestrictions );
+
+//        return isValidWay( state, targetEdge, predecessorArray, turnRestrictions ) && isValidWay( state, targetEdge, predecessorArray, tmpTurnRestrictions ) && graph.isValidWay( state, targetEdge, predecessorArray );
     }
 
     private boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, TIntObjectMap<List<TIntList>> trs ) {
@@ -430,6 +474,10 @@ public class ProcessingData {
         for ( int i = 0; i < sequences.size(); i++ ) {
             // for all restrictions for this node
             TIntList edgeSequence = sequences.get( i ); // load the edge sequence of this particular restrictions
+            if ( edgeSequence.get( 0 ) == state.getEdge() ) { // trim if turn restriction is present and starts in this path
+                return false;
+            }
+            /*
             if ( edgeSequence.get( edgeSequence.size() - 1 ) == targetEdge ) {
                 // if the last edge of this sequence is the target edge
                 NodeState currState = state;
@@ -444,6 +492,43 @@ public class ProcessingData {
                     }
                     currState = predecessorArray.get( currState );
                 }
+            }*/
+        }
+        return true;
+    }
+
+    private boolean hasTt( int edgeFrom, int edgeTo ) {
+        return ( shortcutWithTt.contains( edgeFrom ) || tmpShortcutWithTt.contains( edgeFrom ) || shortcutWithTt.contains( edgeTo ) || tmpShortcutWithTt.contains( edgeTo ) );
+    }
+
+    public boolean isValidShortcut( int edgeFrom, int nodeVia, int edgeTo ) {
+        int[][][] tts = graph.getTurnRestrictions();
+        if ( tts != null && tts[nodeVia] != null ) {
+            for ( int[] sequence : tts[nodeVia] ) {
+                if ( sequence.length == 2 && sequence[0] == edgeFrom && sequence[1] == edgeTo ) {
+                    return false;
+                }
+            }
+        }
+        return isValidShortcut( edgeFrom, nodeVia, edgeTo, turnRestrictions ) && isValidShortcut( edgeFrom, nodeVia, edgeTo, tmpTurnRestrictions );
+    }
+
+    private boolean isValidShortcut( int edgeFrom, int nodeVia, int edgeTo, TIntObjectMap<List<TIntList>> trs ) {
+        // what if predecessor is a shortcut... ???
+        if ( trs == null ) {
+            // without turn restrictions, everything is valid
+            return true;
+        }
+        if ( !trs.containsKey( nodeVia ) ) {
+            // without turn restrictions for the concrete node, every turn is valid
+            return true;
+        }
+        List<TIntList> sequences = trs.get( nodeVia );
+        for ( int i = 0; i < sequences.size(); i++ ) {
+            // for all restrictions for this node
+            TIntList edgeSequence = sequences.get( i ); // load the edge sequence of this particular restrictions
+            if ( edgeSequence.size() == 2 && edgeSequence.get( 0 ) == edgeFrom && edgeSequence.get( 1 ) == edgeTo ) {
+                return false;
             }
         }
         return true;

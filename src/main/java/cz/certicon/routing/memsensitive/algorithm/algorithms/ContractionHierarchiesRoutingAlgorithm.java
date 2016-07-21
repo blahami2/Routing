@@ -263,6 +263,12 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
             if ( nodeFromStates.containsKey( node ) && nodeToStates.containsKey( node ) ) {
                 List<Pair<NodeState, Float>> fromList = nodeFromStates.get( node );
                 List<Pair<NodeState, Float>> toList = nodeToStates.get( node );
+                
+                long nodeOrigId = graph.getNodeOrigId( node );
+                if(nodeOrigId == 41329 || nodeOrigId == 42117 || nodeOrigId == 1487 || nodeOrigId == 25310 || nodeOrigId == 37277 || nodeOrigId == 7273){
+                    
+                }
+                
                 Comparator<Pair<NodeState, Float>> cmp = new Comparator<Pair<NodeState, Float>>() {
                     @Override
                     public int compare( Pair<NodeState, Float> o1, Pair<NodeState, Float> o2 ) {
