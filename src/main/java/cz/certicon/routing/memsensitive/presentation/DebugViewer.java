@@ -27,5 +27,7 @@ public interface DebugViewer {
 
     public void removeNode( long nodeId );
 
+    public void clear();
+
     public void close();
 }

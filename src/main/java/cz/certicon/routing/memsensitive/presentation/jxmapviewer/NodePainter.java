@@ -13,6 +13,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JPanel;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
@@ -25,6 +26,7 @@ public class NodePainter implements Painter<JXMapViewer> {
 
     private Color color = Color.GREEN;
     private boolean antiAlias = true;
+    private static final int SIZE = 6;
 
     private GeoPosition position;
 
@@ -71,7 +73,6 @@ public class NodePainter implements Painter<JXMapViewer> {
     private void drawNode( Graphics2D g, JXMapViewer map ) {
         // convert geo-coordinate to world bitmap pixel
         Point2D pt = map.getTileFactory().geoToPixel( position, map.getZoom() );
-
-        g.drawOval( (int) pt.getX(), (int) pt.getY(), 8, 8 );
+        g.drawOval( (int) pt.getX() - ( SIZE / 2 ), (int) pt.getY() - ( SIZE / 2 ), SIZE, SIZE );
     }
 }
