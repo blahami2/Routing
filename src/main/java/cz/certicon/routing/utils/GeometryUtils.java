@@ -100,4 +100,48 @@ public class GeometryUtils {
         sb.append( ")" );
         return sb.toString();
     }
+
+    public static double pointToLineDistance( int ax, int ay, int bx, int by, int x, int y ) {
+
+//        System.out.println( "first result = " + first);
+        float dx = bx - ax;
+        float dy = by - ay;
+        float cx;
+        float cy;
+        if ( ( dx == 0 ) && ( dy == 0 ) ) {
+            // It's a point not a line segment.
+//            cx = ax;
+//            cy = ay;
+            dx = x - ax;
+            dy = y - ay;
+            return Math.sqrt( dx * dx + dy * dy );
+        }
+        // Calculate the t that minimizes the distance.
+        float t = ( ( x - ax ) * dx + ( y - ay ) * dy ) / ( dx * dx + dy * dy );
+        // See if this represents one of the segment's
+        // end points or a point in the middle.
+        if ( t < 0 ) {
+//            cx = ax;
+//            cy = ay;
+            dx = x - ax;
+            dy = y - ay;
+        } else if ( t > 1 ) {
+//            cx = bx;
+//            cy = by;
+            dx = x - bx;
+            dy = y - by;
+        } else {
+            double normalLength = Math.sqrt( ( bx - ax ) * ( bx - ax ) + ( by - ay ) * ( by - ay ) );
+            double first = ( Math.abs( ( x - ax ) * ( by - ay ) - ( y - ay ) * ( bx - ax ) ) / normalLength );
+            return first;
+        }
+        double second = Math.sqrt( dx * dx + dy * dy );
+        return second;
+//        System.out.println( "second result = " + second );
+//        return Math.max(first,second);
+
+//        double normalLength = Math.sqrt( ( bx - ax ) * ( bx - ax ) + ( by - ay ) * ( by - ay ) );
+//        return Math.abs( ( x - ax ) * ( by - ay ) - ( y - ay ) * ( bx - ax ) ) / normalLength;
+    }
+
 }
