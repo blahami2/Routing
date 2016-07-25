@@ -5,6 +5,8 @@
  */
 package cz.certicon.routing.memsensitive.algorithm.preprocessing.ch;
 
+import static cz.certicon.routing.GlobalOptions.DEBUG_DISPLAY;
+import static cz.certicon.routing.GlobalOptions.MEASURE_STATS;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.memsensitive.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
@@ -13,6 +15,7 @@ import cz.certicon.routing.memsensitive.model.entity.DistanceType;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.NodeState;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
+import cz.certicon.routing.memsensitive.model.entity.common.SimpleNodeState;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.ch.ChDataBuilder;
@@ -21,6 +24,7 @@ import cz.certicon.routing.model.utility.progress.EmptyProgressListener;
 import cz.certicon.routing.utils.DoubleComparator;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
+import cz.certicon.routing.utils.measuring.StatsLogger;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.TIntList;
@@ -38,6 +42,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,6 +138,32 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //                out.println( "node degree #" + graph.getNodeOrigId( node ) + " = " + graph.getNodeDegree( node ) );
 //            }
         }
+
+        /* Add a way per each turnrestriction for each entry to each forbidden exit */
+        int[][][] turnRestrictions = graph.getTurnRestrictions();
+        // foreach node
+        if ( turnRestrictions != null ) {
+            for ( int i = 0; i < graph.getNodeCount(); i++ ) {
+                if ( turnRestrictions[i] != null ) {
+                    // foreach turn restriction (.*AB), where AB are the two last edges of the turn restriction
+                    for ( int j = 0; j < turnRestrictions[i].length; j++ ) {
+                        int[] sequence = turnRestrictions[i][j];
+                        // find the shortest path P from A to B
+                        // foreach two edges of the path P
+                        // create a shortcut
+                        // repeat recursively until a single shortcut S describes the path P
+                        System.out.print( "sequence[" + i + "][" + j + "].length = " + sequence.length );
+                        if ( sequence.length >= 2 ) {
+                            int ss = calculateTurns( data, graph, i, sequence[sequence.length - 2], sequence[sequence.length - 1] );
+                            System.out.println( "-new shortcut: " + ( ss >= 0 ? ss : "not found" ) );
+                        } else {
+                            System.out.println( "-too short" );
+                        }
+                    }
+                }
+            }
+        }
+
 //        Collections.sort( sortedNodes, new Comparator<Pair<Integer, Long>>() {
 //            @Override
 //            public int compare( Pair<Integer, Long> o1, Pair<Integer, Long> o2 ) {
@@ -239,7 +270,101 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return dataBuilder.build();
     }
 
-    private int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, Graph graph ) {
+    int calculateTurns( ProcessingData data, Graph graph, int node, int edgeFrom, int edgeTo ) {
+//        System.out.println( "searching a way for node#" + graph.getNodeOrigId( node ) + " from " + graph.getEdgeOrigId( edgeFrom ) + " to " + graph.getEdgeOrigId( edgeTo ) );
+
+        NodeDataStructure<NodeState> queue = new JgraphtFibonacciDataStructure<>();
+        Set<NodeState> closedStates = new HashSet<>();
+        Map<NodeState, NodeState> nodePredecessorArray = new HashMap<>();
+        Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
+        NodeState finalState = null;
+        double finalDistance = Double.MAX_VALUE;
+        NodeState startingState = new SimpleNodeState( node, edgeFrom );
+        nodeDistanceArray.put( startingState, 0.0f );
+        queue.add( startingState, 0.0 );
+        // find the shortest path P from A to B
+        while ( !queue.isEmpty() ) {
+            NodeState state = queue.extractMin();
+            float distance = nodeDistanceArray.get( state );
+//            System.out.println( "extracted: " + state + ", dist = " + distance );
+            closedStates.add( state );
+            if ( state.getNode() == node && graph.isValidWay( state, edgeTo, nodePredecessorArray ) ) {
+                finalState = state;
+                finalDistance = distance;
+                break;
+            }
+            TIntIterator it = graph.getOutgoingEdgesIterator( state.getNode() );
+            while ( it.hasNext() ) {
+                int edge = it.next();
+                int target = graph.getOtherNode( edge, state.getNode() );
+//                System.out.print( "neighbour: " + target + " via " + edge + " - " );
+                NodeState targetState = NodeState.Factory.newInstance( target, edge );
+                if ( !closedStates.contains( targetState ) && ( state.getEdge() < 0 || target != graph.getOtherNode( state.getEdge(), state.getNode() ) || ( state.equals( startingState ) ) ) ) { // if not closed and not returning to the previous node
+//                    System.out.print( "valid state - " );
+                    if ( graph.isValidWay( state, edge, nodePredecessorArray ) ) {
+//                        System.out.print( "valid turn - " );
+                        float targetDistance = ( nodeDistanceArray.containsKey( targetState ) ) ? nodeDistanceArray.get( targetState ) : Float.MAX_VALUE;
+                        float alternativeDistance = distance + graph.getLength( edge );
+                        if ( alternativeDistance < targetDistance ) {
+//                            System.out.print( "better path." );
+                            nodeDistanceArray.put( targetState, alternativeDistance );
+                            nodePredecessorArray.put( targetState, state );
+                            queue.notifyDataChange( targetState, alternativeDistance );
+                        } else {
+//                            System.out.print( "worse path." );
+                        }
+                    } else {
+//                        System.out.print( "invalid turn." );
+                    }
+                } else {
+//                    System.out.print( "invalid state ( " + !closedStates.contains( targetState ) + " AND ( " + ( state.getEdge() < 0 ) + " OR " + ( target != graph.getOtherNode( state.getEdge(), state.getNode() ) ) + " OR " + ( state.equals( startingState ) ) + " ))" );
+                }
+//                System.out.println( "" );
+            }
+        }
+        if ( finalState != null ) {
+            LinkedList<Integer> path = new LinkedList<>();
+            NodeState currentState = finalState;
+            while ( nodePredecessorArray.containsKey( currentState ) && graph.isValidPredecessor( currentState.getEdge() ) ) {// omit the first edge // starting from crossroad
+                path.addFirst( currentState.getEdge() );
+                currentState = nodePredecessorArray.get( currentState );
+            }
+            if ( path.size() < 1 ) {
+                throw new AssertionError( "The path size is zero => it does not respect the turn restriction." );
+            }
+//            System.out.println( "found a way for node#" + graph.getNodeOrigId( node ) + " from " + graph.getEdgeOrigId( edgeFrom ) + " to " + graph.getEdgeOrigId( edgeFrom ) + " via " + path.size() + " edges." );
+
+            // create a single shortcut by logarithmically reducting the path
+            while ( path.size() != 1 ) {
+                path = createShortcuts( path, data );
+            }
+            return path.get( 0 )/*new shortcut index*/;
+        } else {
+            return -1; // not found
+        }
+    }
+
+    LinkedList<Integer> createShortcuts( LinkedList<Integer> previousLayer, ProcessingData data ) {
+        LinkedList<Integer> list = new LinkedList<>();
+        int prev = -1;
+        // foreach two edges of the path P
+        for ( int edge : previousLayer ) {
+            if ( prev != -1 ) {
+                // create a shortcut
+                list.add( data.addShortcut( prev, edge ) );
+                prev = -1;
+            } else {
+                prev = edge;
+            }
+        }
+        if ( prev != -1 ) {
+            list.add( prev );
+        }
+        // repeat recursively until a single shortcut S describes the path P
+        return list;
+    }
+
+    int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, Graph graph ) {
 //        System.out.println( "-------- shortcut calculation --------" );
         if ( removedNodes.get( node ) ) {
             return 0;
@@ -408,7 +533,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return addedShortcuts;
     }
 
-    private void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, Graph graph ) {
+    void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, Graph graph ) {
 //        System.out.println( "-------- contracting node --------" );
         // disable node
         removedNodes.set( node, true );

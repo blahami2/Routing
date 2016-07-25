@@ -84,7 +84,7 @@ public class ProcessingData {
         }
     } // add only to edgeTrs
 
-    public void addShortcut( int startEdge, int endEdge ) {
+    public int addShortcut( int startEdge, int endEdge ) {
         //            System.out.println( "Adding shortcut: #" + ( shortcutCounter + graph.getEdgeCount() ) + " = " + startEdge + " -> " + endEdge );
         int source = getSource( startEdge );
         int target = getTarget( endEdge );
@@ -129,6 +129,7 @@ public class ProcessingData {
         }
 
         shortcutCounter++;
+        return thisId;
     }
 
     private Set<ShortcutLocator> getShortcutLocators( TIntObjectMap<List<TIntList>> trs, TIntObjectMap<List<ShortcutLocator>> trMap, int startEdge, int endEdge ) {

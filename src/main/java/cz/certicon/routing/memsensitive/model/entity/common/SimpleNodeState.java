@@ -12,7 +12,7 @@ import cz.certicon.routing.memsensitive.model.entity.NodeState;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class SimpleNodeState implements NodeState {
-    
+
     private final int node;
     private final int edge;
 
@@ -58,11 +58,11 @@ public class SimpleNodeState implements NodeState {
             return false;
         }
         return true;
-    }  
+    }
 
     @Override
     public String toString() {
-        return "SimpleNodeState{" + "node=" + node + ", edge=" + edge + '}';
+        return "{" + node + "," + edge + "}";
     }
-    
+
 }

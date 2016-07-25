@@ -38,10 +38,12 @@ import cz.certicon.routing.model.entity.neighbourlist.NeighborListGraphEntityFac
 import cz.certicon.routing.model.utility.ProgressListener;
 import cz.certicon.routing.model.utility.progress.SimpleProgressListener;
 import cz.certicon.routing.utils.CoordinateUtils;
+import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -253,5 +255,92 @@ public class ContractionHierarchiesPreprocessorTest {
                 System.out.println( "" );
             }
         }
+    }
+
+    /**
+     * Test of setEdgeDifferenceCalculator method, of class
+     * ContractionHierarchiesPreprocessor.
+     */
+    @Test
+    public void testSetEdgeDifferenceCalculator() {
+        System.out.println( "setEdgeDifferenceCalculator" );
+//        EdgeDifferenceCalculator edgeDifferenceCalculator = null;
+//        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
+//        instance.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail( "The test case is a prototype." );
+    }
+
+    /**
+     * Test of calculateTurns method, of class
+     * ContractionHierarchiesPreprocessor.
+     */
+    @Test
+    public void testCalculateTurns() {
+        System.out.println( "calculateTurns" );
+        DistanceType distanceType = DistanceType.LENGTH;
+        ContractionHierarchiesPreprocessor preprocessor = new ContractionHierarchiesPreprocessor();
+        int[][][] tr = new int[graph.getNodeCount()][][];
+        tr[3] = new int[1][2];
+        tr[3][0][0] = 5;
+        tr[3][0][1] = 4;
+        graph.setTurnRestrictions( tr );
+        ProcessingData data = new ProcessingData( graph );
+        int shortcut = preprocessor.calculateTurns( data, graph, 3, 5, 4 );
+        assertNotEquals( -1, shortcut );
+        graph.setTurnRestrictions( null );
+    }
+
+    /**
+     * Test of createShortcuts method, of class
+     * ContractionHierarchiesPreprocessor.
+     */
+    @Test
+    public void testCreateShortcuts() {
+        System.out.println( "createShortcuts" );
+//        LinkedList<Integer> previousLayer = null;
+//        ProcessingData data = null;
+//        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
+//        LinkedList<Integer> expResult = null;
+//        LinkedList<Integer> result = instance.createShortcuts( previousLayer, data );
+//        assertEquals( expResult, result );
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail( "The test case is a prototype." );
+    }
+
+    /**
+     * Test of calculateShortcuts method, of class
+     * ContractionHierarchiesPreprocessor.
+     */
+    @Test
+    public void testCalculateShortcuts() {
+        System.out.println( "calculateShortcuts" );
+//        ProcessingData data = null;
+//        BitArray removedNodes = null;
+//        int node = 0;
+//        Graph graph = null;
+//        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
+//        int expResult = 0;
+//        int result = instance.calculateShortcuts( data, removedNodes, node, graph );
+//        assertEquals( expResult, result );
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail( "The test case is a prototype." );
+    }
+
+    /**
+     * Test of contractNode method, of class ContractionHierarchiesPreprocessor.
+     */
+    @Test
+    public void testContractNode() {
+        System.out.println( "contractNode" );
+//        ProcessingData data = null;
+//        int[] nodeDegrees = null;
+//        BitArray removedNodes = null;
+//        int node = 0;
+//        Graph graph = null;
+//        ContractionHierarchiesPreprocessor instance = new ContractionHierarchiesPreprocessor();
+//        instance.contractNode( data, nodeDegrees, removedNodes, node, graph );
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail( "The test case is a prototype." );
     }
 }
