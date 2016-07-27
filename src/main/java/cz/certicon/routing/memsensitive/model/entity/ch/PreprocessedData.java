@@ -34,6 +34,9 @@ public class PreprocessedData {
     private final int[] startEdges;
     private final int[] endEdges;
 
+    private final int[] startOrigEdges;
+    private final int[] endOrigEdges;
+
     private final float[] lengths;
 
     private final long startId;
@@ -48,12 +51,14 @@ public class PreprocessedData {
 
         this.startEdges = new int[shortcutCount];
         this.endEdges = new int[shortcutCount];
+        this.startOrigEdges = new int[shortcutCount];
+        this.endOrigEdges = new int[shortcutCount];
         this.lengths = new float[shortcutCount];
         EffectiveUtils.fillArray( lengths, -1 );
         this.startId = startId;
     }
 
-    public PreprocessedData( int[] ranks, int[][] incomingShortcuts, int[][] outgoingShortcuts, int[] sources, int[] targets, int[] startEdges, int[] endEdges, long startId ) {
+    public PreprocessedData( int[] ranks, int[][] incomingShortcuts, int[][] outgoingShortcuts, int[] sources, int[] targets, int[] startEdges, int[] endEdges, int[] startOrigEdges, int[] endOrigEdges, long startId ) {
         this.ranks = ranks;
         this.incomingShortcuts = incomingShortcuts;
         this.outgoingShortcuts = outgoingShortcuts;
@@ -61,6 +66,8 @@ public class PreprocessedData {
         this.targets = targets;
         this.startEdges = startEdges;
         this.endEdges = endEdges;
+        this.startOrigEdges = startOrigEdges;
+        this.endOrigEdges = endOrigEdges;
         this.lengths = new float[sources.length];
         EffectiveUtils.fillArray( lengths, -1 );
         this.startId = startId;
@@ -179,6 +186,22 @@ public class PreprocessedData {
         return endEdges[shortcut];
     }
 
+    private int getOrigStartEdge( int edge, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return edge;
+        } else {
+            return startOrigEdges[edge - graph.getEdgeCount()];
+        }
+    }
+
+    private int getOrigEndEdge( int edge, Graph graph ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return edge;
+        } else {
+            return endOrigEdges[edge - graph.getEdgeCount()];
+        }
+    }
+
     public long getStartId() {
         return startId;
     }
@@ -242,6 +265,12 @@ public class PreprocessedData {
     }
 
     public boolean isValidWay( NodeState state, int targetEdge, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
+        int se = getOrigEndEdge( state.getEdge(), graph );
+        int te = getOrigStartEdge( targetEdge, graph );
+        if ( state.getEdge() >= 0 && ( graph.getOtherNode( se, state.getNode() ) == graph.getOtherNode( te, state.getNode() ) ) ) {
+            return false;
+        }
+
         if ( turnRestrictions == null ) { // without turn restrictions, everything is valid
             return state.getEdge() >= graph.getEdgeCount() || graph.isValidWay( state, targetEdge, predecessorArray );
         }
@@ -291,24 +320,24 @@ public class PreprocessedData {
     }
 
     public boolean isValidWay( NodeState state, LinkedList<ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite> currentTurnTables, Map<NodeState, NodeState> predecessorArray, Graph graph ) {
-        System.out.println( "checking: #" + graph.getNodeOrigId( state.getNode() ) + "-edge#" + ( state.getEdge() >= 0 ? getEdgeOrigId( state.getEdge(), graph ) : -1 ) );
+//        System.out.println( "checking: #" + graph.getNodeOrigId( state.getNode() ) + "-edge#" + ( state.getEdge() >= 0 ? getEdgeOrigId( state.getEdge(), graph ) : -1 ) );
         for ( ContractionHierarchiesRoutingAlgorithm.TurnTableSequenceOpposite currentTurnTable : currentTurnTables ) {
             NodeState currentState = state;
             for ( int i = currentTurnTable.current - 1; i >= 0; i++ ) {
                 int edge = currentTurnTable.edges[i];
-                System.out.print( ( currentState.getEdge() >= 0 ? getEdgeOrigId( currentState.getEdge(), graph ) : -1 ) + " =? " + ( edge >= 0 ? getEdgeOrigId( edge, graph ) : -1 ) );
+//                System.out.print( ( currentState.getEdge() >= 0 ? getEdgeOrigId( currentState.getEdge(), graph ) : -1 ) + " =? " + ( edge >= 0 ? getEdgeOrigId( edge, graph ) : -1 ) );
                 if ( currentState.getEdge() < 0 || currentState.getEdge() != edge ) { // if the path ends or the edges do not match
                     break;
                 }
                 if ( i == 0 ) { // all match
-                    System.out.println( "-match" );
+//                    System.out.println( "-match" );
                     return false;
                 }
                 currentState = predecessorArray.get( currentState );
             }
-            System.out.println( "-ok" );
+//            System.out.println( "-ok" );
         }
-        System.out.println( "-all-ok" );
+//        System.out.println( "-all-ok" );
         return true;
     }
 

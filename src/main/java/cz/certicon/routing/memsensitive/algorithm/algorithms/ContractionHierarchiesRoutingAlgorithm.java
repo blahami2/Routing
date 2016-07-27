@@ -194,14 +194,14 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                     currentTurnTables = new LinkedList<>();
                     toCarriedTtMap.put( state, currentTurnTables );
                 }
-                System.out.println( "creating turn tables for node#" + graph.getNodeOrigId( state.getNode() ) );
+//                System.out.println( "creating turn tables for node#" + graph.getNodeOrigId( state.getNode() ) );
                 Iterator<IntArrayContainer> turnTableSequencesIterator = preprocessedData.getTurnTableSequencesIterator( state.getNode(), state.getEdge(), graph );
                 while ( turnTableSequencesIterator.hasNext() ) {
                     int[] turnTableSequence = turnTableSequencesIterator.next().array;
                     if ( turnTableSequence[turnTableSequence.length - 1] == state.getEdge() ) { // if the last edge matches this
                         TurnTableSequenceOpposite turnTableSequenceOpposite = new TurnTableSequenceOpposite( turnTableSequence );
                         currentTurnTables.add( turnTableSequenceOpposite );
-                        System.out.println( turnTableSequenceOpposite.toString() );
+//                        System.out.println( turnTableSequenceOpposite.toString() );
                     }
                 }
 
@@ -237,7 +237,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                             nodeToPredecessorArray.put( targetState, state );
                             nodeToDataStructure.notifyDataChange( targetState, distance );
                             // add turn restrictions
-                            System.out.println( "adding turn tables for node#" + graph.getNodeOrigId( otherNode ) );
+//                            System.out.println( "adding turn tables for node#" + graph.getNodeOrigId( otherNode ) );
                             // set current turntables here minus the ones that do not match after this step
                             // when taking the node out of the heap, add its turnrestrictions
                             LinkedList<TurnTableSequenceOpposite> nextTurnTables = new LinkedList<>();
@@ -245,7 +245,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                                 if ( currentTurnTable.edges[currentTurnTable.current - 1] == edge ) { // if still matches for the next step
                                     TurnTableSequenceOpposite next = currentTurnTable.next();
                                     nextTurnTables.add( next );
-                                    System.out.println( next.toString() );
+//                                    System.out.println( next.toString() );
                                 }
                             }
                             if ( currentTurnTables.size() > 0 ) { // if not empty
@@ -265,9 +265,9 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                 List<Pair<NodeState, Float>> toList = nodeToStates.get( node );
                 
                 long nodeOrigId = graph.getNodeOrigId( node );
-                if(nodeOrigId == 41329 || nodeOrigId == 42117 || nodeOrigId == 1487 || nodeOrigId == 25310 || nodeOrigId == 37277 || nodeOrigId == 7273){
-                    
-                }
+//                if(nodeOrigId == 41329 || nodeOrigId == 42117 || nodeOrigId == 1487 || nodeOrigId == 25310 || nodeOrigId == 37277 || nodeOrigId == 7273){
+//                    
+//                }
                 
                 Comparator<Pair<NodeState, Float>> cmp = new Comparator<Pair<NodeState, Float>>() {
                     @Override
@@ -283,9 +283,9 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         // if is valid
                         // check turn restrictions
                         LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( toPair.a );
-                        System.out.println( "pair from: node = " + graph.getNodeOrigId( fromPair.a.getNode() ) + ", edge = " + ( fromPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( fromPair.a.getEdge(), graph ) : -1 )
-                                + ", pairTo: node = " + graph.getNodeOrigId( toPair.a.getNode() ) + ", edge = " + ( toPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( toPair.a.getEdge(), graph ) : -1 )
-                                + ", carried tts: " + currentTurnTables );
+//                        System.out.println( "pair from: node = " + graph.getNodeOrigId( fromPair.a.getNode() ) + ", edge = " + ( fromPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( fromPair.a.getEdge(), graph ) : -1 )
+//                                + ", pairTo: node = " + graph.getNodeOrigId( toPair.a.getNode() ) + ", edge = " + ( toPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( toPair.a.getEdge(), graph ) : -1 )
+//                                + ", carried tts: " + currentTurnTables );
                         if ( currentTurnTables == null || preprocessedData.isValidWay( fromPair.a, currentTurnTables, nodeFromPredecessorArray, graph ) ) {
                             float distance = fromPair.b + toPair.b;
                             if ( 0 <= distance && distance < finalDistance ) {

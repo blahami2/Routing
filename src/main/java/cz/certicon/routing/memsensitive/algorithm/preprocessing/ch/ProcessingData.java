@@ -32,6 +32,8 @@ public class ProcessingData {
     public final TIntList targets = new TIntArrayList();
     public final TIntList startEdges = new TIntArrayList();
     public final TIntList endEdges = new TIntArrayList();
+    public final TIntList startOrigEdges = new TIntArrayList();
+    public final TIntList endOrigEdges = new TIntArrayList();
     public final TIntList[] incomingShortcuts;
     public final TIntList[] outgoingShortcuts;
     public final TFloatList lengths = new TFloatArrayList();
@@ -39,6 +41,8 @@ public class ProcessingData {
     public final TIntList tmpTargets = new TIntArrayList();
     public final TIntList tmpStartEdges = new TIntArrayList();
     public final TIntList tmpEndEdges = new TIntArrayList();
+    public final TIntList tmpStartOrigEdges = new TIntArrayList();
+    public final TIntList tmpEndOrigEdges = new TIntArrayList();
     public final TIntList[] tmpIncomingShortcuts;
     public final TIntList[] tmpOutgoingShortcuts;
     public final TFloatList tmpLengths = new TFloatArrayList();
@@ -103,6 +107,8 @@ public class ProcessingData {
         endEdges.add( endEdge );
         //            System.out.println( "shortcut - end edges = " + endEdges );
         lengths.add( getLength( startEdge ) + getLength( endEdge ) );
+        startOrigEdges.add( getOrigStartEdge( startEdge ) );
+        endOrigEdges.add( getOrigEndEdge( endEdge ) );
         if ( incomingShortcuts[target] == null ) {
             incomingShortcuts[target] = new TIntArrayList();
         }
@@ -119,11 +125,11 @@ public class ProcessingData {
         trSet = getShortcutLocators( turnRestrictions, shortcutsTrs, startEdge, endEdge );
         addTurnRestrictions( trSet, turnRestrictions, turnRestrictions, shortcutsTrs, startEdge, endEdge, thisId );
 
-        if ( graph.getEdgeCount() > 57675 ) {
-            if ( startEdge == graph.getEdgeByOrigId( 57675 ) || endEdge == graph.getEdgeByOrigId( 57675 ) ) {
-                System.out.println( "#57675-hastt: " + hasTt( startEdge, endEdge ) );
-            }
-        }
+//        if ( graph.getEdgeCount() > 57675 ) {
+//            if ( startEdge == graph.getEdgeByOrigId( 57675 ) || endEdge == graph.getEdgeByOrigId( 57675 ) ) {
+//                System.out.println( "#57675-hastt: " + hasTt( startEdge, endEdge ) );
+//            }
+//        }
         if ( hasTt( startEdge, endEdge ) ) {
             shortcutWithTt.add( thisId );
         }
@@ -318,6 +324,8 @@ public class ProcessingData {
         tmpTargets.add( target );
         tmpStartEdges.add( startEdge );
         tmpEndEdges.add( endEdge );
+        tmpStartOrigEdges.add( getOrigStartEdge( startEdge ) );
+        tmpEndOrigEdges.add( getOrigEndEdge( endEdge ) );
         tmpLengths.add( getLength( startEdge ) + getLength( endEdge ) );
         if ( tmpIncomingShortcuts[target] == null ) {
             tmpIncomingShortcuts[target] = new TIntArrayList();
@@ -354,6 +362,8 @@ public class ProcessingData {
         tmpTargets.clear();
         tmpStartEdges.clear();
         tmpEndEdges.clear();
+        tmpStartOrigEdges.clear();
+        tmpEndOrigEdges.clear();
         TIntIterator iterator = tmpNodes.iterator();
         while ( iterator.hasNext() ) {
             int n = iterator.next();
@@ -420,6 +430,26 @@ public class ProcessingData {
         return tmpTargets.get( edge - graph.getEdgeCount() - shortcutCounter );
     }
 
+    private int getOrigStartEdge( int edge ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return edge;
+        }
+        if ( edge < graph.getEdgeCount() + shortcutCounter ) {
+            return startOrigEdges.get( edge - graph.getEdgeCount() );
+        }
+        return tmpStartOrigEdges.get( edge - graph.getEdgeCount() - shortcutCounter );
+    }
+
+    private int getOrigEndEdge( int edge ) {
+        if ( edge < graph.getEdgeCount() ) {
+            return edge;
+        }
+        if ( edge < graph.getEdgeCount() + shortcutCounter ) {
+            return endOrigEdges.get( edge - graph.getEdgeCount() );
+        }
+        return tmpEndOrigEdges.get( edge - graph.getEdgeCount() - shortcutCounter );
+    }
+
     public float getLength( int edge ) {
         if ( edge < graph.getEdgeCount() ) {
             return graph.getLength( edge );
@@ -447,6 +477,13 @@ public class ProcessingData {
         if ( hasTt( state.getEdge(), targetEdge ) ) {
             return false;
         }
+
+        int se = getOrigEndEdge( state.getEdge() );
+        int te = getOrigStartEdge( targetEdge );
+        if ( state.getEdge() >= 0 && ( graph.getOtherNode( se, state.getNode() ) == graph.getOtherNode( te, state.getNode() ) ) ) {
+            return false;
+        }
+
         int[][][] tts = graph.getTurnRestrictions();
         if ( tts != null && tts[state.getNode()] != null ) {
             for ( int[] sequence : tts[state.getNode()] ) {

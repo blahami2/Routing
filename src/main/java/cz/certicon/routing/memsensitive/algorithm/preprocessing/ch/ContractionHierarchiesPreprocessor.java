@@ -279,7 +279,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         Map<NodeState, Float> nodeDistanceArray = new HashMap<>();
         NodeState finalState = null;
         double finalDistance = Double.MAX_VALUE;
-        NodeState startingState = new SimpleNodeState( node, edgeFrom );
+        NodeState startingState = new SimpleNodeState( graph.getOtherNode( edgeFrom, node ), -1 );
         nodeDistanceArray.put( startingState, 0.0f );
         queue.add( startingState, 0.0 );
         // find the shortest path P from A to B
@@ -299,7 +299,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                 int target = graph.getOtherNode( edge, state.getNode() );
 //                System.out.print( "neighbour: " + target + " via " + edge + " - " );
                 NodeState targetState = NodeState.Factory.newInstance( target, edge );
-                if ( !closedStates.contains( targetState ) && ( state.getEdge() < 0 || target != graph.getOtherNode( state.getEdge(), state.getNode() ) || ( state.equals( startingState ) ) ) ) { // if not closed and not returning to the previous node
+                if ( !closedStates.contains( targetState ) && ( state.getEdge() < 0 || target != graph.getOtherNode( state.getEdge(), state.getNode() ) ) ) { // if not closed and not returning to the previous node
 //                    System.out.print( "valid state - " );
                     if ( graph.isValidWay( state, edge, nodePredecessorArray ) ) {
 //                        System.out.print( "valid turn - " );

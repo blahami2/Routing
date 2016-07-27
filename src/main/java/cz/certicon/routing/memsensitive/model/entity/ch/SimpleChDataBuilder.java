@@ -27,6 +27,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     private Map<Long, Pair<Long, Long>> shortcuts;
     private Map<Long, Integer> sourceMap;
     private Map<Long, Integer> targetMap;
+    private Map<Long, Long> startEdgeMap;
+    private Map<Long, Long> endEdgeMap;
     private long minId = Long.MAX_VALUE;
     private long maxId = -1;
     private int counter;
@@ -40,6 +42,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         this.shortcuts = new HashMap<>();
         this.sourceMap = new HashMap<>();
         this.targetMap = new HashMap<>();
+        this.startEdgeMap = new HashMap<>();
+        this.endEdgeMap = new HashMap<>();
         this.ranks = new int[graph.getNodeCount()];
         this.counter = 0;
         this.shortcutIdMap.clear();
@@ -65,6 +69,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         shortcutIdMap.put( shortcutId, counter++ );
         sourceMap.put( shortcutId, getSourceNode( shortcutId ) );
         targetMap.put( shortcutId, getTargetNode( shortcutId ) );
+        startEdgeMap.put( shortcutId, getStartEdge( shortcutId ) );
+        endEdgeMap.put( shortcutId, getEndEdge( shortcutId ) );
     }
 
     @Override
@@ -88,6 +94,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
 
         int[] startEdges = new int[shortcutCount];
         int[] endEdges = new int[shortcutCount];
+        int[] startOrigEdges = new int[shortcutCount];
+        int[] endOrigEdges = new int[shortcutCount];
 
         Map<Integer, List<Integer>> nodeOutgoing = new HashMap<>();
         Map<Integer, List<Integer>> nodeIncoming = new HashMap<>();
@@ -124,6 +132,8 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
                 endEdges[id] = shortcut + graph.getEdgeCount();
 //                System.out.println( "eshortcut = " + shortcut );
             }
+            startOrigEdges[id] = graph.getEdgeByOrigId( startEdgeMap.get( shortcutId ) );
+            endOrigEdges[id] = graph.getEdgeByOrigId( endEdgeMap.get( shortcutId ) );
 
         }
         for ( Map.Entry<Integer, List<Integer>> entry : nodeOutgoing.entrySet() ) {
@@ -146,7 +156,7 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
                 outgoingShortcuts[i] = new int[0];
             }
         }
-        PreprocessedData preprocessedData = new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startId );
+        PreprocessedData preprocessedData = new PreprocessedData( ranks, incomingShortcuts, outgoingShortcuts, sources, targets, startEdges, endEdges, startOrigEdges, endOrigEdges, startId );
 //        // TTDEBUG
 //        if ( turnTables != null ) {
 //            int maxLen = 0;
@@ -193,6 +203,35 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
             targetMap.put( shortcutId, target );
         }
         return target;
+    }
+
+    private long getStartEdge( long shortcutId ) {
+        Long startEdge = startEdgeMap.get( shortcutId );
+        if ( startEdge == null ) {
+            long sourceEdge = shortcuts.get( shortcutId ).a;
+            if ( shortcuts.containsKey( sourceEdge ) ) {
+                startEdge = getStartEdge( sourceEdge );
+            } else {
+                startEdge = sourceEdge;
+            }
+            startEdgeMap.put( shortcutId, startEdge );
+        }
+        return startEdge;
+    }
+
+    private long getEndEdge( long shortcutId ) {
+        Long endEdge = endEdgeMap.get( shortcutId );
+        if ( endEdge == null ) {
+//            System.out.println( "#" + shortcutId + " - target is null" );
+            long targetEdge = shortcuts.get( shortcutId ).b;
+            if ( shortcuts.containsKey( targetEdge ) ) {
+                endEdge = getEndEdge( targetEdge );
+            } else {
+                endEdge = targetEdge;
+            }
+            endEdgeMap.put( shortcutId, endEdge );
+        }
+        return endEdge;
     }
 
 }
