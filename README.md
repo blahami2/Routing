@@ -13,3 +13,4 @@ Used for routing from A to B via OSM maps.
 - [OSM-binary](https://github.com/openstreetmap/osmosis/tree/master/osmosis-osm-binary)
 - [Protocol buffers](https://github.com/google/protobuf)
 - [GraphStream](http://graphstream-project.org/)
+- [Trove](http://trove.starlight-systems.com/)
