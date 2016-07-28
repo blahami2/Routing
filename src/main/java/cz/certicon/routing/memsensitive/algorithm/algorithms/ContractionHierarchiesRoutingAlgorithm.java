@@ -283,7 +283,7 @@ public class ContractionHierarchiesRoutingAlgorithm implements RoutingAlgorithm<
                         // if is valid
                         // check turn restrictions
                         LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( toPair.a );
-//                        System.out.println( "pair from: node = " + graph.getNodeOrigId( fromPair.a.getNode() ) + ", edge = " + ( fromPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( fromPair.a.getEdge(), graph ) : -1 )
+//                        System.out.println( "pair from: node = " + graph.getNodeOrigId( fromPair.a.getNode()LinkedList<TurnTableSequenceOpposite> currentTurnTables = toCarriedTtMap.get( toPair.a ); ) + ", edge = " + ( fromPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( fromPair.a.getEdge(), graph ) : -1 )
 //                                + ", pairTo: node = " + graph.getNodeOrigId( toPair.a.getNode() ) + ", edge = " + ( toPair.a.getEdge() >= 0 ? preprocessedData.getEdgeOrigId( toPair.a.getEdge(), graph ) : -1 )
 //                                + ", carried tts: " + currentTurnTables );
                         if ( currentTurnTables == null || preprocessedData.isValidWay( fromPair.a, currentTurnTables, nodeFromPredecessorArray, graph ) ) {

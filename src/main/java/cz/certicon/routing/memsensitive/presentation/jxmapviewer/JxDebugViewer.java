@@ -5,10 +5,12 @@
  */
 package cz.certicon.routing.memsensitive.presentation.jxmapviewer;
 
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.memsensitive.model.entity.Graph;
 import cz.certicon.routing.memsensitive.model.entity.ch.PreprocessedData;
 import cz.certicon.routing.memsensitive.presentation.DebugViewer;
+import cz.certicon.routing.model.basic.Time;
 import cz.certicon.routing.model.basic.TimeUnits;
 import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.Coordinate;
@@ -248,7 +250,7 @@ public class JxDebugViewer implements DebugViewer {
         }
         List<Long> list = edgeMap.get( edgeId );
         for ( Long edge : list ) {
-            RoutePainter p = (RoutePainter) painterMap.get( edgeId );
+            RoutePainter p = (RoutePainter) painterMap.get( edge );
             p.setColor( Color.blue );
 //        fitGeoPosition.removeAll( p.track );
         }
@@ -263,11 +265,11 @@ public class JxDebugViewer implements DebugViewer {
 
     @Override
     public void clear() {
-        Set<Long> nodes = new HashSet<>(clickableNodeMap.keySet());
+        Set<Long> nodes = new HashSet<>( clickableNodeMap.keySet() );
         for ( long node : nodes ) {
             removeNode( node );
         }
-        Set<Long> edges = new HashSet<>(edgeMap.keySet());
+        Set<Long> edges = new HashSet<>( edgeMap.keySet() );
         for ( long edge : edges ) {
             removeEdge( edge );
         }
@@ -337,12 +339,21 @@ public class JxDebugViewer implements DebugViewer {
     }
 
     private EdgeData loadEdgeData( long edgeId ) {
+//        TimeMeasurement time = new TimeMeasurement();
+//        time.setTimeUnits( TimeUnits.NANOSECONDS );
+//        System.out.println( "loading edge data for: " + edgeId );
+//        time.start();
         String query;
         ResultSet rs;
         try {
             List<Trinity<Long, Long, Long>> shortcuts = new ArrayList<>();
             LinkedList<Long> queue = new LinkedList<>();
             queue.push( edgeId );
+            int counter = 0;
+//            time.start();
+            if ( GlobalOptions.DEBUG_DISPLAY_MAX_SHORTCUTS <= 0 ) {
+                queue.clear();
+            }
             while ( !queue.isEmpty() ) {
                 long id = queue.pop();
                 query = "SELECT s.id, s.edge_source, s.edge_target FROM shortcuts s WHERE s.edge_source = " + id + " OR s.edge_target = " + id + ";";
@@ -351,14 +362,23 @@ public class JxDebugViewer implements DebugViewer {
                     long sId = rs.getLong( "id" );
                     shortcuts.add( new Trinity<>( sId, rs.getLong( "edge_source" ), rs.getLong( "edge_target" ) ) );
                     queue.push( sId );
+                    if ( ++counter > GlobalOptions.DEBUG_DISPLAY_MAX_SHORTCUTS ) {
+                        queue.clear();
+                        break;
+                    }
                 }
             }
+
+//            System.out.println( "shortcuts loaded in: " + time.getCurrentTimeString() + ", meaning " + new Time( TimeUnits.NANOSECONDS, time.getCurrentTimeElapsed() ).divide( counter ).toString() + " per shortcut" );
+//            time.start();
             Collections.sort( shortcuts, new Comparator<Trinity<Long, Long, Long>>() {
                 @Override
                 public int compare( Trinity<Long, Long, Long> o1, Trinity<Long, Long, Long> o2 ) {
                     return Long.compare( o1.a, o2.a );
                 }
             } );
+//            System.out.println( "shortcuts sorted in " + time.getCurrentTimeString() );
+//            time.start();
             query = "SELECT e.id, e.source_id, e.target_id, ST_AsText(d.geom) AS geom FROM edges e JOIN edges_data d ON e.data_id = d.id WHERE e.id = " + edgeId + ";";
             rs = reader.read( query );
             if ( rs.next() ) {
@@ -368,6 +388,7 @@ public class JxDebugViewer implements DebugViewer {
                 List<Coordinate> coordinates = GeometryUtils.toCoordinatesFromWktLinestring( rs.getString( "geom" ) );
                 return new EdgeData( coordinates, id, sourceId, targetId, shortcuts );
             }
+//            System.out.println( "actual edge data loaded in " + time.getCurrentTimeString() );
             throw new UnsupportedOperationException( "Not implemented yet." );
         } catch ( IOException | SQLException ex ) {
             Logger.getLogger( JxDebugViewer.class.getName() ).log( Level.SEVERE, null, ex );
@@ -376,19 +397,29 @@ public class JxDebugViewer implements DebugViewer {
     }
 
     private List<EdgeData> loadEdge( long edgeId ) {
+//        TimeMeasurement time = new TimeMeasurement();
+//        time.setTimeUnits( TimeUnits.NANOSECONDS );
+//        time.start();
+//        System.out.println( "loading edge: " + edgeId );
         List<EdgeData> edgeDataList = new ArrayList<>();
         try {
             String query = "SELECT id FROM edges e WHERE e.id = " + edgeId + ";";
             ResultSet rs = reader.read( query );
+//            System.out.println( "db result in: " + time.getCurrentTimeString() );
             if ( rs.next() ) {
                 edgeDataList.add( loadEdgeData( edgeId ) );
             } else if ( preprocessedData != null ) {
                 LinkedList<Long> edges = new LinkedList<>();
+//                time.start();
                 int edge = preprocessedData.getEdgeByOrigId( edgeId, graph );
                 addEdgeAsLast( edges, edge, preprocessedData, graph );
+//                System.out.println( "edges (size = " + edges.size() + ") gathered in: " + time.getCurrentTimeString() );
+//                time.start();
                 for ( long e : edges ) {
                     edgeDataList.add( loadEdgeData( e ) );
                 }
+//                long stop = time.stop();
+//                System.out.println( "data loaded in: " + stop + " " + TimeUnits.NANOSECONDS.getUnit() + ", per edge = " + ( stop / edges.size() ) + " " + TimeUnits.NANOSECONDS.getUnit() );
             }
         } catch ( IOException | SQLException ex ) {
             Logger.getLogger( JxDebugViewer.class.getName() ).log( Level.SEVERE, null, ex );
