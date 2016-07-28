@@ -8,6 +8,8 @@ package cz.certicon.routing.application.algorithm.preprocessing.ch.calculators;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 
 /**
+ * Basic implementation of the {@link EdgeDifferenceCalculator} interface. Uses
+ * difference of the number of shortcuts and the degree of node.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

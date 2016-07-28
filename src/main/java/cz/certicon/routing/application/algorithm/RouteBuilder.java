@@ -6,6 +6,7 @@
 package cz.certicon.routing.application.algorithm;
 
 /**
+ * 
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

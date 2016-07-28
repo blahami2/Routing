@@ -26,6 +26,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * Basic implementation of the Contraction Hierarchies algorithms. Requires
+ * preprocessing in order to work properly. See
+ * {@link cz.certicon.routing.application.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor}.
+ * The principle: uses ranks (a value for each node) for state space limitation
+ * - can only travel to a higher rank. Where necessary (in order to keep the
+ * shortest distance), a shortcut can be used (a set of consequent edges). Using
+ * a bidirectional Dijkstra (one Dijkstra from the source, one from the target
+ * using the edges in their opposite direction, while maintaining the rule about
+ * only traveling to a higher rank), the two Dijkstras travel to the high ranks,
+ * where they meet. Every time they meet, an upper bound is created based on the
+ * minimum path length, limiting the search space.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -77,12 +88,14 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         TIntList nodesFromVisited = new TIntArrayList();
         TIntList nodesToVisited = new TIntArrayList();
 
+        // add source points for the "from" Dijkstra
         for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
             int node = entry.getKey();
             float distance = entry.getValue();
             nodeFromDistanceArray[node] = distance;
             nodeFromDataStructure.add( node, distance );
         }
+        // add target points for the "to" Dijkstra
         for ( Map.Entry<Integer, Float> entry : to.entrySet() ) {
             int node = entry.getKey();
             float distance = entry.getValue();
@@ -93,6 +106,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         double finalDistance = Double.MAX_VALUE;
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
+                // extract node S with the minimal distance
                 int currentNode = nodeFromDataStructure.extractMin();
 //                System.out.println( "F: extracted: " + currentNode );
                 if ( MEASURE_STATS ) {
@@ -104,6 +118,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                 float currentDistance = nodeFromDistanceArray[currentNode];
 //                System.out.println( "F: distance = " + currentDistance );
 
+                // check against the upper bound
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
                     Iterator<Integer> it = nodeFromDataStructure.iterator();
@@ -112,6 +127,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                     }
                     nodeFromDataStructure.clear();
                 } else {
+                    // check if the node is a meeting node, update upper bound if necessary
                     if ( nodeToClosedArray.get( currentNode ) ) {
                         float nodeDistance = currentDistance + nodeToDistanceArray[currentNode];
                         if ( nodeDistance < finalDistance ) {
@@ -120,6 +136,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                             finalNode = currentNode;
                         }
                     }
+                    // foreach neighbour T of node S with rank higher than the current rank
                     TIntIterator outgoingEdgesIterator = preprocessedData.getOutgoingEdgesIterator( currentNode, graph );
                     while ( outgoingEdgesIterator.hasNext() ) {
                         int edge = outgoingEdgesIterator.next();
@@ -128,8 +145,10 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                             if ( MEASURE_STATS ) {
                                 StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                             }
+                            // calculate it's distance S + path from S to T
                             float otherNodeDistance = nodeFromDistanceArray[otherNode];
                             float distance = currentDistance + preprocessedData.getLength( edge, graph );
+                            // replace if lower than actual
                             if ( distance < otherNodeDistance ) {
                                 nodeFromDistanceArray[otherNode] = distance;
 //                                System.out.println( "F: pred for " + otherNode + " = " + edge );
@@ -138,44 +157,10 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                             }
                         }
                     }
-//
-//                    for ( int i = 0; i < graph.getOutgoingEdges( currentNode ).length; i++ ) {
-//                        int edge = graph.getOutgoingEdges( currentNode )[i];
-//                        int otherNode = graph.getOtherNode( edge, currentNode );
-//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-//                            if ( MEASURE_STATS ) {
-//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-//                            }
-//                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
-//                            float distance = currentDistance + graph.getLength( edge );
-//                            if ( distance < otherNodeDistance ) {
-//                                nodeFromDistanceArray[otherNode] = distance;
-////                                System.out.println( "F: pred for " + otherNode + " = " + edge );
-//                                nodeFromPredecessorArray[otherNode] = edge;
-//                                nodeFromDataStructure.notifyDataChange( otherNode, distance );
-//                            }
-//                        }
-//                    }
-//                    for ( int i = 0; i < preprocessedData.getOutgoingShortcuts( currentNode ).length; i++ ) {
-//                        int shortcut = preprocessedData.getOutgoingShortcuts( currentNode )[i];
-//                        int otherNode = preprocessedData.getTarget( shortcut );
-//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-//                            if ( MEASURE_STATS ) {
-//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-//                            }
-//                            float otherNodeDistance = nodeFromDistanceArray[otherNode];
-//                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
-//                            if ( distance < otherNodeDistance ) {
-//                                nodeFromDistanceArray[otherNode] = distance;
-////                                System.out.println( "F: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
-//                                nodeFromPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
-//                                nodeFromDataStructure.notifyDataChange( otherNode, distance );
-//                            }
-//                        }
-//                    }
                 }
             }
             if ( !nodeToDataStructure.isEmpty() ) {
+                // extract node S with the minimal distance
                 int currentNode = nodeToDataStructure.extractMin();
 //                System.out.println( "T: extracted: " + currentNode );
                 if ( MEASURE_STATS ) {
@@ -187,6 +172,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                 nodesToVisited.add( currentNode );
 //                System.out.println( "T: distance = " + currentDistance );
 
+                // check against the upper bound
                 if ( finalDistance < currentDistance ) {
                     // end this part, everything else can only be worse
                     Iterator<Integer> it = nodeToDataStructure.iterator();
@@ -195,6 +181,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                     }
                     nodeToDataStructure.clear();
                 } else {
+                    // check if the node is a meeting node, update upper bound if necessary
                     if ( nodeFromClosedArray.get( currentNode ) ) {
                         float nodeDistance = currentDistance + nodeFromDistanceArray[currentNode];
                         if ( nodeDistance < finalDistance ) {
@@ -204,6 +191,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                         }
                     }
 
+                    // foreach neighbour T of node S with rank higher than the current rank
                     TIntIterator incomingEdgesIterator = preprocessedData.getIncomingEdgesIterator( currentNode, graph );
                     while ( incomingEdgesIterator.hasNext() ) {
                         int edge = incomingEdgesIterator.next();
@@ -212,8 +200,10 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                             if ( MEASURE_STATS ) {
                                 StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                             }
+                            // calculate it's distance S + path from S to T
                             float otherNodeDistance = nodeToDistanceArray[otherNode];
                             float distance = currentDistance + preprocessedData.getLength( edge, graph );
+                            // replace if lower than actual
                             if ( distance < otherNodeDistance ) {
                                 nodeToDistanceArray[otherNode] = distance;
 //                                System.out.println( "F: pred for " + otherNode + " = " + edge );
@@ -222,41 +212,6 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                             }
                         }
                     }
-//                    for ( int i = 0; i < graph.getIncomingEdges( currentNode ).length; i++ ) {
-//                        int edge = graph.getIncomingEdges( currentNode )[i];
-//                        int otherNode = graph.getOtherNode( edge, currentNode );
-//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-//                            if ( MEASURE_STATS ) {
-//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-//                            }
-//                            float otherNodeDistance = nodeToDistanceArray[otherNode];
-//                            float distance = currentDistance + graph.getLength( edge );
-//                            if ( distance < otherNodeDistance ) {
-//                                nodeToDistanceArray[otherNode] = distance;
-////                                System.out.println( "T: pred for " + otherNode + " = " + edge );
-//                                nodeToPredecessorArray[otherNode] = edge;
-//                                nodeToDataStructure.notifyDataChange( otherNode, distance );
-//                            }
-//                        }
-//                    }
-//                    for ( int i = 0; i < preprocessedData.getIncomingShortcuts( currentNode ).length; i++ ) {
-//                        int shortcut = preprocessedData.getIncomingShortcuts( currentNode )[i];
-//                        int otherNode = preprocessedData.getSource( shortcut );
-////                        System.out.println( "T: incoming shortcuts for: " + currentNode  +  " = " + shortcut + " with otherNode = " + otherNode);
-//                        if ( preprocessedData.getRank( otherNode ) > sourceRank ) {
-//                            if ( MEASURE_STATS ) {
-//                                StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
-//                            }
-//                            float otherNodeDistance = nodeToDistanceArray[otherNode];
-//                            float distance = currentDistance + preprocessedData.getLength( shortcut, graph );
-//                            if ( distance < otherNodeDistance ) {
-//                                nodeToDistanceArray[otherNode] = distance;
-////                                System.out.println( "T: pred for " + otherNode + " = " + (shortcut + graph.getEdgeCount()) );
-//                                nodeToPredecessorArray[otherNode] = shortcut + graph.getEdgeCount();
-//                                nodeToDataStructure.notifyDataChange( otherNode, distance );
-//                            }
-//                        }
-//                    }
                 }
             }
         }

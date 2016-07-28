@@ -8,8 +8,6 @@ package cz.certicon.routing.application.algorithm.preprocessing.ch;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.datastructures.JgraphtFibonacciDataStructure;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
-import cz.certicon.routing.application.algorithm.preprocessing.ch.calculators.SpatialHeuristicEdgeDifferenceCalculator;
-import cz.certicon.routing.application.algorithm.preprocessing.ch.strategies.LazyRecalculationStrategy;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.strategies.NeighboursOnlyRecalculationStrategy;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
@@ -23,26 +21,25 @@ import cz.certicon.routing.utils.DoubleComparator;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TDoubleList;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
+ * {@link Preprocessor} for Contraction Hierarchies. Principle: Each node gets
+ * contracted. The contraction means removal of the node, while preserving all
+ * the shortest paths (it is enough to check its neighbors) - where necessary, a
+ * shortcut is inserted as a connection of two edges (or later edge and shortcut
+ * or shortcuts). The order of nodes is plain optimization, the algorithm will
+ * work with a random order. Here, the order is determined using edge difference
+ * with a few adjustments.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -53,7 +50,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //    public List<Pair<Integer, String>> shortcutCounts = new ArrayList<>();
 //    public int nodeOfInterest = -1;
 //    public Graph graph;
-
     private static final int THREADS = 8;
 
     private static final double INIT_NODE_RANKING = 0.1;
@@ -134,6 +130,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            }
 //        } );
         // DEBUG
+        // determine order of nodes based on their edge difference (based on the concrete calculator)
         for ( int node = 0; node < nodeCount; node++ ) {
 //        for ( int i = 0; i < nodeCount; i++ ) {
 //            int node = sortedNodes.get( i ).a;
@@ -162,10 +159,11 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        if ( true ) {
 //            return dataBuilder.build();
 //        }
-
         int rank = 1;
         progressListener.init( priorityQueue.size(), 1.0 - INIT_NODE_RANKING );
+        // foreach node based on the priority queue
         while ( !priorityQueue.isEmpty() ) {
+            // extract node with the lowest number ("lowest importance")
             Pair<Integer, Double> extractMin = extractMin( priorityQueue, graph );
             int node = extractMin.a;
             // DEBUG
@@ -174,9 +172,12 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //            }
             // shortcuts
 //            System.out.println( "contracting: " + node );
+            // contract the node
             contractNode( data, nodeDegrees, removedNodes, node, dijkstraPriorityQueue, nodeDistanceArray );
 
+            // foreach relevant node (might be neighbor, might be the next in queue, etc.) recalculate the nodes order
             TIntIterator it = nodeRecalculationStrategy.recalculationIterator( graph, data, node, priorityQueue );
+
             // DEBUG
 //            List<Pair<Integer, Long>> sortedNeighbours = new ArrayList<>();
 //            while ( it.hasNext() ) {
@@ -201,7 +202,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
                     calculatedNodes.set( n, true );
                 }
             }
-            // reset calculated neighbours
+            // reset calculated nodes
             it = nodeRecalculationStrategy.recalculationIterator( graph, data, node, priorityQueue );
             while ( it.hasNext() ) {
                 calculatedNodes.set( it.next(), false );
@@ -219,6 +220,18 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return dataBuilder.build();
     }
 
+    /**
+     * Calculates number of shortcuts created, should the node be removed
+     * (contracted).
+     *
+     * @param data currently processed data so far
+     * @param removedNodes array indicating already contracted/removed nodes
+     * @param node the current node
+     * @param dijkstraPriorityQueue prepared queue object
+     * @param nodeDistanceArray prepared distance object
+     * @param graph the original graph
+     * @return number of shortcuts required
+     */
     private int calculateShortcuts( ProcessingData data, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray, Graph graph ) {
         if ( removedNodes.get( node ) ) {
             return 0;
@@ -371,6 +384,16 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return addedShortcuts.size();
     }
 
+    /**
+     * Contracts the given node. Updates the processing data.
+     *
+     * @param data currently processed data so far
+     * @param nodeDegrees array of node degrees
+     * @param removedNodes array indicating already contracted/removed nodes
+     * @param node the current node
+     * @param dijkstraPriorityQueue prepared queue object
+     * @param nodeDistanceArray prepared distance object
+     */
     private void contractNode( ProcessingData data, int[] nodeDegrees, BitArray removedNodes, int node, NodeDataStructure<Integer> dijkstraPriorityQueue, float[] nodeDistanceArray ) {
         // disable node
         removedNodes.set( node, true );
@@ -465,7 +488,6 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        Collections.sort( sources );
 //        List<Integer> targets = new ArrayList<>( targetSet );
 //        Collections.sort( targets );
-
         Set<Integer> visitedNodes = new HashSet<>();
         // for each source calculate Dijkstra to all the targets {without using the node)
         for ( int from : sources ) {
@@ -529,6 +551,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     }
 
+    // serves for easy comparison
     private Pair<Integer, Double> extractMin( NodeDataStructure<Integer> priorityQueue, Graph graph ) {
         double minValue = priorityQueue.minValue();
         int minNode = priorityQueue.extractMin();
@@ -554,6 +577,7 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
         return new Pair<>( minNode, minValue );
     }
 
+    // primitive array wrapper
     private static class IntegerArray {
 
         final int[] array;
@@ -564,6 +588,11 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 
     }
 
+    /**
+     * Class containing working data for preprocessing. It also wraps access to
+     * the graph and add its own data in order to create an illusion of a single
+     * updated graph object.
+     */
     public static class ProcessingData {
 
         public final TIntList sources = new TIntArrayList();

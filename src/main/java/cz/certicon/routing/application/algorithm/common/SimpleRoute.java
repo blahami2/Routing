@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
+ * Basic implementation of the {@link Route} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

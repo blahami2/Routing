@@ -14,6 +14,10 @@ import cz.certicon.routing.model.entity.Graph;
 import gnu.trove.iterator.TIntIterator;
 
 /**
+ * Lazy update implementation of the {@link NodeRecalculationStrategy}
+ * interface. The node is recalculated on demand, then the evaluation repeats.
+ * 
+ * @deprecated not working yet
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

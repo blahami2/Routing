@@ -5,10 +5,10 @@
  */
 package cz.certicon.routing.application.algorithm;
 
+import cz.certicon.routing.application.algorithm.common.SimpleRoute;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinate;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedList;
 
 /**
  *
@@ -21,4 +21,11 @@ public interface Route {
     public long getTarget();
 
     public long getSource();
+
+    public static class Factory {
+
+        public static Route createSimpleRoute( LinkedList<Pair<Long, Boolean>> edges, long source, long target ) {
+            return new SimpleRoute( edges, source, target );
+        }
+    }
 }

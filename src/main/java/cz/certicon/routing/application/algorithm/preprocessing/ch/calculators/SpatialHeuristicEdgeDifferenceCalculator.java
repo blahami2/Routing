@@ -5,11 +5,13 @@
  */
 package cz.certicon.routing.application.algorithm.preprocessing.ch.calculators;
 
-import cz.certicon.routing.application.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.utils.EffectiveUtils;
 
 /**
+ * Advanced implementation of the {@link EdgeDifferenceCalculator} interface.
+ * Takes into account information about the already contracted nodes
+ * (neighbors).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -20,7 +22,6 @@ public class SpatialHeuristicEdgeDifferenceCalculator implements EdgeDifferenceC
 
     // DEBUG
 //    public ContractionHierarchiesPreprocessor preprocessor;
-
     public SpatialHeuristicEdgeDifferenceCalculator( int nodeCount ) {
         contractedNeighboursCountArray = new int[nodeCount];
         lastNodeContractedArray = new int[nodeCount];

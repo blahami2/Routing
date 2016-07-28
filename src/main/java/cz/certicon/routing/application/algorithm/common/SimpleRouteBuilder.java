@@ -12,6 +12,7 @@ import cz.certicon.routing.model.basic.Pair;
 import java.util.LinkedList;
 
 /**
+ * Simple implementation of the {@link RouteBuilder} interface.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

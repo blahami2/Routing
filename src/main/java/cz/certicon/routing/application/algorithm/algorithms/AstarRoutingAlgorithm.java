@@ -14,7 +14,6 @@ import cz.certicon.routing.application.algorithm.RouteNotFoundException;
 import cz.certicon.routing.application.algorithm.RoutingAlgorithm;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.utils.CoordinateUtils;
 import cz.certicon.routing.utils.EffectiveUtils;
 import cz.certicon.routing.utils.efficient.BitArray;
 import cz.certicon.routing.utils.efficient.LongBitArray;
@@ -24,6 +23,8 @@ import gnu.trove.iterator.TIntIterator;
 import java.util.Map;
 
 /**
+ * A* implementation of the routing algorithm, based on the flight-distance
+ * heuristic function.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -61,12 +62,14 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
+        // clear the data
         graph.resetNodeClosedArray( nodeClosedArray );
         graph.resetNodeDistanceArray( nodeDistanceArray );
         graph.resetNodePredecessorArray( nodePredecessorArray );
         EffectiveUtils.copyArray( nodeSpatialDistancePrototype, nodeSpatialDistanceArray );
         nodeDataStructure.clear();
 
+        // set the source points (add to the queue)
         for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
             int node = entry.getKey();
             float distance = entry.getValue();
@@ -76,7 +79,9 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         }
         int finalNode = -1;
         double finalDistance = Double.MAX_VALUE;
+        // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
+            // extract node S with the minimal distance
             int node = nodeDataStructure.extractMin();
             if ( MEASURE_STATS ) {
                 StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -98,6 +103,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
+            // foreach neighbour T of node S
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
@@ -107,8 +113,10 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                     if ( MEASURE_STATS ) {
                         StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
+                    // calculate it's distance S + path from S to T
                     float targetDistance = nodeDistanceArray[target];
                     float alternativeDistance = distance + graph.getLength( edge );
+                    // replace if lower than actual
                     if ( alternativeDistance < targetDistance ) {
                         nodeDistanceArray[target] = alternativeDistance;
                         nodePredecessorArray[target] = edge;
@@ -125,6 +133,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
+        // if the final node has been found, build route from predecessors and return
         if ( finalNode != -1 ) {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );
             routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalNode ) );
@@ -147,6 +156,15 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         return routeBuilder.build();
     }
 
+    /**
+     * Calculates the spatial distance of the given node to the set of target
+     * nodes, selects the minimum distance. Stores result in a cache (map) for
+     * further computation.
+     *
+     * @param node the current node
+     * @param target the set of target nodes
+     * @return the distance
+     */
     private float calculateSpatialDistance( int node, Map<Integer, Float> target ) {
 //        System.out.println( "calculating distance for: #" + node );
         if ( nodeSpatialDistanceArray[node] < 0 ) {

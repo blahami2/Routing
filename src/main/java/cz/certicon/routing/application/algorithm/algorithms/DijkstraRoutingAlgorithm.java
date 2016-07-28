@@ -21,6 +21,7 @@ import gnu.trove.iterator.TIntIterator;
 import java.util.Map;
 
 /**
+ * Basic routing algorithm implementation using the optimal Dijkstra.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -50,11 +51,13 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTING, TimeLogger.Command.START );
         }
+        // clear the data
         graph.resetNodeClosedArray( nodeClosedArray );
         graph.resetNodeDistanceArray( nodeDistanceArray );
         graph.resetNodePredecessorArray( nodePredecessorArray );
         nodeDataStructure.clear();
 
+        // set the source points (add to the queue)
         for ( Map.Entry<Integer, Float> entry : from.entrySet() ) {
             int node = entry.getKey();
             float distance = entry.getValue();
@@ -64,7 +67,9 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         }
         int finalNode = -1;
         double finalDistance = Double.MAX_VALUE;
+        // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
+            // extract node S with the minimal distance
             int node = nodeDataStructure.extractMin();
             if ( MEASURE_STATS ) {
                 StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.INCREMENT );
@@ -85,6 +90,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 }
             }
 //            System.out.println( "outgoing array: " + Arrays.toString( graph.getOutgoingEdges( node ) ) );
+            // foreach neighbour T of node S
             TIntIterator it = graph.getOutgoingEdgesIterator( node );
             while ( it.hasNext() ) {
                 int edge = it.next();
@@ -94,8 +100,10 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                     if ( MEASURE_STATS ) {
                         StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.INCREMENT );
                     }
+                    // calculate it's distance S + path from S to T
                     float targetDistance = nodeDistanceArray[target];
                     float alternativeDistance = distance + graph.getLength( edge );
+                    // replace if lower than actual
                     if ( alternativeDistance < targetDistance ) {
                         nodeDistanceArray[target] = alternativeDistance;
                         nodePredecessorArray[target] = edge;
@@ -110,6 +118,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         if ( MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.ROUTE_BUILDING, TimeLogger.Command.START );
         }
+        // if the final node has been found, build route from predecessors and return
         if ( finalNode != -1 ) {
 //            System.out.println( "orig node as target: " + graph.getNodeOrigId( finalNode ) );
             routeBuilder.setTargetNode( graph, graph.getNodeOrigId( finalNode ) );

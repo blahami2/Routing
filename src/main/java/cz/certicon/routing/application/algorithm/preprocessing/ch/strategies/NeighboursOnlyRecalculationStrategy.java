@@ -5,19 +5,18 @@
  */
 package cz.certicon.routing.application.algorithm.preprocessing.ch.strategies;
 
-import com.vividsolutions.jts.io.OutStream;
 import cz.certicon.routing.application.algorithm.NodeDataStructure;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.ContractionHierarchiesPreprocessor.ProcessingData;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.EdgeDifferenceCalculator;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.NodeRecalculationStrategy;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.calculators.BasicEdgeDifferenceCalculator;
-import cz.certicon.routing.application.algorithm.preprocessing.ch.calculators.SpatialHeuristicEdgeDifferenceCalculator;
 import cz.certicon.routing.model.entity.Graph;
 import gnu.trove.iterator.TIntIterator;
-import java.io.PrintStream;
 
 /**
+ * Neighbors update implementation of the {@link NodeRecalculationStrategy}
+ * interface. The neighbor nodes are recalculated on the node contraction event.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
