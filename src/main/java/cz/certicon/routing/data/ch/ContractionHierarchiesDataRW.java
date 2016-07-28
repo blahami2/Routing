@@ -5,26 +5,20 @@
  */
 package cz.certicon.routing.data.ch;
 
-import cz.certicon.routing.data.DistanceType;
-import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
-import cz.certicon.routing.data.Reader;
-import cz.certicon.routing.data.Writer;
-import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.basic.Trinity;
+import cz.certicon.routing.application.algorithm.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
-import cz.certicon.routing.model.entity.Node;
-import cz.certicon.routing.model.entity.Shortcut;
-import java.util.List;
-import java.util.Map;
+import cz.certicon.routing.model.entity.ch.ChDataFactory;
+import java.io.IOException;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface ContractionHierarchiesDataRW extends
-        Writer<Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType>>,
-        Reader<Trinity<Graph, GraphEntityFactory, DistanceType>, Trinity<Map<Node.Id, Integer>, List<Shortcut>, DistanceType>> {
+public interface ContractionHierarchiesDataRW {
 
-    public void setPreprocessor(ContractionHierarchiesPreprocessor preprocessor);
+    public <T> T read( ChDataFactory<T> chDataFactory ) throws NotPreprocessedException, IOException;
+
+    public <T> T read( ChDataFactory<T> chDataFactory, Graph graph, Preprocessor<T> preprocessor ) throws IOException;
+
+    public <T> void write( ChDataFactory<T> chDataFactory, T entity ) throws IOException;
 }

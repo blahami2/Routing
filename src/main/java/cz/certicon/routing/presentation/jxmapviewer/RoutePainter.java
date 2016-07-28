@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
+import cz.certicon.routing.presentation.jxmapviewer.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;

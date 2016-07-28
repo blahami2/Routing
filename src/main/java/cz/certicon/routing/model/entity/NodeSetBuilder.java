@@ -5,13 +5,13 @@
  */
 package cz.certicon.routing.model.entity;
 
-import cz.certicon.routing.memsensitive.data.nodesearch.EvaluableOnlyException;
-import cz.certicon.routing.memsensitive.model.entity.NodeSet.NodeCategory;
+import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
+import cz.certicon.routing.model.entity.NodeSet.NodeCategory;
 
 /**
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
- * @param <T>
+ * @param <T> a type of NodeSet
  */
 public interface NodeSetBuilder<T> {
 

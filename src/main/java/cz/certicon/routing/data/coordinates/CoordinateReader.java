@@ -5,19 +5,16 @@
  */
 package cz.certicon.routing.data.coordinates;
 
-import cz.certicon.routing.data.Reader;
-import cz.certicon.routing.model.entity.Coordinate;
-import cz.certicon.routing.model.entity.Edge;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import cz.certicon.routing.model.entity.CoordinateSetBuilderFactory;
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
- * An interface for {@link Coordinate} reading (based on the set of edges) using a {@link Reader} interface.
- * Uses a set of dataIds and a map for them.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface CoordinateReader extends Reader<Set<Edge>, Map<Edge, List<Coordinate>>> {
+public interface CoordinateReader {
+
+    public <T> T readCoordinates( CoordinateSetBuilderFactory<T> coordinateSetBuilderFactory, Iterator<Long> edgeIds ) throws IOException;
 
 }

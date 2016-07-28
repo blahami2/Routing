@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
+import cz.certicon.routing.presentation.jxmapviewer.*;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

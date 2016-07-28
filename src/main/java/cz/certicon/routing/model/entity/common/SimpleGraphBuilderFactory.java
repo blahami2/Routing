@@ -5,11 +5,10 @@
  */
 package cz.certicon.routing.model.entity.common;
 
-import cz.certicon.routing.application.algorithm.DistanceFactory;
+import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import cz.certicon.routing.model.entity.GraphBuilderFactory;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
 
 /**
  *
@@ -17,17 +16,15 @@ import cz.certicon.routing.model.entity.GraphEntityFactory;
  */
 public class SimpleGraphBuilderFactory implements GraphBuilderFactory<Graph> {
 
-    private final GraphEntityFactory graphEntityFactory;
-    private final DistanceFactory distanceFactory;
+    private final DistanceType distanceType;
 
-    public SimpleGraphBuilderFactory( GraphEntityFactory graphEntityFactory, DistanceFactory distanceFactory ) {
-        this.graphEntityFactory = graphEntityFactory;
-        this.distanceFactory = distanceFactory;
+    public SimpleGraphBuilderFactory( DistanceType distanceType ) {
+        this.distanceType = distanceType;
     }
 
     @Override
     public GraphBuilder<Graph> createGraphBuilder( int nodeCount, int edgeCount ) {
-        return new SimpleGraphBuilder( graphEntityFactory, distanceFactory );
+        return new SimpleGraphBuilder( nodeCount, edgeCount, distanceType );
     }
 
 }

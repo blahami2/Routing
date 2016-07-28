@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.model.entity.ch;
 
-import cz.certicon.routing.memsensitive.model.entity.DistanceType;
+import cz.certicon.routing.model.entity.DistanceType;
 
 /**
  *
