@@ -8,9 +8,11 @@ package cz.certicon.routing.application.algorithm.preprocessing.ch;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.ch.ChDataBuilder;
+import cz.certicon.routing.model.entity.ch.PreprocessedData;
 import cz.certicon.routing.model.utility.ProgressListener;
 
 /**
+ * Preprocessor class for creating the {@link PreprocessedData}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <PreprocessedData> data as a result of preprocessing

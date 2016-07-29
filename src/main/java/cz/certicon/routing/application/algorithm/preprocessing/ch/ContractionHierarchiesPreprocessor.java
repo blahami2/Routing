@@ -59,6 +59,10 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
     private NodeRecalculationStrategy nodeRecalculationStrategy;
     private EdgeDifferenceCalculator edgeDifferenceCalculator;
 
+    /**
+     * Constructor, initializes {@link EdgeDifferenceCalculator} and
+     * {@link NodeRecalculationStrategy}
+     */
     public ContractionHierarchiesPreprocessor() {
         this.nodeRecalculationStrategy = new NeighboursOnlyRecalculationStrategy();
 //        this.nodeRecalculationStrategy = new LazyRecalculationStrategy();
@@ -72,17 +76,25 @@ public class ContractionHierarchiesPreprocessor implements Preprocessor<Preproce
 //        }
     }
 
+    /**
+     * Constructor, initializes {@link EdgeDifferenceCalculator} and
+     * {@link NodeRecalculationStrategy}
+     * @param nodeRecalculationStrategy strategy for node recalculation
+     */
     public ContractionHierarchiesPreprocessor( NodeRecalculationStrategy nodeRecalculationStrategy ) {
         this.nodeRecalculationStrategy = nodeRecalculationStrategy;
+        this.edgeDifferenceCalculator = nodeRecalculationStrategy.getEdgeDifferenceCalculator();
     }
 
     @Override
     public void setNodeRecalculationStrategy( NodeRecalculationStrategy nodeRecalculationStrategy ) {
         this.nodeRecalculationStrategy = nodeRecalculationStrategy;
+        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
     }
 
     @Override
     public void setEdgeDifferenceCalculator( EdgeDifferenceCalculator edgeDifferenceCalculator ) {
+        this.nodeRecalculationStrategy.setEdgeDifferenceCalculator( edgeDifferenceCalculator );
         this.edgeDifferenceCalculator = edgeDifferenceCalculator;
         // DEBUG
 //        if ( edgeDifferenceCalculator instanceof SpatialHeuristicEdgeDifferenceCalculator ) {
