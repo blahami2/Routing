@@ -7,17 +7,14 @@ package cz.certicon.routing.data.path.sqlite;
 
 import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.application.algorithm.Route;
 import cz.certicon.routing.data.path.PathReader;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.PathBuilder;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.basic.TimeUnits;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.utils.GeometryUtils;
 import cz.certicon.routing.utils.measuring.TimeLogger;
-import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,10 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
+ * An implementation of {@link PathReader} based on the SQLite database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -42,6 +38,11 @@ public class SqlitePathReader implements PathReader<Graph> {
 
     private final InnerDatabase reader;
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
     public SqlitePathReader( Properties connectionProperties ) {
         this.reader = new InnerDatabase( connectionProperties );
     }
