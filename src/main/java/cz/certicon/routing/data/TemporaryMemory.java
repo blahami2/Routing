@@ -12,6 +12,11 @@ package cz.certicon.routing.data;
  */
 public interface TemporaryMemory {
 
+    /**
+     * Returns {@link DataDestination} as a memory for runtime storage
+     * 
+     * @return memory for runtime storage
+     */
     public DataDestination getMemoryAsDestination();
 
     public DataSource getMemoryAsSource();
