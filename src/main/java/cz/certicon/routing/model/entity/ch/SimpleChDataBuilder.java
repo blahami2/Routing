@@ -8,13 +8,14 @@ package cz.certicon.routing.model.entity.ch;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import static cz.certicon.routing.utils.CollectionUtils.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * Simple implementation of the {@link ChDataBuilder} using the
+ * {@link PreprocessedData} as a representation of CH data
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -23,15 +24,15 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
     private final Graph graph;
     private final DistanceType distanceType;
 
-    private int[] ranks;
-    private Map<Long, Pair<Long, Long>> shortcuts;
-    private Map<Long, Integer> sourceMap;
-    private Map<Long, Integer> targetMap;
-    private long minId = Long.MAX_VALUE;
-    private long maxId = -1;
+    private final int[] ranks;
+    private final Map<Long, Pair<Long, Long>> shortcuts;
+    private final Map<Long, Integer> sourceMap;
+    private final Map<Long, Integer> targetMap;
+    private final long minId = Long.MAX_VALUE;
+    private final long maxId = -1;
     private int counter;
     private long startId = 0;
-    private Map<Long, Integer> shortcutIdMap = new HashMap<>();
+    private final Map<Long, Integer> shortcutIdMap = new HashMap<>();
 
     public SimpleChDataBuilder( Graph graph, DistanceType distanceType ) {
         this.graph = graph;
@@ -59,9 +60,9 @@ public class SimpleChDataBuilder implements ChDataBuilder<PreprocessedData> {
         if ( shortcutId == sourceEdgeId || shortcutId == targetEdgeId ) {
             throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
         }
-        if(shortcutId == 127945){
-            throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
-        }
+//        if(shortcutId == 127945){
+//            throw new AssertionError( "shortcut #" + shortcutId + " = " + sourceEdgeId + " -> " + targetEdgeId );
+//        }
         shortcuts.put( shortcutId, new Pair<>( sourceEdgeId, targetEdgeId ) );
         shortcutIdMap.put( shortcutId, counter++ );
         sourceMap.put( shortcutId, getSourceNode( shortcutId ) );

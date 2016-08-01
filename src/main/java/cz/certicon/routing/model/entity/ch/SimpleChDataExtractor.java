@@ -9,10 +9,12 @@ import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.basic.Trinity;
-import cz.certicon.routing.model.entity.ch.ChDataExtractor;
 import java.util.Iterator;
 
 /**
+ * Simple implementation of the {@link ChDataExtractor} using the
+ * {@link PreprocessedData} as a representation of CH data
+ *
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -84,11 +86,11 @@ public class SimpleChDataExtractor implements ChDataExtractor<PreprocessedData> 
             } else {
                 endEdge = data.getStartId() + data.getEndEdge( counter ) - graph.getEdgeCount();
             }
-            if ( data.getStartId() + counter == 127945 ) {
-                System.out.println( "writing: " + ( data.getStartId() + counter ) + " = " + startEdge + " -> " + endEdge );
-                System.out.println( "from: " + counter + " = " + data.getStartEdge( counter ) + " -> " + data.getEndEdge( counter ) );
-                System.out.println( "data: startId = " + data.getStartId() + ", counter = " + counter + ", edgeCount = " + graph.getEdgeCount() );
-            }
+//            if ( data.getStartId() + counter == 127945 ) {
+//                System.out.println( "writing: " + ( data.getStartId() + counter ) + " = " + startEdge + " -> " + endEdge );
+//                System.out.println( "from: " + counter + " = " + data.getStartEdge( counter ) + " -> " + data.getEndEdge( counter ) );
+//                System.out.println( "data: startId = " + data.getStartId() + ", counter = " + counter + ", edgeCount = " + graph.getEdgeCount() );
+//            }
             return new Trinity<>( data.getStartId() + counter, startEdge, endEdge );
         }
 

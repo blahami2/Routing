@@ -7,11 +7,10 @@ package cz.certicon.routing.model.entity.ch;
 
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.model.entity.ch.ChDataBuilder;
-import cz.certicon.routing.model.entity.ch.ChDataExtractor;
-import cz.certicon.routing.model.entity.ch.ChDataFactory;
 
 /**
+ * Simple implementation of the {@link ChDataFactory} using the
+ * {@link PreprocessedData} as a representation of CH data
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -32,7 +31,7 @@ public class SimpleChDataFactory implements ChDataFactory<PreprocessedData> {
 
     @Override
     public ChDataExtractor<PreprocessedData> createChDataExtractor( PreprocessedData extracted ) {
-        return new SimpleChDataExtractor(graph, distanceType, extracted);
+        return new SimpleChDataExtractor( graph, distanceType, extracted );
     }
 
 }

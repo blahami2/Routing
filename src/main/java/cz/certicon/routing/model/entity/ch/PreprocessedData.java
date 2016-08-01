@@ -11,6 +11,8 @@ import gnu.trove.iterator.TIntIterator;
 import java.util.Arrays;
 
 /**
+ * Class wrapper for the graph functionality enriched by the CH data. * # means
+ * index
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -30,6 +32,15 @@ public class PreprocessedData {
 
     private final long startId;
 
+    /**
+     * Constructor
+     *
+     * @param nodeCount amount of nodes in the graph
+     * @param edgeCount amount of edges in the graph
+     * @param shortcutCount amount of shortcuts in the CH data
+     * @param startId startId for the given shortcuts, see {@link ChDataBuilder}
+     * for more details
+     */
     public PreprocessedData( int nodeCount, int edgeCount, int shortcutCount, long startId ) {
         this.ranks = new int[nodeCount];
         this.incomingShortcuts = new int[nodeCount][];
@@ -44,6 +55,21 @@ public class PreprocessedData {
         this.startId = startId;
     }
 
+    /**
+     * Constructor
+     *
+     * @param ranks array of ranks for nodes: (node) -> rank
+     * @param incomingShortcuts 2D array of incoming shortcuts: (node, #) ->
+     * shortcut
+     * @param outgoingShortcuts 2D array of outgoing shortcuts: (node, #) ->
+     * shortcut
+     * @param sources array of sources: shortcut -> node
+     * @param targets array of targets: shortcut -> node
+     * @param startEdges array of start edges: shortcut -> edge
+     * @param endEdges array of end edges: shortcut -> edge
+     * @param startId startId for the given shortcuts, see {@link ChDataBuilder}
+     * for more details
+     */
     public PreprocessedData( int[] ranks, int[][] incomingShortcuts, int[][] outgoingShortcuts, int[] sources, int[] targets, int[] startEdges, int[] endEdges, long startId ) {
         this.ranks = ranks;
         this.incomingShortcuts = incomingShortcuts;
@@ -143,6 +169,16 @@ public class PreprocessedData {
         return targets[edge - graph.getEdgeCount()];
     }
 
+    /**
+     * Returns other node than the given node, which lies on the given edge
+     * (there are two nodes on each edge, returns the node on the other end of
+     * the edge)
+     *
+     * @param edge containing the node
+     * @param node this node
+     * @param graph graph to be calculated upon
+     * @return the other node
+     */
     public int getOtherNode( int edge, int node, Graph graph ) {
         if ( edge < graph.getEdgeCount() ) {
             return graph.getOtherNode( edge, node );
