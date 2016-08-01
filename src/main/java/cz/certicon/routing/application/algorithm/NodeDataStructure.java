@@ -64,11 +64,32 @@ public interface NodeDataStructure<T> {
      */
     public int size();
 
+    /**
+     * Returns true if the structure contains the given node.
+     * 
+     * @param node element whose presence is to be tested
+     * @return true if this structure contains the specified element
+     */
     public boolean contains( T node );
     
+    /**
+     * Returns node with the minimal value. Does not remove it.
+     * 
+     * @return node with the minimal value
+     */
     public T peek();
     
+    /**
+     * Returns the minimal value in this structure
+     * 
+     * @return the minimal value
+     */
     public double minValue();
     
+    /**
+     * Returns iterator over all the elements in this structure
+     * 
+     * @return iterator over the elements
+     */
     public Iterator<T> iterator();
 }

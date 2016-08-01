@@ -14,6 +14,7 @@ import java.util.Map;
  *
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <G> the graph class to be routed upon
  */
 public interface RoutingAlgorithm<G> {
 
@@ -27,7 +28,7 @@ public interface RoutingAlgorithm<G> {
      * @param to a set of target points (and their initial distances)
      * @return the shortest route of type R
      * @throws RouteNotFoundException thrown when no route was found between the
-     * two points
+     * two points, see the {@link RouteNotFoundException} for more information
      */
     public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException;
 }

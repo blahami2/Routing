@@ -6,6 +6,13 @@
 package cz.certicon.routing.application.algorithm;
 
 /**
+ * Thrown when a route has not been found by the algorithm. Route should always
+ * be found, therefore this means an implementation or data error. Solution for
+ * nodes, which are not connected by any path: create maximal connected
+ * components from the graph. When searching for nodes, make sure they are in
+ * the same component - select the first/bigger/closer and then map the second
+ * node inside that component (to the closest node). This ensures the route
+ * existence.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
