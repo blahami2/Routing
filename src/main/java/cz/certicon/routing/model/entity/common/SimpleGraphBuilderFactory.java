@@ -11,6 +11,8 @@ import cz.certicon.routing.model.entity.GraphBuilder;
 import cz.certicon.routing.model.entity.GraphBuilderFactory;
 
 /**
+ * Simple implementation of the {@link GraphBuilderFactory} interface. Uses maps
+ * internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -18,6 +20,11 @@ public class SimpleGraphBuilderFactory implements GraphBuilderFactory<Graph> {
 
     private final DistanceType distanceType;
 
+    /**
+     * Constructor of {@link SimpleGraphBuilderFactory}
+     *
+     * @param distanceType metric
+     */
     public SimpleGraphBuilderFactory( DistanceType distanceType ) {
         this.distanceType = distanceType;
     }

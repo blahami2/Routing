@@ -12,6 +12,8 @@ import cz.certicon.routing.model.entity.NodeSetBuilder;
 import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
 
 /**
+ * Simple implementation of the {@link NodeSetBuilderFactory} interface. Uses
+ * maps internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -20,6 +22,12 @@ public class SimpleNodeSetBuilderFactory implements NodeSetBuilderFactory<NodeSe
     private final DistanceType distanceType;
     private final Graph graph;
 
+    /**
+     * Constructor of {@link SimpleNodeSetBuilderFactory}
+     *
+     * @param graph graph
+     * @param distanceType metric
+     */
     public SimpleNodeSetBuilderFactory( Graph graph, DistanceType distanceType ) {
         this.graph = graph;
         this.distanceType = distanceType;

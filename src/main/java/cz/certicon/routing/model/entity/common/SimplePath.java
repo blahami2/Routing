@@ -13,15 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Simple implementation of the {@link Path} interface. Uses maps internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class SimplePath implements Path {
-    
+
     private final ArrayList<Coordinate> coordinates;
     private final Length length;
     private final Time time;
 
+    /**
+     * Constructor of {@link SimplePath}
+     *
+     * @param coordinates path coordinates sequence
+     * @param length path length
+     * @param time path time
+     */
     public SimplePath( ArrayList<Coordinate> coordinates, Length length, Time time ) {
         this.coordinates = coordinates;
         this.length = length;

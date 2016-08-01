@@ -12,14 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Simple implementation of the {@link CoordinateSetBuilderFactory} interface.
+ * Uses maps internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class SimpleCoordinateSetBuilderFactory implements CoordinateSetBuilderFactory<Map<Long,List<Coordinate>>>{
+public class SimpleCoordinateSetBuilderFactory implements CoordinateSetBuilderFactory<Map<Long, List<Coordinate>>> {
 
     @Override
     public CoordinateSetBuilder<Map<Long, List<Coordinate>>> createCoordinateSetBuilder() {
         return new SimpleCoordinateSetBuilder();
     }
-    
+
 }

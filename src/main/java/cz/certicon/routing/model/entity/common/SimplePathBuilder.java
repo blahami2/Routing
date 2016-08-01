@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.model.entity.common;
 
-import cz.certicon.routing.application.algorithm.Route;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.Path;
 import cz.certicon.routing.model.entity.PathBuilder;
@@ -19,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Simple implementation of the {@link PathBuilder} interface. Uses maps
+ * internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -29,9 +30,6 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
     private List<Coordinate> end = null;
     private double time = 0;
     private double length = 0;
-
-    public SimplePathBuilder() {
-    }
 
     @Override
     public void addEdge( Graph graph, long edgeId, boolean isForward, List<Coordinate> edgeCoordinates, double length, double time ) {
@@ -109,7 +107,7 @@ public class SimplePathBuilder implements PathBuilder<Path, Graph> {
             coords.add( sourceCoordinate );
             coords.add( targetCoordinate );
         }
-        return new SimplePath( coords, new Length( LengthUnits.METERS, (long) length), new Time( TimeUnits.SECONDS, (long) time) );
+        return new SimplePath( coords, new Length( LengthUnits.METERS, (long) length ), new Time( TimeUnits.SECONDS, (long) time ) );
     }
 
 }

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Simple implementation of the {@link GraphBuilder} interface. Uses maps
+ * internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -27,6 +29,13 @@ public class SimpleGraphBuilder implements GraphBuilder<Graph> {
     private int nodeCounter = 0;
     private int edgeCounter = 0;
 
+    /**
+     * Constructor of {@link SimpleGraphBuilder}
+     *
+     * @param nodeCount amount of nodes
+     * @param edgeCount amount of edges
+     * @param distanceType distance type (metric)
+     */
     public SimpleGraphBuilder( int nodeCount, int edgeCount, DistanceType distanceType ) {
         this.graph = new NeighbourlistGraph( nodeCount, edgeCount );
         this.distanceType = distanceType;

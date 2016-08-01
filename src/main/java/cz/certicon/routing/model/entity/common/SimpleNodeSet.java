@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Simple implementation of the {@link NodeSet} interface. Uses maps internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

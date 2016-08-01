@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Simple implementation of the {@link CoordinateSetBuilder} interface. Uses map
+ * internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -19,6 +21,9 @@ public class SimpleCoordinateSetBuilder implements CoordinateSetBuilder<Map<Long
 
     private final Map<Long, List<Coordinate>> coordinatesMap;
 
+    /**
+     * Constructor for {@link SimpleCoordinateSetBuilder}
+     */
     public SimpleCoordinateSetBuilder() {
         this.coordinatesMap = new HashMap<>();
     }

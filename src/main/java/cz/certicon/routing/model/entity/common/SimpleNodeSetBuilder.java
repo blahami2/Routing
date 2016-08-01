@@ -18,6 +18,8 @@ import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Iterator;
 
 /**
+ * Simple implementation of the {@link NodeSetBuilder} interface. Uses maps
+ * internally.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -27,6 +29,12 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
     private final Graph graph;
     private final NodeSet<Graph> nodeSet;
 
+    /**
+     * Constructor of {@link NodeSetBuilder}
+     *
+     * @param graph graph
+     * @param distanceType metric
+     */
     public SimpleNodeSetBuilder( Graph graph, DistanceType distanceType ) {
         this.distanceType = distanceType;
         this.graph = graph;
