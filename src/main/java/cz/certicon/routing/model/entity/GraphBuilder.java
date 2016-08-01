@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.entity;
 
 /**
+ * Builder for the graph.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <T> Graph class

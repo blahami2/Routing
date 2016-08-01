@@ -16,6 +16,13 @@ public class CartesianCoords {
     private final double y;
     private final double z;
 
+    /**
+     * Constructor
+     *
+     * @param x x
+     * @param y y
+     * @param z z
+     */
     public CartesianCoords( double x, double y, double z ) {
         this.x = x;
         this.y = y;
