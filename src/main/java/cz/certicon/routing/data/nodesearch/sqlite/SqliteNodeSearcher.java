@@ -11,18 +11,17 @@ import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.NodeSet.NodeCategory;
-import cz.certicon.routing.model.basic.TimeUnits;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NodeSetBuilder;
 import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
 import cz.certicon.routing.utils.measuring.TimeLogger;
-import cz.certicon.routing.utils.measuring.TimeMeasurement;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * Implementation of the {@link NodeSearcher} using the SQLite database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -35,6 +34,11 @@ public class SqliteNodeSearcher implements NodeSearcher {
     private final double distanceInit;
     private final double distanceMultiplier;
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
     public SqliteNodeSearcher( Properties connectionProperties ) {
         this.reader = new StringSqliteReader( connectionProperties );
         this.distanceInit = DISTANCE_INIT;

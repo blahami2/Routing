@@ -8,6 +8,10 @@ package cz.certicon.routing.data.nodesearch;
 import cz.certicon.routing.model.entity.Coordinate;
 
 /**
+ * Exception thrown when the two coordinates map to a single edge, then routing
+ * is pointless and only a simple evaluation is necessary. This exception
+ * therefore provides basic data about the situation for the application to
+ * solve. This is not a critical exception - it can be solved in runtime.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
