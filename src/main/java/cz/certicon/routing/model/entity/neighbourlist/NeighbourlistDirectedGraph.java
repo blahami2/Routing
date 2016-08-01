@@ -7,8 +7,10 @@ package cz.certicon.routing.model.entity.neighbourlist;
 
 /**
  *
+ * @deprecated use {@link NeighbourlistGraph} instead, it can be used as
+ * Directed as well
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class NeighbourlistDirectedGraph {
-    
+
 }

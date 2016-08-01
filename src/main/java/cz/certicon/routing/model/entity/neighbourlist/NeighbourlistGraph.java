@@ -9,12 +9,11 @@ import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.utils.EffectiveUtils;
 import cz.certicon.routing.utils.efficient.BitArray;
 import gnu.trove.iterator.TIntIterator;
-import java.util.BitSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * Implementation of the {@link Graph} interface. Uses neighbor list - adjacency list.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
