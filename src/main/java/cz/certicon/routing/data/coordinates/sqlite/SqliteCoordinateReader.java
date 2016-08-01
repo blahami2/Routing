@@ -10,7 +10,6 @@ import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.model.entity.CoordinateSetBuilder;
 import cz.certicon.routing.model.entity.CoordinateSetBuilderFactory;
 import cz.certicon.routing.model.entity.Coordinate;
-import cz.certicon.routing.model.utility.iterator.LongIterator;
 import cz.certicon.routing.utils.GeometryUtils;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -18,10 +17,10 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
+ * An implementation of the {@link CoordinateReader} interface based on the
+ * SQLite database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -29,6 +28,11 @@ public class SqliteCoordinateReader implements CoordinateReader {
 
     private final StringSqliteReader reader;
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
     public SqliteCoordinateReader( Properties connectionProperties ) {
         this.reader = new StringSqliteReader( connectionProperties );
     }
