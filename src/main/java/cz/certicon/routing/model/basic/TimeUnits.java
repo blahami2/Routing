@@ -25,15 +25,32 @@ public enum TimeUnits {
         return nanoDivisor;
     }
 
+    /**
+     * Returns nanoseconds converted to these units.
+     *
+     * @param nanoseconds value in nanometers
+     * @return converted value in these units
+     */
     public long fromNano( long nanoseconds ) {
         return nanoseconds / nanoDivisor;
     }
-    
-    public long toNano(long time){
+
+    /**
+     * Returns nanoseconds converted from these units
+     *
+     * @param time value in these units
+     * @return converted value in nanoseconds
+     */
+    public long toNano( long time ) {
         return time * nanoDivisor;
     }
-    
-    public String getUnit(){
+
+    /**
+     * Returns string representation of these units
+     *
+     * @return string representation of these units
+     */
+    public String getUnit() {
         return unit;
     }
 }

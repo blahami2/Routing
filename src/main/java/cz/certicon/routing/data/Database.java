@@ -5,8 +5,6 @@
  */
 package cz.certicon.routing.data;
 
-import java.sql.ResultSet;
-
 /**
  * A database interface
  *

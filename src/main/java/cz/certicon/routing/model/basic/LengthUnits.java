@@ -6,6 +6,7 @@
 package cz.certicon.routing.model.basic;
 
 /**
+ * Enumeration representing the possible length units.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -24,14 +25,31 @@ public enum LengthUnits {
         return nanoDivisor;
     }
 
-    public long fromNano( long nanoseconds ) {
-        return nanoseconds / nanoDivisor;
+    /**
+     * Returns nanometers converted to these units.
+     *
+     * @param nanometers value in nanometers
+     * @return converted value in these units
+     */
+    public long fromNano( long nanometers ) {
+        return nanometers / nanoDivisor;
     }
 
+    /**
+     * Returns nanometers converted from these units
+     *
+     * @param length value in these units
+     * @return converted value in nanometers
+     */
     public long toNano( long length ) {
         return length * nanoDivisor;
     }
 
+    /**
+     * Returns string representation of these units
+     *
+     * @return string representation of these units
+     */
     public String getUnit() {
         return unit;
     }
