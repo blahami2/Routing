@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * An extension to the {@link StringSqliteReader}, which is read-only and
+ * returns {@link ResultSet} based on the given query (String).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -32,10 +34,22 @@ public class StringSqliteReader {
         };
     }
 
+    /**
+     * Returns {@link ResultSet} based on the given query.
+     *
+     * @param sql SQL query
+     * @return result set
+     * @throws IOException thrown when an SQL or IO exception appears
+     */
     public ResultSet read( String sql ) throws IOException {
         return database.read( sql );
     }
 
+    /**
+     * Closes the database connection
+     *
+     * @throws IOException thrown when an SQL or IO exception appears
+     */
     public void close() throws IOException {
         database.close();
     }

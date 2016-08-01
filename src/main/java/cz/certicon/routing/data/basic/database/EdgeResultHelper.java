@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Encapsulates the ResultSet and provides access to the columns. Also offers
+ * multiple static functions, such as select query creation.
+ * 
+ * @deprecated needs to be updated properly
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

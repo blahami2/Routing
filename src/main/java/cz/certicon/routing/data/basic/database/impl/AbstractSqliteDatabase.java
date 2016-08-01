@@ -13,13 +13,25 @@ import java.util.Properties;
 import org.sqlite.SQLiteConfig;
 
 /**
+ * Abstract extension of the embedded database focused on the SQLite database.
+ * Also adds support for the SpatiaLite extension - the provided Properties must
+ * contain path to the spatialite library.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <Entity> entity to be read or written
+ * @param <AdditionalData>
  */
 public abstract class AbstractSqliteDatabase<Entity, AdditionalData> extends AbstractEmbeddedDatabase<Entity, AdditionalData> {
 
     private String spatialitePath;
 
+    /**
+     * Creates an instance of this class.
+     *
+     * @param connectionProperties must contain properties (more info in
+     * {@link AbstractEmbeddedDatabase}) and a path to the spatialite library
+     * under key: spatialite_path
+     */
     public AbstractSqliteDatabase( Properties connectionProperties ) {
         super( connectionProperties );
         SQLiteConfig config = new SQLiteConfig();
