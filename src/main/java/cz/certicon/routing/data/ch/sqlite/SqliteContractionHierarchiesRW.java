@@ -6,9 +6,7 @@
 package cz.certicon.routing.data.ch.sqlite;
 
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
-import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
 import cz.certicon.routing.application.algorithm.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.data.ch.ContractionHierarchiesDataRW;
 import cz.certicon.routing.data.ch.NotPreprocessedException;
@@ -18,7 +16,6 @@ import cz.certicon.routing.model.basic.Trinity;
 import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import cz.certicon.routing.model.entity.ch.ChDataExtractor;
 import cz.certicon.routing.model.entity.ch.ChDataFactory;
-import cz.certicon.routing.model.utility.progress.SimpleProgressListener;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -30,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * An implementation of the {@link ContractionHierarchiesDataRW} interface based
+ * on the SQLite database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -41,11 +40,23 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
 
     private final int batchSize;
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
     public SqliteContractionHierarchiesRW( Properties connectionProperties ) {
         this.db = new InnerDatabase( connectionProperties );
         this.batchSize = BATCH_SIZE;
     }
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     * @param batchSize amount of items to be processed in a single batch (when
+     * writing)
+     */
     public SqliteContractionHierarchiesRW( Properties connectionProperties, int batchSize ) {
         this.db = new InnerDatabase( connectionProperties );
         this.batchSize = batchSize;
@@ -153,7 +164,7 @@ public class SqliteContractionHierarchiesRW implements ContractionHierarchiesDat
             while ( shortcutIterator.hasNext() ) {
                 Trinity<Long, Long, Long> shortcut = shortcutIterator.next();
                 int idx = 1;
-                if(shortcut.a == 127945){
+                if ( shortcut.a == 127945 ) {
                     System.out.println( "statement: " + shortcut.a + " = " + shortcut.b + " -> " + shortcut.c );
                 }
                 shortcutStatement.setLong( idx++, shortcut.a );

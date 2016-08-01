@@ -6,6 +6,10 @@
 package cz.certicon.routing.data.ch;
 
 /**
+ * This exception is thrown when a read on CH is performed, but the data are not
+ * present and the preprocessor is not provided. Please, use the preprocessor if
+ * you want to prepare the data. Do not use the preprocessor, if the data should
+ * already be present - then this is a valid error.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
