@@ -18,6 +18,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
+ * An implementation of the {@link GraphReader} interface based on the SQLite
+ * database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -25,6 +27,11 @@ public class SqliteGraphReader implements GraphReader {
 
     private final StringSqliteReader reader;
 
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
     public SqliteGraphReader( Properties connectionProperties ) {
         this.reader = new StringSqliteReader( connectionProperties );
     }
