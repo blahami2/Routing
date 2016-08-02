@@ -30,8 +30,8 @@ import org.jdesktop.swingx.painter.Painter;
  */
 public class JxMapViewerFrame implements PathDisplayer {
 
-    private JXMapViewer mapViewer;
-    private JXMapKit mapKit;
+    private final JXMapViewer mapViewer;
+    private final JXMapKit mapKit;
     private JFrame frame;
     private DefaultTileFactory tileFactory;
     private final Set<GeoPosition> fitGeoPosition = new HashSet<>();

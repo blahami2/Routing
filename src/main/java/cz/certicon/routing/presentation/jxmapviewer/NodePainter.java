@@ -18,15 +18,16 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
 
 /**
+ * Painter for the node
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class NodePainter implements Painter<JXMapViewer> {
 
     private Color color = Color.RED;
-    private boolean antiAlias = true;
+    private final boolean antiAlias = true;
 
-    private List<GeoPosition> track;
+    private final List<GeoPosition> track;
 
     /**
      * @param track the track
@@ -62,6 +63,10 @@ public class NodePainter implements Painter<JXMapViewer> {
         drawRoute( g, map );
 
         g.dispose();
+    }
+
+    public void setColor( Color color ) {
+        this.color = color;
     }
 
     /**

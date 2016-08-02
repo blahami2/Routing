@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import cz.certicon.routing.presentation.jxmapviewer.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -21,15 +20,15 @@ import org.jdesktop.swingx.painter.Painter;
 /**
  *
  * Paints a route
+ *
  * @author Martin Steiger
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class RoutePainter implements Painter<JXMapViewer> {
 
     private Color color = Color.RED;
-    private boolean antiAlias = true;
-
-    private List<GeoPosition> track;
+    private final boolean antiAlias = true;
+    private final List<GeoPosition> track;
 
     /**
      * @param track the track
@@ -65,6 +64,10 @@ public class RoutePainter implements Painter<JXMapViewer> {
         drawRoute( g, map );
 
         g.dispose();
+    }
+
+    public void setColor( Color color ) {
+        this.color = color;
     }
 
     /**

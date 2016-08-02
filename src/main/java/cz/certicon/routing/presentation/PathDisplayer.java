@@ -8,10 +8,17 @@ package cz.certicon.routing.presentation;
 import cz.certicon.routing.model.entity.Path;
 
 /**
+ * Interface defining path displaying functionality. Displays given path on the
+ * map.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface PathDisplayer {
 
+    /**
+     * Displays given path on the map
+     *
+     * @param path given path
+     */
     public void displayPath( Path path );
 }

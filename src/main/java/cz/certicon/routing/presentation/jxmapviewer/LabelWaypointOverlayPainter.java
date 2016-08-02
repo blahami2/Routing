@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import cz.certicon.routing.presentation.jxmapviewer.*;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -14,7 +13,7 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.WaypointPainter;
 
 /**
- * An implementation of WaypointPainter supporting LabeLWaypoint
+ * An implementation of {@link WaypointPainter} supporting {@link LabeLWaypoint}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

@@ -24,13 +24,14 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 
 /**
+ * Implementation of {@link PathDisplayer} using JXMapViewer library.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class JxNodeViewer implements PathDisplayer {
 
-    private JXMapViewer mapViewer;
-    private JXMapKit mapKit;
+    private final JXMapViewer mapViewer;
+    private final JXMapKit mapKit;
     private JFrame frame;
     private DefaultTileFactory tileFactory;
     private final Set<GeoPosition> fitGeoPosition = new HashSet<>();
