@@ -8,11 +8,14 @@ package cz.certicon.routing.model.utility.progress;
 import cz.certicon.routing.model.utility.ProgressListener;
 
 /**
+ * Empty implementation of {@link ProgressListener}, which does nothing on
+ * progress (this serves for the algorithm to call the progress listener anyway
+ * and not do anything, if not required).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class EmptyProgressListener implements ProgressListener {
-    
+
     @Override
     public void onProgressUpdate( double done ) {
     }
@@ -34,5 +37,5 @@ public class EmptyProgressListener implements ProgressListener {
     @Override
     public void init( int size, double calculationRatio ) {
     }
-    
+
 }

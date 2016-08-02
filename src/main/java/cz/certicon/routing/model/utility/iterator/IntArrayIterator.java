@@ -8,6 +8,7 @@ package cz.certicon.routing.model.utility.iterator;
 import java.util.Iterator;
 
 /**
+ * Simple iterator of primitive integer array
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

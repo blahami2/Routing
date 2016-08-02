@@ -9,6 +9,10 @@ import cz.certicon.routing.model.utility.ProgressListener;
 import cz.certicon.routing.utils.DoubleComparator;
 
 /**
+ * Simple implementation of the {@link ProgressListener}. Implicitly it travels
+ * over percentages: from 0 to 100 via steps of size 1. It can be adjusted via
+ * number of updates (number steps taken from 0 to number of updates) or size
+ * and calculation ratio ({@link #init(int, double) init}).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
