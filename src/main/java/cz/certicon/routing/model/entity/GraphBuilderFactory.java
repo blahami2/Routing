@@ -5,13 +5,20 @@
  */
 package cz.certicon.routing.model.entity;
 
-import org.graphstream.graph.GraphFactory;
-
 /**
+ * Interface for the graph builder factory
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <T> graph type
  */
 public interface GraphBuilderFactory<T> {
 
+    /**
+     * Creates and returns graph builder.
+     *
+     * @param nodeCount amount of nodes in the graph
+     * @param edgeCount amount of edges in the graph
+     * @return graph builder
+     */
     public GraphBuilder<T> createGraphBuilder( int nodeCount, int edgeCount );
 }
