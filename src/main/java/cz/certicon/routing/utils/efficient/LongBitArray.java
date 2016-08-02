@@ -6,9 +6,9 @@
 package cz.certicon.routing.utils.efficient;
 
 import cz.certicon.routing.utils.EffectiveUtils;
-import java.util.Arrays;
 
 /**
+ * Implementation of {@link BitArray} using long as bottom layer data type.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -70,14 +70,14 @@ public class LongBitArray implements BitArray {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append( "[");
+        sb.append( "[" );
         for ( int i = 0; i < size; i++ ) {
-            sb.append( get(i) ? "1" : "0"  ).append( ", ");
+            sb.append( get( i ) ? "1" : "0" ).append( ", " );
         }
-        if(sb.length() > 3){
-            sb.replace( sb.length() - 2, sb.length(), "");
+        if ( sb.length() > 3 ) {
+            sb.replace( sb.length() - 2, sb.length(), "" );
         }
-        sb.append( "]");
+        sb.append( "]" );
         return sb.toString();
     }
 

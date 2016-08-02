@@ -8,6 +8,8 @@ package cz.certicon.routing.utils.efficient;
 import gnu.trove.iterator.TIntIterator;
 
 /**
+ * Efficient integer linked list. From the outside it can be only added to. It
+ * supports reading and removal via iterator.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -17,6 +19,11 @@ public class IntLinkedList {
     private Entry last = null;
     private int size = 0;
 
+    /**
+     * Add number to the end of list
+     *
+     * @param n number to be added
+     */
     public void add( int n ) {
         if ( last == null ) {
             first = last = new Entry( n );
@@ -25,6 +32,15 @@ public class IntLinkedList {
             last = last.next;
         }
         size++;
+    }
+
+    /**
+     * Returns iterator
+     *
+     * @return iterator
+     */
+    public TIntIterator iterator() {
+        return new IntLinkedListIterator();
     }
 
     private static class Entry {
@@ -38,7 +54,7 @@ public class IntLinkedList {
         }
     }
 
-    public class IntLinkedListIterator implements TIntIterator {
+    private class IntLinkedListIterator implements TIntIterator {
 
         private Entry current = null;
         private Entry previous = null;
