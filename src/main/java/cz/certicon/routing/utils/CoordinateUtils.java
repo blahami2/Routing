@@ -176,14 +176,35 @@ public class CoordinateUtils {
         return new Point( x, y );
     }
 
+    /**
+     * Converts {@link com.vividsolutions.jts.geom.Coordinate} into
+     * {@link Coordinate}
+     *
+     * @param coordinate coordinate to convert
+     * @return converted coordinate
+     */
     public static Coordinate jtsToCoordinates( com.vividsolutions.jts.geom.Coordinate coordinate ) {
         return new Coordinate( coordinate.y, coordinate.x );
     }
 
-    public static Coordinate coordinatesToJts( Coordinate coordinates ) {
-        return new Coordinate( coordinates.getLongitude(), coordinates.getLatitude() );
+    /**
+     * Converts {@link Coordinate} into
+     * {@link com.vividsolutions.jts.geom.Coordinate}
+     *
+     * @param coordinate coordinate to convert
+     * @return converted coordinate
+     */
+    public static com.vividsolutions.jts.geom.Coordinate coordinatesToJts( Coordinate coordinate ) {
+        return new com.vividsolutions.jts.geom.Coordinate( coordinate.getLongitude(), coordinate.getLatitude() );
     }
 
+    /**
+     * Converts array of {@link com.vividsolutions.jts.geom.Coordinate} into
+     * list of {@link Coordinate}
+     *
+     * @param coordinates coordinates to convert
+     * @return converted coordinates
+     */
     public static List<Coordinate> jtsToCoordinates( com.vividsolutions.jts.geom.Coordinate[] coordinates ) {
         List<Coordinate> coords = new ArrayList<>();
         for ( com.vividsolutions.jts.geom.Coordinate c : coordinates ) {
@@ -192,16 +213,33 @@ public class CoordinateUtils {
         return coords;
     }
 
-    public static Coordinate[] coordinatesToJts( List<Coordinate> coordinates ) {
-        Coordinate[] coords = new Coordinate[coordinates.size()];
+    /**
+     * Converts list of {@link Coordinate} into array of
+     * {@link com.vividsolutions.jts.geom.Coordinate}
+     *
+     * @param coordinates coordinates to convert
+     * @return converted coordinates
+     */
+    public static com.vividsolutions.jts.geom.Coordinate[] coordinatesToJts( List<Coordinate> coordinates ) {
+        com.vividsolutions.jts.geom.Coordinate[] coords = new com.vividsolutions.jts.geom.Coordinate[coordinates.size()];
         for ( int i = 0; i < coordinates.size(); i++ ) {
             coords[i] = coordinatesToJts( coordinates.get( i ) );
         }
         return coords;
     }
-    
-    public boolean equals(Coordinate a, Coordinate b, double precision){
-        return (DoubleComparator.isEqualTo( a.getLatitude(), b.getLatitude(), 10E-6)
-                && DoubleComparator.isEqualTo( a.getLongitude(), b.getLongitude(), 10E-6));
+
+    /**
+     * Evaluates equality of the given coordinates with the given precision. For
+     * example 1 and 1.99 are equal with precision of 1.0
+     *
+     * @param a first coordinate
+     * @param b second coordinate
+     * @param precision given precision
+     * @return true if the coordinates are equal with the given precision, false
+     * otherwise
+     */
+    public boolean equals( Coordinate a, Coordinate b, double precision ) {
+        return ( DoubleComparator.isEqualTo( a.getLatitude(), b.getLatitude(), precision )
+                && DoubleComparator.isEqualTo( a.getLongitude(), b.getLongitude(), precision ) );
     }
 }

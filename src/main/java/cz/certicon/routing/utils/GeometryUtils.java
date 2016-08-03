@@ -54,6 +54,12 @@ public class GeometryUtils {
         return new Point( scaledX, scaledY );
     }
 
+    /**
+     * Converts string in WKT format into {@link Coordinate}
+     *
+     * @param point description in WKT format
+     * @return converted coordinate
+     */
     public static Coordinate toCoordinatesFromWktPoint( String point ) {
         try {
             point = point.substring( "POINT(".length(), point.length() - ")".length() );
@@ -70,10 +76,23 @@ public class GeometryUtils {
         );
     }
 
-    public static String toWktFromCoordinates( Coordinate coordinates ) {
-        return "POINT(" + coordinates.getLongitude() + " " + coordinates.getLatitude() + ")";
+    /**
+     * Converts given {@link Coordinate} into string WKT format
+     *
+     * @param coordinate given coordinate
+     * @return string representation in WKT format
+     */
+    public static String toWktFromCoordinates( Coordinate coordinate ) {
+        return "POINT(" + coordinate.getLongitude() + " " + coordinate.getLatitude() + ")";
     }
 
+    /**
+     * Converts geometry representation in string WKT format into {@link List}
+     * of {@link Coordinate}.
+     *
+     * @param linestring WKT representation of linestring (geometry)
+     * @return list of coordinates
+     */
     public static List<Coordinate> toCoordinatesFromWktLinestring( String linestring ) {
         List<Coordinate> coordinates = new ArrayList<>();
         String content = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
@@ -90,6 +109,13 @@ public class GeometryUtils {
         return coordinates;
     }
 
+    /**
+     * Converts {@link List} of {@link Coordinate} into string WKT
+     * representation.
+     *
+     * @param coordinates list of coordinates
+     * @return WKT representation as a linestring
+     */
     public static String toWktFromCoordinates( List<Coordinate> coordinates ) {
         StringBuilder sb = new StringBuilder();
         sb.append( "LINESTRING(" );

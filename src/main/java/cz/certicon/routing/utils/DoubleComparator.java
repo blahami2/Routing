@@ -6,7 +6,7 @@
 package cz.certicon.routing.utils;
 
 /**
- *
+ * Utility class for comparing double numbers.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
