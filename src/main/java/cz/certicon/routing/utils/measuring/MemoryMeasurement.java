@@ -25,6 +25,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 
 /**
+ * Class for memory consumption measurement. Does not work accurately (it is
+ * very approximate).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -34,6 +36,9 @@ public class MemoryMeasurement {
     private long start = -1;
     private long memory;
 
+    /**
+     * Starts measuring -> saves the current state of memory consumption
+     */
     public void start() {
         start = Runtime.getRuntime().totalMemory();
     }
@@ -42,6 +47,11 @@ public class MemoryMeasurement {
         this.memoryUnits = memoryUnits;
     }
 
+    /**
+     * Stops measuring -> calculates the difference
+     *
+     * @return difference
+     */
     public long stop() {
         if ( start == -1 ) {
             return 0;
@@ -50,6 +60,12 @@ public class MemoryMeasurement {
         return memoryUnits.fromBytes( memory );
     }
 
+    /**
+     * Returns the consumed memory measured by {@link #start() start} and
+     * {@link #stop() stop} sequence
+     *
+     * @return consumed memory
+     */
     public long getMemoryConsumed() {
         if ( start == -1 ) {
             return 0;
@@ -57,6 +73,11 @@ public class MemoryMeasurement {
         return memoryUnits.fromBytes( memory );
     }
 
+    /**
+     * Returns currently consumed memory since the last {@link #start() start}
+     *
+     * @return currently consumed memory
+     */
     public long getCurrentMemoryConsumed() {
         if ( start == -1 ) {
             return 0;
@@ -64,20 +85,40 @@ public class MemoryMeasurement {
         return memoryUnits.fromBytes( Runtime.getRuntime().totalMemory() - start );
     }
 
+    /**
+     * Restarts the counter (calls {@link #stop() stop} and
+     * {@link #start() start})
+     *
+     * @return consumed memory since the last {@link #start() start}
+     */
     public long restart() {
         long a = stop();
         start();
         return a;
     }
 
+    /**
+     * Clears data
+     */
     public void clear() {
         start = -1;
     }
 
+    /**
+     * Returns current memory as a string with units
+     *
+     * @return current memory as a string
+     */
     public String getMemoryString() {
         return getCurrentMemoryConsumed() + " " + memoryUnits.getUnit();
     }
 
+    /**
+     * Measures object size via class created by Atilla Szegedi
+     *
+     * @param object element to be measured
+     * @return object size in current units
+     */
     public long measureObject( Object object ) {
         return memoryUnits.fromBytes( ObjectSizeCalculator.getObjectSize( object ) );
     }
