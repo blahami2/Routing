@@ -5,13 +5,17 @@
  */
 package cz.certicon.routing.data.basic.database;
 
-import cz.certicon.routing.model.entity.Coordinates;
+import cz.certicon.routing.model.entity.Coordinate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Encapsulates the ResultSet and provides access to the columns. Also offers
+ * multiple static functions, such as select query creation.
+ * 
+ * @deprecated needs to be updated properly
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -63,12 +67,12 @@ public class EdgeResultHelper {
         return resultSet.getBoolean( Columns.IS_FORWARD.getName() );
     }
 
-    public List<Coordinates> getGeometry() throws SQLException {
-        List<Coordinates> coordinates = new ArrayList<>();
+    public List<Coordinate> getGeometry() throws SQLException {
+        List<Coordinate> coordinates = new ArrayList<>();
         String linestring = resultSet.getString( Columns.GEOMETRY.getName() );
         linestring = linestring.substring( "LINESTRING(".length(), linestring.length() - ")".length() );
         for ( String cord : linestring.split( "," ) ) {
-            Coordinates coord = new Coordinates(
+            Coordinate coord = new Coordinate(
                     Double.parseDouble( cord.split( " " )[1] ),
                     Double.parseDouble( cord.split( " " )[0] )
             );

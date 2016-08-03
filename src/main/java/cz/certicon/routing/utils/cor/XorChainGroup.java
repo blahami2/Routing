@@ -6,11 +6,14 @@
 package cz.certicon.routing.utils.cor;
 
 /**
+ * XOR implementation of the {@link ChainGroup} interface. Executes only until
+ * the first true execution is met. Returns true, if such execution was found,
+ * false otherwise.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <Traveller> traveling instance
  */
-public class XorChainGroup<Traveller> extends SimpleChainGroup<Traveller> {
+public class XorChainGroup<Traveller> extends AbstractChainGroup<Traveller> {
 
     @Override
     protected boolean executeNext( ChainLink<Traveller> next, Traveller t ) {

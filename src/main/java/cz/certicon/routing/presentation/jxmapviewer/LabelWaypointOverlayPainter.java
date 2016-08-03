@@ -13,7 +13,7 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.WaypointPainter;
 
 /**
- * An implementation of WaypointPainter supporting LabeLWaypoint
+ * An implementation of {@link WaypointPainter} supporting {@link LabeLWaypoint}
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

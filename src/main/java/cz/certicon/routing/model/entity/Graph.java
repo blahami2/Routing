@@ -5,155 +5,281 @@
  */
 package cz.certicon.routing.model.entity;
 
-import java.util.Collection;
-import java.util.Set;
+import cz.certicon.routing.utils.efficient.BitArray;
+import gnu.trove.iterator.TIntIterator;
 
 /**
- * The root interface for graph representation of a map topology. Ignores edge
- * direction.
+ * Interface defining the graph. Note#1: there are two types of ids: local id
+ * (array index) and global id (outside the application), the algorithm mostly
+ * works with the integer local id often referred to as simply 'id' (or 'edge'
+ * when it comes to edge id, resp. 'node' when it comes to node id), however, it
+ * communicates with the rest of the world via the long global id, often
+ * referred to as 'origId' (resp. 'edgeOrigId', 'nodeOrigId'). It is vital not
+ * to interchange these.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface Graph extends Cloneable {
+public interface Graph {
+
+    public static final float DISTANCE_DEFAULT = Float.MAX_VALUE;
+    public static final boolean CLOSED_DEFAULT = false;
+    public static final int PREDECESSOR_DEFAULT = -1;
 
     /**
-     * Adds node to the graph
+     * Setter for edge original id -> id used outside the application
      *
-     * @param node an instance of {@link Node} to be added
-     * @return this instance
+     * @param edge local id (array index)
+     * @param id global id (original)
      */
-    public Graph addNode( Node node );
+    public void setEdgeOrigId( int edge, long id );
 
     /**
-     * Removes node from the graph. Also removes all connected edges.
+     * Setter for node original id -> id used outside the application
      *
-     * @param node an instance of {@link Node} to be removed
-     * @return {@link Set} of adjacent edges
+     * @param node local id (array index)
+     * @param id global id (original)
      */
-    public Set<Edge> removeNode( Node node );
+    public void setNodeOrigId( int node, long id );
 
     /**
-     * Adds edge to the graph
+     * Sets source for the given edge
      *
-     * @param edge an instance of {@link Edge} to be added
-     * @return this instance
+     * @param edge given edge
+     * @param source id of the source node
      */
-    public Graph addEdge( Edge edge );
+    public void setSource( int edge, int source );
 
     /**
-     * Adds edge to the graph, sets source and target node to the edge if
-     * necessary
+     * Sets target for the given edge
      *
-     * @param sourceNode source {@link Node} of the given {@link Edge}
-     * @param targetNode target {@link Node} of the given {@link Edge}
-     * @param edge an instance of {@link Edge} to be added
-     * @return this instance
+     * @param edge given edge
+     * @param target id of the target node
      */
-    public Graph addEdge( Node sourceNode, Node targetNode, Edge edge );
+    public void setTarget( int edge, int target );
 
     /**
-     * Removes edge from the graph
+     * Sets length[m] for the given edge
      *
-     * @param edge an instance of {@link Edge} to be removed
-     * @return this instance
+     * @param edge given edge
+     * @param length its length in meters
      */
-    public Graph removeEdge( Edge edge );
+    public void setLength( int edge, float length );
 
     /**
-     * Getter for the source node of the given edge
+     * Sets incoming edges for the given node
      *
-     * @param edge an instance of {@link Edge} to determine the node
-     * @return source {@link Node}
+     * @param node given node
+     * @param incomingEdges array of edges' ids incoming to the given node
      */
-    public Node getSourceNodeOf( Edge edge );
+    public void setIncomingEdges( int node, int[] incomingEdges );
 
     /**
-     * Getter for the target node of the given edge
+     * Sets outgoing edges for the given node
      *
-     * @param edge an instance of {@link Edge} to determine the node
-     * @return target {@link Node}
+     * @param node given node
+     * @param outgoingEdges array of edges' ids outgoing from the given node
      */
-    public Node getTargetNodeOf( Edge edge );
+    public void setOutgoingEdges( int node, int[] outgoingEdges );
 
     /**
-     * Getter for the other node connected to the edge than the given node
+     * Sets coordinate for the given node
      *
-     * @param edge an instance of {@link Edge} connected to the two nodes
-     * @param node an instance of {@link Node} connected to this edge
-     * @return the other node connected to the edge
-     * @throws IllegalArgumentException thrown when a node is not connected to
-     * this edge
+     * @param node given node
+     * @param latitude node's latitude
+     * @param longitude node's longitude
      */
-    public Node getOtherNodeOf( Edge edge, Node node );
+    public void setCoordinate( int node, float latitude, float longitude );
 
     /**
-     * Getter for all the edges of the given node
+     * Resets the given array of predecessors to default values (invalid values
+     * lesser than zero). Mostly efficient.
      *
-     * @param node an instance of {@link Node} to determine the edges
-     * @return {@link Set} of {@link Edge}s
+     * @param nodePredecessors array of nodes' predecessors
      */
-    public Set<Edge> getEdgesOf( Node node );
+    public void resetNodePredecessorArray( int[] nodePredecessors );
 
     /**
-     * Getter for the incoming edges to the given node
+     * Resets the given array of distances to default values (infinity). Mostly
+     * efficient.
      *
-     * @param node an instance of {@link Node} to determine the edges
-     * @return {@link Set} of {@link Edge}s
+     * @param nodeDistances array of nodes' distances
      */
-    public Set<Edge> getIncomingEdgesOf( Node node );
+    public void resetNodeDistanceArray( float[] nodeDistances );
 
     /**
-     * Getter for the outgoing edges of the given node
+     * Resets the given array of closed nodes (resp. indicators, whether the
+     * node on its index is closed or not) to default values (false). Mostly
+     * efficient.
      *
-     * @param node an instance of {@link Node} to determine the edges
-     * @return {@link Set} of {@link Edge}s
+     * @param nodeClosed array of nodes' close indicators
      */
-    public Set<Edge> getOutgoingEdgesOf( Node node );
+    public void resetNodeClosedArray( BitArray nodeClosed );
 
     /**
-     * Getter for the degree of the given node (amount of all the edges somehow
-     * directly connected to this node)
+     * Returns array of edges incoming to the given node
      *
-     * @param node an instance of {@link Node}
-     * @return integer number of connected edges
+     * @param node given node
+     * @return array of edges incoming to the given node
      */
-    public int getDegreeOf( Node node );
+    public int[] getIncomingEdges( int node );
 
     /**
-     * Getter for the in degree of the given node (amount of the incoming edges
-     * directly connected to this node)
+     * Returns array of edges outgoing from the given node
      *
-     * @param node an instance of {@link Node}
-     * @return integer number of incoming edges
+     * @param node given node
+     * @return array of edges outgoing from the given node
      */
-    public int getInDegreeOf( Node node );
+    public int[] getOutgoingEdges( int node );
 
     /**
-     * Getter for the out degree of the given node (amount of the outgoing edges
-     * directly connected to this node)
+     * Returns id of the source node of the given edge
      *
-     * @param node an instance of {@link Node}
-     * @return integer number of outgoing edges
+     * @param edge given edge
+     * @return id of the source node of the given edge
      */
-    public int getOutDegreeOf( Node node );
+    public int getSource( int edge );
 
     /**
-     * Getter for all the nodes in this graph
+     * Returns id of the target node of the given edge
      *
-     * @return {@link Collection} of {@link Node}s
+     * @param edge
+     * @return id of the target node of the given edge
      */
-    public Collection<Node> getNodes();
+    public int getTarget( int edge );
 
     /**
-     * Getter for all the edges in this graph
+     * Returns id of the other node of the given edge (other than the given
+     * node)
      *
-     * @return {@link Collection} of {@link Node}s
+     * @param edge given edge
+     * @param node given node
+     * @return id of the other node
      */
-    public Collection<Edge> getEdges();
+    public int getOtherNode( int edge, int node );
 
-    public Node getNode( Node.Id id );
+    /**
+     * Returns length of the given edge
+     *
+     * @param edge given edge
+     * @return length of the given edge
+     */
+    public float getLength( int edge );
 
-    public Edge getEdge( Edge.Id id );
+    /**
+     * Returns original (global) id of the given edge
+     *
+     * @param edge given edge
+     * @return edge's global id
+     */
+    public long getEdgeOrigId( int edge );
 
-    public Graph softCopy();
+    /**
+     * Returns original (global) id of the given node
+     *
+     * @param node given node
+     * @return node's global id
+     */
+    public long getNodeOrigId( int node );
+
+    /* temporary solution - delete after having sequence already in the database */
+    /**
+     * Returns index (local id) by the given global node's id
+     *
+     * @param nodeId given global id
+     * @return node's local id
+     */
+    public int getNodeByOrigId( long nodeId );
+
+    /**
+     * Returns index (local id) by the given global edge's id
+     *
+     * @param edgeId given global id
+     * @return edge's local id
+     */
+    public int getEdgeByOrigId( long edgeId );
+
+    /**
+     * Returns given node's latitude
+     *
+     * @param node given node
+     * @return node's latitude
+     */
+    public float getLatitude( int node );
+
+    /**
+     * Returns given node's longitude
+     *
+     * @param node given node
+     * @return node's longitude
+     */
+    public float getLongitude( int node );
+
+    /**
+     * Returns amount of nodes in this graph
+     *
+     * @return amount of nodes in this graph
+     */
+    public int getNodeCount();
+
+    /**
+     * Returns amount of edges in this graph
+     *
+     * @return amount of nodes in this graph
+     */
+    public int getEdgeCount();
+
+    /**
+     * Returns degree of the given node. Node's degree is a result of addition
+     * of incoming and outgoing edges.
+     *
+     * @param node given node
+     * @return node's degree
+     */
+    public int getNodeDegree( int node );
+
+    /**
+     * Returns iterator of incoming edges to the given node
+     *
+     * @param node given node
+     * @return iterator of incoming edges
+     */
+    public TIntIterator getIncomingEdgesIterator( int node );
+
+    /**
+     * Returns iterator of outgoing edges from the given node
+     *
+     * @param node given node
+     * @return iterator of outgoing edges
+     */
+    public TIntIterator getOutgoingEdgesIterator( int node );
+
+    /**
+     * Returns true if this graph contains the given edge (by global id), false
+     * otherwise
+     *
+     * @param edgeOrigId edge's global id
+     * @return true if this graph contains the given edge, false otherwise
+     */
+    public boolean containsEdge( long edgeOrigId );
+
+    /**
+     * Returns true if this graph contains the given node (by global id), false
+     * otherwise
+     *
+     * @param nodeOrigId node's global id
+     * @return true if this graph contains the given node, false otherwise
+     */
+    public boolean containsNode( long nodeOrigId );
+
+    /**
+     * Returns true if the given predecessor is valid, false otherwise. The
+     * default value indicates invalid predecessor. See
+     * {@link #resetNodePredecessorArray(int[]) resetNodePredecessorArray} for
+     * more details.
+     *
+     * @param predecessor given predecessor
+     * @return true if the predecessor is valid, false otherwise
+     */
+    public boolean isValidPredecessor( int predecessor );
+
 }

@@ -5,9 +5,6 @@
  */
 package cz.certicon.routing.application.algorithm;
 
-import cz.certicon.routing.model.entity.Coordinates;
-import cz.certicon.routing.model.entity.Node;
-import cz.certicon.routing.model.entity.Path;
 import java.util.Map;
 
 /**
@@ -15,26 +12,23 @@ import java.util.Map;
  * shortest path between two points. The distance between two points is abstract
  * (geographical distance, time, etc.).
  *
- * @author Michael Blaha  {@literal <michael.blaha@certicon.cz>}
+ *
+ * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <G> the graph class to be routed upon
  */
-public interface RoutingAlgorithm {
+public interface RoutingAlgorithm<G> {
 
     /**
-     * Find shortest path between two points.
-     * 
-     * @param from source point
-     * @param to target point
-     * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the two points.
+     * Find the shortest route (R) between a set of source points to a set of
+     * target points
+     *
+     * @param <R> route return type, see {@link RouteBuilder}
+     * @param routeBuilder builder for the result route
+     * @param from a set of source points (and their initial distances)
+     * @param to a set of target points (and their initial distances)
+     * @return the shortest route of type R
+     * @throws RouteNotFoundException thrown when no route was found between the
+     * two points, see the {@link RouteNotFoundException} for more information
      */
-    public Path route( Node.Id from, Node.Id to );
-    
-    /**
-     * Find shortest path between a set of starting points and a target point
-     * @param from map of source points (with distances)
-     * @param to map of target points (with distances)
-     * @return instance of {@link Path} representing sequence of edges (ways) or null when no path has been found between the source set and the target set.
-     */
-    public Path route(Map<Node.Id, Distance> from, Map<Node.Id, Distance> to);
-    
-    public RoutingConfiguration getRoutingConfiguration();
+    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, Float> from, Map<Integer, Float> to ) throws RouteNotFoundException;
 }

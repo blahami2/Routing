@@ -6,11 +6,20 @@
 package cz.certicon.routing.utils.cor;
 
 /**
+ * Link of the chain, which is able to execute a single operation on the
+ * traveler. Links can be grouped into {@link ChainGroup}. Implementations offer
+ * OR {@link OrChainGroup} or XOR {@link XorChainGroup} functionality.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
- * @param <Traveller> traveling instance
+ * @param <Traveler> traveling instance
  */
-public interface ChainLink<Traveller> {
+public interface ChainLink<Traveler> {
 
-    public boolean execute( Traveller t );
+    /**
+     * Execute the chain-link operation
+     *
+     * @param t traveler object
+     * @return true if the operation was executed, false otherwise
+     */
+    public boolean execute( Traveler t );
 }

@@ -15,7 +15,7 @@ import java.util.Objects;
  * @param <B> class of the second object
  * @param <C> class of the third object
  * @param <D> class of the fourth object
- * 
+ *
  */
 public class Quaternion<A, B, C, D> extends Trinity<A, B, C> {
 
@@ -50,7 +50,10 @@ public class Quaternion<A, B, C, D> extends Trinity<A, B, C> {
         }
         return true;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "Quaternion{" + "a=" + a + "b=" + b + "c=" + c + "d=" + d + '}';
+    }
 
 }

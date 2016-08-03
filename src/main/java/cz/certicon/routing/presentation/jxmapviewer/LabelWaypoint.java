@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.presentation.jxmapviewer;
 
-import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Objects;
@@ -16,7 +15,7 @@ import org.jdesktop.swingx.mapviewer.DefaultWaypoint;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 /**
- * A waypoint class representing a waypoint with as a label
+ * A waypoint class representing a waypoint with id as a label
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

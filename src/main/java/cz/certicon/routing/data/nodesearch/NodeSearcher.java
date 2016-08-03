@@ -5,35 +5,36 @@
  */
 package cz.certicon.routing.data.nodesearch;
 
-import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
-import cz.certicon.routing.model.entity.Edge;
-import cz.certicon.routing.model.entity.Node;
+import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
 import java.io.IOException;
-import java.util.Map;
 
 /**
+ * An interface defining the search method for closest nodes to the given
+ * coordinates. The distance is measured via distance to edge and then the edge
+ * nodes are considered as sources/targets (edge target for source, edge source
+ * for target).
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public interface NodeSearcher {
 
     /**
-     * Based on given coordinates find the closest nodes and actual distances
-     * (in kilometers) to them
+     * Finds the closest nodes to the given coordinates, based on the edge to
+     * node distance.
      *
-     * @param coordinates a geographical point specifying the approximate
-     * location
-     * @param distanceFactory factory for distance creation
-     * @param searchfor determines what to search for
-     * @return a {@link Pair} of {@link Map} of node id's and distances (in kilometers)
-     * representing the set of closest nodes, from which the correct one cannot
-     * easily be determined, and a data id of the edge (is -1 when the closest point is a crossroad)
-     * @throws java.io.IOException thrown when an error occurs while searching
+     * @param <T> closest nodes structure type
+     * @param nodeSetBuilderFactory factory providing a builder for the closest
+     * nodes structure
+     * @param source coordinates of source
+     * @param target coordinates of target
+     * @return closest nodes structure
+     * @throws IOException thrown when an IO exception occurs
+     * @throws EvaluableOnlyException thrown when the closest edge for the
+     * source is the same as for the target => only simple calculation is
+     * required then instead of complex routing
      */
-    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchfor ) throws IOException;
+    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException, EvaluableOnlyException;
 
     public static enum SearchFor {
         SOURCE, TARGET;

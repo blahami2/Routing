@@ -5,27 +5,23 @@
  */
 package cz.certicon.routing.data.nodesearch.sqlite;
 
-import cz.certicon.routing.application.algorithm.Distance;
-import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.application.algorithm.EdgeData;
-import cz.certicon.routing.data.basic.database.AbstractEmbeddedDatabase;
+import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
+import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
-import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Coordinates;
-import cz.certicon.routing.model.entity.Node;
-import cz.certicon.routing.model.entity.common.SimpleEdgeData;
+import cz.certicon.routing.model.entity.NodeSet.NodeCategory;
+import cz.certicon.routing.model.entity.Coordinate;
+import cz.certicon.routing.model.entity.NodeSetBuilder;
+import cz.certicon.routing.model.entity.NodeSetBuilderFactory;
+import cz.certicon.routing.utils.measuring.TimeLogger;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.sqlite.SQLiteConfig;
 
 /**
+ * Implementation of the {@link NodeSearcher} using the SQLite database.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -33,56 +29,83 @@ public class SqliteNodeSearcher implements NodeSearcher {
 
     private static final double DISTANCE_INIT = 0.001;
     private static final double DISTANCE_MULTIPLIER = 10;
-    private final StringDatabase database;
 
-    public SqliteNodeSearcher( Properties properties ) throws IOException {
-        try {
-            this.database = new StringDatabase( properties );
-        } catch ( SQLException ex ) {
-            throw new IOException( ex );
-        }
-        SQLiteConfig config = new SQLiteConfig();
-        config.enableLoadExtension( true );
-        for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
-            properties.put( entry.getKey(), entry.getValue() );
-        }
-//        this.libspatialitePath = libspatialitePath;
+    private final StringSqliteReader reader;
+    private final double distanceInit;
+    private final double distanceMultiplier;
+
+    /**
+     * See {@link AbstractSqliteDatabase} for further details.
+     *
+     * @param connectionProperties use SQLite database properties.
+     */
+    public SqliteNodeSearcher( Properties connectionProperties ) {
+        this.reader = new StringSqliteReader( connectionProperties );
+        this.distanceInit = DISTANCE_INIT;
+        this.distanceMultiplier = DISTANCE_MULTIPLIER;
+    }
+
+    public SqliteNodeSearcher( StringSqliteReader reader, double distanceInit, double distanceMultiplier ) {
+        this.reader = reader;
+        this.distanceInit = distanceInit;
+        this.distanceMultiplier = distanceMultiplier;
     }
 
     @Override
-    public Pair<Map<Node.Id, Distance>, Long> findClosestNodes( Coordinates coordinates, DistanceFactory distanceFactory, SearchFor searchFor ) throws IOException {
-        Map<Node.Id, Distance> distanceMap = new HashMap<>();
-        final String pointString = "ST_GeomFromText('POINT(" + coordinates.getLongitude() + " " + coordinates.getLatitude() + ")',4326)";
+    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException, EvaluableOnlyException {
+        if ( GlobalOptions.MEASURE_TIME ) {
+            TimeLogger.log( TimeLogger.Event.NODE_SEARCHING, TimeLogger.Command.START );
+        }
+        NodeSetBuilder<T> nodeSetBuilder = nodeSetBuilderFactory.createNodeSetBuilder();
+        search( nodeSetBuilder, source, NodeCategory.SOURCE );
+        search( nodeSetBuilder, target, NodeCategory.TARGET );
+        try {
+            T nodeSet = nodeSetBuilder.build();
+            return nodeSet;
+        } catch ( EvaluableOnlyException ex ) {
+            throw ex;
+        } finally {
+            if ( GlobalOptions.MEASURE_TIME ) {
+                TimeLogger.log( TimeLogger.Event.NODE_SEARCHING, TimeLogger.Command.STOP );
+            }
+        }
+    }
+
+    private <T> void search( NodeSetBuilder<T> nodeSetBuilder, Coordinate point, NodeCategory nodeCategory ) throws IOException {
+
+        double longitude = point.getLongitude();
+        double latitude = point.getLatitude();
+        final String pointString = "ST_GeomFromText('POINT(" + longitude + " " + latitude + ")',4326)";
         final String keyDistanceFromStart = "distance_from_start";
         final String keyDistanceToEnd = "distance_to_end";
-        long dataId = -1;
         try {
-            ResultSet rs = database.read( "SELECT n.id AS id "
+            String query = "SELECT n.id AS id "
                     + "FROM nodes n "
                     + "JOIN (SELECT * FROM nodes_data d "
                     + "        WHERE d.ROWID IN( "
                     + "            SELECT ROWID FROM SpatialIndex "
                     + "            WHERE f_table_name = 'nodes_data' "
-                    + "            AND search_frame = BuildCircleMbr(" + coordinates.getLongitude() + ", " + coordinates.getLatitude() + " , " + DISTANCE_INIT + "  ,4326)"
+                    + "            AND search_frame = BuildCircleMbr(" + longitude + ", " + latitude + " , " + distanceInit + "  ,4326)"
                     + "        )  ) AS d "
                     + "ON n.data_id = d.id "
                     + "WHERE ST_Equals("
                     + "ST_SnapToGrid(" + pointString + ", 0.000001),"
                     + "ST_SnapToGrid(d.geom, 0.000001)"
-                    + ")" );
+                    + ")";
+            ResultSet rs = reader.read( query );
+//            System.out.println( query );
             boolean isCrossroad = false;
             while ( rs.next() ) { // for all nodes found
                 isCrossroad = true;
                 long id = rs.getLong( "id" );
-                distanceMap.put( Node.Id.createId( id ), distanceFactory.createZeroDistance() );
+                nodeSetBuilder.addCrossroad( nodeCategory, id );
             }
             if ( !isCrossroad ) {
                 boolean found = false;
-                double distance = DISTANCE_INIT;
+                double distance = distanceInit;
                 while ( !found ) {
-                    rs = database.read(
-                            "SELECT " + EdgeResultHelper.select( EdgeResultHelper.Columns.DATA_ID, EdgeResultHelper.Columns.IS_FORWARD, EdgeResultHelper.Columns.SOURCE, EdgeResultHelper.Columns.TARGET, EdgeResultHelper.Columns.IS_PAID, EdgeResultHelper.Columns.LENGTH )
-                            + ", speed_fw, speed_bw "
+                    query = "SELECT e.id, e.is_forward, e.source_id, e.target_id, e2.is_paid, e2.length"
+                            + ", e2.speed_fw, e2.speed_bw "
                             + ", ST_Length(ST_Line_Substring(e2.geom, 0, ST_Line_Locate_Point(e2.geom, e2.point)), 1) AS " + keyDistanceFromStart
                             + ", ST_Length(ST_Line_Substring(e2.geom, ST_Line_Locate_Point(e2.geom, e2.point),1), 1) AS " + keyDistanceToEnd + " "
                             + "FROM edges e "
@@ -93,33 +116,27 @@ public class SqliteNodeSearcher implements NodeSearcher {
                             + "        WHERE ed.ROWID IN( "
                             + "            SELECT ROWID FROM SpatialIndex "
                             + "            WHERE f_table_name = 'edges_data' "
-                            + "            AND search_frame = BuildCircleMbr(" + coordinates.getLongitude() + ", " + coordinates.getLatitude() + " , " + distance + "  ,4326)"
+                            + "            AND search_frame = BuildCircleMbr(" + longitude + ", " + latitude + " , " + distance + "  ,4326)"
                             + "        )  "
                             + "        ORDER BY Distance( ed.geom, x.point) "
                             + "        LIMIT 1 "
                             + ") AS e2 "
-                            + "ON e.data_id = e2.id" );
+                            + "ON e.data_id = e2.id";
+                    rs = reader.read( query );
+//                    System.out.println( query );
                     while ( rs.next() ) {
                         found = true;
                         EdgeResultHelper edgeResultHelper = new EdgeResultHelper( rs );
-                        dataId = edgeResultHelper.getDataId();
-                        int speed;
-                        if ( edgeResultHelper.getIsForward() ) {
-                            speed = rs.getInt( "speed_fw" );
+                        long nodeId;
+                        float length;
+                        if ( nodeCategory.equals( NodeCategory.SOURCE ) ) {
+                            nodeId = edgeResultHelper.getTargetId();
+                            length = rs.getFloat( edgeResultHelper.getIsForward() ? keyDistanceToEnd : keyDistanceFromStart );
                         } else {
-                            speed = rs.getInt( "speed_bw" );
+                            nodeId = edgeResultHelper.getSourceId();
+                            length = rs.getFloat( edgeResultHelper.getIsForward() ? keyDistanceFromStart : keyDistanceToEnd );
                         }
-                        EdgeData edgeData = new SimpleEdgeData( speed, edgeResultHelper.getIsPaid(), edgeResultHelper.getLength() );
-                        Node.Id nodeId;
-                        double length;
-                        if ( searchFor.equals( SearchFor.SOURCE ) ) {
-                            nodeId = Node.Id.createId( edgeResultHelper.getTargetId() );
-                            length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceToEnd ) : rs.getDouble( keyDistanceFromStart );
-                        } else {
-                            nodeId = Node.Id.createId( edgeResultHelper.getSourceId() );
-                            length = ( edgeResultHelper.getIsForward() ) ? rs.getDouble( keyDistanceFromStart ) : rs.getDouble( keyDistanceToEnd );
-                        }
-                        distanceMap.put( nodeId, distanceFactory.createFromEdgeDataAndLength( edgeData, length / 1000 ) );
+                        nodeSetBuilder.addNode( nodeCategory, nodeId, edgeResultHelper.getId(), length, rs.getInt( edgeResultHelper.getIsForward() ? "speed_fw" : "speed_bw" ) );
                     }
                     distance *= DISTANCE_MULTIPLIER;
                 }
@@ -127,42 +144,6 @@ public class SqliteNodeSearcher implements NodeSearcher {
         } catch ( SQLException ex ) {
             throw new IOException( ex );
         }
-        return new Pair<>( distanceMap, dataId );
     }
 
-    private static class StringDatabase extends AbstractEmbeddedDatabase<ResultSet, String> {
-
-        private final String spatialitePath;
-
-        public StringDatabase( Properties connectionProperties ) throws SQLException {
-            super( connectionProperties );
-            SQLiteConfig config = new SQLiteConfig();
-            config.enableLoadExtension( true );
-            for ( Map.Entry<Object, Object> entry : config.toProperties().entrySet() ) {
-                connectionProperties.put( entry.getKey(), entry.getValue() );
-            }
-            this.spatialitePath = connectionProperties.getProperty( "spatialite_path" );
-        }
-
-        @Override
-        public void open() throws IOException {
-            super.open();
-            try {
-                getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
-            } catch ( SQLException ex ) {
-                throw new IOException( ex );
-            }
-        }
-
-        @Override
-        protected ResultSet checkedRead( String in ) throws SQLException {
-            return getStatement().executeQuery( in );
-        }
-
-        @Override
-        protected void checkedWrite( ResultSet in ) throws SQLException {
-            throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
-        }
-
-    }
 }

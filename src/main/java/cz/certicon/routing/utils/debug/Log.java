@@ -11,36 +11,50 @@ import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
+ * Logging class offering somewhat Android-like printing tools. Logs into .log
+ * files.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public class Log {
 
-    private static Map<String, Logger> loggersMap = new HashMap<>();
+    private static final Map<String, Logger> LOGGERS_MAP = new HashMap<>();
 
+    /**
+     * Log debug message with the given tag (logs into a file [tag].log). Does
+     * not add end of line.
+     *
+     * @param tag name of the target file
+     * @param message message to be logged
+     */
     public static void d( String tag, String message ) {
         getLogger( tag ).info( message );
     }
 
+    /**
+     * Log debug message with the given tag (logs into a file [tag].log). Adds
+     * end of line.
+     *
+     * @param tag name of the target file
+     * @param message message to be logged
+     */
     public static void dln( String tag, String message ) {
-        getLogger( tag ).info( message + "\n" );
+        String msg = message + "\n";
+        getLogger( tag ).info( msg );
     }
 
     private static Logger getLogger( String tag ) {
-        Logger logger = loggersMap.get( tag );
+        Logger logger = LOGGERS_MAP.get( tag );
         if ( logger == null ) {
             try {
                 FileHandler fileHandler = new FileHandler( tag + ".log" );
                 fileHandler.setFormatter( new PlainTextFormatter() );
                 logger = Logger.getLogger( tag );
                 logger.addHandler( fileHandler );
-                loggersMap.put( tag, logger );
-            } catch ( IOException ex ) {
-                Logger.getLogger( Log.class.getName() ).log( Level.SEVERE, null, ex );
-            } catch ( SecurityException ex ) {
+                LOGGERS_MAP.put( tag, logger );
+            } catch ( IOException | SecurityException ex ) {
                 Logger.getLogger( Log.class.getName() ).log( Level.SEVERE, null, ex );
             }
         }

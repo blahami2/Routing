@@ -9,6 +9,7 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 /**
+ * Extension to {@link Formatter}. Formats records into plain text.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
@@ -18,5 +19,5 @@ public class PlainTextFormatter extends Formatter {
     public String format( LogRecord record ) {
         return record.getMessage();
     }
-    
+
 }

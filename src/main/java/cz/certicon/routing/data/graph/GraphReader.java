@@ -5,17 +5,26 @@
  */
 package cz.certicon.routing.data.graph;
 
-import cz.certicon.routing.data.Reader;
-import cz.certicon.routing.application.algorithm.DistanceFactory;
-import cz.certicon.routing.model.basic.Pair;
-import cz.certicon.routing.model.entity.Graph;
-import cz.certicon.routing.model.entity.GraphEntityFactory;
+import cz.certicon.routing.model.entity.DistanceType;
+import cz.certicon.routing.model.entity.GraphBuilderFactory;
+import java.io.IOException;
 
 /**
- * An interface for {@link Graph} reading using a {@link Reader} interface.
+ * Read-only interface for the graph
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface GraphReader extends Reader<Pair<GraphEntityFactory,DistanceFactory>,Graph> {
+public interface GraphReader {
 
+    /**
+     * Reads the graph based on the given distance type (metric). Creates a
+     * result using a builder provided by the {@link GraphBuilderFactory}.
+     *
+     * @param <T> graph type
+     * @param GraphBuilderFactory factory providing builder for the graph
+     * @param distanceType the metric
+     * @return graph
+     * @throws IOException thrown when an IO exception occurs
+     */
+    public <T> T readGraph( GraphBuilderFactory<T> GraphBuilderFactory, DistanceType distanceType ) throws IOException;
 }
