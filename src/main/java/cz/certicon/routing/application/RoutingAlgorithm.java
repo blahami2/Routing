@@ -6,6 +6,7 @@
 package cz.certicon.routing.application;
 
 import cz.certicon.routing.model.entity.Graph;
+import cz.certicon.routing.model.entity.NodeSet;
 import cz.certicon.routing.model.entity.NodeSet.NodeEntry;
 import java.util.Map;
 
@@ -26,13 +27,12 @@ public interface RoutingAlgorithm<G> {
      *
      * @param <R> route return type, see {@link RouteBuilder}
      * @param routeBuilder builder for the result route
-     * @param from a set of source points (and their initial distances)
-     * @param to a set of target points (and their initial distances)
+     * @param nodeSet holder of initial routing points
      * @return the shortest route of type R
      * @throws RouteNotFoundException thrown when no route was found between the
      * two points, see the {@link RouteNotFoundException} for more information
      */
-    public <R> R route( RouteBuilder<R, G> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException;
+    public <R> R route( RouteBuilder<R, G> routeBuilder, NodeSet<G> nodeSet ) throws RouteNotFoundException;
 
     public static class Utils {
 

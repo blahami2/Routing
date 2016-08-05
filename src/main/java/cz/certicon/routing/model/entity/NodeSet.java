@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.model.entity;
 
+import cz.certicon.routing.model.basic.Pair;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public interface NodeSet<G> {
      * @param distance distance in meters from node to the original location (on
      * the edge)
      */
-    public void put(G graph, NodeCategory nodeCategory, long edgeId, long nodeId, float distance );
+    public void put( G graph, NodeCategory nodeCategory, long edgeId, long nodeId, float distance );
 
     /**
      * Returns iterator over all the entries for the given category
@@ -49,6 +50,34 @@ public interface NodeSet<G> {
      * @return map[local_id, distance] for the given category
      */
     public Map<Integer, NodeEntry> getMap( G graph, NodeCategory nodeCategory );
+
+    public void putUpperBound( NodeEntry source, NodeEntry target, float distance );
+
+    /**
+     * Returns true if the node-set contains upper bound of any sort, an upper
+     * bound can be used to speed up computation. Existence of upper bound also
+     * means that some path has already been found without routing - e.g.
+     * starting and ending point are both on the same edge in the correct order
+     *
+     * @return true if the node-set contains upper bound, false otherwise
+     */
+    public boolean hasUpperBound();
+
+    /**
+     * Returns upper bound, see {@link #hasUpperBound() hasUpperBound()} for
+     * more details
+     *
+     * @return upper bound (length of a known path)
+     */
+    public float getUpperBound();
+
+    /**
+     * Returns entries for the upper bound
+     * ({@link #hasUpperBound() hasUpperBound()})
+     *
+     * @return entries for the upper bound
+     */
+    public Pair<NodeEntry, NodeEntry> getUpperBoundEntries();
 
     /**
      * Class representing a single node entry. It contains node's global id,

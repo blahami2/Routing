@@ -17,6 +17,8 @@ import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import cz.certicon.routing.model.entity.NodeSet;
+import cz.certicon.routing.model.entity.NodeSetBuilder;
+import cz.certicon.routing.model.entity.common.SimpleNodeSetBuilderFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,11 +134,11 @@ public class DijkstraRoutingAlgorithmTest {
         routeBuilder.addEdgeAsLast( graph, 8 );
         routeBuilder.addEdgeAsLast( graph, 12 );
         Route expResult = routeBuilder.build();
-        Map<Integer, NodeSet.NodeEntry> from = new HashMap<>();
-        from.put( 0, new NodeSet.NodeEntry( -1, 0, 0 ) );
-        Map<Integer, NodeSet.NodeEntry> to = new HashMap<>();
-        to.put( 5, new NodeSet.NodeEntry( -1, 5, 0 ) );
-        Route result = instance.route( routeBuilder, from, to );
+        SimpleNodeSetBuilderFactory fct = new SimpleNodeSetBuilderFactory( graph, DistanceType.LENGTH );
+        NodeSetBuilder<NodeSet<Graph>> nodeSetBuilder = fct.createNodeSetBuilder();
+        nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.SOURCE, 1 );
+        nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.TARGET, 6 );
+        Route result = instance.route( routeBuilder, nodeSetBuilder.build() );
         assertEquals( toString( graph, expResult ), toString( graph, result ) );
     }
 

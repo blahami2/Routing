@@ -20,7 +20,9 @@ import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
 import cz.certicon.routing.model.entity.NodeSet;
+import cz.certicon.routing.model.entity.NodeSetBuilder;
 import cz.certicon.routing.model.entity.ch.ChDataBuilder;
+import cz.certicon.routing.model.entity.common.SimpleNodeSetBuilderFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.io.IOException;
 import java.util.HashMap;
@@ -97,6 +99,7 @@ public class ContractionHierarchiesPreprocessorTest {
 
     /**
      * Test of preprocess method, of class ContractionHierarchiesPreprocessor.
+     * @throws cz.certicon.routing.application.RouteNotFoundException thrown when I don't wanna catch it
      */
     @Test
     public void testPreprocess_4args() throws RouteNotFoundException {
@@ -125,15 +128,16 @@ public class ContractionHierarchiesPreprocessorTest {
 
         DijkstraRoutingAlgorithm optimalAlgorithm = new DijkstraRoutingAlgorithm( graph );
         ContractionHierarchiesUbRoutingAlgorithm chAlgorithm = new ContractionHierarchiesUbRoutingAlgorithm( graph, preprocessedData );
+        SimpleNodeSetBuilderFactory fct = new SimpleNodeSetBuilderFactory( graph, distanceType );
         for ( int i = 0; i < 6; i++ ) {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
-                    Map<Integer, NodeSet.NodeEntry> from = new HashMap<>();
-                    from.put( i, new NodeSet.NodeEntry( -1, i, 0 ) );
-                    Map<Integer, NodeSet.NodeEntry> to = new HashMap<>();
-                    to.put( j, new NodeSet.NodeEntry( -1, j, 0 ) );
-                    Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), from, to );
-                    Route result = chAlgorithm.route( new SimpleRouteBuilder(), from, to );
+                    NodeSetBuilder<NodeSet<Graph>> nodeSetBuilder = fct.createNodeSetBuilder();
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.SOURCE, ( i + 1 ) * 10 );
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.TARGET, ( j + 1 ) * 10 );
+                    NodeSet<Graph> nodeSet = nodeSetBuilder.build();
+                    Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), nodeSet );
+                    Route result = chAlgorithm.route( new SimpleRouteBuilder(), nodeSet );
                     assertEquals( toString( graph, expResult ), toString( graph, result ) );
                 }
             }
@@ -188,9 +192,7 @@ public class ContractionHierarchiesPreprocessorTest {
 //        for ( int i = 0; i < preprocessor.shortcutCounts.size(); i++ ) {
 //            assertEquals( preprocessor.shortcutCounts.get( i ), preprocessor2.shortcutCounts.get( i ) );
 //        }
-
 //        assertEquals( preprocessedData2.b.size(), data.getShortcutCount() );
-
 //        Pair<Map<Node.Id, Integer>, List<Shortcut>> expResult = null;
 //        Pair<Map<Node.Id, Integer>, List<Shortcut>> result = instance.preprocess( graph, graphEntityFactory, distanceFactory );
 //        System.out.println( "preprocess" );

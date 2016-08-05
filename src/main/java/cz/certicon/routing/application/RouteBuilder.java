@@ -54,6 +54,12 @@ public interface RouteBuilder<R, G> {
      * @param edgeId an id of the added edge
      */
     public void addEdgeAsLast( G graph, long edgeId );
+    
+    /**
+     * Sets the route as single-edged -&gt; both points are on the same edge in the order Source -&gt; Target
+     * @param singleEdge id of the single edge
+     */
+    public void setSingleEdged(long singleEdge);
 
     /**
      * Clears the builder for later use

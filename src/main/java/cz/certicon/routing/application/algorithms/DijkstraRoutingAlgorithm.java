@@ -18,22 +18,27 @@ import cz.certicon.routing.utils.measuring.TimeLogger;
 import gnu.trove.iterator.TIntIterator;
 import java.util.Map;
 import static cz.certicon.routing.application.RoutingAlgorithm.Utils.*;
+import cz.certicon.routing.model.entity.NodeSet;
 
 /**
  * Basic routing algorithm implementation using the optimal Dijkstra.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
+public class DijkstraRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
-    private final Graph graph;
     private final int[] nodePredecessorArray;
     private final float[] nodeDistanceArray;
     private final BitArray nodeClosedArray;
     private final NodeDataStructure<Integer> nodeDataStructure;
 
+    /**
+     * Constructor for {@link AstarRoutingAlgorithm}
+     *
+     * @param graph source of graph topology and all the necessary data
+     */
     public DijkstraRoutingAlgorithm( Graph graph ) {
-        this.graph = graph;
+        super( graph );
         this.nodePredecessorArray = new int[graph.getNodeCount()];
         this.nodeDistanceArray = new float[graph.getNodeCount()];
         this.nodeClosedArray = new LongBitArray( graph.getNodeCount() );
@@ -41,8 +46,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
-        routeBuilder.clear();
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, NodeSet<Graph> nodeSet, Map<Integer, NodeSet.NodeEntry> from, Map<Integer, NodeSet.NodeEntry> to, float upperBound ) throws RouteNotFoundException {
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
@@ -59,7 +63,7 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         // set the source points (add to the queue)
         initArrays( graph, nodeDistanceArray, nodeDataStructure, from );
         int finalNode = -1;
-        double finalDistance = Double.MAX_VALUE;
+        double finalDistance = upperBound;
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
@@ -125,6 +129,8 @@ public class DijkstraRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 pred = nodePredecessorArray[node];
                 currentNode = node;
             }
+        } else if ( upperBound != Float.MAX_VALUE ) {
+            updateRouteBySingleEdge( routeBuilder, nodeSet );
         } else {
             throw new RouteNotFoundException();
         }

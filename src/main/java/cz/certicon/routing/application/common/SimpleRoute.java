@@ -20,11 +20,13 @@ public class SimpleRoute implements Route {
     private final LinkedList<Pair<Long, Boolean>> edges;
     private final long source;
     private final long target;
+    private final long singleEdge;
 
-    public SimpleRoute( LinkedList<Pair<Long, Boolean>> edges, long source, long target ) {
+    public SimpleRoute( LinkedList<Pair<Long, Boolean>> edges, long source, long target, long singleEdge ) {
         this.edges = edges;
         this.source = source;
         this.target = target;
+        this.singleEdge = singleEdge;
     }
 
     @Override
@@ -40,6 +42,21 @@ public class SimpleRoute implements Route {
     @Override
     public long getSource() {
         return source;
+    }
+
+    @Override
+    public int getEdgeCount() {
+        return edges.size();
+    }
+
+    @Override
+    public boolean isSingleEdged() {
+        return singleEdge >= 0;
+    }
+
+    @Override
+    public long getSingleEdge() {
+        return singleEdge;
     }
 
 }

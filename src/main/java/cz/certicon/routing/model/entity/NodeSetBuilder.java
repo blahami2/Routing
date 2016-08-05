@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.model.entity;
 
-import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.model.entity.NodeSet.NodeCategory;
 
 /**
@@ -42,8 +41,6 @@ public interface NodeSetBuilder<T> {
      * Creates and returns the node set
      *
      * @return node set
-     * @throws EvaluableOnlyException thrown when all the edges are the same,
-     * therefore it is not a routing issue, just simple calculation.
      */
-    public T build() throws EvaluableOnlyException;
+    public T build();
 }

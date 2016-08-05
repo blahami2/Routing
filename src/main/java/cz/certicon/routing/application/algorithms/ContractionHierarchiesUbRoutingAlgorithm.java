@@ -22,6 +22,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import static cz.certicon.routing.application.RoutingAlgorithm.Utils.*;
+import cz.certicon.routing.model.entity.NodeSet;
 
 /**
  * Basic implementation of the Contraction Hierarchies algorithms. Requires
@@ -38,11 +39,10 @@ import static cz.certicon.routing.application.RoutingAlgorithm.Utils.*;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorithm<Graph> {
+public class ContractionHierarchiesUbRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
     private static final double ARRAY_COPY_RATIO = 0.01;
 
-    private final Graph graph;
     private final int[] nodeFromPredecessorArray;
     private final float[] nodeFromDistanceArray;
     private final BitArray nodeFromClosedArray;
@@ -53,8 +53,14 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
     private final NodeDataStructure<Integer> nodeToDataStructure;
     private final PreprocessedData preprocessedData;
 
+    /**
+     * Constructor for {@link ContractionHierarchiesUbRoutingAlgorithm}
+     *
+     * @param graph source of graph topology and all the necessary data
+     * @param preprocessedData graph wrapper for all the additional CH data
+     */
     public ContractionHierarchiesUbRoutingAlgorithm( Graph graph, PreprocessedData preprocessedData ) {
-        this.graph = graph;
+        super( graph );
         this.nodeFromPredecessorArray = new int[graph.getNodeCount()];
         this.nodeFromDistanceArray = new float[graph.getNodeCount()];
         this.nodeFromClosedArray = new LongBitArray( graph.getNodeCount() );
@@ -74,8 +80,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
     }
 
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
-        routeBuilder.clear();
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, NodeSet<Graph> nodeSet, Map<Integer, NodeSet.NodeEntry> from, Map<Integer, NodeSet.NodeEntry> to, float upperBound ) throws RouteNotFoundException {
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
@@ -91,7 +96,7 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
         // add target points for the "to" Dijkstra
         initArrays( graph, nodeToDistanceArray, nodeToDataStructure, to );
         int finalNode = -1;
-        double finalDistance = Double.MAX_VALUE;
+        double finalDistance = upperBound;
         while ( !nodeFromDataStructure.isEmpty() || !nodeToDataStructure.isEmpty() ) {
             if ( !nodeFromDataStructure.isEmpty() ) {
                 // extract node S with the minimal distance
@@ -232,6 +237,8 @@ public class ContractionHierarchiesUbRoutingAlgorithm implements RoutingAlgorith
                 pred = nodeToPredecessorArray[node];
                 currentNode = node;
             }
+        } else if ( upperBound != Float.MAX_VALUE ) {
+            updateRouteBySingleEdge( routeBuilder, nodeSet );
         } else {
             throw new RouteNotFoundException();
         }

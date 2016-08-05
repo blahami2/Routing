@@ -5,6 +5,7 @@
  */
 package cz.certicon.routing.model.entity.common;
 
+import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.NodeSet;
 import java.util.HashMap;
@@ -21,10 +22,16 @@ import java.util.Set;
 public class SimpleNodeSet implements NodeSet<Graph> {
 
     private final Map<NodeCategory, Set<NodeEntry>> nodeEntriesMap = new HashMap<>();
+    private Pair<NodeEntry, NodeEntry> upperBoundEntries = null;
+    private float upperBound = Float.MAX_VALUE;
 
     @Override
     public void put( Graph graph, NodeCategory nodeCategory, long edgeId, long nodeId, float distance ) {
-        getSet( nodeCategory ).add( new NodeEntry( graph.getEdgeByOrigId( edgeId ), graph.getNodeByOrigId( nodeId ), distance ) );
+        getSet( nodeCategory ).add(
+                new NodeEntry(
+                        edgeId < 0 ? -1 : graph.getEdgeByOrigId( edgeId ),
+                        nodeId < 0 ? -1 : graph.getNodeByOrigId( nodeId ),
+                        distance ) );
     }
 
     @Override
@@ -50,5 +57,28 @@ public class SimpleNodeSet implements NodeSet<Graph> {
             map.put( entry.getNodeId(), entry );
         }
         return map;
+    }
+
+    @Override
+    public boolean hasUpperBound() {
+        return upperBoundEntries != null;
+    }
+
+    @Override
+    public float getUpperBound() {
+        return upperBound;
+    }
+
+    @Override
+    public Pair<NodeEntry, NodeEntry> getUpperBoundEntries() {
+        return upperBoundEntries;
+    }
+
+    @Override
+    public void putUpperBound( NodeEntry source, NodeEntry target, float distance ) {
+        if ( distance < upperBound ) {
+            upperBoundEntries = new Pair<>( source, target );
+            upperBound = distance;
+        }
     }
 }

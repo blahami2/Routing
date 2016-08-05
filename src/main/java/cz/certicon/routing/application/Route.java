@@ -40,20 +40,26 @@ public interface Route {
     public long getSource();
 
     /**
-     * Factory for SimpleRoute
+     * Returns amount of edges in this route
+     *
+     * @return amount of edges
      */
-    public static class Factory {
+    public int getEdgeCount();
 
-        /**
-         * Creates a simple implementation object of the route
-         * 
-         * @param edges list of edges in form &lt;global_edgeId, isEdgeForward&gt;
-         * @param source source node of the route
-         * @param target target node of the route
-         * @return simple implementation object of the route
-         */
-        public static Route createSimpleRoute( LinkedList<Pair<Long, Boolean>> edges, long source, long target ) {
-            return new SimpleRoute( edges, source, target );
-        }
-    }
+    /**
+     * Return true, if the route is not actually routable - both points are on
+     * the same edge in the correct order - only relevant for displaying
+     *
+     * @return true if the route is single-edges
+     */
+    public boolean isSingleEdged();
+
+    /**
+     * Returns single edge for display purposes, see
+     * {@link #isSingleEdged() isSingleEdged()}
+     *
+     * @return single edge for display purposes
+     */
+    public long getSingleEdge();
+
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import static cz.certicon.routing.application.RoutingAlgorithm.Utils.*;
+import cz.certicon.routing.model.entity.NodeSet;
 
 /**
  * A* implementation of the routing algorithm, based on the flight-distance
@@ -28,17 +29,22 @@ import static cz.certicon.routing.application.RoutingAlgorithm.Utils.*;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
+public class AstarRoutingAlgorithm extends AbstractRoutingAlgorithm {
 
-    private final Graph graph;
-    private final DistanceType distanceType;
+    private DistanceType distanceType;
     private final int[] nodePredecessorArray;
     private final float[] nodeDistanceArray;
     private final BitArray nodeClosedArray;
     private final NodeDataStructure<Integer> nodeDataStructure;
 
+    /**
+     * Constructor for {@link AstarRoutingAlgorithm}
+     *
+     * @param graph source of graph topology and all the necessary data
+     * @param distanceType metric to calculate by
+     */
     public AstarRoutingAlgorithm( Graph graph, DistanceType distanceType ) {
-        this.graph = graph;
+        super( graph );
         this.distanceType = distanceType;
         this.nodePredecessorArray = new int[graph.getNodeCount()];
         this.nodeDistanceArray = new float[graph.getNodeCount()];
@@ -46,10 +52,17 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         this.nodeDataStructure = new JgraphtFibonacciDataStructure();
     }
 
+    /**
+     * Sets the distance type
+     *
+     * @param distanceType metric
+     */
+    public void setDistanceType( DistanceType distanceType ) {
+        this.distanceType = distanceType;
+    }
+
     @Override
-    public <R> R route( RouteBuilder<R, Graph> routeBuilder, Map<Integer, NodeEntry> from, Map<Integer, NodeEntry> to ) throws RouteNotFoundException {
-//        System.out.println( "ROUTING: from = " + from.keySet() + ", to = " + to.keySet() );
-        routeBuilder.clear();
+    public <R> R route( RouteBuilder<R, Graph> routeBuilder, NodeSet<Graph> nodeSet, Map<Integer, NodeSet.NodeEntry> from, Map<Integer, NodeSet.NodeEntry> to, float upperBound ) throws RouteNotFoundException {
         if ( MEASURE_STATS ) {
             StatsLogger.log( StatsLogger.Statistic.NODES_EXAMINED, StatsLogger.Command.RESET );
             StatsLogger.log( StatsLogger.Statistic.EDGES_EXAMINED, StatsLogger.Command.RESET );
@@ -67,7 +80,7 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
         // set the source points (add to the queue)
         initArrays( graph, nodeDistanceArray, nodeDataStructure, from );
         int finalNode = -1;
-        double finalDistance = Double.MAX_VALUE;
+        double finalDistance = upperBound;
         // while the data structure is not empty (or while the target node is not found)
         while ( !nodeDataStructure.isEmpty() ) {
             // extract node S with the minimal distance
@@ -136,6 +149,8 @@ public class AstarRoutingAlgorithm implements RoutingAlgorithm<Graph> {
                 pred = nodePredecessorArray[node];
                 currentNode = node;
             }
+        } else if ( upperBound != Float.MAX_VALUE ) {
+            updateRouteBySingleEdge( routeBuilder, nodeSet );
         } else {
             throw new RouteNotFoundException();
         }

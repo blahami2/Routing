@@ -49,6 +49,9 @@ public class SqlitePathReader implements PathReader<Graph> {
 
     @Override
     public <T> T readPath( PathBuilder<T, Graph> pathBuilder, Graph graph, Route route, Coordinate origSource, Coordinate origTarget ) throws IOException {
+        if ( route.isSingleEdged() ) {
+            return readPath( pathBuilder, graph, route.getSingleEdge(), origSource, origTarget );
+        }
         pathBuilder.clear();
 //        TimeMeasurement time = new TimeMeasurement();
 //        time.setTimeUnits( TimeUnits.MICROSECONDS );

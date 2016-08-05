@@ -42,25 +42,15 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
     }
 
     @Override
-    public NodeSet<Graph> build() throws EvaluableOnlyException {
+    public NodeSet<Graph> build() {
         Iterator<NodeEntry> itSource = nodeSet.iterator( NodeCategory.SOURCE );
         while ( itSource.hasNext() ) {
             Iterator<NodeEntry> itTarget = nodeSet.iterator( NodeCategory.TARGET );
             NodeEntry sourceEntry = itSource.next();
             while ( itTarget.hasNext() ) {
                 NodeEntry targetEntry = itTarget.next();
-                if ( sourceEntry.getEdgeId() == targetEntry.getEdgeId() ) {
-                    float edgeLength = graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) );
-                    float sourceDist = edgeLength - sourceEntry.getDistance();
-                    float targetDist = targetEntry.getDistance();
-                    System.out.println( "comparing: " + sourceDist + " vs " + targetDist );
-                    if ( DoubleComparator.isLowerOrEqualTo( sourceDist, targetDist, CoordinateUtils.DISTANCE_PRECISION_METERS ) ) {
-                        int srcNode = graph.getNodeByOrigId( sourceEntry.getNodeId() );
-                        int tarNode = graph.getNodeByOrigId( targetEntry.getNodeId() );
-                        Coordinate src = new Coordinate( graph.getLatitude( srcNode ), graph.getLongitude( srcNode ) );
-                        Coordinate tar = new Coordinate( graph.getLatitude( tarNode ), graph.getLongitude( tarNode ) );
-                        throw new EvaluableOnlyException( sourceEntry.getEdgeId(), src, tar );
-                    }
+                if ( sourceEntry.getEdgeId() != -1 && sourceEntry.getEdgeId() == targetEntry.getEdgeId() && sourceEntry.getDistance() + targetEntry.getDistance() - graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) ) > 0 ) {
+                    nodeSet.putUpperBound( sourceEntry, targetEntry, sourceEntry.getDistance() + targetEntry.getDistance() - graph.getLength( graph.getEdgeByOrigId( sourceEntry.getEdgeId() ) ) );
                 }
             }
         }

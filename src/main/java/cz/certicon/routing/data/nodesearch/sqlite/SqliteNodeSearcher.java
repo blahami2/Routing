@@ -28,7 +28,7 @@ import java.util.Properties;
  */
 public class SqliteNodeSearcher implements NodeSearcher {
 
-    private static final double DISTANCE_INIT = 0.001;
+    private static final double DISTANCE_INIT = 0.1;
     private static final double DISTANCE_MULTIPLIER = 10;
 
     private final StringSqliteReader reader;
@@ -46,6 +46,16 @@ public class SqliteNodeSearcher implements NodeSearcher {
         this.distanceMultiplier = DISTANCE_MULTIPLIER;
     }
 
+    /**
+     * Creates object of this class with full customization
+     *
+     * @param reader reader object for executing more complex queries
+     * @param distanceInit initial distance in kilometers (first search searches
+     * inside an area created by a circle around the given point with a radius
+     * of distanceInit)
+     * @param distanceMultiplier multiplies radius distance in each step (while
+     * no node is found)
+     */
     public SqliteNodeSearcher( StringSqliteReader reader, double distanceInit, double distanceMultiplier ) {
         this.reader = reader;
         this.distanceInit = distanceInit;
@@ -53,7 +63,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
     }
 
     @Override
-    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException, EvaluableOnlyException {
+    public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException {
         if ( GlobalOptions.MEASURE_TIME ) {
             TimeLogger.log( TimeLogger.Event.NODE_SEARCHING, TimeLogger.Command.START );
         }
@@ -63,8 +73,6 @@ public class SqliteNodeSearcher implements NodeSearcher {
         try {
             T nodeSet = nodeSetBuilder.build();
             return nodeSet;
-        } catch ( EvaluableOnlyException ex ) {
-            throw ex;
         } finally {
             if ( GlobalOptions.MEASURE_TIME ) {
                 TimeLogger.log( TimeLogger.Event.NODE_SEARCHING, TimeLogger.Command.STOP );
@@ -139,7 +147,7 @@ public class SqliteNodeSearcher implements NodeSearcher {
                         }
                         nodeSetBuilder.addNode( nodeCategory, nodeId, edgeResultHelper.getId(), length, rs.getInt( edgeResultHelper.getIsForward() ? "speed_fw" : "speed_bw" ) );
                     }
-                    distance *= DISTANCE_MULTIPLIER;
+                    distance *= distanceMultiplier;
                 }
             }
         } catch ( SQLException ex ) {

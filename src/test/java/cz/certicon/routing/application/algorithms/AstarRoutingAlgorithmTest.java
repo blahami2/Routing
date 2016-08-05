@@ -17,7 +17,10 @@ import cz.certicon.routing.model.entity.common.SimpleGraphBuilder;
 import cz.certicon.routing.model.basic.Pair;
 import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.GraphBuilder;
+import cz.certicon.routing.model.entity.NodeSet;
 import cz.certicon.routing.model.entity.NodeSet.NodeEntry;
+import cz.certicon.routing.model.entity.NodeSetBuilder;
+import cz.certicon.routing.model.entity.common.SimpleNodeSetBuilderFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,16 +95,18 @@ public class AstarRoutingAlgorithmTest {
 
         DijkstraRoutingAlgorithm optimalAlgorithm = new DijkstraRoutingAlgorithm( graph );
         AstarRoutingAlgorithm instance = new AstarRoutingAlgorithm( graph, DistanceType.LENGTH );
+        SimpleNodeSetBuilderFactory fct = new SimpleNodeSetBuilderFactory( graph, DistanceType.LENGTH );
+
         for ( int i = 0; i < 6; i++ ) {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
                     System.out.println( "from: " + i + " to " + j );
-                    Map<Integer, NodeEntry> from = new HashMap<>();
-                    from.put( i, new NodeEntry( -1, i, 0 ) );
-                    Map<Integer, NodeEntry> to = new HashMap<>();
-                    to.put( j, new NodeEntry( -1, j, 0 ) );
-                    Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), from, to );
-                    Route result = instance.route( new SimpleRouteBuilder(), from, to );
+                    NodeSetBuilder<NodeSet<Graph>> nodeSetBuilder = fct.createNodeSetBuilder();
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.SOURCE, i + 1 );
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.TARGET, j + 1 );
+                    NodeSet<Graph> nodeSet = nodeSetBuilder.build();
+                    Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), nodeSet );
+                    Route result = instance.route( new SimpleRouteBuilder(), nodeSet );
                     System.out.println( toString( graph, result ) );
                     assertEquals( toString( graph, expResult ), toString( graph, result ) );
                 }
@@ -125,7 +130,7 @@ public class AstarRoutingAlgorithmTest {
 //            System.out.println( sb.toString() );
         }
 //        if ( sb.length() > 3 ) {
-            sb.delete( sb.length() - 3, sb.length() );
+        sb.delete( sb.length() - 3, sb.length() );
 //        }
         sb.append( ")" );
         return sb.toString();

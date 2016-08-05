@@ -20,6 +20,7 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
 
     private long source;
     private long target;
+    private long singleEdge = -1;
     private LinkedList<Pair<Long, Boolean>> edges;
 
     public SimpleRouteBuilder() {
@@ -33,10 +34,15 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
     }
 
     @Override
-    public void setTargetNode( Graph graph,  long nodeId ) {
+    public void setTargetNode( Graph graph, long nodeId ) {
 //        System.out.println( "target node = " + nodeId );
         target = nodeId;
         source = nodeId;
+    }
+
+    @Override
+    public void setSingleEdged( long singleEdge ) {
+        this.singleEdge = singleEdge;
     }
 
     @Override
@@ -86,15 +92,15 @@ public class SimpleRouteBuilder implements RouteBuilder<Route, Graph> {
     }
 
     @Override
-    public Route build() {
-        return new SimpleRoute( edges, source, target );
-    }
-
-    @Override
     public final void clear() {
         source = -1;
         target = -1;
         edges = new LinkedList<>();
+    }
+
+    @Override
+    public Route build() {
+        return new SimpleRoute( edges, source, target, singleEdge );
     }
 
 }
