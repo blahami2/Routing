@@ -26,7 +26,7 @@ public interface Graph {
     public static final int PREDECESSOR_DEFAULT = -1;
 
     /**
-     * Setter for edge original id -> id used outside the application
+     * Setter for edge original id -&gt; id used outside the application
      *
      * @param edge local id (array index)
      * @param id global id (original)
@@ -34,7 +34,7 @@ public interface Graph {
     public void setEdgeOrigId( int edge, long id );
 
     /**
-     * Setter for node original id -> id used outside the application
+     * Setter for node original id -&gt; id used outside the application
      *
      * @param node local id (array index)
      * @param id global id (original)
@@ -142,7 +142,7 @@ public interface Graph {
     /**
      * Returns id of the target node of the given edge
      *
-     * @param edge
+     * @param edge given edge
      * @return id of the target node of the given edge
      */
     public int getTarget( int edge );

@@ -22,13 +22,14 @@ public interface NodeSet<G> {
      * the given distance (distance of the original location to the end of the
      * given edge (to the given node)).
      *
+     * @param graph graph to search local ids from
      * @param nodeCategory category to which this shall be added
      * @param edgeId edge's global id
      * @param nodeId node's global id
      * @param distance distance in meters from node to the original location (on
      * the edge)
      */
-    public void put( NodeCategory nodeCategory, long edgeId, long nodeId, float distance );
+    public void put(G graph, NodeCategory nodeCategory, long edgeId, long nodeId, float distance );
 
     /**
      * Returns iterator over all the entries for the given category
@@ -40,14 +41,14 @@ public interface NodeSet<G> {
 
     /**
      * Returns map with local ids as keys and distances as values. See
-     * {@link #put(cz.certicon.routing.model.entity.NodeSet.NodeCategory, long, long, float) put}
+     * {@link #put(java.lang.Object, cz.certicon.routing.model.entity.NodeSet.NodeCategory, long, long, float) put()}
      * for more information about the distance.
      *
      * @param graph graph to search local ids from
      * @param nodeCategory category of the map
      * @return map[local_id, distance] for the given category
      */
-    public Map<Integer, Float> getMap( G graph, NodeCategory nodeCategory );
+    public Map<Integer, NodeEntry> getMap( G graph, NodeCategory nodeCategory );
 
     /**
      * Class representing a single node entry. It contains node's global id,
@@ -57,29 +58,29 @@ public interface NodeSet<G> {
      */
     public static class NodeEntry {
 
-        private final long edgeId;
-        private final long nodeId;
+        private final int edgeId;
+        private final int nodeId;
         private final float distance;
 
         /**
          * Constructor
          *
-         * @param edgeId global id of the edge close to the original location
-         * @param nodeId global id of the node related to the edge
+         * @param edgeId local id of the edge close to the original location
+         * @param nodeId local id of the node related to the edge
          * @param distance distance of the node to the original location (mapped
          * to edge)
          */
-        public NodeEntry( long edgeId, long nodeId, float distance ) {
+        public NodeEntry( int edgeId, int nodeId, float distance ) {
             this.edgeId = edgeId;
             this.nodeId = nodeId;
             this.distance = distance;
         }
 
-        public long getEdgeId() {
+        public int getEdgeId() {
             return edgeId;
         }
 
-        public long getNodeId() {
+        public int getNodeId() {
             return nodeId;
         }
 

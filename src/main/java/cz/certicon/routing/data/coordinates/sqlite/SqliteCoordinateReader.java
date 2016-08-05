@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.coordinates.sqlite;
 
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.coordinates.CoordinateReader;
 import cz.certicon.routing.model.entity.CoordinateSetBuilder;
 import cz.certicon.routing.model.entity.CoordinateSetBuilderFactory;

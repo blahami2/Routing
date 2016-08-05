@@ -70,12 +70,12 @@ public class SimpleNodeSetBuilder implements NodeSetBuilder<NodeSet<Graph>> {
     @Override
     public void addNode( NodeCategory nodeCategory, long nodeId, long edgeId, float length, float speed ) {
         float dist = (float) distanceType.calculateDistance( length, speed );
-        nodeSet.put( nodeCategory, edgeId, nodeId, dist );
+        nodeSet.put( graph, nodeCategory, edgeId, nodeId, dist );
     }
 
     @Override
     public void addCrossroad( NodeCategory nodeCategory, long nodeId ) {
-        nodeSet.put( nodeCategory, -1, nodeId, 0 );
+        nodeSet.put( graph, nodeCategory, -1, nodeId, 0 );
     }
 
 }

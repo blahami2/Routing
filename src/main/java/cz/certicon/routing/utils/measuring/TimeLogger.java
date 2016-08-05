@@ -6,6 +6,7 @@
 package cz.certicon.routing.utils.measuring;
 
 import cz.certicon.routing.model.basic.TimeUnits;
+import cz.certicon.routing.model.basic.Time;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ public class TimeLogger {
     private static TimeUnits timeUnits = TimeUnits.MILLISECONDS;
 
     /**
-     * Set time units globally => all the timers will return values in these
+     * Set time units globally =&gt; all the timers will return values in these
      * units
      *
      * @param timeUnits given time units

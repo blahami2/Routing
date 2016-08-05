@@ -6,6 +6,7 @@
 package cz.certicon.routing.data.graph.sqlite;
 
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.data.graph.GraphReader;
 import cz.certicon.routing.model.entity.Coordinate;

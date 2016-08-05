@@ -7,7 +7,7 @@ package cz.certicon.routing.data.path.sqlite;
 
 import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.application.algorithm.Route;
+import cz.certicon.routing.application.Route;
 import cz.certicon.routing.data.path.PathReader;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.PathBuilder;

@@ -31,7 +31,7 @@ public interface NodeSearcher {
      * @return closest nodes structure
      * @throws IOException thrown when an IO exception occurs
      * @throws EvaluableOnlyException thrown when the closest edge for the
-     * source is the same as for the target => only simple calculation is
+     * source is the same as for the target =&gt; only simple calculation is
      * required then instead of complex routing
      */
     public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException, EvaluableOnlyException;

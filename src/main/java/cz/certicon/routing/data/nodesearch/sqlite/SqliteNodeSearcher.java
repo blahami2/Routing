@@ -8,6 +8,7 @@ package cz.certicon.routing.data.nodesearch.sqlite;
 import cz.certicon.routing.GlobalOptions;
 import cz.certicon.routing.data.basic.database.EdgeResultHelper;
 import cz.certicon.routing.data.basic.database.impl.StringSqliteReader;
+import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
 import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.data.nodesearch.NodeSearcher;
 import cz.certicon.routing.model.entity.NodeSet.NodeCategory;

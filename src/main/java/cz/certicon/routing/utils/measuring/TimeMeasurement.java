@@ -125,7 +125,7 @@ public class TimeMeasurement {
      * ([{@link #start() start()} [{@link #pause() pause()} {@link #continue_() continue_()}]
      * &#42; {@link #stop() stop()}]) elapsed time as a string with units
      *
-     * @return
+     * @return string representation of elapsed time
      */
     public String getTimeString() {
         return getTimeElapsed() + " " + timeUnits.getUnit();

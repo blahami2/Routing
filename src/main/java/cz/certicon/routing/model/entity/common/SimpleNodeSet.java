@@ -20,11 +20,11 @@ import java.util.Set;
  */
 public class SimpleNodeSet implements NodeSet<Graph> {
 
-    private Map<NodeCategory, Set<NodeEntry>> nodeEntriesMap = new HashMap<>();
+    private final Map<NodeCategory, Set<NodeEntry>> nodeEntriesMap = new HashMap<>();
 
     @Override
-    public void put( NodeCategory nodeCategory, long edgeId, long nodeId, float distance ) {
-        getSet( nodeCategory ).add( new NodeEntry( edgeId, nodeId, distance ) );
+    public void put( Graph graph, NodeCategory nodeCategory, long edgeId, long nodeId, float distance ) {
+        getSet( nodeCategory ).add( new NodeEntry( graph.getEdgeByOrigId( edgeId ), graph.getNodeByOrigId( nodeId ), distance ) );
     }
 
     @Override
@@ -42,12 +42,12 @@ public class SimpleNodeSet implements NodeSet<Graph> {
     }
 
     @Override
-    public Map<Integer, Float> getMap( Graph graph, NodeCategory nodeCategory ) {
-        Map<Integer, Float> map = new HashMap<>();
+    public Map<Integer, NodeEntry> getMap( Graph graph, NodeCategory nodeCategory ) {
+        Map<Integer, NodeEntry> map = new HashMap<>();
         Iterator<NodeEntry> it = iterator( nodeCategory );
         while ( it.hasNext() ) {
             NodeEntry entry = it.next();
-            map.put( graph.getNodeByOrigId( entry.getNodeId() ), entry.getDistance() );
+            map.put( entry.getNodeId(), entry );
         }
         return map;
     }

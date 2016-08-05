@@ -7,7 +7,7 @@ package cz.certicon.routing.data.ch.sqlite;
 
 import static cz.certicon.routing.GlobalOptions.MEASURE_TIME;
 import cz.certicon.routing.data.basic.database.impl.AbstractSqliteDatabase;
-import cz.certicon.routing.application.algorithm.preprocessing.ch.Preprocessor;
+import cz.certicon.routing.application.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.data.ch.ContractionHierarchiesDataRW;
 import cz.certicon.routing.data.ch.NotPreprocessedException;
 import cz.certicon.routing.model.entity.Graph;

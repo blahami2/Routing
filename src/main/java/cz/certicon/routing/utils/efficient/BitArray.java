@@ -38,7 +38,7 @@ public interface BitArray {
     /**
      * Returns size of this array
      *
-     * @return
+     * @return size of this array
      */
     public int size();
 

@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.data.path;
 
-import cz.certicon.routing.application.algorithm.Route;
+import cz.certicon.routing.application.Route;
 import cz.certicon.routing.model.entity.PathBuilder;
 import cz.certicon.routing.model.entity.Coordinate;
 import java.io.IOException;

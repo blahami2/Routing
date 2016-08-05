@@ -19,7 +19,7 @@ import org.sqlite.SQLiteConfig;
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  * @param <Entity> entity to be read or written
- * @param <AdditionalData>
+ * @param <AdditionalData> input data for the read
  */
 public abstract class AbstractSqliteDatabase<Entity, AdditionalData> extends AbstractEmbeddedDatabase<Entity, AdditionalData> {
 

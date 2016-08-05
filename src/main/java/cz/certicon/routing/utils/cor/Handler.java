@@ -7,8 +7,8 @@ package cz.certicon.routing.utils.cor;
 
 /**
  *
- * @param <In>
- * @param <Out>
+ * @param <In> input type
+ * @param <Out> output type
  * @since 1.X, X &gt; 2
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */

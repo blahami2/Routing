@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.data.ch;
 
-import cz.certicon.routing.application.algorithm.preprocessing.ch.Preprocessor;
+import cz.certicon.routing.application.preprocessing.ch.Preprocessor;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.ch.ChDataFactory;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public interface ContractionHierarchiesDataRW {
     /**
      * Reads the CH data without a preprocessing option - throws Exception
      * instead. Use the
-     * {@link #read(cz.certicon.routing.model.entity.ch.ChDataFactory, cz.certicon.routing.model.entity.Graph, cz.certicon.routing.application.algorithm.preprocessing.ch.Preprocessor) read(factory, graph, preprocessor)}
+     * {@link #read(cz.certicon.routing.model.entity.ch.ChDataFactory, cz.certicon.routing.model.entity.Graph, cz.certicon.routing.application.preprocessing.ch.Preprocessor) read(factory, graph, preprocessor)}
      * instead if you need the preprocessing option.
      *
      *

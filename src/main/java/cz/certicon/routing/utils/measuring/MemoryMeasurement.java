@@ -37,7 +37,7 @@ public class MemoryMeasurement {
     private long memory;
 
     /**
-     * Starts measuring -> saves the current state of memory consumption
+     * Starts measuring -&gt; saves the current state of memory consumption
      */
     public void start() {
         start = Runtime.getRuntime().totalMemory();
@@ -48,7 +48,7 @@ public class MemoryMeasurement {
     }
 
     /**
-     * Stops measuring -> calculates the difference
+     * Stops measuring -&gt; calculates the difference
      *
      * @return difference
      */

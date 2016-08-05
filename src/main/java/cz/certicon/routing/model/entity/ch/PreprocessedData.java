@@ -58,15 +58,15 @@ public class PreprocessedData {
     /**
      * Constructor
      *
-     * @param ranks array of ranks for nodes: (node) -> rank
-     * @param incomingShortcuts 2D array of incoming shortcuts: (node, #) ->
+     * @param ranks array of ranks for nodes: (node) -&gt; rank
+     * @param incomingShortcuts 2D array of incoming shortcuts: (node, #) -&gt;
      * shortcut
-     * @param outgoingShortcuts 2D array of outgoing shortcuts: (node, #) ->
+     * @param outgoingShortcuts 2D array of outgoing shortcuts: (node, #) -&gt;
      * shortcut
-     * @param sources array of sources: shortcut -> node
-     * @param targets array of targets: shortcut -> node
-     * @param startEdges array of start edges: shortcut -> edge
-     * @param endEdges array of end edges: shortcut -> edge
+     * @param sources array of sources: shortcut -&gt; node
+     * @param targets array of targets: shortcut -&gt; node
+     * @param startEdges array of start edges: shortcut -&gt; edge
+     * @param endEdges array of end edges: shortcut -&gt; edge
      * @param startId startId for the given shortcuts, see {@link ChDataBuilder}
      * for more details
      */
