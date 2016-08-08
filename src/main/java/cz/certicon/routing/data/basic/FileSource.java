@@ -22,18 +22,26 @@ public class FileSource implements DataSource {
     private final File file;
     private Scanner scanner;
 
+    /**
+     * Constructor
+     *
+     * @param file file
+     */
     public FileSource( File file ) {
         this.file = file;
     }
 
     @Override
     public DataSource open() throws IOException {
-        scanner = new Scanner( file );
+        scanner = new Scanner( file, "UTF-8" );
         return this;
     }
 
     @Override
     public int read() throws IOException {
+        if ( scanner == null ) {
+            open();
+        }
         return scanner.nextByte();
     }
 
@@ -44,7 +52,9 @@ public class FileSource implements DataSource {
 
     @Override
     public DataSource close() throws IOException {
-        scanner.close();
+        if ( scanner != null ) {
+            scanner.close();
+        }
         return this;
     }
 

@@ -67,7 +67,34 @@ public class TimeLogger {
      * Enumeration for event types
      */
     public static enum Event {
-        PREPROCESSING, GRAPH_LOADING, PREPROCESSED_LOADING, NODE_SEARCHING, ROUTING, ROUTE_BUILDING, PATH_LOADING;
+        /**
+         * Preprocessing
+         */
+        PREPROCESSING,
+        /**
+         * Loading graph
+         */
+        GRAPH_LOADING,
+        /**
+         * Loading preprocessed data
+         */
+        PREPROCESSED_LOADING,
+        /**
+         * Searching for nodes
+         */
+        NODE_SEARCHING,
+        /**
+         * Routing
+         */
+        ROUTING,
+        /**
+         * Building route
+         */
+        ROUTE_BUILDING,
+        /**
+         * Loading path data
+         */
+        PATH_LOADING;
     }
 
     /**

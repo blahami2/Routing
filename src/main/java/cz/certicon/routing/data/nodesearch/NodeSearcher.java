@@ -33,7 +33,17 @@ public interface NodeSearcher {
      */
     public <T> T findClosestNodes( NodeSetBuilderFactory<T> nodeSetBuilderFactory, Coordinate source, Coordinate target ) throws IOException;
 
+    /**
+     * Enumeration of types of search
+     */
     public static enum SearchFor {
-        SOURCE, TARGET;
+        /**
+         * Search for source
+         */
+        SOURCE,
+        /**
+         * Search for target
+         */
+        TARGET;
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class SimplePathBuilder implements PathBuilder<Path, Graph> {
 
-    private ArrayList<Coordinate> coordinates = new ArrayList<>();
+    private final ArrayList<Coordinate> coordinates = new ArrayList<>();
     private List<Coordinate> start = null;
     private List<Coordinate> end = null;
     private double time = 0;

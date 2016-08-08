@@ -5,16 +5,12 @@
  */
 package cz.certicon.routing.model.entity.common;
 
-import cz.certicon.routing.data.nodesearch.EvaluableOnlyException;
 import cz.certicon.routing.model.entity.DistanceType;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.NodeSet;
 import cz.certicon.routing.model.entity.NodeSet.NodeCategory;
 import cz.certicon.routing.model.entity.NodeSet.NodeEntry;
-import cz.certicon.routing.model.entity.Coordinate;
 import cz.certicon.routing.model.entity.NodeSetBuilder;
-import cz.certicon.routing.utils.CoordinateUtils;
-import cz.certicon.routing.utils.DoubleComparator;
 import java.util.Iterator;
 
 /**

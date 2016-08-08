@@ -34,10 +34,23 @@ public abstract class AbstractHandler<In, Out> implements Handler<In, Out> {
         return output;
     }
 
+    /**
+     * Returns output. No idea what is this for
+     *
+     * @param output output to be returned
+     * @return output
+     */
     protected Out returnOutput( Out output ) {
         return output;
     }
 
+    /**
+     * Continues processing (if next handler is available)
+     *
+     * @param input input
+     * @param output output
+     * @return output
+     */
     protected Out continueProcessing( In input, Out output ) {
         output = handle( input, output );
         if ( next != null ) {
@@ -46,6 +59,13 @@ public abstract class AbstractHandler<In, Out> implements Handler<In, Out> {
         return output;
     }
 
+    /**
+     * Handles the input and enriches the output
+     *
+     * @param input input
+     * @param output output
+     * @return processed output
+     */
     protected abstract Out handle( In input, Out output );
 
 }

@@ -78,10 +78,7 @@ public class Coordinate {
         if ( !DoubleComparator.isEqualTo( this.latitude, other.latitude, EPS ) ) {
             return false;
         }
-        if ( !DoubleComparator.isEqualTo( this.longitude, other.longitude, EPS ) ) {
-            return false;
-        }
-        return true;
+        return DoubleComparator.isEqualTo( this.longitude, other.longitude, EPS );
     }
 
 }

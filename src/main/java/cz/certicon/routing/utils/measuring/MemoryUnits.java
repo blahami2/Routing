@@ -11,7 +11,22 @@ package cz.certicon.routing.utils.measuring;
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
 public enum MemoryUnits {
-    BYTES( 1, "B" ), KILOBYTES( BYTES.getDivisor() * 1000, "KB" ), MEGABYTES( KILOBYTES.getDivisor() * 1000, "MB" ), GIGABYTES( MEGABYTES.getDivisor() * 1000, "GB" );
+    /**
+     * Bytes
+     */
+    BYTES( 1, "B" ),
+    /**
+     * Kilobytes
+     */
+    KILOBYTES( BYTES.getDivisor() * 1000, "KB" ),
+    /**
+     * Megabytes
+     */
+    MEGABYTES( KILOBYTES.getDivisor() * 1000, "MB" ),
+    /**
+     * Gigabytes
+     */
+    GIGABYTES( MEGABYTES.getDivisor() * 1000, "GB" );
 
     private final long byteDivisor;
     private final String unit;

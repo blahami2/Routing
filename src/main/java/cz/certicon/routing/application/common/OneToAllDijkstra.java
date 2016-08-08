@@ -15,10 +15,25 @@ import gnu.trove.iterator.TIntIterator;
  */
 public class OneToAllDijkstra {
 
+    /**
+     * Executes routing
+     *
+     * @param graph topology
+     * @param source source node
+     * @return distances and predecessors for all the reached nodes
+     */
     public DataContainer execute( OneToAllGraph graph, int source ) {
         return execute( graph, new MapDataContainer(), source );
     }
 
+    /**
+     * Executes routing
+     *
+     * @param graph topology
+     * @param dataContainer prepared data container
+     * @param source source node
+     * @return distances and predecessors for all the reached nodes
+     */
     public DataContainer execute( OneToAllGraph graph, DataContainer dataContainer, int source ) {
 //        DataContainer dataContainer = new ArrayDataContainer( graph.getNodeCount() );
         dataContainer.setDistance( source, 0 );
@@ -43,22 +58,73 @@ public class OneToAllDijkstra {
         return dataContainer;
     }
 
+    /**
+     * Definition of the graph
+     */
     public static interface OneToAllGraph {
 
+        /**
+         * Returns amount of nodes
+         *
+         * @return amount of nodes
+         */
         int getNodeCount();
 
+        /**
+         * Returns amount of edges
+         *
+         * @return amount of edges
+         */
         int getEdgeCount();
 
+        /**
+         * Returns length of the given edge
+         *
+         * @param edge given edge
+         * @return length of the edge
+         */
         double getLength( int edge );
 
+        /**
+         * Returns source node of the given edge
+         *
+         * @param edge given edge
+         * @return source node
+         */
         int getSource( int edge );
 
+        /**
+         * Returns target node of the given edge
+         *
+         * @param edge given edge
+         * @return target node
+         */
         int getTarget( int edge );
 
+        /**
+         * Returns other (on the other side from the given node) node of the
+         * given edge
+         *
+         * @param edge given edge
+         * @param node given node
+         * @return other node
+         */
         int getOtherNode( int edge, int node );
 
+        /**
+         * Returns iterator over outgoing edges for the given node
+         *
+         * @param node given node
+         * @return iterator for outgoing edges
+         */
         TIntIterator getOutgoingEdges( int node );
 
+        /**
+         * Returns iterator over incoming edges for the given node
+         *
+         * @param node given node
+         * @return iterator for incoming edges
+         */
         TIntIterator getIncomingEdges( int node );
     }
 }

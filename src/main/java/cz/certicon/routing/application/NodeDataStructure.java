@@ -11,6 +11,7 @@ import java.util.Iterator;
  * The root interface for various data structures used by algorithms.
  *
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
+ * @param <T> node type
  */
 public interface NodeDataStructure<T> {
 

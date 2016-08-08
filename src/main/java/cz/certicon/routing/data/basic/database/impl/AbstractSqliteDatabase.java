@@ -23,7 +23,7 @@ import org.sqlite.SQLiteConfig;
  */
 public abstract class AbstractSqliteDatabase<Entity, AdditionalData> extends AbstractEmbeddedDatabase<Entity, AdditionalData> {
 
-    private String spatialitePath;
+    private final String spatialitePath;
 
     /**
      * Creates an instance of this class.
@@ -46,6 +46,9 @@ public abstract class AbstractSqliteDatabase<Entity, AdditionalData> extends Abs
     public void open() throws IOException {
         super.open();
         try {
+//            PreparedStatement prepareStatement = getConnection().prepareStatement( "SELECT load_extension('?')");
+//            prepareStatement.setString( 1, spatialitePath);
+//            prepareStatement.execute();
             getStatement().execute( "SELECT load_extension('" + spatialitePath + "')" );
 //        this.libspatialitePath = libspatialitePath;
         } catch ( SQLException ex ) {

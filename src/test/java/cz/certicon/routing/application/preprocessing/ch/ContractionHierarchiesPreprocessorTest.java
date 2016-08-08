@@ -5,7 +5,6 @@
  */
 package cz.certicon.routing.application.preprocessing.ch;
 
-import cz.certicon.routing.application.preprocessing.ch.ContractionHierarchiesPreprocessor;
 import cz.certicon.routing.application.Route;
 import cz.certicon.routing.application.RouteNotFoundException;
 import cz.certicon.routing.application.algorithms.ContractionHierarchiesUbRoutingAlgorithm;
@@ -25,9 +24,7 @@ import cz.certicon.routing.model.entity.ch.ChDataBuilder;
 import cz.certicon.routing.model.entity.common.SimpleNodeSetBuilderFactory;
 import cz.certicon.routing.utils.CoordinateUtils;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,6 +40,9 @@ public class ContractionHierarchiesPreprocessorTest {
 
     private final Graph graph;
 
+    /**
+     * Test
+     */
     public ContractionHierarchiesPreprocessorTest() {
         GraphBuilder<Graph> graphBuilder = new SimpleGraphBuilder( 6, 12, DistanceType.LENGTH );
         Coordinate a = new Coordinate( 50.1001831, 14.3856114 );
@@ -72,18 +72,30 @@ public class ContractionHierarchiesPreprocessorTest {
         graph = graphBuilder.build();
     }
 
+    /**
+     * Test
+     */
     @BeforeClass
     public static void setUpClass() {
     }
 
+    /**
+     * Test
+     */
     @AfterClass
     public static void tearDownClass() {
     }
 
+    /**
+     * Test
+     */
     @Before
     public void setUp() {
     }
 
+    /**
+     * Test
+     */
     @After
     public void tearDown() {
     }
@@ -99,7 +111,9 @@ public class ContractionHierarchiesPreprocessorTest {
 
     /**
      * Test of preprocess method, of class ContractionHierarchiesPreprocessor.
-     * @throws cz.certicon.routing.application.RouteNotFoundException thrown when I don't wanna catch it
+     *
+     * @throws cz.certicon.routing.application.RouteNotFoundException thrown
+     * when I don't wanna catch it
      */
     @Test
     public void testPreprocess_4args() throws RouteNotFoundException {
@@ -133,8 +147,8 @@ public class ContractionHierarchiesPreprocessorTest {
             for ( int j = 0; j < 6; j++ ) {
                 if ( i != j ) {
                     NodeSetBuilder<NodeSet<Graph>> nodeSetBuilder = fct.createNodeSetBuilder();
-                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.SOURCE, ( i + 1 ) * 10 );
-                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.TARGET, ( j + 1 ) * 10 );
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.SOURCE, (long) ( i + 1 ) * 10 );
+                    nodeSetBuilder.addCrossroad( NodeSet.NodeCategory.TARGET, (long) ( j + 1 ) * 10 );
                     NodeSet<Graph> nodeSet = nodeSetBuilder.build();
                     Route expResult = optimalAlgorithm.route( new SimpleRouteBuilder(), nodeSet );
                     Route result = chAlgorithm.route( new SimpleRouteBuilder(), nodeSet );
@@ -209,6 +223,13 @@ public class ContractionHierarchiesPreprocessorTest {
 //        fail( "The test case is a prototype." );
     }
 
+    /**
+     * Convert route to string
+     *
+     * @param graph graph
+     * @param route route
+     * @return string representation
+     */
     public String toString( Graph graph, Route route ) {
         StringBuilder sb = new StringBuilder();
         sb.append( "(" );

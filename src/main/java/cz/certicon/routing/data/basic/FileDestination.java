@@ -6,7 +6,6 @@
 package cz.certicon.routing.data.basic;
 
 import cz.certicon.routing.data.DataDestination;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,37 +22,52 @@ public class FileDestination implements DataDestination {
     private final File file;
     private PrintWriter writer;
 
+    /**
+     * Constructor
+     *
+     * @param file destination
+     */
     public FileDestination( File file ) {
         this.file = file;
     }
 
     @Override
     public DataDestination open() throws IOException {
-        OutputStream os = new BufferedOutputStream( new FileOutputStream( file ) );
-        writer = new PrintWriter( os );
+//        OutputStream os = new BufferedOutputStream( new FileOutputStream( file ) );
+        writer = new PrintWriter( file, "UTF-8" );
         return this;
     }
 
     @Override
     public DataDestination write( String str ) throws IOException {
+        if ( writer == null ) {
+            open();
+        }
         writer.print( str );
         return this;
     }
 
     @Override
     public DataDestination close() throws IOException {
-        writer.close();
+        if ( writer != null ) {
+            writer.close();
+        }
         return this;
     }
 
     @Override
     public DataDestination flush() throws IOException {
-        writer.flush();
+        if ( writer != null ) {
+            writer.flush();
+        }
         return this;
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
+        if ( writer == null ) {
+            open();
+        }
         return new FileOutputStream( file );
     }
 

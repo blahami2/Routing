@@ -29,26 +29,50 @@ public class CartesianCoords {
         this.z = z;
     }
 
+    /**
+     * Returns x-axis coordinate
+     * @return x-axis coordinate
+     */
     public double getX() {
         return x;
     }
 
+    /**
+     * Returns y-axis coordinate
+     * @return y-axis coordinate
+     */
     public double getY() {
         return y;
     }
 
+    /**
+     * Returns z-axis coordinate
+     * @return z-axis coordinate
+     */
     public double getZ() {
         return z;
     }
 
+    /**
+     * Returns x-axis coordinate as integer (typed)
+     * @return x-axis coordinate as integer (typed)
+     */
     public int getXAsInt() {
         return Math.round( (float) x );
     }
 
+    /**
+     * Returns y-axis coordinate as integer (typed)
+     * @return y-axis coordinate as integer (typed)
+     */
     public int getYAsInt() {
         return Math.round( (float) y );
     }
 
+    /**
+     * Returns z-axis coordinate as integer (typed)
+     * @return z-axis coordinate as integer (typed)
+     */
     public int getZAsInt() {
         return Math.round( (float) z );
     }

@@ -21,8 +21,17 @@ import gnu.trove.iterator.TIntIterator;
  */
 public interface Graph {
 
+    /**
+     * Default distance value - infinity
+     */
     public static final float DISTANCE_DEFAULT = Float.MAX_VALUE;
+    /**
+     * Default closed value - false
+     */
     public static final boolean CLOSED_DEFAULT = false;
+    /**
+     * Default predecessor value - -1
+     */
     public static final int PREDECESSOR_DEFAULT = -1;
 
     /**

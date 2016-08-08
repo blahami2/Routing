@@ -12,8 +12,28 @@ package cz.certicon.routing.utils.cor;
  * @since 1.X, X &gt; 2
  * @author Michael Blaha {@literal <michael.blaha@certicon.cz>}
  */
-public interface Handler<In,Out> {
-    public Out process(In input, Out output);
+public interface Handler<In, Out> {
+
+    /**
+     * Process input, pass and return output
+     *
+     * @param input input
+     * @param output passed output
+     * @return returned output
+     */
+    public Out process( In input, Out output );
+
+    /**
+     * Returns next handler in the chain
+     *
+     * @return next handler
+     */
     public Handler getNext();
-    public void setNext(Handler handler);
+
+    /**
+     * Sets next handler in the chain
+     *
+     * @param handler next handler
+     */
+    public void setNext( Handler handler );
 }
