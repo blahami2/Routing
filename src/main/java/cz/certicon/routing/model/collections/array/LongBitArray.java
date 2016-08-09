@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.certicon.routing.utils.efficient;
+package cz.certicon.routing.model.collections.array;
 
 import cz.certicon.routing.utils.EffectiveUtils;
 

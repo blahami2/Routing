@@ -11,8 +11,8 @@ import cz.certicon.routing.application.datastructures.JgraphtFibonacciDataStruct
 import cz.certicon.routing.application.*;
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.model.entity.NodeSet.NodeEntry;
-import cz.certicon.routing.utils.efficient.BitArray;
-import cz.certicon.routing.utils.efficient.LongBitArray;
+import cz.certicon.routing.model.collections.array.BitArray;
+import cz.certicon.routing.model.collections.array.LongBitArray;
 import cz.certicon.routing.utils.measuring.StatsLogger;
 import cz.certicon.routing.utils.measuring.TimeLogger;
 import gnu.trove.iterator.TIntIterator;

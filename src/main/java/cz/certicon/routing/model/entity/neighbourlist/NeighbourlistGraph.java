@@ -7,7 +7,7 @@ package cz.certicon.routing.model.entity.neighbourlist;
 
 import cz.certicon.routing.model.entity.Graph;
 import cz.certicon.routing.utils.EffectiveUtils;
-import cz.certicon.routing.utils.efficient.BitArray;
+import cz.certicon.routing.model.collections.array.BitArray;
 import gnu.trove.iterator.TIntIterator;
 import java.util.HashMap;
 import java.util.Map;

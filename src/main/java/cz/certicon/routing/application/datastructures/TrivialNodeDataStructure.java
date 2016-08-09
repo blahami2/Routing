@@ -22,6 +22,7 @@ public class TrivialNodeDataStructure<T> implements NodeDataStructure<T> {
 
     public TrivialNodeDataStructure() {
         this.nodes = new LinkedList<>();
+        
     }
 
     @Override

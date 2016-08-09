@@ -5,7 +5,7 @@
  */
 package cz.certicon.routing.model.entity;
 
-import cz.certicon.routing.utils.efficient.BitArray;
+import cz.certicon.routing.model.collections.array.BitArray;
 import gnu.trove.iterator.TIntIterator;
 
 /**
